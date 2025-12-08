@@ -13,40 +13,38 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-//    primary = Color(0xFF2196F3),
-    primary = Color(0xFF0554F2),
-    secondary = Color(0xFF0554F2),
-    tertiary = Pink40,
+    primary = darkBlue,
+    secondary = Color.White,
+    tertiary = darkBlue,
 
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+    background = background,
+    surface = background,
     onPrimary = Color.White,
-    onSecondary = Color.White,
+    onSecondary = textColor,
     onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
+    onBackground = textColor,
+    onSurface = textColor,
 )
 
 private val LightColorScheme = lightColorScheme(
-//    primary = Color(0xFF2E6FF2),
-    primary = Color(0xFF0554F2),
-    secondary = Color(0xFF0554F2),
-    tertiary = Pink40,
+    primary = darkBlue,
+    secondary = Color.White,
+    tertiary = darkBlue,
 
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+    background = background,
+    surface = background,
     onPrimary = Color.White,
-    onSecondary = Color.White,
+    onSecondary = textColor,
     onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
+    onBackground = textColor,
+    onSurface = textColor,
 )
 
 @Composable
 fun StatsPOSTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -55,7 +53,7 @@ fun StatsPOSTheme(
 //            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
 //        }
 
-        darkTheme -> DarkColorScheme
+        darkTheme -> LightColorScheme
         else -> LightColorScheme
     }
 

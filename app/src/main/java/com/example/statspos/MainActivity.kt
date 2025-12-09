@@ -21,12 +21,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -34,9 +38,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.components.OutlinedTextbox
 import com.example.statspos.components.PasswordOutlinedTextbox
 import com.example.statspos.ui.theme.StatsPOSTheme
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
 
@@ -52,15 +63,35 @@ class MainActivity : ComponentActivity() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun Main() {
-    var name by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    val dataStore = remember {
+        LocalData(context)
+    }
+
+//    val clientId by dataStore.clientId.collectAsStateWithLifecycle(0)
+
+    LaunchedEffect(true) {
+        Toast.makeText(context, "Hello", Toast.LENGTH_SHORT).show()
+//        dataStore.clientId.collect{
+//            Toast.makeText(context, it.toString(), Toast.LENGTH_SHORT).show()
+//        }
+//        clientId?.run {
+//            if(clientId != 0)
+//                Toast.makeText(context, clientId.toString(), Toast.LENGTH_SHORT).show()
+//            else
+//                Toast.makeText(context, "Already Set", Toast.LENGTH_SHORT).show()
+//        }
+    }
 
     StatsPOSTheme {
-        Scaffold() {
+        Scaffold() { innerPadding ->
             Column(
                 modifier = Modifier
-                    .padding(it)
+                    .padding(innerPadding)
                     .fillMaxSize()
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -77,7 +108,6 @@ private fun Main() {
                 Spacer(
                     Modifier.height(16.dp)
                 )
-
                 Text(
                     text = "Welcome Back!",
                     style = TextStyle(
@@ -93,14 +123,12 @@ private fun Main() {
                         fontSize = 18.sp,
                     )
                 )
-
                 Spacer(
-                    Modifier.height(24.dp)
+                    Modifier.height(16.dp)
                 )
-
                 OutlinedTextbox(
-                    value = name,
-                    onValueChange = { name = it },
+                    value = username,
+                    onValueChange = { username = it },
                     labelText = "Username",
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -108,9 +136,6 @@ private fun Main() {
                         Icon(painterResource(R.drawable.ic_user), null)
                     }
                 )
-//                Spacer(
-//                    Modifier.height(16.dp)
-//                )
                 PasswordOutlinedTextbox(
                     value = password,
                     onValueChange = { password = it },
@@ -128,7 +153,10 @@ private fun Main() {
                 )
                 Button(
                     onClick = {
-                        login(context, name, password)
+                        scope.launch {
+                            dataStore.setClientId(1)
+//                            login(context, username, password)
+                        }
                     },
                     modifier = Modifier
                         .width(120.dp)
@@ -140,6 +168,22 @@ private fun Main() {
     }
 }
 
-fun login(context: Context, username:String, password:String) {
+private fun login(context: Context, username:String, password:String) {
     Toast.makeText(context, username, Toast.LENGTH_SHORT).show()
+}
+
+class LocalData(private val context: Context){
+    val Context.dataStore by preferencesDataStore("clientInfo")
+
+    val clientId = context.dataStore.data.map { preferences -> preferences[clientIdKey] ?: 0 }
+
+    suspend fun setClientId(clientId:Int){
+        context.dataStore.edit { settings ->
+            settings[clientIdKey] = clientId
+        }
+    }
+
+    companion object {
+        val clientIdKey = intPreferencesKey("clientId")
+    }
 }

@@ -3,17 +3,22 @@ package com.example.statspos.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.api.CategoriesApi
 import com.example.statspos.models.Categories
 import com.example.statspos.utils.RetrofitInstance
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
+import javax.inject.Inject
 
-class CategoriesViewModel: ViewModel() {
-    val categoriesApi by lazy { RetrofitInstance.getCategoriesApi() }
+@HiltViewModel
+class CategoriesViewModel @Inject constructor(
+    val categoriesApi: CategoriesApi
+): ViewModel() {
 
     fun loadCategories(){
         val jsonObject = JsonObject().apply {

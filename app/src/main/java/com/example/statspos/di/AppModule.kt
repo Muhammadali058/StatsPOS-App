@@ -5,8 +5,9 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
-import com.example.statspos.api.CategoriesApi
+import com.example.statspos.data.remote.CategoriesApi
 import com.example.statspos.utils.HP
+import com.example.statspos.utils.LocalDataStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,15 +28,9 @@ object AppModule{
     @Singleton
     fun provideRetrofit(): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(HP.apiUrl)
+            .baseUrl(HP.API)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-    }
-
-    @Provides
-    @Singleton
-    fun provideCategoriesApi(retrofitInstance: Retrofit): CategoriesApi {
-        return retrofitInstance.create(CategoriesApi::class.java)
     }
 
     @Singleton
@@ -46,4 +41,10 @@ object AppModule{
             produceFile = { context.preferencesDataStoreFile("prefs") }
         )
     }
+
+//    @Provides
+//    @Singleton
+//    fun provideCategoriesApi(retrofitInstance: Retrofit): CategoriesApi {
+//        return retrofitInstance.create(CategoriesApi::class.java)
+//    }
 }

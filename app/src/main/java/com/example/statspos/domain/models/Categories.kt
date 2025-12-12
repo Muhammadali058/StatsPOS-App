@@ -1,4 +1,4 @@
-package com.example.statspos.models
+package com.example.statspos.domain.models
 
 data class Categories(
     var id: Long,

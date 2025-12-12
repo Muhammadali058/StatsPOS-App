@@ -1,11 +1,11 @@
-package com.example.statspos.viewmodels
+package com.example.statspos.presentation.viewmodels
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.statspos.api.CategoriesApi
-import com.example.statspos.models.Categories
-import com.example.statspos.utils.RetrofitInstance
+import com.example.statspos.data.remote.CategoriesApi
+import com.example.statspos.domain.models.Categories
+import com.example.statspos.domain.repository.CategoriesRepo
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CategoriesViewModel @Inject constructor(
-    val categoriesApi: CategoriesApi
+    private val categoriesRepo: CategoriesRepo
 ): ViewModel() {
 
     fun loadCategories(){
@@ -32,7 +32,7 @@ class CategoriesViewModel @Inject constructor(
 //            Call this method in compose in button onClick
 //            viewModel.loadCategories()
             try {
-                val result = categoriesApi.loadCategories(jsonObject)
+                val result = categoriesRepo.loadCategories(jsonObject)
 
                 if(result.isSuccessful){
                     val body = result.body()
@@ -40,7 +40,7 @@ class CategoriesViewModel @Inject constructor(
                         val abc = it.getAsJsonArray("rows")
                         for (a in abc){
                             val cat = Gson().fromJson(a, Categories::class.java)
-                            Log.d("Abc", cat.imageUrl)
+                            Log.d("Hello", cat.categoryName)
                         }
                     }
                 }else{
@@ -68,7 +68,7 @@ class CategoriesViewModel @Inject constructor(
                 addProperty("branchId", 1)
             }
 
-            val result = categoriesApi.uploadImage(
+            val result = categoriesRepo.uploadImage(
                 image = MultipartBody.Part.createFormData(
                     "image",
                     file.name,

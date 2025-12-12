@@ -1,4 +1,4 @@
-package com.example.statspos.components
+package com.example.statspos.presentation.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size

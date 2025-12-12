@@ -1,4 +1,4 @@
-package com.example.statspos.ui.theme
+package com.example.statspos.presentation.ui.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme

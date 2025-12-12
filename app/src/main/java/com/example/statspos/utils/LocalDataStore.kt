@@ -8,13 +8,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-
 class LocalDataStore @Inject constructor(
     val dataStore: DataStore<Preferences>
 ){
-//    val Context.dataStore by preferencesDataStore("prefs")
-
-//    val clientId = context.dataStore.data.map { preferences -> preferences[clientIdKey] ?: 0 }
+    companion object {
+        private val clientIdKey = intPreferencesKey("clientId")
+    }
 
     fun getClientId(): Flow<Int>{
         return dataStore.data.map { preferences -> preferences[clientIdKey] ?: 0 }
@@ -24,9 +23,5 @@ class LocalDataStore @Inject constructor(
         dataStore.edit { settings ->
             settings[clientIdKey] = clientId
         }
-    }
-
-    companion object {
-        val clientIdKey = intPreferencesKey("clientId")
     }
 }

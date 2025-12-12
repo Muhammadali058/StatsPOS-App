@@ -1,4 +1,4 @@
-package com.example.statspos.screens.main
+package com.example.statspos.presentation.ui.screens.main
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -26,19 +28,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.statspos.R
-import com.example.statspos.components.OutlinedTextbox
-import com.example.statspos.components.PasswordOutlinedTextbox
+import com.example.statspos.presentation.ui.components.OutlinedTextbox
+import com.example.statspos.presentation.ui.components.PasswordOutlinedTextbox
 
 @Composable
-fun ClientLoginScreen(modifier: Modifier = Modifier, onLogin:()->Unit) {
+fun ClientLoginScreen(modifier: Modifier = Modifier, onLogin:(clientId:Int)->Unit) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(
             Modifier.height(32.dp)
@@ -89,7 +92,7 @@ fun ClientLoginScreen(modifier: Modifier = Modifier, onLogin:()->Unit) {
                 Icon(painterResource(R.drawable.ic_password), null)
             },
             onKeyboardActionsDone = {
-                onLogin()
+                onLogin(1)
             }
         )
         Spacer(
@@ -97,7 +100,7 @@ fun ClientLoginScreen(modifier: Modifier = Modifier, onLogin:()->Unit) {
         )
         Button(
             onClick = {
-                onLogin()
+                onLogin(1)
             },
             modifier = Modifier
                 .width(120.dp)

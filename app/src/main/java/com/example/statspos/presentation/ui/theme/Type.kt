@@ -1,4 +1,4 @@
-package com.example.statspos.ui.theme
+package com.example.statspos.presentation.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

@@ -1,14 +1,13 @@
 package com.example.statspos.presentation.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.statspos.data.remote.CategoriesApi
 import com.example.statspos.domain.models.Categories
-import com.example.statspos.domain.repository.CategoriesRepo
-import com.google.gson.Gson
+import com.example.statspos.domain.repository.CategoriesRepository
+import com.example.statspos.utils.Resource
 import com.google.gson.JsonObject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -17,43 +16,51 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CategoriesViewModel @Inject constructor(
-    private val categoriesRepo: CategoriesRepo
-): ViewModel() {
+    private val categoriesRepository: CategoriesRepository
+) : ViewModel() {
 
-    fun loadCategories(){
-        val jsonObject = JsonObject().apply {
-            addProperty("text", "")
-            addProperty("clientId", 1)
-            addProperty("branchId", 1)
-            addProperty("branchGroupId", 0)
-        }
+    data class ScreenState(
+        val isLoading: Boolean = false,
+        val categories: List<Categories> = emptyList(),
+//        val success: String? = null,
+        val error: String? = null,
+        val infoMessage: String? = null,
+    )
 
+    var state = MutableStateFlow(ScreenState())
+        private set
+
+    init {
+        loadCategories()
+    }
+
+    fun loadCategories() {
         viewModelScope.launch {
-//            Call this method in compose in button onClick
-//            viewModel.loadCategories()
-            try {
-                val result = categoriesRepo.loadCategories(jsonObject)
+            state.value = state.value.copy(isLoading = true)
 
-                if(result.isSuccessful){
-                    val body = result.body()
-                    body?.let {
-                        val abc = it.getAsJsonArray("rows")
-                        for (a in abc){
-                            val cat = Gson().fromJson(a, Categories::class.java)
-                            Log.d("Hello", cat.categoryName)
-                        }
-                    }
-                }else{
-                    val errorBodyString = result.errorBody()?.string()
-                    Log.d("Error", errorBodyString.toString())
+            val jsonObject = JsonObject().apply {
+                addProperty("text", "")
+                addProperty("clientId", 1)
+                addProperty("branchId", 1)
+                addProperty("branchGroupId", 0)
+            }
+
+            when (val result = categoriesRepository.loadCategories(jsonObject)) {
+                is Resource.Success -> {
+                    state.value = ScreenState(categories = result.data)
                 }
-            }catch (e: Exception){
-                Log.d("Error", e.localizedMessage.toString())
+                is Resource.Error -> {
+                    state.value = ScreenState(error = result.message)
+                }
+                is Resource.Information -> {
+                    state.value = ScreenState(infoMessage = result.infoMessage)
+                }
+                else -> Unit
             }
         }
     }
 
-    fun uploadImage(file: File){
+    fun uploadImage(file: File) {
         // Call this method in compose in button onClick
 //        val context = LocalContext.current
 //        val file = File(context.cacheDir, "bearing1.jpg")
@@ -68,7 +75,7 @@ class CategoriesViewModel @Inject constructor(
                 addProperty("branchId", 1)
             }
 
-            val result = categoriesRepo.uploadImage(
+            val result = categoriesRepository.uploadImage(
                 image = MultipartBody.Part.createFormData(
                     "image",
                     file.name,
@@ -77,12 +84,14 @@ class CategoriesViewModel @Inject constructor(
                 body = MultipartBody.Part.createFormData("data", jsonObject.toString())
             )
 
-            if(result.isSuccessful){
-                val body = result.body()
-                Log.d("Result", body.toString())
-            }else{
-                val errorBodyString = result.errorBody()?.string()
-                Log.d("Error", errorBodyString.toString())
+            when (result) {
+                is Resource.Success -> {
+
+                }
+                is Resource.Error -> {
+                    state.value = ScreenState(error = result.message)
+                }
+                else -> Unit
             }
         }
     }

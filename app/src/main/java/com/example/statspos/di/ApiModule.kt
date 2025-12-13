@@ -1,7 +1,7 @@
 package com.example.statspos.di
 
-import com.example.statspos.data.repository.CategoriesRepoImpl
-import com.example.statspos.domain.repository.CategoriesRepo
+import com.example.statspos.data.repository.CategoriesRepositoryImpl
+import com.example.statspos.domain.repository.CategoriesRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -12,6 +12,6 @@ import dagger.hilt.android.components.ViewModelComponent
 abstract class ApiModule {
 
     @Binds
-    abstract fun bindsCategoriesRepo(categoriesRepoImpl: CategoriesRepoImpl): CategoriesRepo
+    abstract fun bindsCategoriesRepo(categoriesRepoImpl: CategoriesRepositoryImpl): CategoriesRepository
 
 }

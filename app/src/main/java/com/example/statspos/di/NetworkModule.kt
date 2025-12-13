@@ -3,10 +3,7 @@ package com.example.statspos.di
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.example.statspos.data.remote.CategoriesApi
-import com.example.statspos.data.repository.CategoriesRepoImpl
-import com.example.statspos.domain.repository.CategoriesRepo
 import com.example.statspos.utils.LocalDataStore
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

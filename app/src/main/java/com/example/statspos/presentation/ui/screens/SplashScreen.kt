@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -30,6 +32,8 @@ import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.R
 import com.example.statspos.presentation.ui.screens.main.ClientLoginScreen
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
+import com.example.statspos.presentation.viewmodels.LocalDataViewModel
+import com.example.statspos.utils.showToast
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -47,21 +51,22 @@ fun SplashScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val backStack = rememberNavBackStack(Screens.ClientLogin)
-//    val viewModel = hiltViewModel<LocalDataViewModel>()
+    val viewModel = hiltViewModel<LocalDataViewModel>()
 
     var showSplash by remember { mutableStateOf(true) }
 
 //    val clientId1 by viewModel.getClientId().collectAsStateWithLifecycle(0)
-//    LaunchedEffect (true) {
-//        viewModel.getClientId().collect { clientId ->
-//            if(clientId != 0) {
-//                backStack.add(Screens.Login(clientId))
-//                backStack.remove(Screens.ClientLogin)
-//            }
-//
-//            showSplash = false
-//        }
-//    }
+    LaunchedEffect (true) {
+        viewModel.getClientId().collect { clientId ->
+            if(clientId != 0) {
+                backStack.add(Screens.Login(clientId))
+                backStack.remove(Screens.ClientLogin)
+            }
+
+            showSplash = false
+            context.showToast("True")
+        }
+    }
 
     if(showSplash) {
         Box(

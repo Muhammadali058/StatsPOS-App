@@ -2,7 +2,8 @@ package com.example.statspos.di
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import com.example.statspos.data.remote.CategoriesApi
+import com.example.statspos.data.remote.items.CategoriesApi
+import com.example.statspos.data.remote.main.ClientsApi
 import com.example.statspos.utils.LocalDataStore
 import dagger.Module
 import dagger.Provides
@@ -22,6 +23,11 @@ class NetworkModule {
     @Provides
     fun provideCategoriesApi(retrofitInstance: Retrofit): CategoriesApi {
         return retrofitInstance.create(CategoriesApi::class.java)
+    }
+
+    @Provides
+    fun provideClientsApi(retrofitInstance: Retrofit): ClientsApi {
+        return retrofitInstance.create(ClientsApi::class.java)
     }
 
 }

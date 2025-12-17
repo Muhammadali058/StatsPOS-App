@@ -5,7 +5,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
-import com.example.statspos.data.remote.CategoriesApi
+import com.example.statspos.data.remote.items.CategoriesApi
+import com.example.statspos.utils.DB
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.LocalDataStore
 import dagger.Module
@@ -28,7 +29,7 @@ object AppModule{
     @Singleton
     fun provideRetrofit(): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(HP.API)
+            .baseUrl(DB.API)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }

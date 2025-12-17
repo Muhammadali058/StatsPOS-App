@@ -1,4 +1,4 @@
-package com.example.statspos.data.remote
+package com.example.statspos.data.remote.items
 
 import com.google.gson.JsonObject
 import okhttp3.MultipartBody

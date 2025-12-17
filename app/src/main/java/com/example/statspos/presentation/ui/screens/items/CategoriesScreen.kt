@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens
+package com.example.statspos.presentation.ui.screens.items
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
@@ -20,7 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
-import com.example.statspos.presentation.viewmodels.CategoriesViewModel
+import com.example.statspos.presentation.viewmodels.items.CategoriesViewModel
 
 
 @Preview(showBackground = true)

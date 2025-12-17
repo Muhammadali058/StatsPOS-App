@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.viewmodels
+package com.example.statspos.presentation.viewmodels.main
 
 import androidx.lifecycle.ViewModel
 import com.example.statspos.utils.LocalDataStore
@@ -11,11 +11,11 @@ class LocalDataViewModel @Inject constructor(
     private var dataStore: LocalDataStore
 ) : ViewModel() {
 
-    fun getClientId(): Flow<Int>{
+    fun getClientId(): Flow<Long> {
         return dataStore.getClientId()
     }
 
-    suspend fun setClientId(clientId:Int){
+    suspend fun setClientId(clientId: Long){
         dataStore.setClientId(clientId)
     }
 

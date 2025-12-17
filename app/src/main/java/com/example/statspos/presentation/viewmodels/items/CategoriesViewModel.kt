@@ -1,10 +1,12 @@
-package com.example.statspos.presentation.viewmodels
+package com.example.statspos.presentation.viewmodels.items
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.statspos.domain.models.Categories
-import com.example.statspos.domain.repository.CategoriesRepository
+import com.example.statspos.domain.models.items.Categories
+import com.example.statspos.domain.repository.items.CategoriesRepository
 import com.example.statspos.utils.Resource
+import com.google.gson.Gson
 import com.google.gson.JsonObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +24,6 @@ class CategoriesViewModel @Inject constructor(
     data class ScreenState(
         val isLoading: Boolean = false,
         val categories: List<Categories> = emptyList(),
-//        val success: String? = null,
         val error: String? = null,
         val infoMessage: String? = null,
     )
@@ -34,28 +35,49 @@ class CategoriesViewModel @Inject constructor(
         loadCategories()
     }
 
+    fun initState(){
+        state.value = state.value.copy(
+            isLoading = true,
+            error = null,
+            infoMessage = null,
+        )
+    }
+
     fun loadCategories() {
         viewModelScope.launch {
-            state.value = state.value.copy(isLoading = true)
+            if(state.value.isLoading)
+                return@launch
 
-            val jsonObject = JsonObject().apply {
+            initState()
+
+            val params = JsonObject().apply {
                 addProperty("text", "")
                 addProperty("clientId", 1)
                 addProperty("branchId", 1)
                 addProperty("branchGroupId", 0)
             }
 
-            when (val result = categoriesRepository.loadCategories(jsonObject)) {
-                is Resource.Success -> {
-                    state.value = ScreenState(categories = result.data)
-                }
+            when (val result = categoriesRepository.loadCategories(params)) {
                 is Resource.Error -> {
                     state.value = ScreenState(error = result.message)
                 }
                 is Resource.Information -> {
                     state.value = ScreenState(infoMessage = result.infoMessage)
                 }
-                else -> Unit
+                is Resource.Success -> {
+                    val jsonArray = result.data.getAsJsonArray("rows") ?: emptyList()
+
+                    val categories = mutableListOf<Categories>()
+                    for (a in jsonArray) {
+                        val cat = Gson().fromJson(a, Categories::class.java)
+                        categories.add(cat)
+                    }
+
+                    state.value = state.value.copy(
+                        isLoading = false,
+                        categories = categories
+                    )
+                }
             }
         }
     }
@@ -70,7 +92,7 @@ class CategoriesViewModel @Inject constructor(
 //        viewModel.uploadImage(file)
 
         viewModelScope.launch {
-            val jsonObject = JsonObject().apply {
+            val params = JsonObject().apply {
                 addProperty("clientId", 1)
                 addProperty("branchId", 1)
             }
@@ -81,17 +103,21 @@ class CategoriesViewModel @Inject constructor(
                     file.name,
                     file.asRequestBody()
                 ),
-                body = MultipartBody.Part.createFormData("data", jsonObject.toString())
+                body = MultipartBody.Part.createFormData("data", params.toString())
             )
 
             when (result) {
-                is Resource.Success -> {
-
-                }
                 is Resource.Error -> {
                     state.value = ScreenState(error = result.message)
                 }
-                else -> Unit
+                is Resource.Information -> {
+                    state.value = ScreenState(infoMessage = result.infoMessage)
+                }
+                is Resource.Success -> {
+                    state.value = state.value.copy(
+                        isLoading = false
+                    )
+                }
             }
         }
     }

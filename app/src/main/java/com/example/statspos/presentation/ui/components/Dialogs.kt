@@ -1,6 +1,7 @@
 package com.example.statspos.presentation.ui.components
 
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -8,14 +9,12 @@ import androidx.compose.ui.Modifier
 
 
 @Composable
-fun InfoDialog(
-    modifier: Modifier = Modifier,
-    title: String = "Info",
+fun ErrorDialog(
+    title: String = "Error",
     text: String = "",
     onDismiss: () -> Unit,
 ) {
     AlertDialog(
-        modifier = modifier,
         onDismissRequest = onDismiss,
         confirmButton = {
 
@@ -27,19 +26,20 @@ fun InfoDialog(
                 Text("OK")
             }
         },
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        textContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
     )
 }
 
 @Composable
 fun ConfirmDialog(
-    modifier: Modifier = Modifier,
-    title: String = "Info",
+    title: String = "Confirm",
     text: String = "",
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
 ) {
     AlertDialog(
-        modifier = modifier,
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = onConfirm) {
@@ -53,5 +53,8 @@ fun ConfirmDialog(
                 Text("No")
             }
         },
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        textContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
     )
 }

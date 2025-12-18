@@ -17,8 +17,8 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.example.statspos.presentation.ui.screens.main.SplashScreen
 import com.example.statspos.presentation.ui.screens.main.ClientLoginScreen
+import com.example.statspos.presentation.ui.screens.main.SplashScreen
 import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -35,7 +35,7 @@ private sealed class Screens : NavKey {
 
 @Preview(showBackground = true)
 @Composable
-fun App(modifier: Modifier = Modifier) {
+fun App() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val backStack = rememberNavBackStack(Screens.Splash)
@@ -62,13 +62,10 @@ fun App(modifier: Modifier = Modifier) {
         onBack = { backStack.removeLastOrNull() },
         entryProvider = entryProvider {
             entry<Screens.Splash> {
-                SplashScreen(
-                    modifier = modifier
-                )
+                SplashScreen()
             }
             entry<Screens.ClientLogin> {
                 ClientLoginScreen(
-                    modifier = modifier,
                     onLogin = { clientId ->
                         scope.launch {
                             viewModel.setClientId(clientId)

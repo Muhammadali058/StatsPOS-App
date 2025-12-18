@@ -14,9 +14,9 @@ import androidx.compose.ui.unit.dp
 import com.example.statspos.R
 
 @Composable
-fun SplashScreen(modifier: Modifier = Modifier) {
+fun SplashScreen() {
     Box(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {

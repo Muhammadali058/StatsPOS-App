@@ -19,12 +19,15 @@ private val DarkColorScheme = darkColorScheme(
     secondary = Color.White,
     onSecondary = foreground,
 
+    primaryContainer = Color.White,
+    onPrimaryContainer = textColor,
+
     background = background,
     surface = background,
-    onBackground = foreground,
-    onSurface = foreground,
+    onBackground = textColor,
+    onSurface = textColor,
 
-    outline =  foreground,
+    outline =  textColor,
     outlineVariant = darkBlue,
 )
 
@@ -35,12 +38,15 @@ private val LightColorScheme = lightColorScheme(
     secondary = Color.White,
     onSecondary = foreground,
 
+    primaryContainer = Color.White,
+    onPrimaryContainer = textColor,
+
     background = background,
     surface = background,
-    onBackground = foreground,
-    onSurface = foreground,
+    onBackground = textColor,
+    onSurface = textColor,
 
-    outline =  foreground,
+    outline =  textColor,
     outlineVariant = darkBlue,
 )
 

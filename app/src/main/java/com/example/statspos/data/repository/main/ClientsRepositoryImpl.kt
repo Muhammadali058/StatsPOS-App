@@ -21,4 +21,13 @@ class ClientsRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun localClientLogin(body: JsonObject): Resource<JsonObject> {
+        val result = safeApiCall { api.localClientLogin(body) }
+
+        return when (result) {
+            is Resource.Error -> Resource.Error(result.message)
+            is Resource.Information -> Resource.Information(result.infoMessage)
+            is Resource.Success -> Resource.Success(result.data)
+        }
+    }
 }

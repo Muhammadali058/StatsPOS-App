@@ -1,5 +1,6 @@
 package com.example.statspos.presentation
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
@@ -19,7 +20,9 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.presentation.ui.screens.main.ClientLoginScreen
 import com.example.statspos.presentation.ui.screens.main.SplashScreen
+import com.example.statspos.presentation.viewmodels.main.ClientsViewModel
 import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
+import com.example.statspos.utils.DB
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -42,13 +45,37 @@ fun App() {
     val viewModel = hiltViewModel<LocalDataViewModel>()
 
     LaunchedEffect(true) {
-        viewModel.getClientId().collect { clientId ->
-            if (clientId != 0.toLong()) {
-                backStack.add(Screens.Login(clientId))
-                backStack.removeFirstOrNull()
-            }else{
-                backStack.add(Screens.ClientLogin)
-                backStack.removeFirstOrNull()
+        if(DB.IS_ONLINE_MODE){
+            viewModel.getClientId().collect { clientId ->
+                if (clientId != 0.toLong()) {
+                    backStack.add(Screens.Login(clientId))
+                    backStack.removeFirstOrNull()
+                }else{
+                    backStack.add(Screens.ClientLogin)
+                    backStack.removeFirstOrNull()
+                }
+            }
+        }else{
+            viewModel.getLocalClientId().collect { localClientId ->
+                if (localClientId != 0) {
+                    viewModel.getBaseUrl().collect { baseUrl ->
+                        if(baseUrl != null){
+                            DB.setBaseUrl(baseUrl)
+
+                            Log.d("TAG localClientId", localClientId.toString())
+                            Log.d("TAG baseUrl", baseUrl)
+
+                            backStack.add(Screens.Login(1))
+                            backStack.removeFirstOrNull()
+                        }else{
+                            backStack.add(Screens.ClientLogin)
+                            backStack.removeFirstOrNull()
+                        }
+                    }
+                }else{
+                    backStack.add(Screens.ClientLogin)
+                    backStack.removeFirstOrNull()
+                }
             }
         }
     }
@@ -66,16 +93,27 @@ fun App() {
             }
             entry<Screens.ClientLogin> {
                 ClientLoginScreen(
-                    onLogin = { clientId ->
+                    onClientLogin = { clientId ->
                         scope.launch {
                             viewModel.setClientId(clientId)
                             backStack.add(Screens.Login(clientId))
                             backStack.removeFirstOrNull()
                         }
+                    },
+                    onLocalClientLogin = { localClientId, baseUrl ->
+                        scope.launch {
+                            if(localClientId != 0 && baseUrl.isNotEmpty()) {
+                                viewModel.setLocalClientId(localClientId)
+                                viewModel.setBaseUrl(baseUrl)
+
+                                backStack.removeLastOrNull()
+                            }
+                        }
                     }
                 )
             }
             entry<Screens.Login> { key ->
+                val viewModel = hiltViewModel<ClientsViewModel>()
                 Box(
                     Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center

@@ -1,6 +1,7 @@
 package com.example.statspos.di
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
@@ -28,6 +29,7 @@ object AppModule{
     @Provides
     @Singleton
     fun provideRetrofit(): Retrofit {
+        Log.d("TAG Retrofit", DB.API)
         return Retrofit.Builder()
             .baseUrl(DB.API)
             .addConverterFactory(GsonConverterFactory.create())

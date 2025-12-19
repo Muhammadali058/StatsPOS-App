@@ -1,10 +1,14 @@
 package com.example.statspos.presentation.viewmodels.main
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.items.Categories
+import com.example.statspos.domain.models.main.LocalBranches
 import com.example.statspos.domain.repository.main.ClientsRepository
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.UiEvent
+import com.google.gson.Gson
 import com.google.gson.JsonObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -22,6 +26,10 @@ class ClientsViewModel @Inject constructor(
     data class ScreenState(
         val username: String = "",
         val password: String = "",
+
+        val localClientId:Int = 0,
+        val baseUrl: String = "",
+        val localBranches: List<LocalBranches> = emptyList(),
 
         val isLoading: Boolean = false,
         val error: String? = null,
@@ -102,6 +110,46 @@ class ClientsViewModel @Inject constructor(
         }
     }
 
+    fun localClientLogin() {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+            if (!validation()) {
+                return@launch
+            }
+            beforeRequest()
+
+            val params = JsonObject().apply {
+                addProperty("username", state.value.username)
+                addProperty("password", state.value.password)
+            }
+
+            when (val result = clientsRepository.localClientLogin(params)) {
+                is Resource.Error -> resultError(result.message)
+                is Resource.Information -> resultInformation(result.infoMessage)
+                is Resource.Success -> {
+                    resultSuccess()
+                    if (result.data.get("isExists").asBoolean) {
+                        val localClientId = result.data.getAsJsonObject("localClient").get("id").asInt
+
+                        val jsonArray = result.data.getAsJsonArray("localBranches") ?: emptyList()
+                        val localBranches = mutableListOf<LocalBranches>()
+                        for (a in jsonArray) {
+                            val branch = Gson().fromJson(a, LocalBranches::class.java)
+                            localBranches.add(branch)
+                        }
+
+                        state.update { it.copy(
+                            localClientId = localClientId,
+                            localBranches = localBranches
+                        ) }
+                    } else {
+                        showSnackbar("Username or password incorrect")
+                    }
+                }
+            }
+        }
+    }
     // endregion
 
     // region Others

@@ -5,4 +5,5 @@ import com.google.gson.JsonObject
 
 interface ClientsRepository {
     suspend fun clientLogin(body: JsonObject): Resource<JsonObject>
+    suspend fun localClientLogin(body: JsonObject): Resource<JsonObject>
 }

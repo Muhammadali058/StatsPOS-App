@@ -1,6 +1,8 @@
 package com.example.statspos.presentation.ui.screens.main
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,20 +10,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,17 +40,21 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.R
+import com.example.statspos.domain.models.main.LocalBranches
 import com.example.statspos.presentation.ui.components.CustomSnackbarHost
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.OutlinedTextbox
 import com.example.statspos.presentation.ui.components.PasswordOutlinedTextbox
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
 import com.example.statspos.presentation.viewmodels.main.ClientsViewModel
+import com.example.statspos.utils.DB
 import com.example.statspos.utils.UiEvent
+import com.example.statspos.utils.checkEvent
 
 @Composable
 fun ClientLoginScreen(
-    onLogin: (clientId: Long) -> Unit
+    onClientLogin: (clientId: Long) -> Unit,
+    onLocalClientLogin: (localClientId: Int, baseUrl:String) -> Unit,
 ) {
     val viewModel = hiltViewModel<ClientsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -60,21 +63,12 @@ fun ClientLoginScreen(
     var showErrorDialog by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(event) {
-        when (event) {
-            is UiEvent.ShowSnackbar -> {
-                snackbarHostState.showSnackbar(
-                    message = (event as UiEvent.ShowSnackbar).message,
-                    withDismissAction = true,
-                )
-                viewModel.onEvent(UiEvent.Idle)
-            }
-
-            is UiEvent.ShowError -> {
-                showErrorDialog = true
-                viewModel.onEvent(UiEvent.Idle)
-            }
-
-            else -> {}
+        checkEvent(
+            event = event,
+            snackbarHostState = snackbarHostState,
+            viewModelIdleEvent = viewModel::onEvent
+        ){
+            showErrorDialog = true
         }
     }
 
@@ -90,33 +84,50 @@ fun ClientLoginScreen(
                 CustomSnackbarHost(snackbarHostState = snackbarHostState)
             }
         ) { innerPadding ->
-            Body(
-                modifier = Modifier.padding(innerPadding),
-                username = state.username,
-                password = state.password,
-                onUsernameChange = viewModel::onUsernameChange,
-                onPasswordChange = viewModel::onPasswordChange,
-                onLogin = {
-                    viewModel.clientLogin { clientId ->
-                        onLogin(clientId)
+            Box(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize(),
+            ){
+                if(state.localBranches.isEmpty()) {
+                    Body(
+                        username = state.username,
+                        password = state.password,
+                        onUsernameChange = viewModel::onUsernameChange,
+                        onPasswordChange = viewModel::onPasswordChange,
+                        onClientLogin = {
+                            viewModel.clientLogin { clientId ->
+                                onClientLogin(clientId)
+                            }
+                        },
+                        onLocalClientLogin = {
+                            viewModel.localClientLogin()
+                        }
+                    )
+                }else{
+                    BranchesList(state.localBranches){ localBranch ->
+                        onLocalClientLogin(
+                            localBranch.localClientId,
+                            localBranch.baseUrl
+                        )
                     }
                 }
-            )
+            }
         }
     }
 }
 
 @Composable
 private fun Body(
-    modifier: Modifier = Modifier,
     username: String,
     password: String,
     onUsernameChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
-    onLogin: () -> Unit,
+    onClientLogin: () -> Unit,
+    onLocalClientLogin: () -> Unit,
 ) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
@@ -171,7 +182,11 @@ private fun Body(
                 Icon(painterResource(R.drawable.ic_password), null)
             },
             onKeyboardActionsDone = {
-                onLogin()
+                if(DB.IS_ONLINE_MODE){
+                    onClientLogin()
+                }else{
+                    onLocalClientLogin()
+                }
             }
         )
         Spacer(
@@ -179,7 +194,11 @@ private fun Body(
         )
         Button(
             onClick = {
-                onLogin()
+                if(DB.IS_ONLINE_MODE){
+                    onClientLogin()
+                }else{
+                    onLocalClientLogin()
+                }
             },
             modifier = Modifier
                 .width(120.dp)
@@ -189,17 +208,81 @@ private fun Body(
     }
 }
 
-@Preview(showBackground = true)
+
+//@Preview(showBackground = true)
 @Composable
-fun prev() {
-    StatsPOSTheme{
+fun BodyPreview() {
+    StatsPOSTheme {
         Body(
-            modifier = Modifier,
             username = "",
             password = "",
             {},
             {},
+            {},
             {}
         )
+    }
+}
+
+@Composable
+fun BranchesList(localBranches: List<LocalBranches>, onClick: (LocalBranches) -> Unit) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        item {
+            Text(
+                text = "Select Branch:",
+                style = TextStyle(
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
+                modifier = Modifier
+                    .padding(16.dp)
+            )
+        }
+        items(localBranches){ localBranch ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .clickable{
+                        onClick(localBranch)
+                    },
+
+            ) {
+                Text(
+                    text = localBranch.branchName,
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    ),
+                    maxLines = 1,
+                    modifier = Modifier
+                        .padding(16.dp)
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BranchesListPreview() {
+    StatsPOSTheme() {
+        val branches: List<LocalBranches> = List(100){
+            LocalBranches(
+                it,
+                localClientId = it,
+                branchName = "Branch $it",
+                baseUrl = "",
+            )
+        }
+
+        BranchesList(
+            branches
+        ) { }
     }
 }

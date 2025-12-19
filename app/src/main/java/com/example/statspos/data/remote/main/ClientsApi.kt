@@ -8,4 +8,7 @@ import retrofit2.http.POST
 interface ClientsApi {
     @POST("clients/clientLogin")
     suspend fun clientLogin(@Body body: JsonObject): Response<JsonObject>
+
+    @POST("clients/localClientLogin")
+    suspend fun localClientLogin(@Body body: JsonObject): Response<JsonObject>
 }

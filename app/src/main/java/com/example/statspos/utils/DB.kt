@@ -5,8 +5,15 @@ import com.google.gson.JsonObject
 import retrofit2.Response
 
 object DB {
-    const val HOST = "http://192.168.100.28:8000/"
-    const val API = "${HOST}api/"
+    const val IS_ONLINE_MODE = false
+
+    var HOST = "http://192.168.100.28:8000/"
+    var API = "${HOST}api/"
+
+    fun setBaseUrl(host: String){
+        HOST = host
+        API = "${host}api/"
+    }
 }
 
 sealed class Resource<T> {

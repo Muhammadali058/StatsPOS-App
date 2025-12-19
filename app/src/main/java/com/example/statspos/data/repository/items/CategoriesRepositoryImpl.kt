@@ -13,29 +13,12 @@ import retrofit2.Response
 import javax.inject.Inject
 
 class CategoriesRepositoryImpl @Inject constructor(
-    private val categoriesApi: CategoriesApi
+    private val api: CategoriesApi
 ) : CategoriesRepository {
-    override suspend fun loadCategories(body: JsonObject): Resource<JsonObject> {
-        val result = safeApiCall { categoriesApi.loadCategories(body) }
-
-        return when (result) {
-            is Resource.Error -> Resource.Error(result.message)
-            is Resource.Information -> Resource.Information(result.infoMessage)
-            is Resource.Success -> Resource.Success(result.data)
-        }
-    }
+    override suspend fun loadCategories(body: JsonObject): Resource<JsonObject>  = safeApiCall { api.loadCategories(body) }
 
     override suspend fun uploadImage(
         image: MultipartBody.Part,
         body: MultipartBody.Part
-    ): Resource<JsonObject> {
-        val result = safeApiCall { categoriesApi.uploadImage(image, body) }
-
-        return when (result) {
-            is Resource.Error -> Resource.Error(result.message)
-            is Resource.Information -> Resource.Information(result.infoMessage)
-            is Resource.Success -> Resource.Success(result.data)
-        }
-    }
-
+    ): Resource<JsonObject>  = safeApiCall { api.uploadImage(image, body) }
 }

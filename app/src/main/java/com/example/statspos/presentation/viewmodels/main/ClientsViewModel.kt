@@ -1,9 +1,8 @@
 package com.example.statspos.presentation.viewmodels.main
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.statspos.domain.models.items.Categories
+import com.example.statspos.domain.models.main.Clients
 import com.example.statspos.domain.models.main.LocalBranches
 import com.example.statspos.domain.repository.main.ClientsRepository
 import com.example.statspos.utils.Resource
@@ -24,10 +23,13 @@ class ClientsViewModel @Inject constructor(
 ) : ViewModel() {
     // region ScreenState
     data class ScreenState(
+        val businessName: String = "",
+        val contact: String = "",
         val username: String = "",
         val password: String = "",
+        val confirmPassword: String = "",
 
-        val localClientId:Int = 0,
+        val localClientId: Int = 0,
         val baseUrl: String = "",
         val localBranches: List<LocalBranches> = emptyList(),
 
@@ -70,12 +72,24 @@ class ClientsViewModel @Inject constructor(
     // endregion
 
     // region onChangeMethods
+    fun onBusinessNameChange(value: String) {
+        state.update { it.copy(businessName = value) }
+    }
+
+    fun onContactChange(value: String) {
+        state.update { it.copy(contact = value) }
+    }
+
     fun onUsernameChange(value: String) {
         state.update { it.copy(username = value) }
     }
 
     fun onPasswordChange(value: String) {
         state.update { it.copy(password = value) }
+    }
+
+    fun onConfirmPasswordChange(value: String) {
+        state.update { it.copy(confirmPassword = value) }
     }
     // endregion
 
@@ -84,7 +98,7 @@ class ClientsViewModel @Inject constructor(
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
-            if (!validation()) {
+            if (!loginValidation()) {
                 return@launch
             }
             beforeRequest()
@@ -110,11 +124,40 @@ class ClientsViewModel @Inject constructor(
         }
     }
 
+    fun clientSignup(onSuccess: (clientId: Long) -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+            if (!signupValidation()) {
+                return@launch
+            }
+            beforeRequest()
+
+            val params = JsonObject().apply {
+                addProperty("clientName", state.value.businessName)
+                addProperty("contact", state.value.contact)
+                addProperty("username", state.value.username)
+                addProperty("password", state.value.password)
+            }
+
+            when (val result = clientsRepository.clientSignup(params)) {
+                is Resource.Error -> resultError(result.message)
+                is Resource.Information -> resultInformation(result.infoMessage)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val client = Gson().fromJson(result.data, Clients::class.java)
+                    onSuccess(client.id)
+                }
+            }
+        }
+    }
+
     fun localClientLogin() {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
-            if (!validation()) {
+            if (!loginValidation()) {
                 return@launch
             }
             beforeRequest()
@@ -130,7 +173,8 @@ class ClientsViewModel @Inject constructor(
                 is Resource.Success -> {
                     resultSuccess()
                     if (result.data.get("isExists").asBoolean) {
-                        val localClientId = result.data.getAsJsonObject("localClient").get("id").asInt
+                        val localClientId =
+                            result.data.getAsJsonObject("localClient").get("id").asInt
 
                         val jsonArray = result.data.getAsJsonArray("localBranches") ?: emptyList()
                         val localBranches = mutableListOf<LocalBranches>()
@@ -139,10 +183,12 @@ class ClientsViewModel @Inject constructor(
                             localBranches.add(branch)
                         }
 
-                        state.update { it.copy(
-                            localClientId = localClientId,
-                            localBranches = localBranches
-                        ) }
+                        state.update {
+                            it.copy(
+                                localClientId = localClientId,
+                                localBranches = localBranches
+                            )
+                        }
                     } else {
                         showSnackbar("Username or password incorrect")
                     }
@@ -153,12 +199,35 @@ class ClientsViewModel @Inject constructor(
     // endregion
 
     // region Others
-    private fun validation(): Boolean {
+    private fun loginValidation(): Boolean {
         if (state.value.username.isEmpty()) {
             showSnackbar("Enter username")
             return false
         } else if (state.value.password.isEmpty()) {
             showSnackbar("Enter password")
+            return false
+        } else
+            return true
+    }
+
+    private fun signupValidation(): Boolean {
+        if (state.value.businessName.isEmpty()) {
+            showSnackbar("Enter Business Name")
+            return false
+        } else if (state.value.contact.isEmpty()) {
+            showSnackbar("Enter contact")
+            return false
+        } else if (state.value.username.isEmpty()) {
+            showSnackbar("Enter username")
+            return false
+        } else if (state.value.password.isEmpty()) {
+            showSnackbar("Enter password")
+            return false
+        }else if (state.value.confirmPassword.isEmpty()) {
+            showSnackbar("Re-enter password")
+            return false
+        }else if (state.value.password != state.value.confirmPassword) {
+            showSnackbar("Password didn't match")
             return false
         } else
             return true

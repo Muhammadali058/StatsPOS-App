@@ -11,23 +11,22 @@ import javax.inject.Inject
 class ClientsRepositoryImpl @Inject constructor(
     private val api: ClientsApi
 ) : ClientsRepository {
-    override suspend fun clientLogin(body: JsonObject): Resource<JsonObject> {
-        val result = safeApiCall { api.clientLogin(body) }
+    override suspend fun clientLogin(body: JsonObject): Resource<JsonObject> =
+        safeApiCall { api.clientLogin(body) }
 
-        return when (result) {
-            is Resource.Error -> Resource.Error(result.message)
-            is Resource.Information -> Resource.Information(result.infoMessage)
-            is Resource.Success -> Resource.Success(result.data)
-        }
-    }
+    //    {
+//        return safeApiCall { api.clientLogin(body) }
+////        val result = safeApiCall { api.clientLogin(body) }
+////
+////        return when (result) {
+////            is Resource.Error -> Resource.Error(result.message)
+////            is Resource.Information -> Resource.Information(result.infoMessage)
+////            is Resource.Success -> Resource.Success(result.data)
+////        }
+//    }
 
-    override suspend fun localClientLogin(body: JsonObject): Resource<JsonObject> {
-        val result = safeApiCall { api.localClientLogin(body) }
+    override suspend fun clientSignup(body: JsonObject): Resource<JsonObject>  = safeApiCall { api.clientSignup(body) }
 
-        return when (result) {
-            is Resource.Error -> Resource.Error(result.message)
-            is Resource.Information -> Resource.Information(result.infoMessage)
-            is Resource.Success -> Resource.Success(result.data)
-        }
-    }
+    override suspend fun localClientLogin(body: JsonObject): Resource<JsonObject> =
+        safeApiCall { api.localClientLogin(body) }
 }

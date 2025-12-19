@@ -5,7 +5,7 @@ import com.google.gson.JsonObject
 import retrofit2.Response
 
 object DB {
-    const val IS_ONLINE_MODE = false
+    const val IS_ONLINE_MODE = true
 
     var HOST = "http://192.168.100.28:8000/"
     var API = "${HOST}api/"
@@ -39,10 +39,10 @@ suspend fun <T> safeApiCall(
             val errorBodyString = response.errorBody()?.string()
             val jsonObject = Gson().fromJson(errorBodyString, JsonObject::class.java)
 
-            if (jsonObject.has("result")) {
-                Resource.Information(jsonObject.get("message").asString)
-            } else {
+            if (jsonObject.get("type").asString == ("e")) {
                 Resource.Error(jsonObject.get("message").asString)
+            } else {
+                Resource.Information(jsonObject.get("message").asString)
             }
         }
     } catch (e: Exception) {

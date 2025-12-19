@@ -32,7 +32,7 @@ fun PasswordOutlinedTextbox(
     modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
-    labelText:String = "Password",
+    labelText: String = "Password",
     shape: Shape = OutlinedTextFieldDefaults.shape,
     colors: TextFieldColors = TextFieldDefaults.colors(
         focusedIndicatorColor = MaterialTheme.colorScheme.outlineVariant,
@@ -41,14 +41,15 @@ fun PasswordOutlinedTextbox(
         unfocusedLabelColor = MaterialTheme.colorScheme.outline,
         focusedContainerColor = Color.Transparent,
         unfocusedContainerColor = Color.Transparent,
-        focusedTextColor = MaterialTheme.colorScheme.onSecondary,
-        unfocusedTextColor = MaterialTheme.colorScheme.onSecondary,
+        focusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        unfocusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
     ),
     leadingIcon: @Composable (() -> Unit)? = null,
-    onKeyboardActionsDone: (() -> Unit)? = null,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    imeAction: ImeAction = ImeAction.Next,
 ) {
     var visible by rememberSaveable { mutableStateOf(false) }
-    val icon = if(visible)
+    val icon = if (visible)
         painterResource(R.drawable.hidden)
     else
         painterResource(R.drawable.eye)
@@ -65,21 +66,17 @@ fun PasswordOutlinedTextbox(
         },
         leadingIcon = leadingIcon,
         trailingIcon = {
-            IconButton(onClick = {visible = !visible}) {
+            IconButton(onClick = { visible = !visible }) {
                 Icon(icon, null, modifier = Modifier.size(24.dp))
             }
         },
-        visualTransformation = if(visible) VisualTransformation.None else PasswordVisualTransformation(),
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Password,
-            imeAction = ImeAction.Done
-        ),
-        keyboardActions = KeyboardActions(
-            onDone = {
-                onKeyboardActionsDone?.invoke()
-            }
-        ),
         colors = colors,
         shape = shape,
+        visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password,
+            imeAction = imeAction
+        ),
+        keyboardActions = keyboardActions,
     )
 }

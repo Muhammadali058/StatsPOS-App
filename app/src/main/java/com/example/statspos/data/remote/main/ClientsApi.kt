@@ -9,6 +9,9 @@ interface ClientsApi {
     @POST("clients/clientLogin")
     suspend fun clientLogin(@Body body: JsonObject): Response<JsonObject>
 
+    @POST("clients/clientSignup")
+    suspend fun clientSignup(@Body body: JsonObject): Response<JsonObject>
+
     @POST("clients/localClientLogin")
     suspend fun localClientLogin(@Body body: JsonObject): Response<JsonObject>
 }

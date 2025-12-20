@@ -50,9 +50,9 @@ fun PasswordOutlinedTextbox(
 ) {
     var visible by rememberSaveable { mutableStateOf(false) }
     val icon = if (visible)
-        painterResource(R.drawable.hidden)
+        R.drawable.hidden
     else
-        painterResource(R.drawable.eye)
+        R.drawable.eye
 
     OutlinedTextField(
         value = value,
@@ -67,7 +67,10 @@ fun PasswordOutlinedTextbox(
         leadingIcon = leadingIcon,
         trailingIcon = {
             IconButton(onClick = { visible = !visible }) {
-                Icon(icon, null, modifier = Modifier.size(24.dp))
+                CustomIcon(
+                    icon = icon,
+                    modifier = Modifier.size(24.dp)
+                )
             }
         },
         colors = colors,

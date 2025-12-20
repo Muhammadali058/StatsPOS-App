@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.main.Clients
 import com.example.statspos.domain.models.main.LocalBranches
+import com.example.statspos.domain.models.main.LocalClients
 import com.example.statspos.domain.repository.main.ClientsRepository
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.UiEvent
 import com.google.gson.Gson
@@ -29,8 +31,6 @@ class ClientsViewModel @Inject constructor(
         val password: String = "",
         val confirmPassword: String = "",
 
-        val localClientId: Int = 0,
-        val baseUrl: String = "",
         val localBranches: List<LocalBranches> = emptyList(),
 
         val isLoading: Boolean = false,
@@ -173,8 +173,10 @@ class ClientsViewModel @Inject constructor(
                 is Resource.Success -> {
                     resultSuccess()
                     if (result.data.get("isExists").asBoolean) {
-                        val localClientId =
-                            result.data.getAsJsonObject("localClient").get("id").asInt
+                        HP.localClient = Gson().fromJson(
+                            result.data.getAsJsonObject("localClient"),
+                            LocalClients::class.java
+                        )
 
                         val jsonArray = result.data.getAsJsonArray("localBranches") ?: emptyList()
                         val localBranches = mutableListOf<LocalBranches>()
@@ -185,7 +187,6 @@ class ClientsViewModel @Inject constructor(
 
                         state.update {
                             it.copy(
-                                localClientId = localClientId,
                                 localBranches = localBranches
                             )
                         }
@@ -223,10 +224,10 @@ class ClientsViewModel @Inject constructor(
         } else if (state.value.password.isEmpty()) {
             showSnackbar("Enter password")
             return false
-        }else if (state.value.confirmPassword.isEmpty()) {
+        } else if (state.value.confirmPassword.isEmpty()) {
             showSnackbar("Re-enter password")
             return false
-        }else if (state.value.password != state.value.confirmPassword) {
+        } else if (state.value.password != state.value.confirmPassword) {
             showSnackbar("Password didn't match")
             return false
         } else

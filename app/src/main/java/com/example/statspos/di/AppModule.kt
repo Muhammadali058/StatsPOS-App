@@ -29,7 +29,6 @@ object AppModule{
     @Provides
     @Singleton
     fun provideRetrofit(): Retrofit {
-        Log.d("TAG Retrofit", DB.API)
         return Retrofit.Builder()
             .baseUrl(DB.API)
             .addConverterFactory(GsonConverterFactory.create())

@@ -21,18 +21,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun CircleCheckbox(checked: Boolean, enabled: Boolean = true, onCheckedChange: () -> Unit) {
+fun CircleCheckbox(modifier: Modifier = Modifier, checked: Boolean, enabled: Boolean = true, onCheckedChange: (Boolean) -> Unit) {
     val imageVector = if (checked) Icons.Filled.CheckCircle else Icons.Filled.Circle
     val tint = if (checked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimary
     val background = if (checked) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
 
     Row (
+        modifier = modifier,
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ){
         IconButton(
             onClick = {
-                onCheckedChange()
+                onCheckedChange(!checked)
             },
             modifier = Modifier
                 .size(24.dp)

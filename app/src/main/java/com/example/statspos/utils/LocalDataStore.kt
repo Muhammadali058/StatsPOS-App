@@ -2,6 +2,7 @@ package com.example.statspos.utils
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
@@ -17,6 +18,8 @@ class LocalDataStore @Inject constructor(
         private val clientIdKey = longPreferencesKey("clientId")
         private val localClientIdKey = intPreferencesKey("localClientId")
         private val baseUrlKey = stringPreferencesKey("baseUrl")
+        private val usernameKey = stringPreferencesKey("username")
+        private val passwordKey = stringPreferencesKey("password")
     }
 
     // clientId
@@ -24,9 +27,9 @@ class LocalDataStore @Inject constructor(
         return dataStore.data.map { preferences -> preferences[clientIdKey] ?: 0 }
     }
 
-    suspend fun setClientId(clientId:Long){
+    suspend fun setClientId(value:Long){
         dataStore.edit { settings ->
-            settings[clientIdKey] = clientId
+            settings[clientIdKey] = value
         }
     }
 
@@ -35,9 +38,9 @@ class LocalDataStore @Inject constructor(
         return dataStore.data.map { preferences -> preferences[localClientIdKey] ?: 0 }
     }
 
-    suspend fun setLocalClientId(localClientId: Int){
+    suspend fun setLocalClientId(value: Int){
         dataStore.edit { settings ->
-            settings[localClientIdKey] = localClientId
+            settings[localClientIdKey] = value
         }
     }
 
@@ -46,9 +49,32 @@ class LocalDataStore @Inject constructor(
         return dataStore.data.map { preferences -> preferences[baseUrlKey] }
     }
 
-    suspend fun setBaseUrl(baseUrl: String){
+    suspend fun setBaseUrl(value: String){
         dataStore.edit { settings ->
-            settings[baseUrlKey] = baseUrl
+            settings[baseUrlKey] = value
         }
     }
+
+    // username
+    fun getUsername(): Flow<String?>{
+        return dataStore.data.map { preferences -> preferences[usernameKey] }
+    }
+
+    suspend fun setUsername(value: String){
+        dataStore.edit { settings ->
+            settings[usernameKey] = value
+        }
+    }
+
+    // password
+    fun getPassword(): Flow<String?>{
+        return dataStore.data.map { preferences -> preferences[passwordKey] }
+    }
+
+    suspend fun setPassword(value: String){
+        dataStore.edit { settings ->
+            settings[passwordKey] = value
+        }
+    }
+
 }

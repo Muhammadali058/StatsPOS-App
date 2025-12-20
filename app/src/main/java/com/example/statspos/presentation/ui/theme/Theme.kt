@@ -1,79 +1,66 @@
 package com.example.statspos.presentation.ui.theme
 
 import android.app.Activity
+import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = darkBlue,
-    onPrimary = Color.White,
+    primary = primaryDark,
+    onPrimary = onPrimaryDark,
 
-    secondary = Color.White,
-    onSecondary = foreground,
+    primaryContainer = backgroundDark,
+    onPrimaryContainer = textDark,
 
-    primaryContainer = Color.White,
-    onPrimaryContainer = textColor,
+    background = backgroundDark,
+    onBackground = textDark,
 
-    background = background,
-    surface = background,
-    onBackground = textColor,
-    onSurface = textColor,
-
-    outline =  textColor,
-    outlineVariant = darkBlue,
+    outline =  textDark,
+    outlineVariant = primaryDark,
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = darkBlue,
-    onPrimary = Color.White,
+    primary = primaryLight,
+    onPrimary = onPrimaryLight,
 
-    secondary = Color.White,
-    onSecondary = foreground,
+    primaryContainer = backgroundLight,
+    onPrimaryContainer = textLight,
 
-    primaryContainer = Color.White,
-    onPrimaryContainer = textColor,
+    background = backgroundLight,
+    onBackground = textLight,
 
-    background = background,
-    surface = background,
-    onBackground = textColor,
-    onSurface = textColor,
-
-    outline =  textColor,
-    outlineVariant = darkBlue,
+    outline =  textLight,
+    outlineVariant = primaryLight,
 )
 
 @Composable
 fun StatsPOSTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-//        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-//            val context = LocalContext.current
-//            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-//        }
-
-        darkTheme -> LightColorScheme
+        darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
 
     val view = LocalView.current
-    if(!view.isInEditMode){
-        SideEffect {
-            val window = (view.context as Activity).window
-            window.statusBarColor = if(darkTheme) Color.Black.toArgb() else Color.White.toArgb()
-            window.navigationBarColor = if(darkTheme) Color.Black.toArgb() else Color.White.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+    SideEffect {
+        val window = (view.context as Activity).window
+        window.navigationBarColor = if(darkTheme) backgroundDark.toArgb() else backgroundLight.toArgb()
+        window.statusBarColor = if(darkTheme) backgroundDark.toArgb() else backgroundLight.toArgb()
+        WindowCompat.getInsetsController(window, view).apply {
+            isAppearanceLightNavigationBars = !darkTheme
+            isAppearanceLightStatusBars = !darkTheme
         }
     }
 

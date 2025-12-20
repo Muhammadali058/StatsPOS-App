@@ -1,12 +1,8 @@
 package com.example.statspos.presentation.ui.screens.main
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,12 +13,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -48,25 +42,32 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.R
 import com.example.statspos.presentation.ui.components.CircleCheckbox
 import com.example.statspos.presentation.ui.components.CustomCheckbox
+import com.example.statspos.presentation.ui.components.CustomIcon
 import com.example.statspos.presentation.ui.components.CustomSnackbarHost
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.OutlinedTextbox
 import com.example.statspos.presentation.ui.components.PasswordOutlinedTextbox
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
-import com.example.statspos.presentation.viewmodels.main.ClientsViewModel
+import com.example.statspos.presentation.viewmodels.main.LoginViewModel
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
-import com.example.statspos.utils.showToast
 
 @Composable
 fun LoginScreen(
     clientId: Long,
-    onLogin: () -> Unit
+    username: String?,
+    password: String?,
+    onLogin: (remember: Boolean, username: String, password: String) -> Unit
 ) {
     val context = LocalContext.current
-    val viewModel = hiltViewModel<ClientsViewModel>()
+    val viewModel = hiltViewModel<LoginViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
+
+    LaunchedEffect(Unit) {
+        username?.let { viewModel.onUsernameChange(it) }
+        password?.let { viewModel.onPasswordChange(it) }
+    }
 
     var showErrorDialog by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -75,7 +76,7 @@ fun LoginScreen(
             event = event,
             snackbarHostState = snackbarHostState,
             viewModelIdleEvent = viewModel::onEvent
-        ){
+        ) {
             showErrorDialog = true
         }
     }
@@ -97,13 +98,19 @@ fun LoginScreen(
                     .padding(innerPadding),
                 username = state.username,
                 password = state.password,
+                remember = state.remember,
                 onUsernameChange = viewModel::onUsernameChange,
                 onPasswordChange = viewModel::onPasswordChange,
+                onRememberCheckedChange = viewModel::onRememberCheckedChange,
+                isLoading = state.isLoading,
                 onLogin = {
-                    context.showToast(clientId.toString())
-//                    viewModel.clientLogin { clientId ->
-//                        onLogin()
-//                    }
+                    viewModel.login(clientId) {
+                        onLogin(
+                            state.remember,
+                            state.username,
+                            state.password
+                        )
+                    }
                 }
             )
         }
@@ -115,8 +122,11 @@ private fun Body(
     modifier: Modifier = Modifier,
     username: String,
     password: String,
+    remember: Boolean,
     onUsernameChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
+    onRememberCheckedChange: (Boolean) -> Unit,
+    isLoading: Boolean,
     onLogin: () -> Unit
 ) {
     Column(
@@ -129,11 +139,11 @@ private fun Body(
         Spacer(
             Modifier.height(32.dp)
         )
-        Image(
-            painterResource(R.drawable.statspos),
-            contentDescription = null,
+        CustomIcon(
+            icon = R.drawable.statspos,
             modifier = Modifier
-                .size(140.dp)
+                .size(140.dp),
+            tint = MaterialTheme.colorScheme.primary
         )
         Spacer(
             Modifier.height(16.dp)
@@ -149,7 +159,7 @@ private fun Body(
         Text(
             text = "Let's Start Today's Business",
             style = TextStyle(
-                color = MaterialTheme.colorScheme.onSecondary,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 fontSize = 18.sp,
             )
         )
@@ -163,7 +173,9 @@ private fun Body(
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {
-                Icon(painterResource(R.drawable.ic_user), null)
+                CustomIcon(
+                    icon = R.drawable.ic_user,
+                )
             }
         )
         PasswordOutlinedTextbox(
@@ -172,37 +184,37 @@ private fun Body(
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {
-                Icon(painterResource(R.drawable.ic_password), null)
+                CustomIcon(
+                    icon = R.drawable.ic_password,
+                )
             },
             imeAction = ImeAction.Done
         )
         Spacer(
             Modifier.height(8.dp)
         )
-        var checked by remember { mutableStateOf(false) }
-        Box(
-            Modifier.fillMaxWidth()
-        ){
-            CustomCheckbox (
-                checked = checked,
-                onCheckedChange = {
-                    checked = !checked
-                }
-            )
-        }
+        CustomCheckbox (
+            modifier = Modifier.fillMaxWidth(),
+            checked = remember,
+            onCheckedChange = onRememberCheckedChange
+        )
         Spacer(
             Modifier.height(8.dp)
         )
-        Button(
-            onClick = {
-                onLogin()
-            },
-            modifier = Modifier
+        if (isLoading) {
+            CircularProgressIndicator()
+        } else {
+            Button(
+                onClick = {
+                    onLogin()
+                },
+                modifier = Modifier
 //                .height(45.dp)
 //                .fillMaxWidth()
-                .width(120.dp)
-        ) {
-            Text("Login")
+                    .width(120.dp)
+            ) {
+                Text("Login")
+            }
         }
     }
 }
@@ -216,8 +228,11 @@ private fun BodyPreview() {
             Modifier,
             username = "",
             password = "",
+            remember = true,
             {},
             {},
+            {},
+            isLoading = false,
             {}
         )
     }

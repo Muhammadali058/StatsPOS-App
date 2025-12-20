@@ -14,57 +14,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            StatsPOSTheme {
+            StatsPOSTheme(
+                darkTheme = false
+            ) {
                 App()
             }
         }
     }
 }
-
-
-
-//    val viewModel = hiltViewModel<CategoriesViewModel>()
-//    val state by viewModel.state.collectAsStateWithLifecycle()
-//    var showInfoDialog by remember { mutableStateOf(false) }
-//    LaunchedEffect(state.infoMessage, state.error) {
-//        if(state.infoMessage != null || state.error != null)
-//            showInfoDialog = true
-//    }
-
-//    if (state.isLoading) {
-//        Box(
-//            modifier = modifier.fillMaxSize(),
-//            contentAlignment = Alignment.Center
-//        ) {
-//            CircularProgressIndicator()
-//        }
-//    } else if (state.error != null) {
-//        if(showInfoDialog){
-//            InfoDialog(
-//                title = "Error",
-//                text = state.error!!
-//            ) {
-//                showInfoDialog = false
-//            }
-//        }
-//    } else if (state.infoMessage != null) {
-//        if(showInfoDialog){
-//            InfoDialog(
-//                title = "Info",
-//                text = state.infoMessage!!
-//            ) {
-//                showInfoDialog = false
-//            }
-//        }
-//    } else if (state.categories.isNotEmpty()) {
-//        LazyColumn(
-//            modifier = modifier
-//        ) {
-//            items(state.categories.size) { i ->
-//                val category = state.categories[i]
-//                Text(text = category.categoryName)
-//            }
-//        }
-//    } else {
-//        SplashScreen()
-//    }

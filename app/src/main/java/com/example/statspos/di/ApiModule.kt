@@ -2,8 +2,10 @@ package com.example.statspos.di
 
 import com.example.statspos.data.repository.items.CategoriesRepositoryImpl
 import com.example.statspos.data.repository.main.ClientsRepositoryImpl
+import com.example.statspos.data.repository.utilities.UsersRepositoryImpl
 import com.example.statspos.domain.repository.items.CategoriesRepository
 import com.example.statspos.domain.repository.main.ClientsRepository
+import com.example.statspos.domain.repository.utilities.UsersRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -18,5 +20,8 @@ abstract class ApiModule {
 
     @Binds
     abstract fun bindsClientsRepo(clientsRepoImpl: ClientsRepositoryImpl): ClientsRepository
+
+    @Binds
+    abstract fun bindsUsersepo(usersRepositoryImpl: UsersRepositoryImpl): UsersRepository
 
 }

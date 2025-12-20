@@ -46,6 +46,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.R
 import com.example.statspos.domain.models.main.LocalBranches
+import com.example.statspos.presentation.ui.components.CustomIcon
 import com.example.statspos.presentation.ui.components.CustomSnackbarHost
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.OutlinedTextbox
@@ -53,13 +54,14 @@ import com.example.statspos.presentation.ui.components.PasswordOutlinedTextbox
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
 import com.example.statspos.presentation.viewmodels.main.ClientsViewModel
 import com.example.statspos.utils.DB
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
 @Composable
 fun ClientLoginScreen(
     onClientLogin: (clientId: Long) -> Unit,
-    onLocalClientLogin: (localClientId: Int, baseUrl: String) -> Unit,
+    onLocalClientLogin: (localBranch: LocalBranches) -> Unit,
     onSignup: () -> Unit
 ) {
     val viewModel = hiltViewModel<ClientsViewModel>()
@@ -115,10 +117,7 @@ fun ClientLoginScreen(
                     )
                 } else {
                     BranchesList(state.localBranches) { localBranch ->
-                        onLocalClientLogin(
-                            localBranch.localClientId,
-                            localBranch.baseUrl
-                        )
+                        onLocalClientLogin(localBranch)
                     }
                 }
             }
@@ -146,11 +145,11 @@ private fun Body(
         Spacer(
             Modifier.height(32.dp)
         )
-        Image(
-            painterResource(R.drawable.statspos),
-            contentDescription = null,
+        CustomIcon(
+            icon = R.drawable.statspos,
             modifier = Modifier
-                .size(140.dp)
+                .size(140.dp),
+            tint = MaterialTheme.colorScheme.primary
         )
         Spacer(
             Modifier.height(16.dp)

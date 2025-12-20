@@ -10,7 +10,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -26,6 +25,8 @@ import com.example.statspos.presentation.ui.screens.main.SplashScreen
 import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
 import com.example.statspos.utils.DB
 import com.example.statspos.utils.showToast
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -40,13 +41,12 @@ private sealed class Screens : NavKey {
     data object ClientSignup : Screens()
 
     @Serializable
-    data class Login(val clientId: Long) : Screens()
+    data class Login(val clientId: Long, val username: String?, val password: String?) : Screens()
 
     @Serializable
     data object Main : Screens()
 }
 
-@Preview(showBackground = true)
 @Composable
 fun App() {
     val context = LocalContext.current
@@ -54,35 +54,33 @@ fun App() {
     val backStack = rememberNavBackStack(Screens.Splash)
     val viewModel = hiltViewModel<LocalDataViewModel>()
 
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
         if (DB.IS_ONLINE_MODE) {
-            viewModel.getClientId().collect { clientId ->
-                if (clientId != 0.toLong()) {
-                    backStack.add(Screens.Login(clientId))
-                    backStack.removeFirstOrNull()
-                } else {
-                    backStack.add(Screens.ClientLogin)
+            val clientId = viewModel.getClientId().first()
+
+            if (clientId != 0.toLong()) {
+                viewModel.getLoginInfo { username, password ->
+                    backStack.add(Screens.Login(clientId, username, password))
                     backStack.removeFirstOrNull()
                 }
+            } else {
+                backStack.add(Screens.ClientLogin)
+                backStack.removeFirstOrNull()
             }
         } else {
-            viewModel.getLocalClientId().collect { localClientId ->
-                if (localClientId != 0) {
-                    viewModel.getBaseUrl().collect { baseUrl ->
-                        if (baseUrl != null) {
-                            DB.setBaseUrl(baseUrl)
+            val localClientId = viewModel.getLocalClientId().first()
+            val baseUrl = viewModel.getBaseUrl().first()
 
-                            backStack.add(Screens.Login(1))
-                            backStack.removeFirstOrNull()
-                        } else {
-                            backStack.add(Screens.ClientLogin)
-                            backStack.removeFirstOrNull()
-                        }
-                    }
-                } else {
-                    backStack.add(Screens.ClientLogin)
+            if (localClientId != 0 && baseUrl != null) {
+                DB.setBaseUrl(baseUrl)
+
+                viewModel.getLoginInfo { username, password ->
+                    backStack.add(Screens.Login(1, username, password))
                     backStack.removeFirstOrNull()
                 }
+            } else {
+                backStack.add(Screens.ClientLogin)
+                backStack.removeFirstOrNull()
             }
         }
     }
@@ -104,15 +102,16 @@ fun App() {
                         scope.launch {
                             viewModel.setClientId(clientId)
 
-                            backStack.add(Screens.Login(clientId))
+                            backStack.add(Screens.Login(clientId, "", ""))
                             backStack.removeFirstOrNull()
                         }
                     },
-                    onLocalClientLogin = { localClientId, baseUrl ->
+                    onLocalClientLogin = { localBranch ->
                         scope.launch {
-                            if (localClientId != 0 && baseUrl.isNotEmpty()) {
-                                viewModel.setLocalClientId(localClientId)
-                                viewModel.setBaseUrl(baseUrl)
+                            if (localBranch.localClientId != 0 && localBranch.baseUrl.isNotEmpty()) {
+                                viewModel.setLocalClientId(localBranch.localClientId)
+                                viewModel.setBaseUrl(localBranch.baseUrl)
+
 
                                 context.showToast("Open App again to continue")
                                 backStack.removeLastOrNull()
@@ -126,19 +125,26 @@ fun App() {
                 )
             }
             entry<Screens.ClientSignup> {
-                ClientSignupScreen (
+                ClientSignupScreen(
                     onSignup = { clientId ->
                         scope.launch {
                             viewModel.setClientId(clientId)
 
-                            backStack.add(Screens.Login(clientId))
+                            backStack.add(Screens.Login(clientId, "", ""))
                             backStack.removeFirstOrNull()
                         }
                     }
                 )
             }
             entry<Screens.Login> { key ->
-                LoginScreen(clientId = key.clientId) {
+                LoginScreen(
+                    clientId = key.clientId,
+                    username = key.username,
+                    password = key.password
+                ) { remember, username, password ->
+                    if (remember)
+                        viewModel.saveLoginInfo(username, password)
+
                     backStack.add(Screens.Main)
                     backStack.removeFirstOrNull()
                 }
@@ -149,7 +155,7 @@ fun App() {
                         .fillMaxSize()
                         .padding(16.dp),
                     contentAlignment = Alignment.Center
-                ){
+                ) {
                     Text(
                         text = "Main Screen"
                     )

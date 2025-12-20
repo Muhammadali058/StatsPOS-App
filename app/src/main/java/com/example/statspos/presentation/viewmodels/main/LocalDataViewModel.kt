@@ -1,9 +1,13 @@
 package com.example.statspos.presentation.viewmodels.main
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.statspos.utils.LocalDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -16,8 +20,8 @@ class LocalDataViewModel @Inject constructor(
         return dataStore.getClientId()
     }
 
-    suspend fun setClientId(clientId: Long){
-        dataStore.setClientId(clientId)
+    suspend fun setClientId(value: Long){
+        dataStore.setClientId(value)
     }
 
     // localClientId
@@ -25,8 +29,8 @@ class LocalDataViewModel @Inject constructor(
         return dataStore.getLocalClientId()
     }
 
-    suspend fun setLocalClientId(localClientId: Int){
-        dataStore.setLocalClientId(localClientId)
+    suspend fun setLocalClientId(value: Int){
+        dataStore.setLocalClientId(value)
     }
 
     // baseUrl
@@ -34,8 +38,24 @@ class LocalDataViewModel @Inject constructor(
         return dataStore.getBaseUrl()
     }
 
-    suspend fun setBaseUrl(baseUrl: String){
-        dataStore.setBaseUrl(baseUrl)
+    suspend fun setBaseUrl(value: String){
+        dataStore.setBaseUrl(value)
+    }
+
+    fun saveLoginInfo(username: String, password: String) {
+        viewModelScope.launch {
+            dataStore.setUsername(username)
+            dataStore.setPassword(password)
+        }
+    }
+
+    fun getLoginInfo(onSuccess:(String, String) -> Unit) {
+        viewModelScope.launch {
+            val username = dataStore.getUsername().first() ?: ""
+            val password = dataStore.getPassword().first() ?: ""
+
+            onSuccess(username, password)
+        }
     }
 
 }

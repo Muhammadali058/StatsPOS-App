@@ -4,11 +4,13 @@ import android.content.Context
 import android.widget.Toast
 import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.main.LocalBranches
+import com.example.statspos.domain.models.main.LocalClients
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 
 object HP {
-
+    var localClient: LocalClients? = null
 }
 
 fun Context.showToast(msg: String, length: Int = Toast.LENGTH_SHORT) =

@@ -16,10 +16,10 @@ import retrofit2.Retrofit
 @InstallIn(ViewModelComponent::class)
 class NetworkModule {
 
-    @Provides
-    fun provideLocalDataStore(dataStore: DataStore<Preferences>): LocalDataStore{
-        return LocalDataStore(dataStore)
-    }
+//    @Provides
+//    fun provideLocalDataStore(dataStore: DataStore<Preferences>): LocalDataStore{
+//        return LocalDataStore(dataStore)
+//    }
 
     @Provides
     fun provideCategoriesApi(retrofitInstance: Retrofit): CategoriesApi {

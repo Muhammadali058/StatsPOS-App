@@ -13,6 +13,12 @@ object HP {
     var localClient: LocalClients? = null
 }
 
+enum class ThemeMode {
+    LIGHT,
+    DARK,
+    SYSTEM
+}
+
 fun Context.showToast(msg: String, length: Int = Toast.LENGTH_SHORT) =
     Toast.makeText(this, msg, length).show()
 

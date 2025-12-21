@@ -10,7 +10,9 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class LocalDataStore @Inject constructor(
     val dataStore: DataStore<Preferences>
 ){
@@ -20,6 +22,7 @@ class LocalDataStore @Inject constructor(
         private val baseUrlKey = stringPreferencesKey("baseUrl")
         private val usernameKey = stringPreferencesKey("username")
         private val passwordKey = stringPreferencesKey("password")
+        private val themeKey = stringPreferencesKey("theme")
     }
 
     // clientId
@@ -74,6 +77,19 @@ class LocalDataStore @Inject constructor(
     suspend fun setPassword(value: String){
         dataStore.edit { settings ->
             settings[passwordKey] = value
+        }
+    }
+
+    // theme
+    fun getTheme(): Flow<ThemeMode> {
+        return dataStore.data.map { preferences ->
+            ThemeMode.valueOf(preferences[themeKey] ?: ThemeMode.LIGHT.name)
+        }
+    }
+
+    suspend fun setTheme(value: ThemeMode){
+        dataStore.edit { settings ->
+            settings[themeKey] = value.name
         }
     }
 

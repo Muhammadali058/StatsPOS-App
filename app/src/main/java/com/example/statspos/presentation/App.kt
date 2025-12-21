@@ -1,16 +1,11 @@
 package com.example.statspos.presentation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
+import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
@@ -23,11 +18,10 @@ import com.example.statspos.presentation.ui.screens.main.ClientSignupScreen
 import com.example.statspos.presentation.ui.screens.main.LoginScreen
 import com.example.statspos.presentation.ui.screens.main.SplashScreen
 import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
+import com.example.statspos.presentation.ui.screens.main.MainScreen
 import com.example.statspos.utils.DB
 import com.example.statspos.utils.showToast
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 private sealed class Screens : NavKey {
@@ -85,6 +79,13 @@ fun App() {
         }
     }
 
+    val activity = LocalContext.current as Activity
+    BackHandler {
+        if (backStack.size == 1) {
+            activity.finish()
+        }
+    }
+
     NavDisplay(
         entryDecorators = listOf(
             rememberSaveableStateHolderNavEntryDecorator(),
@@ -99,23 +100,19 @@ fun App() {
             entry<Screens.ClientLogin> {
                 ClientLoginScreen(
                     onClientLogin = { clientId ->
-                        scope.launch {
-                            viewModel.setClientId(clientId)
+                        viewModel.setClientId(clientId)
 
-                            backStack.add(Screens.Login(clientId, "", ""))
-                            backStack.removeFirstOrNull()
-                        }
+                        backStack.add(Screens.Login(clientId, "", ""))
+                        backStack.removeFirstOrNull()
                     },
                     onLocalClientLogin = { localBranch ->
-                        scope.launch {
-                            if (localBranch.localClientId != 0 && localBranch.baseUrl.isNotEmpty()) {
-                                viewModel.setLocalClientId(localBranch.localClientId)
-                                viewModel.setBaseUrl(localBranch.baseUrl)
+                        if (localBranch.localClientId != 0 && localBranch.baseUrl.isNotEmpty()) {
+                            viewModel.setLocalClientId(localBranch.localClientId)
+                            viewModel.setBaseUrl(localBranch.baseUrl)
 
 
-                                context.showToast("Open App again to continue")
-                                backStack.removeLastOrNull()
-                            }
+                            context.showToast("Open App again to continue")
+                            backStack.removeLastOrNull()
                         }
                     },
                     onSignup = {
@@ -127,12 +124,10 @@ fun App() {
             entry<Screens.ClientSignup> {
                 ClientSignupScreen(
                     onSignup = { clientId ->
-                        scope.launch {
-                            viewModel.setClientId(clientId)
+                        viewModel.setClientId(clientId)
 
-                            backStack.add(Screens.Login(clientId, "", ""))
-                            backStack.removeFirstOrNull()
-                        }
+                        backStack.add(Screens.Login(clientId, "", ""))
+                        backStack.removeFirstOrNull()
                     }
                 )
             }
@@ -150,16 +145,7 @@ fun App() {
                 }
             }
             entry<Screens.Main> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Main Screen"
-                    )
-                }
+                MainScreen()
             }
         }
     )

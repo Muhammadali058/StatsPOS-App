@@ -22,6 +22,6 @@ abstract class ApiModule {
     abstract fun bindsClientsRepo(clientsRepoImpl: ClientsRepositoryImpl): ClientsRepository
 
     @Binds
-    abstract fun bindsUsersepo(usersRepositoryImpl: UsersRepositoryImpl): UsersRepository
+    abstract fun bindsUsersRepo(usersRepositoryImpl: UsersRepositoryImpl): UsersRepository
 
 }

@@ -2,6 +2,7 @@ package com.example.statspos.presentation
 
 import android.app.Activity
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -13,6 +14,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.example.statspos.presentation.ui.screens.items.CategoriesScreen
 import com.example.statspos.presentation.ui.screens.main.ClientLoginScreen
 import com.example.statspos.presentation.ui.screens.main.ClientSignupScreen
 import com.example.statspos.presentation.ui.screens.main.LoginScreen
@@ -44,7 +46,6 @@ private sealed class Screens : NavKey {
 @Composable
 fun App() {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val backStack = rememberNavBackStack(Screens.Splash)
     val viewModel = hiltViewModel<LocalDataViewModel>()
 
@@ -79,20 +80,18 @@ fun App() {
         }
     }
 
-    val activity = LocalContext.current as Activity
+    val activity = LocalActivity.current as Activity
     BackHandler {
         if (backStack.size == 1) {
             activity.finish()
         }
     }
-
     NavDisplay(
         entryDecorators = listOf(
             rememberSaveableStateHolderNavEntryDecorator(),
             rememberViewModelStoreNavEntryDecorator()
         ),
         backStack = backStack,
-        onBack = { backStack.removeLastOrNull() },
         entryProvider = entryProvider {
             entry<Screens.Splash> {
                 SplashScreen()
@@ -109,7 +108,6 @@ fun App() {
                         if (localBranch.localClientId != 0 && localBranch.baseUrl.isNotEmpty()) {
                             viewModel.setLocalClientId(localBranch.localClientId)
                             viewModel.setBaseUrl(localBranch.baseUrl)
-
 
                             context.showToast("Open App again to continue")
                             backStack.removeLastOrNull()
@@ -141,7 +139,7 @@ fun App() {
                         viewModel.saveLoginInfo(username, password)
 
                     backStack.add(Screens.Main)
-                    backStack.removeFirstOrNull()
+//                    backStack.removeFirstOrNull()
                 }
             }
             entry<Screens.Main> {

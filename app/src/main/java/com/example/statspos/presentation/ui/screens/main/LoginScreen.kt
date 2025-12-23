@@ -61,6 +61,14 @@ fun LoginScreen(
     LaunchedEffect(Unit) {
         username?.let { viewModel.onUsernameChange(it) }
         password?.let { viewModel.onPasswordChange(it) }
+
+//        viewModel.login(clientId) {
+//            onLogin(
+//                state.remember,
+//                state.username,
+//                state.password
+//            )
+//        }
     }
 
     var showErrorDialog by remember { mutableStateOf(false) }

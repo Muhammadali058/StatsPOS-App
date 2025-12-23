@@ -10,14 +10,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
 @Composable
-fun CategoriesScreen(modifier: Modifier = Modifier) {
+fun ItemsScreen(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.Green)
-        ,
+            .background(Color.Red)
+            ,
         contentAlignment = Alignment.Center
     ){
-        Text("Categories Screen")
+        Text("Items Screen")
     }
 }

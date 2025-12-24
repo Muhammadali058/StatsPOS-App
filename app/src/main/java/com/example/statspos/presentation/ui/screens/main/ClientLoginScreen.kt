@@ -1,6 +1,6 @@
 package com.example.statspos.presentation.ui.screens.main
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,7 +54,6 @@ import com.example.statspos.presentation.ui.components.PasswordOutlinedTextbox
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
 import com.example.statspos.presentation.viewmodels.main.ClientsViewModel
 import com.example.statspos.utils.DB
-import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
@@ -95,7 +94,8 @@ fun ClientLoginScreen(
             Box(
                 modifier = Modifier
                     .padding(innerPadding)
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surface),
             ) {
                 if (state.localBranches.isEmpty()) {
                     Body(
@@ -157,7 +157,7 @@ private fun Body(
         OutlinedTextbox(
             value = username,
             onValueChange = onUsernameChange,
-            labelText = "Username",
+            label = "Username",
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {

@@ -1,5 +1,6 @@
 package com.example.statspos.presentation.ui.screens.main
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -117,6 +119,7 @@ private fun Body(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -136,7 +139,7 @@ private fun Body(
         OutlinedTextbox(
             value = businessName,
             onValueChange = onBusinessNameChange,
-            labelText = "Business Name",
+            label = "Business Name",
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {
@@ -149,7 +152,7 @@ private fun Body(
         OutlinedTextbox(
             value = contact,
             onValueChange = onContactChange,
-            labelText = "Contact",
+            label = "Contact",
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {
@@ -165,7 +168,7 @@ private fun Body(
         OutlinedTextbox(
             value = username,
             onValueChange = onUsernameChange,
-            labelText = "Username",
+            label = "Username",
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {

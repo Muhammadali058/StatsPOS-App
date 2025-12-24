@@ -1,5 +1,6 @@
 package com.example.statspos.presentation.ui.screens.main
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -134,6 +135,7 @@ private fun Body(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -171,7 +173,7 @@ private fun Body(
         OutlinedTextbox(
             value = username,
             onValueChange = onUsernameChange,
-            labelText = "Username",
+            label = "Username",
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {

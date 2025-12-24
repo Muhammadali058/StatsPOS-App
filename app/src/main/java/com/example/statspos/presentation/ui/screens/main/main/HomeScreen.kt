@@ -1,0 +1,184 @@
+package com.example.statspos.presentation.ui.screens.main.main
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.ui.NavDisplay
+import com.example.statspos.presentation.ui.components.CustomIcon
+import com.example.statspos.presentation.ui.others.Navigator
+import com.example.statspos.presentation.ui.others.rememberNavigationState
+import com.example.statspos.presentation.ui.others.toEntries
+import com.example.statspos.presentation.ui.screens.BottomRoutes
+import com.example.statspos.presentation.ui.screens.TopRoutes
+import com.example.statspos.presentation.ui.screens.items.ItemsScreen
+import com.example.statspos.presentation.ui.screens.reports.ReportsScreen
+import com.example.statspos.presentation.ui.screens.sales.SalesScreen
+import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
+import com.example.statspos.utils.ThemeMode
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+
+@Preview(showBackground = true)
+@Composable
+fun HomeScreen(
+    onTopRouteClick: (NavKey) -> Unit = {},
+) {
+    val viewModel = hiltViewModel<LocalDataViewModel>()
+
+    // Navigation
+    val navigationState = rememberNavigationState(
+        startRoute = BottomRoutes.Sales,
+        topLevelRoutes = BOTTOM_DESTINATIONS.keys,
+        serializersModules = SerializersModule {
+            polymorphic(NavKey::class) {
+                subclass(BottomRoutes.Home::class, BottomRoutes.Home.serializer())
+                subclass(BottomRoutes.Items::class, BottomRoutes.Items.serializer())
+                subclass(BottomRoutes.Sales::class, BottomRoutes.Sales.serializer())
+                subclass(BottomRoutes.Reports::class, BottomRoutes.Reports.serializer())
+            }
+        }
+    )
+    val bottomNavigator = remember { Navigator(navigationState) }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                navigationIcon = Icons.Default.Menu,
+                actions = {
+                    IconButton(onClick = {
+
+                    }) {
+                        CustomIcon(
+                            icon = Icons.Default.MoreVert,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                },
+                onNavigationClick = {
+                    viewModel.setTheme(ThemeMode.SYSTEM)
+                }
+            )
+        },
+        bottomBar = {
+            BottomBar(
+                items = BOTTOM_DESTINATIONS,
+                selectedKey = navigationState.selectedRoute,
+                onSelectKey = { key ->
+                    bottomNavigator.navigate(key)
+                }
+            )
+        }
+    ) { innerPadding ->
+        NavDisplay(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            onBack = bottomNavigator::goBack,
+            entries = navigationState.toEntries(
+                entryProvider {
+                    entry<BottomRoutes.Home> {
+                        HomeBody(
+                            onTopRouteClick = { screen ->
+                                onTopRouteClick(screen)
+                            }
+                        )
+                    }
+                    entry<BottomRoutes.Items> {
+                        ItemsScreen()
+                    }
+                    entry<BottomRoutes.Sales> {
+                        SalesScreen{key ->
+                            onTopRouteClick(key)
+                        }
+                    }
+                    entry<BottomRoutes.Reports> {
+                        ReportsScreen()
+                    }
+                }
+            )
+        )
+    }
+}
+
+@Composable
+private fun HomeBody(
+    modifier: Modifier = Modifier,
+    onTopRouteClick: (screen: TopRoutes) -> Unit = {}
+) {
+    val items = listOf(
+        TopItem("Categories", TopRoutes.Categories),
+        TopItem("Purchase", TopRoutes.Purchase),
+        TopItem("Warehouses", TopRoutes.Categories),
+        TopItem("Customers", TopRoutes.Categories),
+        TopItem("Vendors", TopRoutes.Categories),
+        TopItem("Suppliers", TopRoutes.Categories),
+        TopItem("Banks", TopRoutes.Categories),
+        TopItem("Expenses", TopRoutes.Categories),
+    )
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp)
+    ) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
+            modifier = Modifier
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(items) { item ->
+                Card(
+                    modifier = Modifier
+                        .height(100.dp)
+                    ,
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = 2.dp
+                    )
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable {
+                                onTopRouteClick(item.screen)
+                            }
+                            .background(MaterialTheme.colorScheme.onBackground)
+                    ) {
+                        Text(
+                            text = item.text,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,62 @@
+package com.example.statspos.presentation.ui.screens.main.main
+
+import android.app.Activity
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
+import com.example.statspos.presentation.ui.screens.TopRoutes
+import com.example.statspos.presentation.ui.screens.items.CategoriesScreen
+import com.example.statspos.presentation.ui.screens.purchase.PurchaseScreen
+
+@Composable
+fun MainScreen() {
+    val backStack = rememberNavBackStack(TopRoutes.Home)
+    val activity = LocalActivity.current as Activity
+    BackHandler {
+        if (backStack.size == 1) {
+            activity.finish()
+        }
+    }
+    NavDisplay(
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
+        backStack = backStack,
+        entryProvider = entryProvider {
+            entry<TopRoutes.Home> {
+                HomeScreen { key ->
+                    backStack.add(key)
+                }
+            }
+            entry<TopRoutes.Categories> {
+                CategoriesScreen()
+            }
+            entry<TopRoutes.Purchase> {
+                PurchaseScreen()
+            }
+            entry<TopRoutes.AddSales> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Blue),
+                    contentAlignment = Alignment.Center
+                ){
+                    Text("Add Sales")
+                }
+            }
+        }
+    )
+}

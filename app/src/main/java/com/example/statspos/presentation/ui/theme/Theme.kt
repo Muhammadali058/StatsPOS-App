@@ -22,10 +22,13 @@ private val DarkColorScheme = darkColorScheme(
     onPrimaryContainer = textDark,
 
     background = backgroundDark,
-    onBackground = textDark,
+    onBackground = onBackgroundDark,
 
-    surface = backgroundDark,
-    onSurface = textDark,
+    surface = onPrimaryDark,
+    onSurface = primaryDark,
+
+    surfaceVariant = onPrimaryDark,
+    onSurfaceVariant = primaryDark,
 
     outline =  textDark,
     outlineVariant = primaryDark,
@@ -39,10 +42,13 @@ private val LightColorScheme = lightColorScheme(
     onPrimaryContainer = textLight,
 
     background = backgroundLight,
-    onBackground = textLight,
+    onBackground = onBackgroundLight,
 
-    surface = backgroundLight,
+    surface = onBackgroundLight,
     onSurface = textLight,
+
+    surfaceVariant = primaryLight,
+    onSurfaceVariant = onPrimaryLight,
 
     outline =  textLight,
     outlineVariant = primaryLight,
@@ -62,11 +68,11 @@ fun StatsPOSTheme(
     val view = LocalView.current
     SideEffect {
         val window = (view.context as Activity).window
-        window.navigationBarColor = if(darkTheme) backgroundDark.toArgb() else backgroundLight.toArgb()
-        window.statusBarColor = if(darkTheme) backgroundDark.toArgb() else backgroundLight.toArgb()
+        window.navigationBarColor = colorScheme.surface.toArgb()
+        window.statusBarColor = colorScheme.surfaceVariant.toArgb()
         WindowCompat.getInsetsController(window, view).apply {
             isAppearanceLightNavigationBars = !darkTheme
-            isAppearanceLightStatusBars = !darkTheme
+            isAppearanceLightStatusBars = false
         }
     }
 

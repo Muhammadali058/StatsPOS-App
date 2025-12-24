@@ -20,7 +20,7 @@ import com.example.statspos.presentation.ui.components.CustomIcon
 fun SplashScreen() {
     Box(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.surface)
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {

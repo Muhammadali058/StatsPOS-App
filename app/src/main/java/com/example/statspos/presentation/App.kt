@@ -5,7 +5,6 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -14,15 +13,15 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.example.statspos.presentation.ui.screens.items.CategoriesScreen
 import com.example.statspos.presentation.ui.screens.main.ClientLoginScreen
 import com.example.statspos.presentation.ui.screens.main.ClientSignupScreen
 import com.example.statspos.presentation.ui.screens.main.LoginScreen
 import com.example.statspos.presentation.ui.screens.main.SplashScreen
 import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
-import com.example.statspos.presentation.ui.screens.main.MainScreen
+import com.example.statspos.presentation.ui.screens.main.main.MainScreen
 import com.example.statspos.utils.DB
 import com.example.statspos.utils.showToast
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.Serializable
 
@@ -50,6 +49,7 @@ fun App() {
     val viewModel = hiltViewModel<LocalDataViewModel>()
 
     LaunchedEffect(Unit) {
+        delay(2000)
         if (DB.IS_ONLINE_MODE) {
             val clientId = viewModel.getClientId().first()
 

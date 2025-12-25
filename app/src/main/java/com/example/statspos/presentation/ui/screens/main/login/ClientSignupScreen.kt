@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.main
+package com.example.statspos.presentation.ui.screens.main.login
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -38,11 +38,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.R
 import com.example.statspos.presentation.ui.components.CustomSnackbarHost
-import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.OutlinedTextbox
 import com.example.statspos.presentation.ui.components.PasswordOutlinedTextbox
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
 import com.example.statspos.presentation.viewmodels.main.ClientsViewModel
+import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
@@ -54,50 +54,46 @@ fun ClientSignupScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
 
-    var showErrorDialog by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
+    var currentSnackbarType by remember { mutableStateOf(SnackbarType.INFORMATION) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
             snackbarHostState = snackbarHostState,
-            viewModelIdleEvent = viewModel::onEvent
-        ) {
-            showErrorDialog = true
-        }
+            viewModelIdleEvent = viewModel::onEvent,
+            changeSnackbarType = {
+                currentSnackbarType = it
+            }
+        )
     }
 
-    if (showErrorDialog) {
-        ErrorDialog(
-            text = state.error!!
-        ) {
-            showErrorDialog = false
-        }
-    } else {
-        Scaffold(
-            snackbarHost = {
-                CustomSnackbarHost(snackbarHostState = snackbarHostState)
-            }
-        ) { innerPadding ->
-            Body (
-                modifier = Modifier
-                    .padding(innerPadding),
-                businessName = state.businessName,
-                contact = state.contact,
-                username = state.username,
-                password = state.password,
-                confirmPassword = state.confirmPassword,
-                onBusinessNameChange = viewModel::onBusinessNameChange,
-                onContactChange = viewModel::onContactChange,
-                onUsernameChange = viewModel::onUsernameChange,
-                onPasswordChange = viewModel::onPasswordChange,
-                onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
-                onSignup = {
-                    viewModel.clientSignup { clientId ->
-                        onSignup(clientId)
-                    }
-                }
+    Scaffold(
+        snackbarHost = {
+            CustomSnackbarHost(
+                snackbarHostState = snackbarHostState,
+                currentSnackbarType = currentSnackbarType
             )
         }
+    ) { innerPadding ->
+        Body(
+            modifier = Modifier
+                .padding(innerPadding),
+            businessName = state.businessName,
+            contact = state.contact,
+            username = state.username,
+            password = state.password,
+            confirmPassword = state.confirmPassword,
+            onBusinessNameChange = viewModel::onBusinessNameChange,
+            onContactChange = viewModel::onContactChange,
+            onUsernameChange = viewModel::onUsernameChange,
+            onPasswordChange = viewModel::onPasswordChange,
+            onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
+            onSignup = {
+                viewModel.clientSignup { clientId ->
+                    onSignup(clientId)
+                }
+            }
+        )
     }
 }
 

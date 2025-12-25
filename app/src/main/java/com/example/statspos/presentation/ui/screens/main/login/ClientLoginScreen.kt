@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.main
+package com.example.statspos.presentation.ui.screens.main.login
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -48,12 +48,12 @@ import com.example.statspos.R
 import com.example.statspos.domain.models.main.LocalBranches
 import com.example.statspos.presentation.ui.components.CustomIcon
 import com.example.statspos.presentation.ui.components.CustomSnackbarHost
-import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.OutlinedTextbox
 import com.example.statspos.presentation.ui.components.PasswordOutlinedTextbox
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
 import com.example.statspos.presentation.viewmodels.main.ClientsViewModel
 import com.example.statspos.utils.DB
+import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
@@ -67,58 +67,54 @@ fun ClientLoginScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
 
-    var showErrorDialog by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
+    var currentSnackbarType by remember { mutableStateOf(SnackbarType.INFORMATION) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
             snackbarHostState = snackbarHostState,
-            viewModelIdleEvent = viewModel::onEvent
-        ) {
-            showErrorDialog = true
-        }
+            viewModelIdleEvent = viewModel::onEvent,
+            changeSnackbarType = {
+                currentSnackbarType = it
+            }
+        )
     }
 
-    if (showErrorDialog) {
-        ErrorDialog(
-            text = state.error!!
-        ) {
-            showErrorDialog = false
+    Scaffold(
+        snackbarHost = {
+            CustomSnackbarHost(
+                snackbarHostState = snackbarHostState,
+                currentSnackbarType = currentSnackbarType
+            )
         }
-    } else {
-        Scaffold(
-            snackbarHost = {
-                CustomSnackbarHost(snackbarHostState = snackbarHostState)
-            }
-        ) { innerPadding ->
-            Box(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surface),
-            ) {
-                if (state.localBranches.isEmpty()) {
-                    Body(
-                        username = state.username,
-                        password = state.password,
-                        onUsernameChange = viewModel::onUsernameChange,
-                        onPasswordChange = viewModel::onPasswordChange,
-                        onClientLogin = {
-                            viewModel.clientLogin { clientId ->
-                                onClientLogin(clientId)
-                            }
-                        },
-                        onLocalClientLogin = {
-                            viewModel.localClientLogin()
-                        },
-                        onSignup ={
-                            onSignup()
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface),
+        ) {
+            if (state.localBranches.isEmpty()) {
+                Body(
+                    username = state.username,
+                    password = state.password,
+                    onUsernameChange = viewModel::onUsernameChange,
+                    onPasswordChange = viewModel::onPasswordChange,
+                    onClientLogin = {
+                        viewModel.clientLogin { clientId ->
+                            onClientLogin(clientId)
                         }
-                    )
-                } else {
-                    BranchesList(state.localBranches) { localBranch ->
-                        onLocalClientLogin(localBranch)
+                    },
+                    onLocalClientLogin = {
+                        viewModel.localClientLogin()
+                    },
+                    onSignup = {
+                        onSignup()
                     }
+                )
+            } else {
+                BranchesList(state.localBranches) { localBranch ->
+                    onLocalClientLogin(localBranch)
                 }
             }
         }
@@ -133,7 +129,7 @@ private fun Body(
     onPasswordChange: (String) -> Unit,
     onClientLogin: () -> Unit,
     onLocalClientLogin: () -> Unit,
-    onSignup: ()-> Unit,
+    onSignup: () -> Unit,
 ) {
     Column(
         modifier = Modifier

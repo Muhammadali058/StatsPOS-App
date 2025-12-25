@@ -13,10 +13,10 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.example.statspos.presentation.ui.screens.main.ClientLoginScreen
-import com.example.statspos.presentation.ui.screens.main.ClientSignupScreen
-import com.example.statspos.presentation.ui.screens.main.LoginScreen
-import com.example.statspos.presentation.ui.screens.main.SplashScreen
+import com.example.statspos.presentation.ui.screens.main.login.ClientLoginScreen
+import com.example.statspos.presentation.ui.screens.main.login.ClientSignupScreen
+import com.example.statspos.presentation.ui.screens.main.login.LoginScreen
+import com.example.statspos.presentation.ui.screens.main.main.SplashScreen
 import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
 import com.example.statspos.presentation.ui.screens.main.main.MainScreen
 import com.example.statspos.utils.DB
@@ -49,7 +49,6 @@ fun App() {
     val viewModel = hiltViewModel<LocalDataViewModel>()
 
     LaunchedEffect(Unit) {
-        delay(2000)
         if (DB.IS_ONLINE_MODE) {
             val clientId = viewModel.getClientId().first()
 

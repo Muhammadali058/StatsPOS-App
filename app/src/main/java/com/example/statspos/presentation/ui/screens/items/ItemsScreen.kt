@@ -45,7 +45,7 @@ fun ItemsScreen() {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.onBackground)
+                        .background(MaterialTheme.colorScheme.primaryContainer)
                         .clickable{
 
                         }

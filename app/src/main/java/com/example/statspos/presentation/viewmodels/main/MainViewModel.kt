@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.repository.utilities.UsersRepository
 import com.example.statspos.utils.Resource
+import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
 import com.google.gson.JsonObject
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,7 +38,6 @@ class MainViewModel @Inject constructor(
     fun onEvent(event: UiEvent) {
         when (event) {
             is UiEvent.ShowSnackbar -> {}
-            is UiEvent.ShowError -> {}
             else -> {
                 viewModelScope.launch {
                     _event.send(UiEvent.Idle)
@@ -46,17 +46,12 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun showSnackbar(message: String) {
+    fun showSnackbar(message: String, type: SnackbarType = SnackbarType.INFORMATION) {
         viewModelScope.launch {
-            _event.send(UiEvent.ShowSnackbar(message))
+            _event.send(UiEvent.ShowSnackbar(message, type))
         }
     }
 
-    fun showError(message: String) {
-        viewModelScope.launch {
-            _event.send(UiEvent.ShowError(message))
-        }
-    }
     // endregion
 
     // region Network calls
@@ -64,9 +59,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
-//            if (!loginValidation()) {
-//                return@launch
-//            }
+
             beforeRequest()
 
             val params = JsonObject().apply {
@@ -97,7 +90,7 @@ class MainViewModel @Inject constructor(
     // region Others
     private fun resultError(message: String?) {
         state.update { it.copy(isLoading = false, error = message) }
-        message?.let { showError(it) }
+        message?.let { showSnackbar(it, SnackbarType.ERROR) }
     }
 
     private fun resultInformation(message: String?) {

@@ -30,11 +30,11 @@ fun MainScreen() {
         }
     }
     NavDisplay(
+        backStack = backStack,
         entryDecorators = listOf(
             rememberSaveableStateHolderNavEntryDecorator(),
             rememberViewModelStoreNavEntryDecorator()
         ),
-        backStack = backStack,
         entryProvider = entryProvider {
             entry<TopRoutes.Home> {
                 HomeScreen { key ->

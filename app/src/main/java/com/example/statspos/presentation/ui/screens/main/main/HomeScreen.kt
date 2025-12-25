@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -30,7 +30,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import com.example.statspos.presentation.ui.components.BOTTOM_DESTINATIONS
+import com.example.statspos.presentation.ui.components.BottomBar
 import com.example.statspos.presentation.ui.components.CustomIcon
+import com.example.statspos.presentation.ui.components.TopAppBar
+import com.example.statspos.presentation.ui.components.TopItem
 import com.example.statspos.presentation.ui.others.Navigator
 import com.example.statspos.presentation.ui.others.rememberNavigationState
 import com.example.statspos.presentation.ui.others.toEntries
@@ -53,7 +57,7 @@ fun HomeScreen(
 
     // Navigation
     val navigationState = rememberNavigationState(
-        startRoute = BottomRoutes.Sales,
+        startRoute = BottomRoutes.Home,
         topLevelRoutes = BOTTOM_DESTINATIONS.keys,
         serializersModules = SerializersModule {
             polymorphic(NavKey::class) {
@@ -157,7 +161,7 @@ private fun HomeBody(
             items(items) { item ->
                 Card(
                     modifier = Modifier
-                        .height(100.dp)
+                        .size(100.dp)
                     ,
                     elevation = CardDefaults.cardElevation(
                         defaultElevation = 2.dp
@@ -170,7 +174,7 @@ private fun HomeBody(
                             .clickable {
                                 onTopRouteClick(item.screen)
                             }
-                            .background(MaterialTheme.colorScheme.onBackground)
+                            .background(MaterialTheme.colorScheme.primaryContainer)
                     ) {
                         Text(
                             text = item.text,

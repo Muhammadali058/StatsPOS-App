@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.main
+package com.example.statspos.presentation.ui.screens.main.login
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -26,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -39,11 +38,11 @@ import com.example.statspos.R
 import com.example.statspos.presentation.ui.components.CustomCheckbox
 import com.example.statspos.presentation.ui.components.CustomIcon
 import com.example.statspos.presentation.ui.components.CustomSnackbarHost
-import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.OutlinedTextbox
 import com.example.statspos.presentation.ui.components.PasswordOutlinedTextbox
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
 import com.example.statspos.presentation.viewmodels.main.LoginViewModel
+import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
@@ -54,7 +53,6 @@ fun LoginScreen(
     password: String?,
     onLogin: (remember: Boolean, username: String, password: String) -> Unit
 ) {
-    val context = LocalContext.current
     val viewModel = hiltViewModel<LoginViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
@@ -72,51 +70,47 @@ fun LoginScreen(
 //        }
     }
 
-    var showErrorDialog by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
+    var currentSnackbarType by remember { mutableStateOf(SnackbarType.INFORMATION) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
             snackbarHostState = snackbarHostState,
-            viewModelIdleEvent = viewModel::onEvent
-        ) {
-            showErrorDialog = true
-        }
+            viewModelIdleEvent = viewModel::onEvent,
+            changeSnackbarType = {
+                currentSnackbarType = it
+            }
+        )
     }
 
-    if (showErrorDialog) {
-        ErrorDialog(
-            text = state.error!!
-        ) {
-            showErrorDialog = false
-        }
-    } else {
-        Scaffold(
-            snackbarHost = {
-                CustomSnackbarHost(snackbarHostState = snackbarHostState)
-            }
-        ) { innerPadding ->
-            Body(
-                modifier = Modifier
-                    .padding(innerPadding),
-                username = state.username,
-                password = state.password,
-                remember = state.remember,
-                onUsernameChange = viewModel::onUsernameChange,
-                onPasswordChange = viewModel::onPasswordChange,
-                onRememberCheckedChange = viewModel::onRememberCheckedChange,
-                isLoading = state.isLoading,
-                onLogin = {
-                    viewModel.login(clientId) {
-                        onLogin(
-                            state.remember,
-                            state.username,
-                            state.password
-                        )
-                    }
-                }
+    Scaffold(
+        snackbarHost = {
+            CustomSnackbarHost(
+                snackbarHostState = snackbarHostState,
+                currentSnackbarType = currentSnackbarType
             )
         }
+    ) { innerPadding ->
+        Body(
+            modifier = Modifier
+                .padding(innerPadding),
+            username = state.username,
+            password = state.password,
+            remember = state.remember,
+            onUsernameChange = viewModel::onUsernameChange,
+            onPasswordChange = viewModel::onPasswordChange,
+            onRememberCheckedChange = viewModel::onRememberCheckedChange,
+            isLoading = state.isLoading,
+            onLogin = {
+                viewModel.login(clientId) {
+                    onLogin(
+                        state.remember,
+                        state.username,
+                        state.password
+                    )
+                }
+            }
+        )
     }
 }
 
@@ -197,7 +191,7 @@ private fun Body(
         Spacer(
             Modifier.height(8.dp)
         )
-        CustomCheckbox (
+        CustomCheckbox(
             modifier = Modifier.fillMaxWidth(),
             checked = remember,
             onCheckedChange = onRememberCheckedChange

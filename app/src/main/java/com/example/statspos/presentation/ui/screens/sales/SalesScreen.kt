@@ -15,16 +15,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import com.example.statspos.presentation.ui.components.CustomCheckbox
 import com.example.statspos.presentation.ui.components.OutlinedTextbox
 import com.example.statspos.presentation.ui.screens.TopRoutes
+import com.example.statspos.presentation.viewmodels.main.LoginViewModel
 
 @Composable
 fun SalesScreen(
     modifier: Modifier = Modifier,
     onClick: (NavKey) -> Unit = {}
 ) {
+    val viewModel = hiltViewModel<LoginViewModel>()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -34,8 +40,8 @@ fun SalesScreen(
     ) {
         var title by remember { mutableStateOf("") }
         OutlinedTextbox(
-            value = title,
-            onValueChange = { title = it },
+            value = state.username,
+            onValueChange = viewModel::onUsernameChange,
             modifier = Modifier
                 .fillMaxWidth(),
             label = "Itemname"

@@ -8,6 +8,7 @@ import com.example.statspos.domain.models.main.LocalClients
 import com.example.statspos.domain.repository.main.ClientsRepository
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
+import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -49,7 +50,7 @@ class ClientsViewModel @Inject constructor(
     fun onEvent(event: UiEvent) {
         when (event) {
             is UiEvent.ShowSnackbar -> {}
-            is UiEvent.ShowError -> {}
+//            is UiEvent.ShowError -> {}
             else -> {
                 viewModelScope.launch {
                     _event.send(UiEvent.Idle)
@@ -58,17 +59,17 @@ class ClientsViewModel @Inject constructor(
         }
     }
 
-    fun showSnackbar(message: String) {
+    fun showSnackbar(message: String, type: SnackbarType = SnackbarType.INFORMATION) {
         viewModelScope.launch {
-            _event.send(UiEvent.ShowSnackbar(message))
+            _event.send(UiEvent.ShowSnackbar(message, type))
         }
     }
 
-    fun showError(message: String) {
-        viewModelScope.launch {
-            _event.send(UiEvent.ShowError(message))
-        }
-    }
+//    fun showError(message: String) {
+//        viewModelScope.launch {
+//            _event.send(UiEvent.ShowError(message))
+//        }
+//    }
     // endregion
 
     // region onChangeMethods
@@ -236,7 +237,7 @@ class ClientsViewModel @Inject constructor(
 
     private fun resultError(message: String?) {
         state.update { it.copy(isLoading = false, error = message) }
-        message?.let { showError(it) }
+        message?.let { showSnackbar(it, SnackbarType.ERROR) }
     }
 
     private fun resultInformation(message: String?) {

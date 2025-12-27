@@ -41,7 +41,7 @@ class LoginViewModel @Inject constructor(
     var event = _event.receiveAsFlow()
     fun onEvent(event: UiEvent) {
         when (event) {
-            is UiEvent.ShowSnackbar -> {}
+            is UiEvent.ShowMessage -> {}
             else -> {
                 viewModelScope.launch {
                     _event.send(UiEvent.Idle)
@@ -50,9 +50,9 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun showSnackbar(message: String, type: SnackbarType = SnackbarType.INFORMATION) {
+    fun showMessage(message: String, type: SnackbarType = SnackbarType.INFORMATION) {
         viewModelScope.launch {
-            _event.send(UiEvent.ShowSnackbar(message, type))
+            _event.send(UiEvent.ShowMessage(message, type))
         }
     }
 
@@ -73,7 +73,7 @@ class LoginViewModel @Inject constructor(
     // endregion
 
     // region Network calls
-    fun login(clientId:Long, onSuccess: () -> Unit) {
+    fun login(clientId: Int, onSuccess: () -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -89,8 +89,8 @@ class LoginViewModel @Inject constructor(
             }
 
             when (val result = usersRepository.login(params)) {
-                is Resource.Error -> resultError(result.message)
-                is Resource.Information -> resultInformation(result.infoMessage)
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
                     if (result.data.get("isExists").asBoolean) {
@@ -98,7 +98,7 @@ class LoginViewModel @Inject constructor(
 //                        val clientId = result.data.getAsJsonObject("data").get("id").asLong
                         onSuccess()
                     } else {
-                        showSnackbar("Username or password incorrect")
+                        showMessage("Username or password incorrect")
                     }
                 }
             }
@@ -110,23 +110,23 @@ class LoginViewModel @Inject constructor(
     // region Others
     private fun loginValidation(): Boolean {
         if (state.value.username.isEmpty()) {
-            showSnackbar("Enter username")
+            showMessage("Enter username")
             return false
         } else if (state.value.password.isEmpty()) {
-            showSnackbar("Enter password")
+            showMessage("Enter password")
             return false
         } else
             return true
     }
 
-    private fun resultError(message: String?) {
-        state.update { it.copy(isLoading = false, error = message) }
-        message?.let { showSnackbar(it, SnackbarType.ERROR) }
+    private fun resultError(error: String?) {
+        state.update { it.copy(isLoading = false, error = error) }
+        error?.let { showMessage(it, SnackbarType.ERROR) }
     }
 
     private fun resultInformation(message: String?) {
         state.update { it.copy(isLoading = false) }
-        message?.let { showSnackbar(it) }
+        message?.let { showMessage(it) }
     }
 
     private fun resultSuccess() {

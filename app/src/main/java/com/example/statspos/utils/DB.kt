@@ -18,8 +18,8 @@ object DB {
 
 sealed class Resource<T> {
     data class Success<T>(val data: T) : Resource<T>()
-    data class Error<T>(val message: String?) : Resource<T>()
-    data class Information<T>(val infoMessage: String?) : Resource<T>()
+    data class Error<T>(val error: String?) : Resource<T>()
+    data class Information<T>(val message: String?) : Resource<T>()
 }
 
 suspend fun <T> safeApiCall(

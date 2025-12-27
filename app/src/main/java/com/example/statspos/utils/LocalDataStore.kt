@@ -17,7 +17,7 @@ class LocalDataStore @Inject constructor(
     val dataStore: DataStore<Preferences>
 ){
     companion object {
-        private val clientIdKey = longPreferencesKey("clientId")
+        private val clientIdKey = intPreferencesKey("clientId")
         private val localClientIdKey = intPreferencesKey("localClientId")
         private val baseUrlKey = stringPreferencesKey("baseUrl")
         private val usernameKey = stringPreferencesKey("username")
@@ -26,11 +26,11 @@ class LocalDataStore @Inject constructor(
     }
 
     // clientId
-    fun getClientId(): Flow<Long>{
+    fun getClientId(): Flow<Int>{
         return dataStore.data.map { preferences -> preferences[clientIdKey] ?: 0 }
     }
 
-    suspend fun setClientId(value:Long){
+    suspend fun setClientId(value:Int){
         dataStore.edit { settings ->
             settings[clientIdKey] = value
         }

@@ -59,7 +59,7 @@ import com.example.statspos.utils.checkEvent
 
 @Composable
 fun ClientLoginScreen(
-    onClientLogin: (clientId: Long) -> Unit,
+    onClientLogin: (clientId: Int) -> Unit,
     onLocalClientLogin: (localBranch: LocalBranches) -> Unit,
     onSignup: () -> Unit
 ) {

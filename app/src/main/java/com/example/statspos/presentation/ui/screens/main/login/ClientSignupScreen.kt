@@ -48,7 +48,7 @@ import com.example.statspos.utils.checkEvent
 
 @Composable
 fun ClientSignupScreen(
-    onSignup: (clientId: Long) -> Unit
+    onSignup: (clientId: Int) -> Unit
 ) {
     val viewModel = hiltViewModel<ClientsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()

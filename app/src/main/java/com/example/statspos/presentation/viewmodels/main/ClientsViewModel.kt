@@ -49,7 +49,7 @@ class ClientsViewModel @Inject constructor(
     var event = _event.receiveAsFlow()
     fun onEvent(event: UiEvent) {
         when (event) {
-            is UiEvent.ShowSnackbar -> {}
+            is UiEvent.ShowMessage -> {}
 //            is UiEvent.ShowError -> {}
             else -> {
                 viewModelScope.launch {
@@ -59,9 +59,9 @@ class ClientsViewModel @Inject constructor(
         }
     }
 
-    fun showSnackbar(message: String, type: SnackbarType = SnackbarType.INFORMATION) {
+    fun showMessage(message: String, type: SnackbarType = SnackbarType.INFORMATION) {
         viewModelScope.launch {
-            _event.send(UiEvent.ShowSnackbar(message, type))
+            _event.send(UiEvent.ShowMessage(message, type))
         }
     }
 
@@ -95,7 +95,7 @@ class ClientsViewModel @Inject constructor(
     // endregion
 
     // region Network calls
-    fun clientLogin(onSuccess: (clientId: Long) -> Unit) {
+    fun clientLogin(onSuccess: (clientId: Int) -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -110,22 +110,22 @@ class ClientsViewModel @Inject constructor(
             }
 
             when (val result = clientsRepository.clientLogin(params)) {
-                is Resource.Error -> resultError(result.message)
-                is Resource.Information -> resultInformation(result.infoMessage)
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
                     if (result.data.get("isExists").asBoolean) {
-                        val clientId = result.data.getAsJsonObject("data").get("id").asLong
+                        val clientId = result.data.getAsJsonObject("data").get("id").asInt
                         onSuccess(clientId)
                     } else {
-                        showSnackbar("Username or password incorrect")
+                        showMessage("Username or password incorrect")
                     }
                 }
             }
         }
     }
 
-    fun clientSignup(onSuccess: (clientId: Long) -> Unit) {
+    fun clientSignup(onSuccess: (clientId: Int) -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -142,8 +142,8 @@ class ClientsViewModel @Inject constructor(
             }
 
             when (val result = clientsRepository.clientSignup(params)) {
-                is Resource.Error -> resultError(result.message)
-                is Resource.Information -> resultInformation(result.infoMessage)
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
 
@@ -169,8 +169,8 @@ class ClientsViewModel @Inject constructor(
             }
 
             when (val result = clientsRepository.localClientLogin(params)) {
-                is Resource.Error -> resultError(result.message)
-                is Resource.Information -> resultInformation(result.infoMessage)
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
                     if (result.data.get("isExists").asBoolean) {
@@ -192,7 +192,7 @@ class ClientsViewModel @Inject constructor(
                             )
                         }
                     } else {
-                        showSnackbar("Username or password incorrect")
+                        showMessage("Username or password incorrect")
                     }
                 }
             }
@@ -203,10 +203,10 @@ class ClientsViewModel @Inject constructor(
     // region Others
     private fun loginValidation(): Boolean {
         if (state.value.username.isEmpty()) {
-            showSnackbar("Enter username")
+            showMessage("Enter username")
             return false
         } else if (state.value.password.isEmpty()) {
-            showSnackbar("Enter password")
+            showMessage("Enter password")
             return false
         } else
             return true
@@ -214,35 +214,35 @@ class ClientsViewModel @Inject constructor(
 
     private fun signupValidation(): Boolean {
         if (state.value.businessName.isEmpty()) {
-            showSnackbar("Enter Business Name")
+            showMessage("Enter Business Name")
             return false
         } else if (state.value.contact.isEmpty()) {
-            showSnackbar("Enter contact")
+            showMessage("Enter contact")
             return false
         } else if (state.value.username.isEmpty()) {
-            showSnackbar("Enter username")
+            showMessage("Enter username")
             return false
         } else if (state.value.password.isEmpty()) {
-            showSnackbar("Enter password")
+            showMessage("Enter password")
             return false
         } else if (state.value.confirmPassword.isEmpty()) {
-            showSnackbar("Re-enter password")
+            showMessage("Re-enter password")
             return false
         } else if (state.value.password != state.value.confirmPassword) {
-            showSnackbar("Password didn't match")
+            showMessage("Password didn't match")
             return false
         } else
             return true
     }
 
-    private fun resultError(message: String?) {
-        state.update { it.copy(isLoading = false, error = message) }
-        message?.let { showSnackbar(it, SnackbarType.ERROR) }
+    private fun resultError(error: String?) {
+        state.update { it.copy(isLoading = false, error = error) }
+        error?.let { showMessage(it, SnackbarType.ERROR) }
     }
 
     private fun resultInformation(message: String?) {
         state.update { it.copy(isLoading = false) }
-        message?.let { showSnackbar(it) }
+        message?.let { showMessage(it) }
     }
 
     private fun resultSuccess() {

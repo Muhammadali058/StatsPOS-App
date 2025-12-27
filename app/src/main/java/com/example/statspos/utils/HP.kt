@@ -20,7 +20,7 @@ fun Context.showToast(msg: String, length: Int = Toast.LENGTH_SHORT) =
 
 sealed class UiEvent {
     data object Idle : UiEvent()
-    data class ShowSnackbar(
+    data class ShowMessage(
         val message: String,
         val type: SnackbarType = SnackbarType.INFORMATION
     ) : UiEvent()
@@ -37,7 +37,7 @@ suspend fun checkEvent(
     changeSnackbarType: (SnackbarType) -> Unit
 ) {
     when (event) {
-        is UiEvent.ShowSnackbar -> {
+        is UiEvent.ShowMessage -> {
 
             val snackbarType = when (event.type) {
                 SnackbarType.INFORMATION -> SnackbarType.INFORMATION

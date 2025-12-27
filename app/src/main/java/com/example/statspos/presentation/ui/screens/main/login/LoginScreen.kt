@@ -48,7 +48,7 @@ import com.example.statspos.utils.checkEvent
 
 @Composable
 fun LoginScreen(
-    clientId: Long,
+    clientId: Int,
     username: String?,
     password: String?,
     onLogin: (remember: Boolean, username: String, password: String) -> Unit

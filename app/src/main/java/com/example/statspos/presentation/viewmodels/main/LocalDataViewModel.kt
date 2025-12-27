@@ -16,11 +16,11 @@ class LocalDataViewModel @Inject constructor(
 ) : ViewModel() {
 
     // clientId
-    fun getClientId(): Flow<Long> {
+    fun getClientId(): Flow<Int> {
         return dataStore.getClientId()
     }
 
-    fun setClientId(value: Long){
+    fun setClientId(value: Int){
         viewModelScope.launch {
             dataStore.setClientId(value)
         }

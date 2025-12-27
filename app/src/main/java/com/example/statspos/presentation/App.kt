@@ -36,7 +36,7 @@ private sealed class Screens : NavKey {
     data object ClientSignup : Screens()
 
     @Serializable
-    data class Login(val clientId: Long, val username: String?, val password: String?) : Screens()
+    data class Login(val clientId: Int, val username: String?, val password: String?) : Screens()
 
     @Serializable
     data object Main : Screens()
@@ -52,7 +52,7 @@ fun App() {
         if (DB.IS_ONLINE_MODE) {
             val clientId = viewModel.getClientId().first()
 
-            if (clientId != 0.toLong()) {
+            if (clientId != 0) {
                 viewModel.getLoginInfo { username, password ->
                     backStack.add(Screens.Login(clientId, username, password))
                     backStack.removeFirstOrNull()

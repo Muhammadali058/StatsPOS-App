@@ -1,6 +1,5 @@
 package com.example.statspos.presentation.viewmodels.items
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.items.Categories
@@ -45,7 +44,7 @@ class CategoriesViewModel @Inject constructor(
     var event = _event.receiveAsFlow()
     fun onEvent(event: UiEvent) {
         when (event) {
-            is UiEvent.ShowSnackbar -> {}
+            is UiEvent.ShowMessage -> {}
             else -> {
                 viewModelScope.launch {
                     _event.send(UiEvent.Idle)
@@ -54,9 +53,9 @@ class CategoriesViewModel @Inject constructor(
         }
     }
 
-    fun showSnackbar(message: String, type: SnackbarType = SnackbarType.INFORMATION) {
+    fun showMessage(message: String, type: SnackbarType = SnackbarType.INFORMATION) {
         viewModelScope.launch {
-            _event.send(UiEvent.ShowSnackbar(message, type))
+            _event.send(UiEvent.ShowMessage(message, type))
         }
     }
 
@@ -78,8 +77,8 @@ class CategoriesViewModel @Inject constructor(
             }
 
             when (val result = categoriesRepository.loadCategories(params)) {
-                is Resource.Error -> resultError(result.message)
-                is Resource.Information -> resultInformation(result.infoMessage)
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
 
@@ -132,8 +131,8 @@ class CategoriesViewModel @Inject constructor(
             )
 
             when (result) {
-                is Resource.Error -> resultError(result.message)
-                is Resource.Information -> resultInformation(result.infoMessage)
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
                 }
@@ -143,14 +142,14 @@ class CategoriesViewModel @Inject constructor(
     // endregion
 
     // region Others
-    private fun resultError(message: String?) {
-        state.update { it.copy(isLoading = false, error = message) }
-        message?.let { showSnackbar(it, SnackbarType.ERROR) }
+    private fun resultError(error: String?) {
+        state.update { it.copy(isLoading = false, error = error) }
+        error?.let { showMessage(it, SnackbarType.ERROR) }
     }
 
     private fun resultInformation(message: String?) {
         state.update { it.copy(isLoading = false) }
-        message?.let { showSnackbar(it) }
+        message?.let { showMessage(it) }
     }
 
     private fun resultSuccess() {

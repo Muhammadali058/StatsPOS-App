@@ -101,44 +101,6 @@ class CategoriesViewModel @Inject constructor(
         }
     }
 
-    fun uploadImage(file: File) {
-        // Call this method in compose in button onClick
-//        val context = LocalContext.current
-//        val file = File(context.cacheDir, "bearing1.jpg")
-//        file.outputStream().use {
-//            context.assets.open("bearing.jpg").copyTo(it)
-//        }
-//        viewModel.uploadImage(file)
-
-        viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
-
-            beforeRequest()
-
-            val params = JsonObject().apply {
-                addProperty("clientId", 1)
-                addProperty("branchId", 1)
-            }
-
-            val result = categoriesRepository.uploadImage(
-                image = MultipartBody.Part.createFormData(
-                    "image",
-                    file.name,
-                    file.asRequestBody()
-                ),
-                body = MultipartBody.Part.createFormData("data", params.toString())
-            )
-
-            when (result) {
-                is Resource.Error -> resultError(result.error)
-                is Resource.Information -> resultInformation(result.message)
-                is Resource.Success -> {
-                    resultSuccess()
-                }
-            }
-        }
-    }
     // endregion
 
     // region Others

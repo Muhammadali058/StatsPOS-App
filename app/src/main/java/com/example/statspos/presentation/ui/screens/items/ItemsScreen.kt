@@ -56,7 +56,7 @@ fun ItemsScreen() {
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Text(
-                        text = item.itemname,
+                        text = item.itemname!!,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }

@@ -1,6 +1,7 @@
 package com.example.statspos.presentation
 
 import android.app.Activity
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
@@ -20,6 +21,7 @@ import com.example.statspos.presentation.ui.screens.main.main.SplashScreen
 import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
 import com.example.statspos.presentation.ui.screens.main.main.MainScreen
 import com.example.statspos.utils.DB
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.showToast
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -36,7 +38,7 @@ private sealed class Screens : NavKey {
     data object ClientSignup : Screens()
 
     @Serializable
-    data class Login(val clientId: Int, val username: String?, val password: String?) : Screens()
+    data class Login(val username: String?, val password: String?) : Screens()
 
     @Serializable
     data object Main : Screens()
@@ -54,7 +56,8 @@ fun App() {
 
             if (clientId != 0) {
                 viewModel.getLoginInfo { username, password ->
-                    backStack.add(Screens.Login(clientId, username, password))
+                    HP.clientId = clientId
+                    backStack.add(Screens.Login(username, password))
                     backStack.removeFirstOrNull()
                 }
             } else {
@@ -69,7 +72,8 @@ fun App() {
                 DB.setBaseUrl(baseUrl)
 
                 viewModel.getLoginInfo { username, password ->
-                    backStack.add(Screens.Login(1, username, password))
+                    HP.clientId = 1
+                    backStack.add(Screens.Login(username, password))
                     backStack.removeFirstOrNull()
                 }
             } else {
@@ -100,7 +104,8 @@ fun App() {
                     onClientLogin = { clientId ->
                         viewModel.setClientId(clientId)
 
-                        backStack.add(Screens.Login(clientId, "", ""))
+                        HP.clientId = clientId
+                        backStack.add(Screens.Login( "", ""))
                         backStack.removeFirstOrNull()
                     },
                     onLocalClientLogin = { localBranch ->
@@ -123,14 +128,14 @@ fun App() {
                     onSignup = { clientId ->
                         viewModel.setClientId(clientId)
 
-                        backStack.add(Screens.Login(clientId, "", ""))
+                        HP.clientId = clientId
+                        backStack.add(Screens.Login( "", ""))
                         backStack.removeFirstOrNull()
                     }
                 )
             }
             entry<Screens.Login> { key ->
                 LoginScreen(
-                    clientId = key.clientId,
                     username = key.username,
                     password = key.password
                 ) { remember, username, password ->
@@ -138,7 +143,7 @@ fun App() {
                         viewModel.saveLoginInfo(username, password)
 
                     backStack.add(Screens.Main)
-//                    backStack.removeFirstOrNull()
+                    backStack.removeFirstOrNull()
                 }
             }
             entry<Screens.Main> {

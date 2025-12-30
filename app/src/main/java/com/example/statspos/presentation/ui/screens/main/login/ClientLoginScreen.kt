@@ -157,7 +157,7 @@ private fun Body(
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {
-                Icon(painterResource(R.drawable.ic_user), null)
+                CustomIcon(icon = R.drawable.ic_user)
             }
         )
         PasswordOutlinedTextbox(
@@ -166,7 +166,7 @@ private fun Body(
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {
-                Icon(painterResource(R.drawable.ic_password), null)
+                CustomIcon(icon = R.drawable.ic_password)
             },
             imeAction = ImeAction.Done
         )

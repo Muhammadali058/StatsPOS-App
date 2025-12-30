@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.R
+import com.example.statspos.presentation.ui.components.CustomIcon
 import com.example.statspos.presentation.ui.components.CustomSnackbarHost
 import com.example.statspos.presentation.ui.components.OutlinedTextbox
 import com.example.statspos.presentation.ui.components.PasswordOutlinedTextbox
@@ -139,10 +140,7 @@ private fun Body(
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Business,
-                    contentDescription = null
-                )
+                CustomIcon(icon = Icons.Default.Business)
             }
         )
         OutlinedTextbox(
@@ -152,10 +150,7 @@ private fun Body(
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Contacts,
-                    contentDescription = null
-                )
+                CustomIcon(icon = Icons.Default.Contacts)
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number
@@ -168,7 +163,7 @@ private fun Body(
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {
-                Icon(painterResource(R.drawable.ic_user), null)
+                CustomIcon(icon = R.drawable.ic_user)
             }
         )
         PasswordOutlinedTextbox(
@@ -177,7 +172,7 @@ private fun Body(
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {
-                Icon(painterResource(R.drawable.ic_password), null)
+                CustomIcon(icon = R.drawable.ic_password)
             }
         )
         PasswordOutlinedTextbox(
@@ -187,7 +182,7 @@ private fun Body(
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {
-                Icon(painterResource(R.drawable.ic_password), null)
+                CustomIcon(icon = R.drawable.ic_password)
             },
             imeAction = ImeAction.Done
         )

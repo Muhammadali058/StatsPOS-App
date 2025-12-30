@@ -14,6 +14,17 @@ object DB {
         HOST = host
         API = "${host}api/"
     }
+
+    fun addParams(jsonObject: JsonObject): JsonObject{
+        jsonObject.addProperty("clientId", HP.clientId)
+        jsonObject.addProperty("branchId", HP.branchId)
+        return jsonObject
+    }
+
+    fun getJsonObject(jsonObject: Any): JsonObject{
+        val body = Gson().toJsonTree(jsonObject).asJsonObject
+        return body
+    }
 }
 
 sealed class Resource<T> {

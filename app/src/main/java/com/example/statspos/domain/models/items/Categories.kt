@@ -1,12 +1,12 @@
 package com.example.statspos.domain.models.items
 
 data class Categories(
-    var id: Long,
-    var categoryName: String,
-    var remarks: String? = "",
-    var imageUrl: String? = "",
+    var id: Long? = null,
+    var categoryName: String? = null,
+    var remarks: String? = null,
+    var imageUrl: String? = null,
 
-    val clientId:Int? = 0,
-    val branchId:Int? = 0,
-    val branchGroupId:Int? = 0,
+    val clientId:Int? = null,
+    val branchId:Int? = null,
+    val branchGroupId:Int? = null,
 )

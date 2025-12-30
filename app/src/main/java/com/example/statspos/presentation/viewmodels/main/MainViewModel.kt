@@ -1,24 +1,25 @@
 package com.example.statspos.presentation.viewmodels.main
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.statspos.domain.repository.utilities.UsersRepository
+import com.example.statspos.domain.repository.main.MainRepository
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
-import com.google.gson.JsonObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val usersRepository: UsersRepository
+    private val mainRepository: MainRepository
 ) : ViewModel() {
     // region ScreenState
     data class ScreenState(
@@ -55,36 +56,37 @@ class MainViewModel @Inject constructor(
     // endregion
 
     // region Network calls
-    fun login(clientId:Long, onSuccess: () -> Unit) {
+    fun uploadImage(file: File) {
+        // Call this method in compose in button onClick
+//        val context = LocalContext.current
+//        val file = File(context.cacheDir, "bearing1.jpg")
+//        file.outputStream().use {
+//            context.assets.open("bearing.jpg").copyTo(it)
+//        }
+//        viewModel.uploadImage(file)
+
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
-
             beforeRequest()
 
-            val params = JsonObject().apply {
-                addProperty("clientId", clientId)
-//                addProperty("username", state.value.username)
-//                addProperty("password", state.value.password)
-            }
+            val result = mainRepository.uploadImage(
+                image = MultipartBody.Part.createFormData(
+                    "image",
+                    file.name,
+                    file.asRequestBody()
+                )
+            )
 
-            when (val result = usersRepository.login(params)) {
+            when (result) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
-                    if (result.data.get("isExists").asBoolean) {
-                        Log.d("TAG Users", result.data.toString())
-//                        val clientId = result.data.getAsJsonObject("data").get("id").asLong
-                        onSuccess()
-                    } else {
-                        showMessage("Username or password incorrect")
-                    }
                 }
             }
         }
     }
-
     // endregion
 
     // region Others

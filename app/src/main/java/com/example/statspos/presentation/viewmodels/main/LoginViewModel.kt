@@ -3,7 +3,9 @@ package com.example.statspos.presentation.viewmodels.main
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.sales.Sales
 import com.example.statspos.domain.repository.utilities.UsersRepository
+import com.example.statspos.utils.DB
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
@@ -14,6 +16,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Calendar
 import javax.inject.Inject
 
 @HiltViewModel
@@ -73,7 +79,7 @@ class LoginViewModel @Inject constructor(
     // endregion
 
     // region Network calls
-    fun login(clientId: Int, onSuccess: () -> Unit) {
+    fun login(onSuccess: () -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -82,13 +88,7 @@ class LoginViewModel @Inject constructor(
             }
             beforeRequest()
 
-            val params = JsonObject().apply {
-                addProperty("clientId", clientId)
-                addProperty("username", state.value.username)
-                addProperty("password", state.value.password)
-            }
-
-            when (val result = usersRepository.login(params)) {
+            when (val result = usersRepository.login(state.value.username, state.value.password)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {

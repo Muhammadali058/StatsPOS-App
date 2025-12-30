@@ -148,7 +148,7 @@ class ClientsViewModel @Inject constructor(
                     resultSuccess()
 
                     val client = Gson().fromJson(result.data, Clients::class.java)
-                    onSuccess(client.id)
+                    onSuccess(client.id!!)
                 }
             }
         }

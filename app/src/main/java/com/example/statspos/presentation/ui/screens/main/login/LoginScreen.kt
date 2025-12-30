@@ -36,19 +36,23 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.R
 import com.example.statspos.presentation.ui.components.CustomCheckbox
+import com.example.statspos.presentation.ui.components.CustomDatePickerDialog
 import com.example.statspos.presentation.ui.components.CustomIcon
 import com.example.statspos.presentation.ui.components.CustomSnackbarHost
+import com.example.statspos.presentation.ui.components.CustomTimePickerDialog
 import com.example.statspos.presentation.ui.components.OutlinedTextbox
 import com.example.statspos.presentation.ui.components.PasswordOutlinedTextbox
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
+import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
 import com.example.statspos.presentation.viewmodels.main.LoginViewModel
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.SnackbarType
+import com.example.statspos.utils.ThemeMode
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
 @Composable
 fun LoginScreen(
-    clientId: Int,
     username: String?,
     password: String?,
     onLogin: (remember: Boolean, username: String, password: String) -> Unit
@@ -61,13 +65,13 @@ fun LoginScreen(
         username?.let { viewModel.onUsernameChange(it) }
         password?.let { viewModel.onPasswordChange(it) }
 
-//        viewModel.login(clientId) {
-//            onLogin(
-//                state.remember,
-//                state.username,
-//                state.password
-//            )
-//        }
+        viewModel.login() {
+            onLogin(
+                state.remember,
+                state.username,
+                state.password
+            )
+        }
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -102,7 +106,7 @@ fun LoginScreen(
             onRememberCheckedChange = viewModel::onRememberCheckedChange,
             isLoading = state.isLoading,
             onLogin = {
-                viewModel.login(clientId) {
+                viewModel.login {
                     onLogin(
                         state.remember,
                         state.username,
@@ -171,9 +175,7 @@ private fun Body(
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {
-                CustomIcon(
-                    icon = R.drawable.ic_user,
-                )
+                CustomIcon(icon = R.drawable.ic_user)
             }
         )
         PasswordOutlinedTextbox(
@@ -182,9 +184,7 @@ private fun Body(
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {
-                CustomIcon(
-                    icon = R.drawable.ic_password,
-                )
+                CustomIcon(icon = R.drawable.ic_password)
             },
             imeAction = ImeAction.Done
         )

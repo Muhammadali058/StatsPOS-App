@@ -29,6 +29,7 @@ fun MainScreen() {
             activity.finish()
         }
     }
+
     NavDisplay(
         backStack = backStack,
         entryDecorators = listOf(

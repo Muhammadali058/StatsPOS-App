@@ -29,6 +29,6 @@ interface SalesRepository {
 
     suspend fun changeBillType(body: JsonObject): Resource<JsonObject>
 
-    suspend fun gererateReturnBill(body: JsonObject): Resource<JsonObject>
+    suspend fun generateReturnBill(body: JsonObject): Resource<JsonObject>
 
 }

@@ -6,6 +6,7 @@ import com.example.statspos.domain.models.utilities.users.Users
 import com.example.statspos.domain.repository.main.ClientsRepository
 import com.example.statspos.domain.repository.utilities.UsersRepository
 import com.example.statspos.utils.DB
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.safeApiCall
 import com.google.gson.JsonObject
@@ -28,29 +29,63 @@ class UsersRepositoryImpl @Inject constructor(
     }
 
     override suspend fun loadUsers(body: JsonObject): Resource<JsonObject> {
-        TODO("Not yet implemented")
+        body.addProperty("branchGroupId", HP.branchGroupId)
+
+        return safeApiCall {
+            api.loadUsers(
+                DB.addParams(body)
+            )
+        }
     }
 
-    override suspend fun insertUser(
-        user: Users,
-        userRights: UserRights
-    ): Resource<JsonObject> {
-        TODO("Not yet implemented")
+    override suspend fun insertUser(user: Users, userRights: UserRights): Resource<JsonObject> {
+        val body = JsonObject().apply {
+            add("user", DB.getJsonObject(user))
+            add("userRights", DB.getJsonObject(userRights))
+            addProperty("branchGroupId", HP.branchGroupId)
+        }
+        return safeApiCall {
+            api.insertUser(
+                DB.addParams(body)
+            )
+        }
     }
 
-    override suspend fun updateUser(
-        id: Long,
-        user: Users,
-        userRights: UserRights
-    ): Resource<JsonObject> {
-        TODO("Not yet implemented")
+    override suspend fun updateUser(id: Long, user: Users, userRights: UserRights): Resource<JsonObject> {
+        val body = JsonObject().apply {
+            addProperty("id", id)
+            add("user", DB.getJsonObject(user))
+            add("userRights", DB.getJsonObject(userRights))
+            addProperty("branchGroupId", HP.branchGroupId)
+        }
+        return safeApiCall {
+            api.updateUser(
+                DB.addParams(body)
+            )
+        }
     }
 
     override suspend fun deleteUser(id: Long): Resource<JsonObject> {
-        TODO("Not yet implemented")
+        val body = JsonObject().apply {
+            addProperty("id", id)
+            addProperty("userId", HP.user.id)
+            addProperty("branchGroupId", HP.branchGroupId)
+        }
+        return safeApiCall {
+            api.deleteUser(
+                DB.addParams(body)
+            )
+        }
     }
 
     override suspend fun getUser(id: Long): Resource<JsonObject> {
-        TODO("Not yet implemented")
+        val body = JsonObject().apply {
+            addProperty("id", id)
+        }
+        return safeApiCall {
+            api.getUser(
+                DB.addParams(body)
+            )
+        }
     }
 }

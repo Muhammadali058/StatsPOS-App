@@ -65,13 +65,14 @@ fun LoginScreen(
         username?.let { viewModel.onUsernameChange(it) }
         password?.let { viewModel.onPasswordChange(it) }
 
-        viewModel.login() {
-            onLogin(
-                state.remember,
-                state.username,
-                state.password
-            )
-        }
+//        viewModel.test()
+//        viewModel.login() {
+//            onLogin(
+//                state.remember,
+//                state.username,
+//                state.password
+//            )
+//        }
     }
 
     val snackbarHostState = remember { SnackbarHostState() }

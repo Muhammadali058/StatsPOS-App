@@ -43,6 +43,6 @@ interface SalesApi {
     suspend fun changeBillType(@Body body: JsonObject): Response<JsonObject>
 
     @POST("sales/gererateReturnBill")
-    suspend fun gererateReturnBill(@Body body: JsonObject): Response<JsonObject>
+    suspend fun generateReturnBill(@Body body: JsonObject): Response<JsonObject>
 
 }

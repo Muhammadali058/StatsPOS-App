@@ -4,7 +4,7 @@ import com.example.statspos.domain.models.utilities.AuditItems
 import com.example.statspos.utils.Resource
 import com.google.gson.JsonObject
 
-interface AuditItemsRepository {
+interface AuditRepository {
     suspend fun loadAuditItems(body: JsonObject): Resource<JsonObject>
 
     suspend fun insertAuditItem(auditItem: AuditItems): Resource<JsonObject>

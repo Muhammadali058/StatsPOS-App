@@ -26,20 +26,20 @@ interface PackagesApi {
     suspend fun generatePackage(@Body body: JsonObject): Response<JsonObject>
     // endregion
 
-    // region Sub-Packages
-    @POST("packageItems/loadSubPackages")
-    suspend fun loadSubPackages(@Body body: JsonObject): Response<JsonObject>
+    // region Package-Items
+    @POST("packageItems/loadPackageItems")
+    suspend fun loadPackageItems(@Body body: JsonObject): Response<JsonObject>
 
-    @POST("packageItems/insertSubPackage")
-    suspend fun insertSubPackage(@Body body: JsonObject): Response<JsonObject>
+    @POST("packageItems/insertPackageItem")
+    suspend fun insertPackageItem(@Body body: JsonObject): Response<JsonObject>
 
-    @POST("packageItems/updateSubPackage")
-    suspend fun updateSubPackage(@Body body: JsonObject): Response<JsonObject>
+    @POST("packageItems/updatePackageItem")
+    suspend fun updatePackageItem(@Body body: JsonObject): Response<JsonObject>
 
-    @POST("packageItems/deleteSubPackage")
-    suspend fun deleteSubPackage(@Body body: JsonObject): Response<JsonObject>
+    @POST("packageItems/deletePackageItem")
+    suspend fun deletePackageItem(@Body body: JsonObject): Response<JsonObject>
 
-    @POST("packageItems/getSubPackage")
-    suspend fun getSubPackage(@Body body: JsonObject): Response<JsonObject>
+    @POST("packageItems/getPackageItem")
+    suspend fun getPackageItem(@Body body: JsonObject): Response<JsonObject>
     // endregion
 }

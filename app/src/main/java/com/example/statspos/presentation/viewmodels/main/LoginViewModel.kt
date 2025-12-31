@@ -3,7 +3,9 @@ package com.example.statspos.presentation.viewmodels.main
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.accounts.AccountCategories
 import com.example.statspos.domain.models.sales.Sales
+import com.example.statspos.domain.repository.accounts.AccountCategoriesRepository
 import com.example.statspos.domain.repository.utilities.UsersRepository
 import com.example.statspos.utils.DB
 import com.example.statspos.utils.Resource
@@ -24,7 +26,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val usersRepository: UsersRepository
+    private val usersRepository: UsersRepository,
+    private val accountCategoriesRepository: AccountCategoriesRepository
 ) : ViewModel() {
     // region ScreenState
     data class ScreenState(
@@ -79,6 +82,27 @@ class LoginViewModel @Inject constructor(
     // endregion
 
     // region Network calls
+    fun test() {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+            beforeRequest()
+
+            val accountCategories = AccountCategories(
+                categoryName = "Test 1"
+            )
+
+            when (val result = accountCategoriesRepository.insertAccountCategory(accountCategories)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+                    Log.d("TAG Inserted", result.data.toString())
+                }
+            }
+        }
+    }
+
     fun login(onSuccess: () -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)

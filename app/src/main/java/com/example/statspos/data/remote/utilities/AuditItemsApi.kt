@@ -5,7 +5,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
 
-interface AuditItemsApi {
+interface AuditApi {
     @POST("audit/loadAuditItems")
     suspend fun loadAuditItems(@Body body: JsonObject): Response<JsonObject>
 

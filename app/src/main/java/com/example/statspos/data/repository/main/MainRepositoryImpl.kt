@@ -3,6 +3,7 @@ package com.example.statspos.data.repository.main
 import com.example.statspos.data.remote.main.MainApi
 import com.example.statspos.domain.repository.main.MainRepository
 import com.example.statspos.utils.DB
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.safeApiCall
 import com.google.gson.JsonObject
@@ -14,7 +15,9 @@ class MainRepositoryImpl @Inject constructor(
 ) : MainRepository {
 
     override suspend fun loadData(): Resource<JsonObject> {
-        val body = JsonObject()
+        val body = JsonObject().apply {
+            addProperty("branchGroupId", HP.branchGroupId)
+        }
 
         return safeApiCall {
             api.loadData(

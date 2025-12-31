@@ -29,7 +29,7 @@ import com.example.statspos.data.remote.reports.SalesReportsApi
 import com.example.statspos.data.remote.reports.StockReportsApi
 import com.example.statspos.data.remote.sales.SalesApi
 import com.example.statspos.data.remote.sales.SalesItemsApi
-import com.example.statspos.data.remote.utilities.AuditItemsApi
+import com.example.statspos.data.remote.utilities.AuditApi
 import com.example.statspos.data.remote.utilities.BarcodeLabelsApi
 import com.example.statspos.data.remote.utilities.SettingsApi
 import com.example.statspos.data.remote.utilities.ShiftsApi
@@ -209,8 +209,8 @@ class NetworkModule {
 
     // region Utilities
     @Provides
-    fun provideAuditItemsApi(retrofitInstance: Retrofit): AuditItemsApi {
-        return retrofitInstance.create(AuditItemsApi::class.java)
+    fun provideAuditApi(retrofitInstance: Retrofit): AuditApi {
+        return retrofitInstance.create(AuditApi::class.java)
     }
 
     @Provides

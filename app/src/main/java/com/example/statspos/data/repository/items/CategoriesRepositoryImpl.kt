@@ -36,6 +36,23 @@ class CategoriesRepositoryImpl @Inject constructor(
                 DB.addParams(body)
             )
         }
+
+
+//        val body = DB.getJsonObject(category)
+//        val result = safeApiCall {
+//            api.insertCategory(
+//                DB.addParams(body)
+//            )
+//        }
+//
+//        return when (result) {
+//            is Resource.Error -> Resource.Error(result.error)
+//            is Resource.Information -> Resource.Information(result.message)
+//            is Resource.Success -> {
+//                val inserted = Gson().fromJson(result.data.get("category").asJsonObject, Categories::class.java)
+//                Resource.Success(inserted)
+//            }
+//        }
     }
 
     override suspend fun updateCategory(category: Categories): Resource<JsonObject> {
@@ -53,7 +70,7 @@ class CategoriesRepositoryImpl @Inject constructor(
         val body = JsonObject().apply {
             addProperty("branchGroupId", HP.branchGroupId)
             addProperty("id", id)
-            addProperty("userId", HP.user.id ?: 0)
+            addProperty("userId", HP.user.id)
         }
 
         return safeApiCall {
@@ -78,23 +95,61 @@ class CategoriesRepositoryImpl @Inject constructor(
 
     // region Sub-Categories
     override suspend fun loadSubCategories(body: JsonObject): Resource<JsonObject> {
-        TODO("Not yet implemented")
+        body.addProperty("branchGroupId", HP.branchGroupId)
+
+        return safeApiCall {
+            api.loadSubCategories(
+                DB.addParams(body)
+            )
+        }
     }
 
     override suspend fun insertSubCategory(subCategory: SubCategories): Resource<JsonObject> {
-        TODO("Not yet implemented")
+        val body = DB.getJsonObject(subCategory)
+        body.addProperty("branchGroupId", HP.branchGroupId)
+
+        return safeApiCall {
+            api.insertSubCategory(
+                DB.addParams(body)
+            )
+        }
     }
 
     override suspend fun updateSubCategory(subCategory: SubCategories): Resource<JsonObject> {
-        TODO("Not yet implemented")
+        val body = DB.getJsonObject(subCategory)
+        body.addProperty("branchGroupId", HP.branchGroupId)
+
+        return safeApiCall {
+            api.updateSubCategory(
+                DB.addParams(body)
+            )
+        }
     }
 
     override suspend fun deleteSubCategory(id: Long): Resource<JsonObject> {
-        TODO("Not yet implemented")
+        val body = JsonObject().apply {
+            addProperty("branchGroupId", HP.branchGroupId)
+            addProperty("id", id)
+            addProperty("userId", HP.user.id)
+        }
+
+        return safeApiCall {
+            api.deleteSubCategory(
+                DB.addParams(body)
+            )
+        }
     }
 
     override suspend fun getSubCategory(id: Long): Resource<JsonObject> {
-        TODO("Not yet implemented")
+        val body = JsonObject().apply {
+            addProperty("id", id)
+        }
+
+        return safeApiCall {
+            api.getSubCategory(
+                DB.addParams(body)
+            )
+        }
     }
     // endregion
 

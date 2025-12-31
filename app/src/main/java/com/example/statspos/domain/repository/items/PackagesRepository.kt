@@ -21,14 +21,14 @@ interface PackagesRepository {
     // endregion
 
     // region Package-Items
-    suspend fun loadSubPackages(body: JsonObject): Resource<JsonObject>
+    suspend fun loadPackageItems(body: JsonObject): Resource<JsonObject>
 
-    suspend fun insertSubPackage(packageItem: PackageItems): Resource<JsonObject>
+    suspend fun insertPackageItem(packageItem: PackageItems): Resource<JsonObject>
 
-    suspend fun updateSubPackage(packageItem: PackageItems): Resource<JsonObject>
+    suspend fun updatePackageItem(packageItem: PackageItems): Resource<JsonObject>
 
-    suspend fun deleteSubPackage(id: Long): Resource<JsonObject>
+    suspend fun deletePackageItem(id: Long): Resource<JsonObject>
 
-    suspend fun getSubPackage(id: Long): Resource<JsonObject>
+    suspend fun getPackageItem(id: Long): Resource<JsonObject>
     // endregion
 }

@@ -22,10 +22,15 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -33,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalView
@@ -82,9 +88,9 @@ val BOTTOM_DESTINATIONS = mapOf(
 @Composable
 fun TopAppBar(
     title: String = "StatsPOS",
-    navigationIcon:ImageVector = Icons.Default.ArrowBack,
+    navigationIcon: ImageVector = Icons.Default.ArrowBack,
     actions: @Composable RowScope.() -> Unit = {},
-    onNavigationClick:()-> Unit
+    onNavigationClick: () -> Unit
 ) {
     TopAppBar(
         title = {
@@ -117,6 +123,43 @@ fun BottomBar(
     val foregroundColor = MaterialTheme.colorScheme.onSurface
     val selectedColor = MaterialTheme.colorScheme.primary
 
+
+//    NavigationBar
+//    val customColors = NavigationBarItemDefaults.colors(
+//        indicatorColor = selectedColor,
+//        selectedIconColor = MaterialTheme.colorScheme.onPrimary,
+//        unselectedIconColor = foregroundColor,
+//        selectedTextColor = foregroundColor,
+//        unselectedTextColor = foregroundColor,
+//    )
+//    NavigationBar(
+//        modifier = modifier,
+//        containerColor = backgroundColor,
+//        contentColor = foregroundColor,
+//        ) {
+//        items.forEach { (key, data) ->
+//            val selected = selectedKey == key
+//            NavigationBarItem(
+//                selected = selected,
+//                onClick = { onSelectKey(key) },
+//                colors = customColors,
+//                icon = {
+//                    Icon(
+//                        imageVector = data.icon,
+//                        contentDescription = data.title,
+//                    )
+//                },
+//                label = {
+//                    Text(
+//                        text = data.title,
+//                        fontSize = 12.sp,
+//                    )
+//                }
+//            )
+//        }
+//    }
+
+//    Custom NavigationBar
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -136,18 +179,25 @@ fun BottomBar(
                     .clickable { onSelectKey(key) },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                AnimatedVisibility(
-                    visible = selected,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .height(2.dp)
-                            .fillMaxWidth(0.5f)
-//                            .clip(RoundedCornerShape(2.dp))
-                            .background(selectedColor)
-                    )
-                }
+//                AnimatedVisibility(
+//                    visible = selected,
+//                    modifier = Modifier.fillMaxWidth()
+//                ) {
+//                    Box(
+//                        modifier = Modifier
+//                            .height(2.dp)
+//                            .fillMaxWidth(0.5f)
+////                            .clip(RoundedCornerShape(2.dp))
+//                            .background(selectedColor)
+//                    )
+//                }
+
+                HorizontalDivider(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    thickness = if(selected) 2.dp else 1.dp,
+                    color = if(selected) selectedColor else MaterialTheme.colorScheme.primaryContainer
+                )
 
                 Spacer(Modifier.height(6.dp))
 
@@ -176,7 +226,7 @@ fun BottomBar(
 
 @Composable
 fun ChangeStatusBarColor(darkTheme: Boolean = false) {
-    val colorScheme =  MaterialTheme.colorScheme
+    val colorScheme = MaterialTheme.colorScheme
     val view = LocalView.current
     SideEffect {
         val window = (view.context as Activity).window

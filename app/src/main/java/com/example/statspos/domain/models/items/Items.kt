@@ -73,6 +73,9 @@ data class Items(
     var totalStockPcs: Double? = null,
     var totalStockCrtn: Long? = null,
 
+    var categoryName: String? = null,
+    var subCategoryName: String? = null,
+    var vendorName: String? = null,
     var isCrtnBarcode: Boolean? = null,
     var crtnBarcode: String? = null,
     var isExists: Boolean? = null,

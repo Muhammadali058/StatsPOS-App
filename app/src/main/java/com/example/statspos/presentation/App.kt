@@ -38,7 +38,7 @@ private sealed class Screens : NavKey {
     data object ClientSignup : Screens()
 
     @Serializable
-    data class Login(val username: String?, val password: String?) : Screens()
+    data class Login(val remember: Boolean, val username: String?, val password: String?) : Screens()
 
     @Serializable
     data object Main : Screens()
@@ -55,9 +55,9 @@ fun App() {
             val clientId = viewModel.getClientId().first()
 
             if (clientId != 0) {
-                viewModel.getLoginInfo { username, password ->
+                viewModel.getLoginInfo { remember, username, password ->
                     HP.clientId = clientId
-                    backStack.add(Screens.Login(username, password))
+                    backStack.add(Screens.Login(remember, username, password))
                     backStack.removeFirstOrNull()
                 }
             } else {
@@ -71,9 +71,9 @@ fun App() {
             if (localClientId != 0 && baseUrl != null) {
                 DB.setBaseUrl(baseUrl)
 
-                viewModel.getLoginInfo { username, password ->
+                viewModel.getLoginInfo { remember, username, password ->
                     HP.clientId = 1
-                    backStack.add(Screens.Login(username, password))
+                    backStack.add(Screens.Login(remember, username, password))
                     backStack.removeFirstOrNull()
                 }
             } else {
@@ -105,7 +105,7 @@ fun App() {
                         viewModel.setClientId(clientId)
 
                         HP.clientId = clientId
-                        backStack.add(Screens.Login( "", ""))
+                        backStack.add(Screens.Login( false, "", ""))
                         backStack.removeFirstOrNull()
                     },
                     onLocalClientLogin = { localBranch ->
@@ -129,18 +129,21 @@ fun App() {
                         viewModel.setClientId(clientId)
 
                         HP.clientId = clientId
-                        backStack.add(Screens.Login( "", ""))
+                        backStack.add(Screens.Login( false,"", ""))
                         backStack.removeFirstOrNull()
                     }
                 )
             }
             entry<Screens.Login> { key ->
                 LoginScreen(
+                    remember = key.remember,
                     username = key.username,
                     password = key.password
                 ) { remember, username, password ->
-                    if (remember)
-                        viewModel.saveLoginInfo(username, password)
+                    if(remember)
+                        viewModel.saveLoginInfo(true, username, password)
+                    else
+                        viewModel.saveLoginInfo(false,"", "")
 
                     backStack.add(Screens.Main)
                     backStack.removeFirstOrNull()

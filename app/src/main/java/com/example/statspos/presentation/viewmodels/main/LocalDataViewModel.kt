@@ -49,19 +49,21 @@ class LocalDataViewModel @Inject constructor(
     }
 
     // Login Info
-    fun saveLoginInfo(username: String, password: String) {
+    fun saveLoginInfo(remember: Boolean, username: String, password: String) {
         viewModelScope.launch {
+            dataStore.setRemember(remember)
             dataStore.setUsername(username)
             dataStore.setPassword(password)
         }
     }
 
-    fun getLoginInfo(onSuccess:(String, String) -> Unit) {
+    fun getLoginInfo(onSuccess:(Boolean, String, String) -> Unit) {
         viewModelScope.launch {
+            val remember = dataStore.getRemember().first() ?: false
             val username = dataStore.getUsername().first() ?: ""
             val password = dataStore.getPassword().first() ?: ""
 
-            onSuccess(username, password)
+            onSuccess(remember, username, password)
         }
     }
 

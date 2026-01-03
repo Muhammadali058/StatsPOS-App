@@ -15,17 +15,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
 class CategoriesViewModel @Inject constructor(
-    private val categoriesRepository: CategoriesRepository
+    private val categoriesRepo: CategoriesRepository
 ) : ViewModel() {
     // region ScreenState
-
     data class ScreenState(
         val categories: List<Categories> = emptyList(),
 
@@ -58,7 +54,6 @@ class CategoriesViewModel @Inject constructor(
             _event.send(UiEvent.ShowMessage(message, type))
         }
     }
-
     // endregion
 
     // region Network calls
@@ -76,7 +71,7 @@ class CategoriesViewModel @Inject constructor(
                 addProperty("branchGroupId", 0)
             }
 
-            when (val result = categoriesRepository.loadCategories(params)) {
+            when (val result = categoriesRepo.loadCategories(params)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
@@ -92,7 +87,6 @@ class CategoriesViewModel @Inject constructor(
 
                     state.update {
                         it.copy(
-                            isLoading = false,
                             categories = categories
                         )
                     }

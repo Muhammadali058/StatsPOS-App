@@ -32,6 +32,23 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
+//    primary = primaryLight,
+//    onPrimary = onPrimaryLight,
+//
+//    primaryContainer = foregroundLight,
+//    onPrimaryContainer = textLight,
+//
+//    background = backgroundLight,
+//
+//    surface = foregroundLight,
+//    onSurface = textLight,
+//
+//    surfaceVariant = primaryLight,
+//    onSurfaceVariant = onPrimaryLight,
+//
+//    outline =  textLight,
+//    outlineVariant = primaryLight,
+
     primary = primaryLight,
     onPrimary = onPrimaryLight,
 
@@ -40,7 +57,7 @@ private val LightColorScheme = lightColorScheme(
 
     background = backgroundLight,
 
-    surface = foregroundLight,
+    surface = backgroundLight,
     onSurface = textLight,
 
     surfaceVariant = primaryLight,

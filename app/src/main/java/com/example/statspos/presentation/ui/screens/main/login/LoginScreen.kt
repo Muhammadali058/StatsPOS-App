@@ -53,6 +53,7 @@ import com.example.statspos.utils.checkEvent
 
 @Composable
 fun LoginScreen(
+    remember: Boolean,
     username: String?,
     password: String?,
     onLogin: (remember: Boolean, username: String, password: String) -> Unit
@@ -62,6 +63,7 @@ fun LoginScreen(
     val event by viewModel.event.collectAsState(UiEvent.Idle)
 
     LaunchedEffect(Unit) {
+        viewModel.onRememberCheckedChange(remember)
         username?.let { viewModel.onUsernameChange(it) }
         password?.let { viewModel.onPasswordChange(it) }
 

@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
             StatsPOSTheme(
                 darkTheme = darkTheme
             ) {
-                App()
+                MainScreen()
             }
         }
     }

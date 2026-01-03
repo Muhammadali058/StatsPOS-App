@@ -20,6 +20,7 @@ class LocalDataStore @Inject constructor(
         private val clientIdKey = intPreferencesKey("clientId")
         private val localClientIdKey = intPreferencesKey("localClientId")
         private val baseUrlKey = stringPreferencesKey("baseUrl")
+        private val rememberKey = booleanPreferencesKey("remember")
         private val usernameKey = stringPreferencesKey("username")
         private val passwordKey = stringPreferencesKey("password")
         private val themeKey = stringPreferencesKey("theme")
@@ -55,6 +56,17 @@ class LocalDataStore @Inject constructor(
     suspend fun setBaseUrl(value: String){
         dataStore.edit { settings ->
             settings[baseUrlKey] = value
+        }
+    }
+
+    // remember
+    fun getRemember(): Flow<Boolean?>{
+        return dataStore.data.map { preferences -> preferences[rememberKey] }
+    }
+
+    suspend fun setRemember(value: Boolean){
+        dataStore.edit { settings ->
+            settings[rememberKey] = value
         }
     }
 

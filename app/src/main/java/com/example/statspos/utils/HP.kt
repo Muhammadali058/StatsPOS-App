@@ -11,11 +11,16 @@ import java.time.format.DateTimeFormatter
 object HP {
     var localClient: LocalClients? = null
 
-    var clientId:Int = 0
-    val branchId:Int = 0
+    var clientId:Int = 1
+    val branchId:Int = 1
     val branchGroupId:Int = 0
 
     val user: Users = Users()
+
+
+    fun getImageUrl(imageUrl: String ): String {
+        return DB.HOST + clientId.toString() + "/images/" + imageUrl
+    }
 
     fun getFormatedDate(localDate: LocalDate): String{
         val customFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")

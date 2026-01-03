@@ -57,7 +57,7 @@ fun HomeScreen(
 
     // Navigation
     val navigationState = rememberNavigationState(
-        startRoute = BottomRoutes.Home,
+        startRoute = BottomRoutes.Items,
         topLevelRoutes = BOTTOM_DESTINATIONS.keys,
         serializersModules = SerializersModule {
             polymorphic(NavKey::class) {
@@ -75,7 +75,7 @@ fun HomeScreen(
                 navigationIcon = Icons.Default.Menu,
                 actions = {
                     IconButton(onClick = {
-
+                        viewModel.setTheme(ThemeMode.DARK)
                     }) {
                         CustomIcon(
                             icon = Icons.Default.MoreVert,
@@ -84,7 +84,7 @@ fun HomeScreen(
                     }
                 },
                 onNavigationClick = {
-                    viewModel.setTheme(ThemeMode.SYSTEM)
+                    viewModel.setTheme(ThemeMode.LIGHT)
                 }
             )
         },

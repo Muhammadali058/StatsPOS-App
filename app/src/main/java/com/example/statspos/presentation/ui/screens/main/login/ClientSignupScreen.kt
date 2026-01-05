@@ -2,6 +2,7 @@ package com.example.statspos.presentation.ui.screens.main.login
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -29,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,10 +37,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.R
+import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.ui.components.CustomIcon
 import com.example.statspos.presentation.ui.components.CustomSnackbarHost
-import com.example.statspos.presentation.ui.components.OutlinedTextbox
-import com.example.statspos.presentation.ui.components.PasswordOutlinedTextbox
+import com.example.statspos.presentation.ui.components.PasswordTextbox
+import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
 import com.example.statspos.presentation.viewmodels.main.ClientsViewModel
 import com.example.statspos.utils.SnackbarType
@@ -89,6 +90,7 @@ fun ClientSignupScreen(
             onUsernameChange = viewModel::onUsernameChange,
             onPasswordChange = viewModel::onPasswordChange,
             onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
+            isLoading = state.isLoading,
             onSignup = {
                 viewModel.clientSignup { clientId ->
                     onSignup(clientId)
@@ -111,6 +113,7 @@ private fun Body(
     onUsernameChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onConfirmPasswordChange: (String) -> Unit,
+    isLoading: Boolean,
     onSignup: () -> Unit
 ) {
     Column(
@@ -121,82 +124,90 @@ private fun Body(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-//        Spacer(
-//            Modifier.height(32.dp)
-//        )
-//        Image(
-//            painterResource(R.drawable.statspos),
-//            contentDescription = null,
-//            modifier = Modifier
-//                .size(140.dp)
-//        )
-//        Spacer(
-//            Modifier.height(16.dp)
-//        )
-        OutlinedTextbox(
+        Textbox(
             value = businessName,
             onValueChange = onBusinessNameChange,
-            label = "Business Name",
+            label = {
+                Text("Business Name")
+            },
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {
                 CustomIcon(icon = Icons.Default.Business)
-            }
+            },
+            contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
         )
-        OutlinedTextbox(
+        Textbox(
             value = contact,
             onValueChange = onContactChange,
-            label = "Contact",
+            label = {
+                Text("Contact")
+            },
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {
                 CustomIcon(icon = Icons.Default.Contacts)
             },
+            contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number
             )
         )
-        OutlinedTextbox(
+        Textbox(
             value = username,
             onValueChange = onUsernameChange,
-            label = "Username",
+            label = {
+                Text("Username")
+            },
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {
                 CustomIcon(icon = R.drawable.ic_user)
-            }
+            },
+            contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
         )
-        PasswordOutlinedTextbox(
+        PasswordTextbox(
+            modifier = Modifier
+                .fillMaxWidth(),
             value = password,
             onValueChange = onPasswordChange,
-            modifier = Modifier
-                .fillMaxWidth(),
-            leadingIcon = {
-                CustomIcon(icon = R.drawable.ic_password)
-            }
-        )
-        PasswordOutlinedTextbox(
-            value = confirmPassword,
-            onValueChange = onConfirmPasswordChange,
-            labelText = "Confirm Password",
-            modifier = Modifier
-                .fillMaxWidth(),
+            label = {
+                Text("Password")
+            },
             leadingIcon = {
                 CustomIcon(icon = R.drawable.ic_password)
             },
+            contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
+        )
+        PasswordTextbox(
+            modifier = Modifier
+                .fillMaxWidth(),
+            value = confirmPassword,
+            onValueChange = onConfirmPasswordChange,
+            label = {
+                Text("Confirm Password")
+            },
+            leadingIcon = {
+                CustomIcon(icon = R.drawable.ic_password)
+            },
+            contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
             imeAction = ImeAction.Done
         )
         Spacer(
             Modifier.height(16.dp)
         )
-        Button(
-            onClick = {
-                onSignup()
-            },
-            modifier = Modifier
-                .width(120.dp)
-        ) {
-            Text("Signup")
+        if (isLoading) {
+            CircularProgressIndicator()
+        } else {
+            Button(
+                onClick = {
+                    onSignup()
+                },
+                modifier = Modifier
+                    .width(120.dp)
+            ) {
+                Text("Signup")
+            }
         }
     }
 }
@@ -217,6 +228,7 @@ private fun BodyPreview() {
             {},
             {},
             {},
+            false,
             {}
         )
     }

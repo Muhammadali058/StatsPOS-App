@@ -3,15 +3,26 @@ package com.example.statspos.presentation.viewmodels.main
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.accounts.AccountCategories
+import com.example.statspos.domain.models.items.Categories
 import com.example.statspos.domain.models.sales.Sales
+import com.example.statspos.domain.models.utilities.users.UserRights
+import com.example.statspos.domain.models.utilities.users.Users
 import com.example.statspos.domain.repository.accounts.AccountCategoriesRepository
+import com.example.statspos.domain.repository.items.CategoriesRepository
+import com.example.statspos.domain.repository.main.MainRepository
 import com.example.statspos.domain.repository.utilities.UsersRepository
 import com.example.statspos.utils.DB
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
+import com.example.statspos.utils.get
+import com.example.statspos.utils.getListOf
+import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +38,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val usersRepository: UsersRepository,
-    private val accountCategoriesRepository: AccountCategoriesRepository
+    private val mainRepository: MainRepository
 ) : ViewModel() {
     // region ScreenState
     data class ScreenState(
@@ -88,18 +99,19 @@ class LoginViewModel @Inject constructor(
                 return@launch
             beforeRequest()
 
-            val accountCategories = AccountCategories(
-                categoryName = "Test 1"
-            )
-
-            when (val result = accountCategoriesRepository.insertAccountCategory(accountCategories)) {
-                is Resource.Error -> resultError(result.error)
-                is Resource.Information -> resultInformation(result.message)
-                is Resource.Success -> {
-                    resultSuccess()
-                    Log.d("TAG Inserted", result.data.toString())
-                }
+            val params = JsonObject().apply {
+                addProperty("clientId", 1)
+                addProperty("branchId", 1)
             }
+
+//            when (val result = usersRepository.loadUsers(params)) {
+//                is Resource.Error -> resultError(result.error)
+//                is Resource.Information -> resultInformation(result.message)
+//                is Resource.Success -> {
+//                    resultSuccess()
+//                    Log.d("TAG Users", result.data.toString())
+//                }
+//            }
         }
     }
 
@@ -118,12 +130,39 @@ class LoginViewModel @Inject constructor(
                 is Resource.Success -> {
                     resultSuccess()
                     if (result.data.get("isExists").asBoolean) {
-                        Log.d("TAG Users", result.data.toString())
-//                        val clientId = result.data.getAsJsonObject("data").get("id").asLong
-                        onSuccess()
+                        HP.user = Gson().get<Users>(result.data.get("user").asJsonObject)
+                        HP.userRights = Gson().get<UserRights>(result.data.get("userRights").asJsonObject)
+
+                        HP.clientId = HP.user.clientId!!
+                        HP.branchId = HP.user.branchId!!
+                        HP.branchGroupId = HP.user.branchGroupId!!
+
+                        loadMainData {
+                            onSuccess()
+                        }
                     } else {
                         showMessage("Username or password incorrect")
                     }
+                }
+            }
+        }
+    }
+
+    fun loadMainData(onSuccess: () -> Unit){
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+            beforeRequest()
+
+            when (val result = mainRepository.loadData()) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    HP.setDropdowns(result.data)
+
+                    onSuccess()
                 }
             }
         }

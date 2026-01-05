@@ -3,6 +3,10 @@ package com.example.statspos.utils
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.material3.SnackbarHostState
+import com.google.gson.Gson
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import com.google.gson.reflect.TypeToken
 
 
 enum class ThemeMode {
@@ -57,3 +61,7 @@ suspend fun checkEvent(
         else -> {}
     }
 }
+
+inline fun <reified T> Gson.getListOf(jsonArray: String): List<T> = fromJson(jsonArray, object : TypeToken<List<T>>() {}.type)
+inline fun <reified T> Gson.getListOf(jsonArray: JsonArray): List<T> = fromJson(jsonArray, object : TypeToken<List<T>>() {}.type)
+inline fun <reified T> Gson.get(jsonObject: JsonObject): T = fromJson(jsonObject, object : TypeToken<T>() {}.type)

@@ -15,11 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.IconButton
@@ -32,7 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -44,11 +40,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.rememberAsyncImagePainter
 import com.example.statspos.R
-import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.items.Items
-import com.example.statspos.presentation.ui.components.AutoCompleteTextbox
-import com.example.statspos.presentation.ui.components.Textbox
+import com.example.statspos.presentation.ui.components.AutoCompleteItemsTextbox
+import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.CustomIcon
+import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.showToast
 
@@ -58,21 +54,42 @@ fun ItemsScreen() {
     val context = LocalContext.current
 
     var barcode by remember { mutableStateOf("") }
+
+    var showDialog by remember { mutableStateOf(false) }
+    if(showDialog){
+        ConfirmDialog(
+            text = "Are you sure to delete this Item?",
+            onDismiss = {
+                showDialog = false
+            },
+            onConfirm = {
+                showDialog = false
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
     ) {
-
         SearchBox(
             value = barcode,
             onValueChange = { barcode = it },
             onItemSelected = { itemname ->
                 context.showToast(itemname)
-            }
+            },
+            onSearchClick = { text ->
+
+            },
+            onKeyboardAction = { text ->
+
+            },
         )
 
-        ItemsList()
+        ItemsList {
+            showDialog = true
+        }
     }
 }
 
@@ -81,19 +98,10 @@ private fun SearchBox(
     modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
-    onItemSelected: (String) -> Unit
+    onItemSelected: (String) -> Unit,
+    onSearchClick: (String) -> Unit,
+    onKeyboardAction: (String) -> Unit,
 ) {
-
-    val autoCompleteItems = listOf(
-        "Sugar",
-        "Daal Chana",
-        "Daal Mash",
-        "Sprite",
-        "Coca Cola",
-        "Olivia Color",
-        "Masar sabat Color",
-    )
-
     Row(
         modifier = modifier
             .background(MaterialTheme.colorScheme.surface)
@@ -101,38 +109,19 @@ private fun SearchBox(
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AutoCompleteTextbox(
+        AutoCompleteItemsTextbox(
             modifier = Modifier
                 .weight(1f),
             value = value,
             onValueChange = onValueChange,
-            items = autoCompleteItems,
             onItemSelected = onItemSelected,
-            placeholder = {
+            onSearchClick = onSearchClick,
+            onKeyboardAction = onKeyboardAction,
+            label = {
                 Text(
                     text = "Search"
                 )
             },
-            contentPadding = PaddingValues(
-                horizontal = 10.dp,
-                vertical = 8.dp,
-            ),
-//                shape = CircleShape,
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Search
-            ),
-            keyboardActions = KeyboardActions(
-                onSearch = {
-
-                }
-            ),
-            trailingIcon = {
-                IconButton(onClick = {
-
-                }) {
-                    CustomIcon(icon = R.drawable.ic_search)
-                }
-            }
         )
         IconButton(
             onClick = {
@@ -150,7 +139,10 @@ private fun SearchBox(
 }
 
 @Composable
-fun ItemsList(modifier: Modifier = Modifier) {
+fun ItemsList(
+    modifier: Modifier = Modifier,
+    onItemClick: (Items) -> Unit,
+) {
     val items = (1..50).map {
         Items(
             id = it.toLong(),
@@ -166,7 +158,9 @@ fun ItemsList(modifier: Modifier = Modifier) {
             .padding(horizontal = 16.dp)
     ) {
         items(items) { item ->
-            ItemListCard(item = item)
+            ItemListCard(item = item){
+                onItemClick(it)
+            }
         }
     }
 }
@@ -174,7 +168,8 @@ fun ItemsList(modifier: Modifier = Modifier) {
 @Composable
 private fun ItemListCard(
     modifier: Modifier = Modifier,
-    item: Items
+    item: Items,
+    onItemClick: (Items) -> Unit
 ) {
     Card(
         modifier = modifier
@@ -189,7 +184,7 @@ private fun ItemListCard(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.primaryContainer)
                 .clickable {
-
+                    onItemClick(item)
                 }
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,

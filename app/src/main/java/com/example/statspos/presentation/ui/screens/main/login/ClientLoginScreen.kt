@@ -19,7 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -34,7 +34,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -48,9 +47,10 @@ import com.example.statspos.R
 import com.example.statspos.domain.models.main.LocalBranches
 import com.example.statspos.presentation.ui.components.CustomIcon
 import com.example.statspos.presentation.ui.components.CustomSnackbarHost
-import com.example.statspos.presentation.ui.components.OutlinedTextbox
-import com.example.statspos.presentation.ui.components.PasswordOutlinedTextbox
+import com.example.statspos.presentation.ui.components.PasswordTextbox
+import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
+import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.main.ClientsViewModel
 import com.example.statspos.utils.DB
 import com.example.statspos.utils.SnackbarType
@@ -98,6 +98,7 @@ fun ClientLoginScreen(
                 Body(
                     username = state.username,
                     password = state.password,
+                    isLoading = state.isLoading,
                     onUsernameChange = viewModel::onUsernameChange,
                     onPasswordChange = viewModel::onPasswordChange,
                     onClientLogin = {
@@ -127,6 +128,7 @@ private fun Body(
     password: String,
     onUsernameChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
+    isLoading: Boolean,
     onClientLogin: () -> Unit,
     onLocalClientLogin: () -> Unit,
     onSignup: () -> Unit,
@@ -150,42 +152,55 @@ private fun Body(
         Spacer(
             Modifier.height(16.dp)
         )
-        OutlinedTextbox(
+        Textbox(
+            modifier = Modifier
+                .fillMaxWidth(),
             value = username,
             onValueChange = onUsernameChange,
-            label = "Username",
-            modifier = Modifier
-                .fillMaxWidth(),
+            label = {
+                Text("Username")
+            },
             leadingIcon = {
                 CustomIcon(icon = R.drawable.ic_user)
-            }
+            },
+            contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
         )
-        PasswordOutlinedTextbox(
-            value = password,
-            onValueChange = onPasswordChange,
+        PasswordTextbox(
             modifier = Modifier
                 .fillMaxWidth(),
+            value = password,
+            onValueChange = onPasswordChange,
+            label = {
+                Text("Password")
+            },
             leadingIcon = {
                 CustomIcon(icon = R.drawable.ic_password)
             },
+            contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
             imeAction = ImeAction.Done
         )
         Spacer(
             Modifier.height(16.dp)
         )
-        Button(
-            onClick = {
-                if (DB.IS_ONLINE_MODE) {
-                    onClientLogin()
-                } else {
-                    onLocalClientLogin()
-                }
-            },
-            modifier = Modifier
-                .width(120.dp)
-        ) {
-            Text("Login")
+
+        if (isLoading) {
+            CircularProgressIndicator()
+        } else {
+            Button(
+                onClick = {
+                    if (DB.IS_ONLINE_MODE) {
+                        onClientLogin()
+                    } else {
+                        onLocalClientLogin()
+                    }
+                },
+                modifier = Modifier
+                    .width(120.dp)
+            ) {
+                Text("Login")
+            }
         }
+
         if (DB.IS_ONLINE_MODE) {
             Row(
                 modifier = Modifier
@@ -271,6 +286,7 @@ private fun BodyPreview() {
             password = "",
             {},
             {},
+            false,
             {},
             {},
             {}

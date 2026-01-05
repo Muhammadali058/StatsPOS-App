@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.others
+package com.example.statspos.presentation.ui.utils
 
 import androidx.navigation3.runtime.NavKey
 

@@ -2,59 +2,49 @@
 
 package com.example.statspos.presentation.ui.components
 
-import android.app.Activity
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.view.WindowCompat
 import androidx.navigation3.runtime.NavKey
 import com.example.statspos.presentation.ui.screens.BottomRoutes
 import com.example.statspos.presentation.ui.screens.TopRoutes
-import com.example.statspos.presentation.ui.theme.backgroundDark
-import com.example.statspos.presentation.ui.theme.backgroundLight
-import com.example.statspos.presentation.ui.theme.primaryLight
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.collections.forEach
-
+import com.example.statspos.utils.SnackbarType
 
 data class TopItem(
     val text: String,
@@ -223,20 +213,30 @@ fun BottomBar(
     }
 }
 
-
 @Composable
-fun ChangeStatusBarColor(darkTheme: Boolean = false) {
-    val colorScheme = MaterialTheme.colorScheme
-    val view = LocalView.current
-    SideEffect {
-        val window = (view.context as Activity).window
-//        window.navigationBarColor = if(darkTheme) colorScheme.onSurface.toArgb() else backgroundLight.toArgb()
-//        window.statusBarColor = if(darkTheme) colorScheme.onSurface.toArgb() else backgroundLight.toArgb()
-        window.navigationBarColor = colorScheme.surface.toArgb()
-        window.statusBarColor = colorScheme.surfaceVariant.toArgb()
-        WindowCompat.getInsetsController(window, view).apply {
-            isAppearanceLightNavigationBars = !darkTheme
-            isAppearanceLightStatusBars = false
+fun CustomSnackbarHost(
+    snackbarHostState: SnackbarHostState,
+    currentSnackbarType: SnackbarType = SnackbarType.INFORMATION
+) {
+    SnackbarHost(
+        hostState = snackbarHostState,
+        modifier = Modifier
+            .fillMaxSize()
+            .wrapContentSize(Alignment.TopCenter),
+    )
+    { data ->
+        val backgroundColor = when (currentSnackbarType) {
+            SnackbarType.INFORMATION -> MaterialTheme.colorScheme.primary
+            SnackbarType.ERROR -> Color.Red
         }
+
+        Snackbar(
+            snackbarData = data,
+            modifier = Modifier
+                .statusBarsPadding(),
+            containerColor = backgroundColor,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            shape = RoundedCornerShape(16.dp),
+        )
     }
 }

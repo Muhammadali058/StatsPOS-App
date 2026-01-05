@@ -36,18 +36,14 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.R
 import com.example.statspos.presentation.ui.components.CustomCheckbox
-import com.example.statspos.presentation.ui.components.CustomDatePickerDialog
 import com.example.statspos.presentation.ui.components.CustomIcon
 import com.example.statspos.presentation.ui.components.CustomSnackbarHost
-import com.example.statspos.presentation.ui.components.CustomTimePickerDialog
-import com.example.statspos.presentation.ui.components.OutlinedTextbox
-import com.example.statspos.presentation.ui.components.PasswordOutlinedTextbox
+import com.example.statspos.presentation.ui.components.PasswordTextbox
+import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
-import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
+import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.main.LoginViewModel
-import com.example.statspos.utils.HP
 import com.example.statspos.utils.SnackbarType
-import com.example.statspos.utils.ThemeMode
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
@@ -64,17 +60,17 @@ fun LoginScreen(
 
     LaunchedEffect(Unit) {
         viewModel.onRememberCheckedChange(remember)
-        username?.let { viewModel.onUsernameChange(it) }
-        password?.let { viewModel.onPasswordChange(it) }
+        viewModel.onUsernameChange(username?: "")
+        viewModel.onPasswordChange(password?: "")
 
 //        viewModel.test()
-//        viewModel.login() {
-//            onLogin(
-//                state.remember,
-//                state.username,
-//                state.password
-//            )
-//        }
+        viewModel.login{
+            onLogin(
+                state.remember,
+                state.username,
+                state.password
+            )
+        }
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -171,24 +167,31 @@ private fun Body(
         Spacer(
             Modifier.height(16.dp)
         )
-        OutlinedTextbox(
+        Textbox(
             value = username,
             onValueChange = onUsernameChange,
-            label = "Username",
+            label = {
+                Text("Username")
+            },
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {
                 CustomIcon(icon = R.drawable.ic_user)
-            }
+            },
+            contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
         )
-        PasswordOutlinedTextbox(
-            value = password,
-            onValueChange = onPasswordChange,
+        PasswordTextbox(
             modifier = Modifier
                 .fillMaxWidth(),
+            value = password,
+            onValueChange = onPasswordChange,
+            label = {
+                Text("Password")
+            },
             leadingIcon = {
                 CustomIcon(icon = R.drawable.ic_password)
             },
+            contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
             imeAction = ImeAction.Done
         )
         Spacer(
@@ -210,8 +213,6 @@ private fun Body(
                     onLogin()
                 },
                 modifier = Modifier
-//                .height(45.dp)
-//                .fillMaxWidth()
                     .width(120.dp)
             ) {
                 Text("Login")

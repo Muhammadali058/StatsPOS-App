@@ -21,9 +21,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.example.statspos.presentation.ui.others.Navigator
-import com.example.statspos.presentation.ui.others.rememberNavigationState
-import com.example.statspos.presentation.ui.others.toEntries
+import com.example.statspos.presentation.ui.utils.Navigator
+import com.example.statspos.presentation.ui.utils.rememberNavigationState
+import com.example.statspos.presentation.ui.utils.toEntries
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic

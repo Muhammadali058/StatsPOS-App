@@ -35,9 +35,9 @@ import com.example.statspos.presentation.ui.components.BottomBar
 import com.example.statspos.presentation.ui.components.CustomIcon
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.components.TopItem
-import com.example.statspos.presentation.ui.others.Navigator
-import com.example.statspos.presentation.ui.others.rememberNavigationState
-import com.example.statspos.presentation.ui.others.toEntries
+import com.example.statspos.presentation.ui.utils.Navigator
+import com.example.statspos.presentation.ui.utils.rememberNavigationState
+import com.example.statspos.presentation.ui.utils.toEntries
 import com.example.statspos.presentation.ui.screens.BottomRoutes
 import com.example.statspos.presentation.ui.screens.TopRoutes
 import com.example.statspos.presentation.ui.screens.items.ItemsScreen

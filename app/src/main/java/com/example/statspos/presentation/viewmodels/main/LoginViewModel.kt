@@ -1,38 +1,24 @@
 package com.example.statspos.presentation.viewmodels.main
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.statspos.domain.models.DropdownItem
-import com.example.statspos.domain.models.accounts.AccountCategories
-import com.example.statspos.domain.models.items.Categories
-import com.example.statspos.domain.models.sales.Sales
 import com.example.statspos.domain.models.utilities.users.UserRights
 import com.example.statspos.domain.models.utilities.users.Users
-import com.example.statspos.domain.repository.accounts.AccountCategoriesRepository
-import com.example.statspos.domain.repository.items.CategoriesRepository
 import com.example.statspos.domain.repository.main.MainRepository
 import com.example.statspos.domain.repository.utilities.UsersRepository
-import com.example.statspos.utils.DB
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.get
-import com.example.statspos.utils.getListOf
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.util.Calendar
 import javax.inject.Inject
 
 @HiltViewModel
@@ -61,7 +47,16 @@ class LoginViewModel @Inject constructor(
     var event = _event.receiveAsFlow()
     fun onEvent(event: UiEvent) {
         when (event) {
-            is UiEvent.ShowMessage -> {}
+            is UiEvent.ShowSnackbar -> {
+                viewModelScope.launch {
+                    _event.send(UiEvent.ShowSnackbar(event.message, event.type))
+                }
+            }
+            is UiEvent.ShowError -> {
+                viewModelScope.launch {
+                    _event.send(UiEvent.ShowError(event.error))
+                }
+            }
             else -> {
                 viewModelScope.launch {
                     _event.send(UiEvent.Idle)
@@ -70,10 +65,8 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun showMessage(message: String, type: SnackbarType = SnackbarType.INFORMATION) {
-        viewModelScope.launch {
-            _event.send(UiEvent.ShowMessage(message, type))
-        }
+    fun showSnackbar(message: String, type: SnackbarType = SnackbarType.INFORMATION) {
+        onEvent(UiEvent.ShowSnackbar(message, type))
     }
 
     // endregion
@@ -141,7 +134,7 @@ class LoginViewModel @Inject constructor(
                             onSuccess()
                         }
                     } else {
-                        showMessage("Username or password incorrect")
+                        showSnackbar("Username or password incorrect")
                     }
                 }
             }
@@ -173,10 +166,10 @@ class LoginViewModel @Inject constructor(
     // region Others
     private fun loginValidation(): Boolean {
         if (state.value.username.isEmpty()) {
-            showMessage("Enter username")
+            showSnackbar("Enter username")
             return false
         } else if (state.value.password.isEmpty()) {
-            showMessage("Enter password")
+            showSnackbar("Enter password")
             return false
         } else
             return true
@@ -184,12 +177,12 @@ class LoginViewModel @Inject constructor(
 
     private fun resultError(error: String?) {
         state.update { it.copy(isLoading = false, error = error) }
-        error?.let { showMessage(it, SnackbarType.ERROR) }
+        error?.let { onEvent(UiEvent.ShowError(it)) }
     }
 
     private fun resultInformation(message: String?) {
         state.update { it.copy(isLoading = false) }
-        message?.let { showMessage(it) }
+        message?.let { showSnackbar(it) }
     }
 
     private fun resultSuccess() {

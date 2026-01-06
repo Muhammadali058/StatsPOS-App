@@ -1,0 +1,116 @@
+package com.example.statspos.presentation.ui.components
+
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.Modifier.Companion
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.example.statspos.presentation.ui.utils.ConstantSize
+
+@Composable
+fun AppIcon(
+    modifier: Modifier = Modifier,
+    @DrawableRes icon: Int,
+    size: Dp = ConstantSize.DEFAULT_ICON,
+    contentDescription: String? = null,
+    tint: Color = MaterialTheme.colorScheme.onPrimaryContainer
+) {
+    Icon(
+        painterResource(icon),
+        contentDescription = contentDescription,
+        tint = tint,
+        modifier = modifier
+            .size(size),
+    )
+}
+
+
+@Composable
+fun AppIcon(
+    modifier: Modifier = Modifier,
+    icon: ImageVector,
+    size: Dp = ConstantSize.DEFAULT_ICON,
+    contentDescription: String? = null,
+    tint: Color = MaterialTheme.colorScheme.onPrimaryContainer
+) {
+    Icon(
+        icon,
+        contentDescription = contentDescription,
+        tint = tint,
+        modifier = modifier
+            .size(size),
+    )
+}
+
+@Composable
+fun AppIconButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    icon: ImageVector,
+    buttonSize: Dp = ConstantSize.DEFAULT_ICON_BUTTON,
+    size: Dp = ConstantSize.DEFAULT_ICON,
+    enabled: Boolean = true,
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
+    interactionSource: MutableInteractionSource? = null,
+    shape: Shape = IconButtonDefaults.standardShape,
+) {
+    IconButton(
+        modifier = modifier
+            .size(buttonSize),
+        onClick = onClick,
+        enabled = enabled,
+        colors = colors,
+        interactionSource = interactionSource,
+        shape = shape,
+    ) {
+        AppIcon(
+            icon = icon,
+            size = size,
+            modifier = Modifier
+        )
+    }
+}
+
+
+@Composable
+fun AppIconButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    @DrawableRes icon: Int,
+    buttonSize: Dp = ConstantSize.DEFAULT_ICON_BUTTON,
+    size: Dp = ConstantSize.DEFAULT_ICON,
+    enabled: Boolean = true,
+    colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
+    interactionSource: MutableInteractionSource? = null,
+    shape: Shape = IconButtonDefaults.standardShape,
+) {
+    IconButton(
+        modifier = modifier
+            .size(buttonSize),
+        onClick = onClick,
+        enabled = enabled,
+        colors = colors,
+        interactionSource = interactionSource,
+        shape = shape,
+    ) {
+        AppIcon(
+            icon = icon,
+            size = size,
+            modifier = Modifier
+        )
+    }
+}

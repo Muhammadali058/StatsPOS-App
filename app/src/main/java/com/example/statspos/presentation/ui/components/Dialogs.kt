@@ -2,6 +2,8 @@
 
 package com.example.statspos.presentation.ui.components
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,6 +44,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CustomDatePickerDialog(
     modifier: Modifier = Modifier,
@@ -90,6 +93,7 @@ fun CustomDatePickerDialog(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CustomTimePickerDialog(
     modifier: Modifier = Modifier,
@@ -149,9 +153,8 @@ fun CustomTimePickerDialog(
 @Composable
 fun ErrorDialog(
     title: String = "Error",
-    text: String = "",
+    error: String? = null,
     onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -159,13 +162,15 @@ fun ErrorDialog(
 
         },
         title = { Text(title) },
-        text = { Text(text) },
+        text = { Text(
+            text = error ?: ""
+        ) },
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text("OK")
             }
         },
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
         titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         textContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
     )
@@ -174,7 +179,7 @@ fun ErrorDialog(
 @Composable
 fun ConfirmDialog(
     title: String = "Confirm",
-    text: String = "",
+    text: String,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
 ) {
@@ -194,76 +199,8 @@ fun ConfirmDialog(
                 Text("YES")
             }
         },
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
         titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         textContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
     )
-}
-
-@Composable
-fun ConfirmDialog2(
-    text: String = "",
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.LightGray)
-    ){
-        Popup (
-            alignment = Alignment.Center,
-            onDismissRequest = onDismiss,
-        ){
-            Card(
-                modifier = Modifier
-                    .heightIn(min = 200.dp, max = 200.dp)
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                elevation = CardDefaults.cardElevation(2.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                )
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight()
-                        .padding(
-                            start = 16.dp,
-                            top = 16.dp,
-                            end = 16.dp,
-                            bottom = 4.dp,
-                        ),
-                    horizontalAlignment = Alignment.Start,
-                    verticalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Text("Are you sure to delete this item?")
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        TextButton(
-                            onClick = {
-                                onDismiss()
-                            }
-                        ) {
-                            Text("NO")
-                        }
-                        TextButton(
-                            onClick = {
-                                onConfirm()
-                            }
-                        ) {
-                            Text("YES")
-                        }
-                    }
-                }
-            }
-        }
-    }
 }

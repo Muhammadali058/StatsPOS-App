@@ -2,13 +2,10 @@ package com.example.statspos.presentation.viewmodels.items
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.statspos.domain.models.items.Categories
-import com.example.statspos.domain.repository.items.CategoriesRepository
+import com.example.statspos.domain.repository.items.ItemsRepository
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
-import com.google.gson.Gson
-import com.google.gson.JsonObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,13 +15,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CategoriesViewModel @Inject constructor(
-    private val categoriesRepo: CategoriesRepository
+class AddUpdateItemViewModel @Inject constructor(
+    private val itemsRepo: ItemsRepository
 ) : ViewModel() {
     // region ScreenState
     data class ScreenState(
-        val categories: List<Categories> = emptyList(),
-
         val isLoading: Boolean = false,
         val error: String? = null,
     )
@@ -45,11 +40,13 @@ class CategoriesViewModel @Inject constructor(
                     _event.send(UiEvent.ShowSnackbar(event.message, event.type))
                 }
             }
+
             is UiEvent.ShowError -> {
                 viewModelScope.launch {
                     _event.send(UiEvent.ShowError(event.error))
                 }
             }
+
             else -> {
                 viewModelScope.launch {
                     _event.send(UiEvent.Idle)
@@ -65,39 +62,19 @@ class CategoriesViewModel @Inject constructor(
     // endregion
 
     // region Network calls
-    fun loadCategories() {
+    fun deleteItem(id: Long, onSuccess: () -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
 
             beforeRequest()
 
-            val params = JsonObject().apply {
-                addProperty("text", "")
-                addProperty("clientId", 1)
-                addProperty("branchId", 1)
-                addProperty("branchGroupId", 0)
-            }
-
-            when (val result = categoriesRepo.loadCategories(params)) {
+            when (val result = itemsRepo.deleteItem(id)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
-
-                    val jsonArray = result.data.getAsJsonArray("rows") ?: emptyList()
-
-                    val categories = mutableListOf<Categories>()
-                    for (a in jsonArray) {
-                        val cat = Gson().fromJson(a, Categories::class.java)
-                        categories.add(cat)
-                    }
-
-                    state.update {
-                        it.copy(
-                            categories = categories
-                        )
-                    }
+                    onSuccess()
                 }
             }
         }

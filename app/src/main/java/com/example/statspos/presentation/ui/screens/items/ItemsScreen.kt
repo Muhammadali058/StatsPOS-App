@@ -3,8 +3,9 @@ package com.example.statspos.presentation.ui.screens.items
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,15 +15,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,65 +40,148 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.rememberAsyncImagePainter
 import com.example.statspos.R
 import com.example.statspos.domain.models.items.Items
+import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
+import com.example.statspos.presentation.ui.components.AppIconButton
+import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.AutoCompleteItemsTextbox
-import com.example.statspos.presentation.ui.components.ConfirmDialog
-import com.example.statspos.presentation.ui.components.CustomIcon
 import com.example.statspos.presentation.ui.components.ErrorDialog
+import com.example.statspos.presentation.ui.components.HeadingMedium
+import com.example.statspos.presentation.ui.components.LabelLarge
+import com.example.statspos.presentation.ui.components.LabelMedium
+import com.example.statspos.presentation.ui.utils.ConstantPaddings
+import com.example.statspos.presentation.viewmodels.items.ItemsSharedViewModel
+import com.example.statspos.presentation.viewmodels.items.ItemsViewModel
 import com.example.statspos.utils.HP
-import com.example.statspos.utils.showToast
+import com.example.statspos.utils.UiEvent
+import com.example.statspos.utils.checkEvent
 
-@Preview(showBackground = true)
 @Composable
-fun ItemsScreen() {
-    val context = LocalContext.current
+fun ItemsScreen(
+    sharedViewModel: ItemsSharedViewModel,
+    AddItemClick: (Long, Boolean) -> Unit,
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
 
-    var barcode by remember { mutableStateOf("") }
-
-    var showDialog by remember { mutableStateOf(false) }
-    if(showDialog){
-        ConfirmDialog(
-            text = "Are you sure to delete this Item?",
-            onDismiss = {
-                showDialog = false
-            },
-            onConfirm = {
-                showDialog = false
+    val viewModel = hiltViewModel<ItemsViewModel>()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val event by viewModel.event.collectAsState(UiEvent.Idle)
+    val snackbarHostState = remember { SnackbarHostState() }
+    var showErrorDialog by remember { mutableStateOf(false) }
+    LaunchedEffect(event) {
+        checkEvent(
+            event = event,
+            snackbarHostState = snackbarHostState,
+            viewModelIdleEvent = viewModel::onEvent,
+            onError = {
+                showErrorDialog = true
             }
         )
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-    ) {
-        SearchBox(
-            value = barcode,
-            onValueChange = { barcode = it },
-            onItemSelected = { itemname ->
-                context.showToast(itemname)
-            },
-            onSearchClick = { text ->
+    val sharedViewModelState by sharedViewModel.state.collectAsStateWithLifecycle()
+    LaunchedEffect(sharedViewModelState.itemChanged) {
+        if (sharedViewModelState.itemChanged) {
+            viewModel.loadItems()
+            sharedViewModel.consumeItemChanged()
+        }
+    }
 
-            },
-            onKeyboardAction = { text ->
-
+    if (showErrorDialog) {
+        ErrorDialog(
+            error = state.error,
+            onDismiss = {
+                showErrorDialog = false
             },
         )
+    }
 
-        ItemsList {
-            showDialog = true
+    Scaffold(
+        snackbarHost = {
+            AppSnackbarHost(
+                snackbarHostState = snackbarHostState,
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    AddItemClick(0L, false)
+                },
+                shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                )
+            }
+        }
+    ) { innerPadding ->
+        Box(Modifier.padding(innerPadding))
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface)
+        ) {
+            Spacer(Modifier.height(8.dp))
+            SearchBox(
+                value = state.search,
+                onValueChange = viewModel::onSearchChange,
+                onItemSelected = {
+                    viewModel.getItem()
+                    keyboardController?.hide()
+                },
+                onSearchClick = {
+                    viewModel.loadItems()
+                    keyboardController?.hide()
+                },
+                onKeyboardAction = {
+                    viewModel.getItem()
+                    keyboardController?.hide()
+                },
+            )
+
+            ItemsList(
+                modifier = Modifier
+                    .weight(1f),
+                isRefreshing = state.isLoading,
+                onRefresh = {
+                    viewModel.loadItems()
+                },
+                isLoadingNextPage = state.isLoadingNextPage,
+                endReached = state.endReached,
+                loadNextItems = {
+                    viewModel.loadNextItems()
+                },
+                items = state.items,
+                onItemClick = { item ->
+                    AddItemClick(item.id!!, true)
+                }
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                HeadingMedium(
+                    text = "Total Items: ",
+                )
+                LabelMedium(
+                    text = state.totalItems.toString(),
+                )
+            }
+
         }
     }
 }
@@ -105,8 +198,8 @@ private fun SearchBox(
     Row(
         modifier = modifier
             .background(MaterialTheme.colorScheme.surface)
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(ConstantPaddings.BODY_HORIZONTAL)
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         AutoCompleteItemsTextbox(
@@ -123,46 +216,96 @@ private fun SearchBox(
                 )
             },
         )
-        IconButton(
+        Spacer(Modifier.width(4.dp))
+        AppIconButton(
             onClick = {
 
             },
-            modifier = Modifier
-        ) {
-            CustomIcon(
-                icon = R.drawable.ic_barcode,
-                modifier = Modifier
-                    .size(30.dp)
-            )
-        }
+            icon = R.drawable.ic_barcode,
+            buttonSize = 36.dp,
+            size = 28.dp
+        )
+        Spacer(Modifier.width(4.dp))
+        AppIconButton(
+            onClick = {
+
+            },
+            icon = Icons.Default.FilterList,
+            buttonSize = 36.dp,
+            size = 28.dp
+        )
     }
 }
 
 @Composable
 fun ItemsList(
     modifier: Modifier = Modifier,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
+    isLoadingNextPage: Boolean,
+    endReached: Boolean,
+    loadNextItems: () -> Unit,
+    items: List<Items>,
     onItemClick: (Items) -> Unit,
 ) {
-    val items = (1..50).map {
-        Items(
-            id = it.toLong(),
-            itemname = "Coca cola 1.5 ltr item $it",
-            imageUrl = HP.getImageUrl("43512549.png")
-        )
-    }
+    val state = rememberPullToRefreshState()
 
-    LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 16.dp)
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = onRefresh,
+        state = state,
+        modifier = modifier,
+        indicator = {
+            Indicator(
+                modifier = Modifier.align(Alignment.TopCenter),
+                isRefreshing = isRefreshing,
+                containerColor = MaterialTheme.colorScheme.onPrimary,
+                color = MaterialTheme.colorScheme.primary,
+                state = state
+            )
+        },
     ) {
-        items(items) { item ->
-            ItemListCard(item = item){
-                onItemClick(it)
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(ConstantPaddings.BODY_HORIZONTAL)
+        ) {
+            items(items.size) { i ->
+                val item = items[i]
+
+                if (
+                    i == items.lastIndex &&
+                    !endReached &&
+                    !isLoadingNextPage
+                ) {
+                    loadNextItems()
+                }
+
+//                if (i >= items.size - 1 && !endReached) {
+//                    loadNextItems()
+//                }
+
+                ItemListCard(item = item) {
+                    onItemClick(it)
+                }
+            }
+
+            item {
+                if (isLoadingNextPage) {
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        AppCircularProgressIndicator()
+                    }
+                }
             }
         }
     }
+
 }
 
 @Composable
@@ -191,7 +334,7 @@ private fun ItemListCard(
         ) {
             Image(
                 painter = rememberAsyncImagePainter(
-                    model = item.imageUrl,
+                    model = HP.getImageUrl(item.imageUrl!!),
                     error = painterResource(R.drawable.item)
                 ),
                 contentDescription = null,
@@ -203,54 +346,22 @@ private fun ItemListCard(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                Text(
-                    text = item.itemname.toString(),
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                )
+                LabelLarge(item.itemname.toString())
                 Spacer(Modifier.height(2.dp))
                 Row {
                     Row(
                         modifier = Modifier
                             .weight(1f)
                     ) {
-                        Text(
-                            text = "Cost: ",
-                            style = TextStyle(
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                            )
-                        )
-                        Text(
-                            text = "958.58",
-                            style = TextStyle(
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        )
+                        HeadingMedium("Cost: ")
+                        LabelMedium(item.cost.toString())
                     }
                     Row(
                         modifier = Modifier
                             .weight(1f)
                     ) {
-                        Text(
-                            text = "Retail: ",
-                            style = TextStyle(
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                            )
-                        )
-                        Text(
-                            text = "1458.58",
-                            style = TextStyle(
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        )
+                        HeadingMedium("Retail: ")
+                        LabelMedium(item.retail.toString())
                     }
                 }
                 Spacer(Modifier.height(2.dp))
@@ -259,44 +370,83 @@ private fun ItemListCard(
                         modifier = Modifier
                             .weight(1f)
                     ) {
-                        Text(
-                            text = "W.Sale: ",
-                            style = TextStyle(
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                            )
-                        )
-                        Text(
-                            text = "1235.78",
-                            style = TextStyle(
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        )
+                        HeadingMedium("W.Sale: ")
+                        LabelMedium(item.wholesale.toString())
                     }
                     Row(
                         modifier = Modifier
                             .weight(1f)
                     ) {
-                        Text(
-                            text = "C.Rate: ",
-                            style = TextStyle(
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                            )
-                        )
-                        Text(
-                            text = "145858",
-                            style = TextStyle(
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        )
+                        HeadingMedium("C.Rate: ")
+                        LabelMedium(item.crtnRate.toString())
                     }
                 }
             }
+        }
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+private fun Prev() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
+    ) {
+        Spacer(Modifier.height(8.dp))
+        SearchBox(
+            value = "",
+            onValueChange = {
+
+            },
+            onItemSelected = { itemname ->
+
+            },
+            onSearchClick = { text ->
+
+            },
+            onKeyboardAction = { text ->
+
+            },
+        )
+
+        ItemsList(
+            modifier = Modifier
+                .weight(1f),
+            isRefreshing = false,
+            onRefresh = {
+
+            },
+            isLoadingNextPage = false,
+            endReached = false,
+            loadNextItems = {
+
+            },
+            items = (1..50).map {
+                Items(
+                    id = it.toLong(),
+                    itemname = "Coca cola 1.5 ltr item $it",
+                    imageUrl = HP.getImageUrl("43512549.png")
+                )
+            },
+            onItemClick = { item ->
+
+            }
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            HeadingMedium(
+                text = "Total Items: ",
+            )
+            LabelMedium(
+                text = "500.0",
+            )
         }
     }
 }

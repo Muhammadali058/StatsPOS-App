@@ -25,21 +25,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun CustomCheckbox(modifier: Modifier = Modifier, checked: Boolean, enabled: Boolean = true, onCheckedChange: (Boolean) -> Unit) {
-    Row (
+fun MyCheckbox(
+    modifier: Modifier = Modifier,
+    checked: Boolean,
+    enabled: Boolean = true,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .height(20.dp)
-    ){
+    ) {
         Checkbox(
             checked = checked,
             onCheckedChange = onCheckedChange,
             enabled = enabled,
             modifier = Modifier
                 .scale(.95f)
-                .size(20.dp)
-            ,
+                .size(20.dp),
             colors = CheckboxDefaults.colors(
                 checkedColor = MaterialTheme.colorScheme.primary,
                 uncheckedColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -59,23 +63,29 @@ fun CustomCheckbox(modifier: Modifier = Modifier, checked: Boolean, enabled: Boo
 }
 
 @Composable
-fun CircleCheckbox(modifier: Modifier = Modifier, checked: Boolean, enabled: Boolean = true, onCheckedChange: (Boolean) -> Unit) {
+fun MyCircleCheckbox(
+    modifier: Modifier = Modifier,
+    checked: Boolean,
+    enabled: Boolean = true,
+    onCheckedChange: (Boolean) -> Unit
+) {
     val imageVector = if (checked) Icons.Filled.CheckCircle else Icons.Filled.Circle
-    val tint = if (checked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimary
-    val background = if (checked) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
+    val tint =
+        if (checked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimary
+    val background =
+        if (checked) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
 
-    Row (
+    Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
-    ){
+    ) {
         IconButton(
             onClick = {
                 onCheckedChange(!checked)
             },
             modifier = Modifier
-                .size(24.dp)
-            ,
+                .size(24.dp),
             enabled = enabled
         ) {
             Icon(

@@ -49,8 +49,16 @@ class ClientsViewModel @Inject constructor(
     var event = _event.receiveAsFlow()
     fun onEvent(event: UiEvent) {
         when (event) {
-            is UiEvent.ShowMessage -> {}
-//            is UiEvent.ShowError -> {}
+            is UiEvent.ShowSnackbar -> {
+                viewModelScope.launch {
+                    _event.send(UiEvent.ShowSnackbar(event.message, event.type))
+                }
+            }
+            is UiEvent.ShowError -> {
+                viewModelScope.launch {
+                    _event.send(UiEvent.ShowError(event.error))
+                }
+            }
             else -> {
                 viewModelScope.launch {
                     _event.send(UiEvent.Idle)
@@ -59,17 +67,10 @@ class ClientsViewModel @Inject constructor(
         }
     }
 
-    fun showMessage(message: String, type: SnackbarType = SnackbarType.INFORMATION) {
-        viewModelScope.launch {
-            _event.send(UiEvent.ShowMessage(message, type))
-        }
+    fun showSnackbar(message: String, type: SnackbarType = SnackbarType.INFORMATION) {
+        onEvent(UiEvent.ShowSnackbar(message, type))
     }
 
-//    fun showError(message: String) {
-//        viewModelScope.launch {
-//            _event.send(UiEvent.ShowError(message))
-//        }
-//    }
     // endregion
 
     // region onChangeMethods
@@ -118,7 +119,7 @@ class ClientsViewModel @Inject constructor(
                         val clientId = result.data.getAsJsonObject("data").get("id").asInt
                         onSuccess(clientId)
                     } else {
-                        showMessage("Username or password incorrect")
+                        showSnackbar("Username or password incorrect")
                     }
                 }
             }
@@ -192,7 +193,7 @@ class ClientsViewModel @Inject constructor(
                             )
                         }
                     } else {
-                        showMessage("Username or password incorrect")
+                        showSnackbar("Username or password incorrect")
                     }
                 }
             }
@@ -203,10 +204,10 @@ class ClientsViewModel @Inject constructor(
     // region Others
     private fun loginValidation(): Boolean {
         if (state.value.username.isEmpty()) {
-            showMessage("Enter username")
+            showSnackbar("Enter username")
             return false
         } else if (state.value.password.isEmpty()) {
-            showMessage("Enter password")
+            showSnackbar("Enter password")
             return false
         } else
             return true
@@ -214,22 +215,22 @@ class ClientsViewModel @Inject constructor(
 
     private fun signupValidation(): Boolean {
         if (state.value.businessName.isEmpty()) {
-            showMessage("Enter Business Name")
+            showSnackbar("Enter Business Name")
             return false
         } else if (state.value.contact.isEmpty()) {
-            showMessage("Enter contact")
+            showSnackbar("Enter contact")
             return false
         } else if (state.value.username.isEmpty()) {
-            showMessage("Enter username")
+            showSnackbar("Enter username")
             return false
         } else if (state.value.password.isEmpty()) {
-            showMessage("Enter password")
+            showSnackbar("Enter password")
             return false
         } else if (state.value.confirmPassword.isEmpty()) {
-            showMessage("Re-enter password")
+            showSnackbar("Re-enter password")
             return false
         } else if (state.value.password != state.value.confirmPassword) {
-            showMessage("Password didn't match")
+            showSnackbar("Password didn't match")
             return false
         } else
             return true
@@ -237,12 +238,12 @@ class ClientsViewModel @Inject constructor(
 
     private fun resultError(error: String?) {
         state.update { it.copy(isLoading = false, error = error) }
-        error?.let { showMessage(it, SnackbarType.ERROR) }
+        error?.let { onEvent(UiEvent.ShowError(it)) }
     }
 
     private fun resultInformation(message: String?) {
         state.update { it.copy(isLoading = false) }
-        message?.let { showMessage(it) }
+        message?.let { showSnackbar(it) }
     }
 
     private fun resultSuccess() {

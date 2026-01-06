@@ -34,7 +34,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
@@ -194,7 +193,7 @@ fun PasswordTextbox(
         leadingIcon = leadingIcon,
         trailingIcon = {
             IconButton(onClick = { visible = !visible }) {
-                CustomIcon(
+                AppIcon(
                     icon = icon,
                     modifier = Modifier.size(24.dp)
                 )
@@ -281,7 +280,7 @@ fun AutoCompleteItemsTextbox(
                         expanded = !expanded
                     }
                 ) {
-                    CustomIcon(
+                    AppIcon(
                         icon = Icons.Default.ArrowDropDown
                     )
                 }
@@ -290,7 +289,7 @@ fun AutoCompleteItemsTextbox(
                 IconButton(onClick = {
                     onSearchClick(value)
                 }) {
-                    CustomIcon(icon = R.drawable.ic_search)
+                    AppIcon(icon = R.drawable.ic_search)
                 }
             },
             keyboardOptions = KeyboardOptions(

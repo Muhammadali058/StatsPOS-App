@@ -139,7 +139,7 @@ fun Dropdown(
                         expanded = !expanded
                     }
                 ) {
-                    CustomIcon(
+                    AppIcon(
                         icon = Icons.Default.ArrowDropDown
                     )
                 }
@@ -151,7 +151,7 @@ fun Dropdown(
                         onItemSelected(DropdownItem(0L,"None"))
                     }
                 ) {
-                    CustomIcon(
+                    AppIcon(
                         icon = Icons.Default.Clear,
                         modifier = Modifier.size(20.dp)
                     )
@@ -321,7 +321,7 @@ fun SubDropdown(
                         expanded = !expanded
                     }
                 ) {
-                    CustomIcon(
+                    AppIcon(
                         icon = Icons.Default.ArrowDropDown
                     )
                 }
@@ -333,7 +333,7 @@ fun SubDropdown(
                         onItemSelected(DropdownItem(0L, "None"))
                     }
                 ) {
-                    CustomIcon(
+                    AppIcon(
                         icon = Icons.Default.Clear,
                         modifier = Modifier.size(20.dp)
                     )

@@ -13,7 +13,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.statspos.R
-import com.example.statspos.presentation.ui.components.CustomIcon
+import com.example.statspos.presentation.ui.components.AppIcon
 
 @Preview(showBackground = true)
 @Composable
@@ -24,7 +24,7 @@ fun SplashScreen() {
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        CustomIcon(
+        AppIcon(
             icon = R.drawable.statspos_circle,
             modifier = Modifier
                 .size(160.dp)

@@ -24,11 +24,13 @@ import java.time.format.DateTimeFormatter
 object HP {
     var localClient: LocalClients? = null
 
-    var clientId:Int = 1
-    var branchId:Int = 1
-    var branchGroupId:Int = 0
+    const val itemsPerPage: Int = 10
 
-    var user = Users()
+    var clientId: Int = 1
+    var branchId: Int = 1
+    var branchGroupId: Int = 0
+
+    var user = Users(id = 1, clientId = 1, branchId = 1)
     var userRights = UserRights()
     var settings = Settings()
     var passwords = Passwords()
@@ -59,7 +61,7 @@ object HP {
     var shifts = emptyList<DropdownItem>()
     var branch = Branches()
 
-    fun setDropdowns(jsonObject: JsonObject){
+    fun setDropdowns(jsonObject: JsonObject) {
         settings = Gson().get<Settings>(jsonObject.get("settings").asJsonObject)
         passwords = Gson().get<Passwords>(jsonObject.get("passwords").asJsonObject)
         adminSettings = Gson().get<AdminSettings>(jsonObject.get("adminSettings").asJsonObject)
@@ -80,7 +82,8 @@ object HP {
         suppliers = Gson().getListOf<DropdownItem>(jsonObject.get("suppliers").asJsonArray)
         fixedAccounts = Gson().getListOf<DropdownItem>(jsonObject.get("fixedAccounts").asJsonArray)
         users = Gson().getListOf<DropdownItem>(jsonObject.get("users").asJsonArray)
-        accountCategories = Gson().getListOf<DropdownItem>(jsonObject.get("accountCategories").asJsonArray)
+        accountCategories =
+            Gson().getListOf<DropdownItem>(jsonObject.get("accountCategories").asJsonArray)
         expenses = Gson().getListOf<DropdownItem>(jsonObject.get("expenses").asJsonArray)
         subExpenses = jsonObject.get("subExpenses").asJsonArray.map { obj ->
             DropdownItem(
@@ -101,31 +104,32 @@ object HP {
         branches = Gson().getListOf<DropdownItem>(jsonObject.get("branches").asJsonArray)
         branchGroups = Gson().getListOf<DropdownItem>(jsonObject.get("branchGroups").asJsonArray)
         printSizes = Gson().getListOf<DropdownItem>(jsonObject.get("printSizes").asJsonArray)
-        printLanguages = Gson().getListOf<DropdownItem>(jsonObject.get("printLanguages").asJsonArray)
+        printLanguages =
+            Gson().getListOf<DropdownItem>(jsonObject.get("printLanguages").asJsonArray)
         accounts = Gson().getListOf<DropdownItem>(jsonObject.get("accounts").asJsonArray)
         userTypes = Gson().getListOf<DropdownItem>(jsonObject.get("userTypes").asJsonArray)
         shifts = Gson().getListOf<DropdownItem>(jsonObject.get("shifts").asJsonArray)
         branch = Gson().get<Branches>(jsonObject.get("branch").asJsonObject)
     }
 
-    fun getImageUrl(imageUrl: String ): String {
+    fun getImageUrl(imageUrl: String): String {
         return DB.HOST + clientId.toString() + "/images/" + imageUrl
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun getFormatedDate(localDate: LocalDate): String{
+    fun getFormatedDate(localDate: LocalDate): String {
         val customFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
         return localDate.format(customFormatter)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun getFormatedTime(localTime: LocalTime): String{
+    fun getFormatedTime(localTime: LocalTime): String {
         val customFormatter = DateTimeFormatter.ofPattern("h:m a")
         return localTime.format(customFormatter)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun getZonedDate(localDate: LocalDate): String{
+    fun getZonedDate(localDate: LocalDate): String {
         val zonedDateTime = ZonedDateTime.of(
             localDate,
             LocalTime.now(),
@@ -137,7 +141,7 @@ object HP {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun getZonedTime(localTime: LocalTime): String{
+    fun getZonedTime(localTime: LocalTime): String {
         val zonedDateTime = ZonedDateTime.of(
             LocalDate.now(),
             localTime,
@@ -149,7 +153,7 @@ object HP {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun getZonedDateTime(localDate: LocalDate, localTime: LocalTime): String{
+    fun getZonedDateTime(localDate: LocalDate, localTime: LocalTime): String {
         val zonedDateTime = ZonedDateTime.of(
             localDate,
             localTime,

@@ -11,17 +11,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.presentation.ui.screens.TopRoutes
+import com.example.statspos.presentation.ui.screens.items.AddUpdateItemScreen
 import com.example.statspos.presentation.ui.screens.items.CategoriesScreen
 import com.example.statspos.presentation.ui.screens.purchase.PurchaseScreen
+import com.example.statspos.presentation.viewmodels.items.ItemsSharedViewModel
 
 @Composable
 fun MainScreen() {
+    val sharedViewModel = hiltViewModel<ItemsSharedViewModel>()
+
     val backStack = rememberNavBackStack(TopRoutes.Home)
     val activity = LocalActivity.current as Activity
     BackHandler {
@@ -38,9 +43,24 @@ fun MainScreen() {
         ),
         entryProvider = entryProvider {
             entry<TopRoutes.Home> {
-                HomeScreen { key ->
-                    backStack.add(key)
-                }
+                HomeScreen(
+                    sharedViewModel= sharedViewModel,
+                    onTopRouteClick = { key ->
+                        if (backStack.lastOrNull() != key) {
+                            backStack.add(key)
+                        }
+                    }
+                )
+            }
+            entry<TopRoutes.AddUpdateItem> { key ->
+                AddUpdateItemScreen(
+                    sharedViewModel= sharedViewModel,
+                    updateId = key.updateId,
+                    isUpdate = key.isUpdate,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                )
             }
             entry<TopRoutes.Categories> {
                 CategoriesScreen()
@@ -54,7 +74,7 @@ fun MainScreen() {
                         .fillMaxSize()
                         .background(Color.Blue),
                     contentAlignment = Alignment.Center
-                ){
+                ) {
                     Text("Add Sales")
                 }
             }

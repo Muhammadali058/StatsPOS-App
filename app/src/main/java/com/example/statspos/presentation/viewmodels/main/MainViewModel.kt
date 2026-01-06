@@ -38,7 +38,16 @@ class MainViewModel @Inject constructor(
     var event = _event.receiveAsFlow()
     fun onEvent(event: UiEvent) {
         when (event) {
-            is UiEvent.ShowMessage -> {}
+            is UiEvent.ShowSnackbar -> {
+                viewModelScope.launch {
+                    _event.send(UiEvent.ShowSnackbar(event.message, event.type))
+                }
+            }
+            is UiEvent.ShowError -> {
+                viewModelScope.launch {
+                    _event.send(UiEvent.ShowError(event.error))
+                }
+            }
             else -> {
                 viewModelScope.launch {
                     _event.send(UiEvent.Idle)
@@ -47,10 +56,8 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun showMessage(message: String, type: SnackbarType = SnackbarType.INFORMATION) {
-        viewModelScope.launch {
-            _event.send(UiEvent.ShowMessage(message, type))
-        }
+    fun showSnackbar(message: String, type: SnackbarType = SnackbarType.INFORMATION) {
+        onEvent(UiEvent.ShowSnackbar(message, type))
     }
 
     // endregion
@@ -92,12 +99,12 @@ class MainViewModel @Inject constructor(
     // region Others
     private fun resultError(error: String?) {
         state.update { it.copy(isLoading = false, error = error) }
-        error?.let { showMessage(it, SnackbarType.ERROR) }
+        error?.let { onEvent(UiEvent.ShowError(it)) }
     }
 
     private fun resultInformation(message: String?) {
         state.update { it.copy(isLoading = false) }
-        message?.let { showMessage(it) }
+        message?.let { showSnackbar(it) }
     }
 
     private fun resultSuccess() {

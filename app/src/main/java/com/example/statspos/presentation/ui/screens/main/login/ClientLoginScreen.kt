@@ -19,7 +19,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -45,15 +44,16 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.R
 import com.example.statspos.domain.models.main.LocalBranches
-import com.example.statspos.presentation.ui.components.CustomIcon
-import com.example.statspos.presentation.ui.components.CustomSnackbarHost
+import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
+import com.example.statspos.presentation.ui.components.AppIcon
+import com.example.statspos.presentation.ui.components.AppSnackbarHost
+import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.PasswordTextbox
 import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.main.ClientsViewModel
 import com.example.statspos.utils.DB
-import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
@@ -68,23 +68,31 @@ fun ClientLoginScreen(
     val event by viewModel.event.collectAsState(UiEvent.Idle)
 
     val snackbarHostState = remember { SnackbarHostState() }
-    var currentSnackbarType by remember { mutableStateOf(SnackbarType.INFORMATION) }
+    var showErrorDialog by remember { mutableStateOf(false) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
             snackbarHostState = snackbarHostState,
             viewModelIdleEvent = viewModel::onEvent,
-            changeSnackbarType = {
-                currentSnackbarType = it
-            }
+            onError = {
+                showErrorDialog = true
+            },
+        )
+    }
+
+    if(showErrorDialog){
+        ErrorDialog(
+            error = state.error,
+            onDismiss = {
+                showErrorDialog = false
+            },
         )
     }
 
     Scaffold(
         snackbarHost = {
-            CustomSnackbarHost(
+            AppSnackbarHost(
                 snackbarHostState = snackbarHostState,
-                currentSnackbarType = currentSnackbarType
             )
         }
     ) { innerPadding ->
@@ -143,7 +151,7 @@ private fun Body(
         Spacer(
             Modifier.height(32.dp)
         )
-        CustomIcon(
+        AppIcon(
             icon = R.drawable.statspos,
             modifier = Modifier
                 .size(140.dp),
@@ -161,7 +169,7 @@ private fun Body(
                 Text("Username")
             },
             leadingIcon = {
-                CustomIcon(icon = R.drawable.ic_user)
+                AppIcon(icon = R.drawable.ic_user)
             },
             contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
         )
@@ -174,7 +182,7 @@ private fun Body(
                 Text("Password")
             },
             leadingIcon = {
-                CustomIcon(icon = R.drawable.ic_password)
+                AppIcon(icon = R.drawable.ic_password)
             },
             contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
             imeAction = ImeAction.Done
@@ -184,7 +192,7 @@ private fun Body(
         )
 
         if (isLoading) {
-            CircularProgressIndicator()
+            AppCircularProgressIndicator()
         } else {
             Button(
                 onClick = {
@@ -223,7 +231,8 @@ private fun Body(
                     Text(
                         text = "Sign up",
                         fontSize = 15.sp,
-                        textDecoration = TextDecoration.Underline
+                        textDecoration = TextDecoration.Underline,
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }

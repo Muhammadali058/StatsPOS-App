@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -88,7 +89,7 @@ fun TopAppBar(
         },
         navigationIcon = {
             IconButton(onClick = onNavigationClick) {
-                CustomIcon(
+                AppIcon(
                     icon = navigationIcon,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -186,7 +187,7 @@ fun BottomBar(
                     modifier = Modifier
                         .fillMaxWidth(),
                     thickness = if(selected) 2.dp else 1.dp,
-                    color = if(selected) selectedColor else MaterialTheme.colorScheme.primaryContainer
+                    color = if(selected) selectedColor else MaterialTheme.colorScheme.primaryContainer,
                 )
 
                 Spacer(Modifier.height(6.dp))
@@ -214,7 +215,7 @@ fun BottomBar(
 }
 
 @Composable
-fun CustomSnackbarHost(
+fun AppSnackbarHost(
     snackbarHostState: SnackbarHostState,
     currentSnackbarType: SnackbarType = SnackbarType.INFORMATION
 ) {
@@ -233,7 +234,8 @@ fun CustomSnackbarHost(
         Snackbar(
             snackbarData = data,
             modifier = Modifier
-                .statusBarsPadding(),
+                .statusBarsPadding()
+                .padding(top = 44.dp),
             containerColor = backgroundColor,
             contentColor = MaterialTheme.colorScheme.onPrimary,
             shape = RoundedCornerShape(16.dp),

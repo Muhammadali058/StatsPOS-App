@@ -20,12 +20,13 @@ fun Context.showToast(msg: String, length: Int = Toast.LENGTH_SHORT) =
 
 sealed class UiEvent {
     data object Idle : UiEvent()
-    data class ShowMessage(
+    data class ShowSnackbar(
         val message: String,
         val type: SnackbarType = SnackbarType.INFORMATION
     ) : UiEvent()
 
-//    data class ShowError(val message: String) : UiEvent()
+    data class ShowMessage(val message: String) : UiEvent()
+    data class ShowError(val error: String) : UiEvent()
 }
 
 enum class SnackbarType { INFORMATION, ERROR }
@@ -33,17 +34,19 @@ enum class SnackbarType { INFORMATION, ERROR }
 suspend fun checkEvent(
     event: UiEvent,
     snackbarHostState: SnackbarHostState,
+    onError: (String) -> Unit = {},
+    onMessage: (String) -> Unit = {},
     viewModelIdleEvent: (event: UiEvent) -> Unit,
-    changeSnackbarType: (SnackbarType) -> Unit
+//    changeSnackbarType: (SnackbarType) -> Unit
 ) {
     when (event) {
-        is UiEvent.ShowMessage -> {
+        is UiEvent.ShowSnackbar -> {
 
-            val snackbarType = when (event.type) {
-                SnackbarType.INFORMATION -> SnackbarType.INFORMATION
-                else -> SnackbarType.ERROR
-            }
-            changeSnackbarType(snackbarType)
+//            val snackbarType = when (event.type) {
+//                SnackbarType.INFORMATION -> SnackbarType.INFORMATION
+//                else -> SnackbarType.ERROR
+//            }
+//            changeSnackbarType(snackbarType)
 
             snackbarHostState.showSnackbar(
                 message = event.message,
@@ -53,15 +56,27 @@ suspend fun checkEvent(
 //            viewModel.onEvent(UiEvent.Idle)
         }
 
-//        is UiEvent.ShowError -> {
-//            viewModelIdleEvent(UiEvent.Idle)
-////            viewModel.onEvent(UiEvent.Idle)
-//        }
+        is UiEvent.ShowMessage -> {
+            onError(event.message)
+            viewModelIdleEvent(UiEvent.Idle)
+//            viewModel.onEvent(UiEvent.Idle)
+        }
+
+        is UiEvent.ShowError -> {
+            onError(event.error)
+            viewModelIdleEvent(UiEvent.Idle)
+//            viewModel.onEvent(UiEvent.Idle)
+        }
 
         else -> {}
     }
 }
 
-inline fun <reified T> Gson.getListOf(jsonArray: String): List<T> = fromJson(jsonArray, object : TypeToken<List<T>>() {}.type)
-inline fun <reified T> Gson.getListOf(jsonArray: JsonArray): List<T> = fromJson(jsonArray, object : TypeToken<List<T>>() {}.type)
-inline fun <reified T> Gson.get(jsonObject: JsonObject): T = fromJson(jsonObject, object : TypeToken<T>() {}.type)
+inline fun <reified T> Gson.getListOf(jsonArray: String): List<T> =
+    fromJson(jsonArray, object : TypeToken<List<T>>() {}.type)
+
+inline fun <reified T> Gson.getListOf(jsonArray: JsonArray): List<T> =
+    fromJson(jsonArray, object : TypeToken<List<T>>() {}.type)
+
+inline fun <reified T> Gson.get(jsonObject: JsonObject): T =
+    fromJson(jsonObject, object : TypeToken<T>() {}.type)

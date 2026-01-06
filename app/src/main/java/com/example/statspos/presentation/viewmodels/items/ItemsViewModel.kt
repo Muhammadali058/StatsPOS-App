@@ -2,13 +2,13 @@ package com.example.statspos.presentation.viewmodels.items
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.statspos.domain.models.items.Categories
 import com.example.statspos.domain.models.items.Items
-import com.example.statspos.domain.repository.items.CategoriesRepository
 import com.example.statspos.domain.repository.items.ItemsRepository
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
+import com.example.statspos.utils.get
 import com.example.statspos.utils.getListOf
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -27,12 +27,17 @@ class ItemsViewModel @Inject constructor(
     // region ScreenState
     data class ScreenState(
         val items: List<Items> = emptyList(),
+        val totalItems: Int = 0,
+        val page: Int = 1,
+        val endReached: Boolean = false,
+        val search: String = "",
         val categoryName: String = "",
         val subCategoryName: String = "",
         val categoryId: Long = 0.toLong(),
         val subCategoryId: Long = 0.toLong(),
 
         val isLoading: Boolean = false,
+        val isLoadingNextPage: Boolean = false,
         val error: String? = null,
     )
 
@@ -40,14 +45,30 @@ class ItemsViewModel @Inject constructor(
         private set
 
     fun beforeRequest() {
-        state.update { it.copy(isLoading = true, error = null) }
+        state.update {
+            it.copy(
+                isLoading = true,
+                error = null,
+            )
+        }
     }
 
     private val _event = Channel<UiEvent>()
     var event = _event.receiveAsFlow()
     fun onEvent(event: UiEvent) {
         when (event) {
-            is UiEvent.ShowMessage -> {}
+            is UiEvent.ShowSnackbar -> {
+                viewModelScope.launch {
+                    _event.send(UiEvent.ShowSnackbar(event.message, event.type))
+                }
+            }
+
+            is UiEvent.ShowError -> {
+                viewModelScope.launch {
+                    _event.send(UiEvent.ShowError(event.error))
+                }
+            }
+
             else -> {
                 viewModelScope.launch {
                     _event.send(UiEvent.Idle)
@@ -56,27 +77,37 @@ class ItemsViewModel @Inject constructor(
         }
     }
 
-    fun showMessage(message: String, type: SnackbarType = SnackbarType.INFORMATION) {
-        viewModelScope.launch {
-            _event.send(UiEvent.ShowMessage(message, type))
-        }
+    fun showSnackbar(message: String, type: SnackbarType = SnackbarType.INFORMATION) {
+        onEvent(UiEvent.ShowSnackbar(message, type))
     }
+
     // endregion
 
     // region onChangeMethods
+    fun onSearchChange(value: String) {
+        state.update { it.copy(search = value) }
+    }
+
     fun onCategoryNameChange(value: String) {
         state.update { it.copy(categoryName = value) }
     }
+
     fun onSubCategoryNameChange(value: String) {
         state.update { it.copy(subCategoryName = value) }
     }
+
     fun onCategoryIdChange(value: Long) {
         state.update { it.copy(categoryId = value) }
     }
+
     fun onSubCategoryIdChange(value: Long) {
         state.update { it.copy(subCategoryId = value) }
     }
     // endregion
+
+    init {
+        loadItems()
+    }
 
     // region Network calls
     fun loadItems() {
@@ -84,10 +115,23 @@ class ItemsViewModel @Inject constructor(
             if (state.value.isLoading)
                 return@launch
 
-            beforeRequest()
+            state.update {
+                it.copy(
+                    isLoading = true,
+                    error = null,
+                    page = 1,
+                    endReached = false,
+                )
+            }
 
             val params = JsonObject().apply {
-                addProperty("text", "")
+                addProperty("page", 1)
+                addProperty("itemsPerPage", HP.itemsPerPage)
+                addProperty("searchBy", 0)
+                addProperty("categoryId", 0)
+                addProperty("subCategoryId", 0)
+                addProperty("vendorId", 0)
+                addProperty("text", state.value.search)
             }
 
             when (val result = itemsRepo.loadItems(params)) {
@@ -96,11 +140,12 @@ class ItemsViewModel @Inject constructor(
                 is Resource.Success -> {
                     resultSuccess()
 
+                    val totalItems = result.data.get("total").asJsonObject.get("totalItems").asInt
                     val itemsList = Gson().getListOf<Items>(result.data.get("rows").asJsonArray)
-
                     state.update {
                         it.copy(
-                            items = itemsList
+                            items = itemsList,
+                            totalItems = totalItems,
                         )
                     }
                 }
@@ -108,17 +153,110 @@ class ItemsViewModel @Inject constructor(
         }
     }
 
+    fun loadNextItems() {
+        viewModelScope.launch {
+            if (state.value.isLoadingNextPage)
+                return@launch
+
+            state.update {
+                it.copy(
+                    isLoadingNextPage = true,
+                    error = null,
+                    page = state.value.page + 1,
+                )
+            }
+
+            val params = JsonObject().apply {
+                addProperty("page", state.value.page)
+                addProperty("itemsPerPage", HP.itemsPerPage)
+                addProperty("searchBy", 0)
+                addProperty("categoryId", 0)
+                addProperty("subCategoryId", 0)
+                addProperty("vendorId", 0)
+                addProperty("text", state.value.search)
+            }
+
+            when (val result = itemsRepo.loadItems(params)) {
+                is Resource.Error -> {
+                    state.update { it.copy(isLoadingNextPage = false, error = result.error) }
+                    result.error?.let { onEvent(UiEvent.ShowError(result.error)) }
+                }
+
+                is Resource.Information -> {
+                    state.update { it.copy(isLoadingNextPage = false) }
+                    result.message?.let { showSnackbar(result.message) }
+                }
+
+                is Resource.Success -> {
+                    state.update { it.copy(isLoadingNextPage = false, error = null) }
+
+                    val totalItems = result.data.get("total").asJsonObject.get("totalItems").asInt
+                    val itemsList = Gson().getListOf<Items>(result.data.get("rows").asJsonArray)
+                    state.update {
+                        it.copy(
+                            items = state.value.items + itemsList,
+                            totalItems = totalItems,
+                            endReached = itemsList.isEmpty(),
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun getItem() {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            state.update {
+                it.copy(
+                    isLoading = true,
+                    error = null,
+                    page = 1,
+                    endReached = true,
+                )
+            }
+
+            when (val result = itemsRepo.isBarcodeExists(state.value.search)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val isExists = result.data.get("isExists").asBoolean
+                    if (isExists) {
+                        val item = Gson().get<Items>(result.data.get("data").asJsonObject)
+                        state.update {
+                            it.copy(
+                                items = listOf(item),
+                                totalItems = 1,
+                            )
+                        }
+                    } else {
+                        state.update {
+                            it.copy(
+                                items = emptyList(),
+                                totalItems = 0,
+                            )
+                        }
+                        showSnackbar("Items not found")
+                    }
+                }
+            }
+        }
+    }
     // endregion
 
     // region Others
     private fun resultError(error: String?) {
         state.update { it.copy(isLoading = false, error = error) }
-        error?.let { showMessage(it, SnackbarType.ERROR) }
+        error?.let { onEvent(UiEvent.ShowError(it)) }
     }
 
     private fun resultInformation(message: String?) {
         state.update { it.copy(isLoading = false) }
-        message?.let { showMessage(it) }
+        message?.let { showSnackbar(it) }
     }
 
     private fun resultSuccess() {

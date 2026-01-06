@@ -2,7 +2,6 @@ package com.example.statspos.presentation.ui.screens.main.login
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,7 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -37,14 +35,15 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.R
+import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
-import com.example.statspos.presentation.ui.components.CustomIcon
-import com.example.statspos.presentation.ui.components.CustomSnackbarHost
+import com.example.statspos.presentation.ui.components.AppIcon
+import com.example.statspos.presentation.ui.components.AppSnackbarHost
+import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.PasswordTextbox
 import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
 import com.example.statspos.presentation.viewmodels.main.ClientsViewModel
-import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
@@ -57,23 +56,31 @@ fun ClientSignupScreen(
     val event by viewModel.event.collectAsState(UiEvent.Idle)
 
     val snackbarHostState = remember { SnackbarHostState() }
-    var currentSnackbarType by remember { mutableStateOf(SnackbarType.INFORMATION) }
+    var showErrorDialog by remember { mutableStateOf(false) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
             snackbarHostState = snackbarHostState,
             viewModelIdleEvent = viewModel::onEvent,
-            changeSnackbarType = {
-                currentSnackbarType = it
-            }
+            onError = {
+                showErrorDialog = true
+            },
+        )
+    }
+
+    if(showErrorDialog){
+        ErrorDialog(
+            error = state.error,
+            onDismiss = {
+                showErrorDialog = false
+            },
         )
     }
 
     Scaffold(
         snackbarHost = {
-            CustomSnackbarHost(
+            AppSnackbarHost(
                 snackbarHostState = snackbarHostState,
-                currentSnackbarType = currentSnackbarType
             )
         }
     ) { innerPadding ->
@@ -133,7 +140,7 @@ private fun Body(
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {
-                CustomIcon(icon = Icons.Default.Business)
+                AppIcon(icon = Icons.Default.Business)
             },
             contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
         )
@@ -146,7 +153,7 @@ private fun Body(
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {
-                CustomIcon(icon = Icons.Default.Contacts)
+                AppIcon(icon = Icons.Default.Contacts)
             },
             contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
             keyboardOptions = KeyboardOptions(
@@ -162,7 +169,7 @@ private fun Body(
             modifier = Modifier
                 .fillMaxWidth(),
             leadingIcon = {
-                CustomIcon(icon = R.drawable.ic_user)
+                AppIcon(icon = R.drawable.ic_user)
             },
             contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
         )
@@ -175,7 +182,7 @@ private fun Body(
                 Text("Password")
             },
             leadingIcon = {
-                CustomIcon(icon = R.drawable.ic_password)
+                AppIcon(icon = R.drawable.ic_password)
             },
             contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
         )
@@ -188,7 +195,7 @@ private fun Body(
                 Text("Confirm Password")
             },
             leadingIcon = {
-                CustomIcon(icon = R.drawable.ic_password)
+                AppIcon(icon = R.drawable.ic_password)
             },
             contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
             imeAction = ImeAction.Done
@@ -197,7 +204,7 @@ private fun Body(
             Modifier.height(16.dp)
         )
         if (isLoading) {
-            CircularProgressIndicator()
+            AppCircularProgressIndicator()
         } else {
             Button(
                 onClick = {

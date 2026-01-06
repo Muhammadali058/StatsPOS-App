@@ -16,4 +16,12 @@ object ConstantPaddings {
         end = 10.dp,
         bottom = 10.dp,
     )
+    val BODY_HORIZONTAL = PaddingValues(
+        horizontal = 16.dp
+    )
+}
+
+object ConstantSize {
+    val DEFAULT_ICON_BUTTON = 30.dp
+    val DEFAULT_ICON = 24.dp
 }

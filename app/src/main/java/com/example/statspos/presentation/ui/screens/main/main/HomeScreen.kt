@@ -32,7 +32,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.presentation.ui.components.BOTTOM_DESTINATIONS
 import com.example.statspos.presentation.ui.components.BottomBar
-import com.example.statspos.presentation.ui.components.CustomIcon
+import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.components.TopItem
 import com.example.statspos.presentation.ui.utils.Navigator
@@ -43,15 +43,16 @@ import com.example.statspos.presentation.ui.screens.TopRoutes
 import com.example.statspos.presentation.ui.screens.items.ItemsScreen
 import com.example.statspos.presentation.ui.screens.reports.ReportsScreen
 import com.example.statspos.presentation.ui.screens.sales.SalesScreen
+import com.example.statspos.presentation.viewmodels.items.ItemsSharedViewModel
 import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
 import com.example.statspos.utils.ThemeMode
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 
-@Preview(showBackground = true)
 @Composable
 fun HomeScreen(
-    onTopRouteClick: (NavKey) -> Unit = {},
+    sharedViewModel: ItemsSharedViewModel,
+    onTopRouteClick: (NavKey) -> Unit,
 ) {
     val viewModel = hiltViewModel<LocalDataViewModel>()
 
@@ -77,7 +78,7 @@ fun HomeScreen(
                     IconButton(onClick = {
                         viewModel.setTheme(ThemeMode.DARK)
                     }) {
-                        CustomIcon(
+                        AppIcon(
                             icon = Icons.Default.MoreVert,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -113,10 +114,15 @@ fun HomeScreen(
                         )
                     }
                     entry<BottomRoutes.Items> {
-                        ItemsScreen()
+                        ItemsScreen(
+                            sharedViewModel= sharedViewModel,
+                            AddItemClick = { updateId, isUpdate ->
+                                onTopRouteClick(TopRoutes.AddUpdateItem(updateId, isUpdate))
+                            }
+                        )
                     }
                     entry<BottomRoutes.Sales> {
-                        SalesScreen{key ->
+                        SalesScreen { key ->
                             onTopRouteClick(key)
                         }
                     }
@@ -161,8 +167,7 @@ private fun HomeBody(
             items(items) { item ->
                 Card(
                     modifier = Modifier
-                        .size(100.dp)
-                    ,
+                        .size(100.dp),
                     elevation = CardDefaults.cardElevation(
                         defaultElevation = 2.dp
                     )

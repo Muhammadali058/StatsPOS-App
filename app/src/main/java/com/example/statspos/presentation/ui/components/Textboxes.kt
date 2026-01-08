@@ -69,7 +69,7 @@ fun Textbox(
         unfocusedLabelColor = MaterialTheme.colorScheme.outline,
         focusedContainerColor = Color.Transparent,
         unfocusedContainerColor = Color.Transparent,
-        focusedTextColor = Color.Red,
+        focusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
         unfocusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
         focusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer,
         unfocusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -156,7 +156,7 @@ fun PasswordTextbox(
         unfocusedLabelColor = MaterialTheme.colorScheme.outline,
         focusedContainerColor = Color.Transparent,
         unfocusedContainerColor = Color.Transparent,
-        focusedTextColor = Color.Red,
+        focusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
         unfocusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
         focusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer,
         unfocusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -227,7 +227,7 @@ fun AutoCompleteItemsTextbox(
         unfocusedLabelColor = MaterialTheme.colorScheme.outline,
         focusedContainerColor = Color.Transparent,
         unfocusedContainerColor = Color.Transparent,
-        focusedTextColor = Color.Red,
+        focusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
         unfocusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
         focusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer,
         unfocusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -293,10 +293,10 @@ fun AutoCompleteItemsTextbox(
                 }
             },
             keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Send
+                imeAction = ImeAction.Go
             ),
             keyboardActions = KeyboardActions(
-                onSend = {
+                onGo = {
                     onKeyboardAction(value)
                 }
             ),
@@ -310,7 +310,7 @@ fun AutoCompleteItemsTextbox(
                 offset = IntOffset(
                     x = 0,
 //                    x = textFieldPosition.x.toInt(),
-                    y = textFieldSize.height
+                    y = textFieldSize.height - 6
 //                    y = (textFieldPosition.y + textFieldSize.height).toInt()
                 ),
                 onDismissRequest = { expanded = false }

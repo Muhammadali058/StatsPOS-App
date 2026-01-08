@@ -24,6 +24,7 @@ import javax.inject.Inject
 class ItemsViewModel @Inject constructor(
     private val itemsRepo: ItemsRepository
 ) : ViewModel() {
+
     // region ScreenState
     data class ScreenState(
         val items: List<Items> = emptyList(),
@@ -33,8 +34,12 @@ class ItemsViewModel @Inject constructor(
         val search: String = "",
         val categoryName: String = "",
         val subCategoryName: String = "",
-        val categoryId: Long = 0.toLong(),
-        val subCategoryId: Long = 0.toLong(),
+        val vendorName: String = "",
+        val filterName: String = "",
+        val categoryId: Long = 0L,
+        val subCategoryId: Long = 0L,
+        val vendorId: Long = 0L,
+        val filterId: Long = 0L,
 
         val isLoading: Boolean = false,
         val isLoadingNextPage: Boolean = false,
@@ -83,6 +88,10 @@ class ItemsViewModel @Inject constructor(
 
     // endregion
 
+    init {
+        loadItems()
+    }
+
     // region onChangeMethods
     fun onSearchChange(value: String) {
         state.update { it.copy(search = value) }
@@ -96,6 +105,14 @@ class ItemsViewModel @Inject constructor(
         state.update { it.copy(subCategoryName = value) }
     }
 
+    fun onVendorNameChange(value: String) {
+        state.update { it.copy(vendorName = value) }
+    }
+
+    fun onFilterNameChange(value: String) {
+        state.update { it.copy(filterName = value) }
+    }
+
     fun onCategoryIdChange(value: Long) {
         state.update { it.copy(categoryId = value) }
     }
@@ -103,11 +120,15 @@ class ItemsViewModel @Inject constructor(
     fun onSubCategoryIdChange(value: Long) {
         state.update { it.copy(subCategoryId = value) }
     }
-    // endregion
 
-    init {
-        loadItems()
+    fun onVendorIdChange(value: Long) {
+        state.update { it.copy(vendorId = value) }
     }
+
+    fun onFilterIdChange(value: Long) {
+        state.update { it.copy(filterId = value) }
+    }
+    // endregion
 
     // region Network calls
     fun loadItems() {
@@ -124,15 +145,7 @@ class ItemsViewModel @Inject constructor(
                 )
             }
 
-            val params = JsonObject().apply {
-                addProperty("page", 1)
-                addProperty("itemsPerPage", HP.itemsPerPage)
-                addProperty("searchBy", 0)
-                addProperty("categoryId", 0)
-                addProperty("subCategoryId", 0)
-                addProperty("vendorId", 0)
-                addProperty("text", state.value.search)
-            }
+            val params = getSearchParams(1)
 
             when (val result = itemsRepo.loadItems(params)) {
                 is Resource.Error -> resultError(result.error)
@@ -166,15 +179,7 @@ class ItemsViewModel @Inject constructor(
                 )
             }
 
-            val params = JsonObject().apply {
-                addProperty("page", state.value.page)
-                addProperty("itemsPerPage", HP.itemsPerPage)
-                addProperty("searchBy", 0)
-                addProperty("categoryId", 0)
-                addProperty("subCategoryId", 0)
-                addProperty("vendorId", 0)
-                addProperty("text", state.value.search)
-            }
+            val params = getSearchParams(state.value.page)
 
             when (val result = itemsRepo.loadItems(params)) {
                 is Resource.Error -> {
@@ -207,6 +212,9 @@ class ItemsViewModel @Inject constructor(
     fun getItem() {
         viewModelScope.launch {
             if (state.value.isLoading)
+                return@launch
+
+            if (state.value.search.isEmpty())
                 return@launch
 
             state.update {
@@ -262,5 +270,16 @@ class ItemsViewModel @Inject constructor(
     private fun resultSuccess() {
         state.update { it.copy(isLoading = false, error = null) }
     }
+
+    private fun getSearchParams(page: Int): JsonObject = JsonObject().apply {
+        addProperty("page", page)
+        addProperty("itemsPerPage", HP.itemsPerPage)
+        addProperty("searchBy", state.value.filterId)
+        addProperty("categoryId", state.value.categoryId)
+        addProperty("subCategoryId", state.value.subCategoryId)
+        addProperty("vendorId", state.value.vendorId)
+        addProperty("text", state.value.search)
+    }
+
     // endregion
 }

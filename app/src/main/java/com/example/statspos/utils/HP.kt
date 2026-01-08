@@ -61,6 +61,19 @@ object HP {
     var shifts = emptyList<DropdownItem>()
     var branch = Branches()
 
+    // Items
+    var itemFilters = listOf(
+        DropdownItem(0, "By Name"),
+        DropdownItem(1, "By Barcode"),
+        DropdownItem(2, "By Ref. Code"),
+        DropdownItem(3, "By Urduname"),
+        DropdownItem(4, "By Cost"),
+        DropdownItem(5, "By Retail"),
+        DropdownItem(6, "By Wholesale"),
+        DropdownItem(7, "By Carton Rate"),
+        DropdownItem(8, "By Carton Size"),
+    )
+
     fun setDropdowns(jsonObject: JsonObject) {
         settings = Gson().get<Settings>(jsonObject.get("settings").asJsonObject)
         passwords = Gson().get<Passwords>(jsonObject.get("passwords").asJsonObject)

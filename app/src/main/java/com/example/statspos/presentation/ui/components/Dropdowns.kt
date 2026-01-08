@@ -1,15 +1,23 @@
 package com.example.statspos.presentation.ui.components
 
+import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -17,6 +25,9 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -44,6 +55,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import com.example.statspos.domain.models.DropdownItem
 
@@ -59,18 +71,6 @@ fun Dropdown(
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     shape: Shape = OutlinedTextFieldDefaults.shape,
-    colors: TextFieldColors = TextFieldDefaults.colors(
-        focusedIndicatorColor = MaterialTheme.colorScheme.outlineVariant,
-        unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
-        focusedLabelColor = MaterialTheme.colorScheme.outlineVariant,
-        unfocusedLabelColor = MaterialTheme.colorScheme.outline,
-        focusedContainerColor = Color.Transparent,
-        unfocusedContainerColor = Color.Transparent,
-        focusedTextColor = Color.Red,
-        unfocusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        focusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer,
-    ),
     textStyle: TextStyle = TextStyle(),
     enabled: Boolean = true,
     readOnly: Boolean = false,
@@ -126,7 +126,6 @@ fun Dropdown(
                     textFieldSize = coordinates.size
                 },
             shape = shape,
-            colors = colors,
             enabled = enabled,
             readOnly = readOnly,
             singleLine = singleLine,
@@ -167,7 +166,7 @@ fun Dropdown(
                 alignment = Alignment.TopStart,
                 offset = IntOffset(
                     x = 0,
-                    y = textFieldSize.height
+                    y = textFieldSize.height - 6
                 ),
                 onDismissRequest = { expanded = false }
             ) {
@@ -222,18 +221,6 @@ fun SubDropdown(
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     shape: Shape = OutlinedTextFieldDefaults.shape,
-    colors: TextFieldColors = TextFieldDefaults.colors(
-        focusedIndicatorColor = MaterialTheme.colorScheme.outlineVariant,
-        unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
-        focusedLabelColor = MaterialTheme.colorScheme.outlineVariant,
-        unfocusedLabelColor = MaterialTheme.colorScheme.outline,
-        focusedContainerColor = Color.Transparent,
-        unfocusedContainerColor = Color.Transparent,
-        focusedTextColor = Color.Red,
-        unfocusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        focusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer,
-    ),
     textStyle: TextStyle = TextStyle(),
     enabled: Boolean = true,
     readOnly: Boolean = false,
@@ -308,7 +295,6 @@ fun SubDropdown(
                     textFieldSize = coordinates.size
                 },
             shape = shape,
-            colors = colors,
             enabled = enabled,
             readOnly = readOnly,
             singleLine = singleLine,
@@ -349,7 +335,7 @@ fun SubDropdown(
                 alignment = Alignment.TopStart,
                 offset = IntOffset(
                     x = 0,
-                    y = textFieldSize.height
+                    y = textFieldSize.height - 6
                 ),
                 onDismissRequest = { expanded = false }
             ) {
@@ -385,6 +371,187 @@ fun SubDropdown(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ComboBox(
+    modifier: Modifier = Modifier,
+    items: List<DropdownItem>,
+    selectedItem: DropdownItem?,
+    onItemSelected: (DropdownItem) -> Unit,
+    listSize: Dp = 200.dp,
+    label: @Composable (() -> Unit)? = null,
+    placeholder: @Composable (() -> Unit)? = null,
+    shape: Shape = OutlinedTextFieldDefaults.shape,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        Textbox(
+            value = selectedItem?.name ?: "",
+            onValueChange = {},
+            modifier = modifier
+                .menuAnchor(),
+            shape = shape,
+            readOnly = true,
+            label = label,
+            placeholder = placeholder,
+            leadingIcon = {
+                IconButton(
+                    onClick = {
+                        expanded = true
+                    }
+                ) {
+                    AppIcon(
+                        icon = Icons.Default.ArrowDropDown
+                    )
+                }
+            },
+            trailingIcon = {
+                IconButton(
+                    onClick = {
+                        expanded = false
+                        onItemSelected(items[0])
+                    }
+                ) {
+                    AppIcon(
+                        icon = Icons.Default.Clear,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            },
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.primaryContainer)
+                .heightIn(max = listSize)
+        ) {
+            items.forEach { item ->
+                DropdownMenuItem(
+                    modifier = Modifier.height(34.dp),
+                    text = {
+                        Text(
+                            text = item.name,
+                            style = TextStyle(
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                fontSize = 14.sp,
+                            ),
+                            modifier = Modifier
+                                .padding(vertical = 2.dp)
+                        )
+                    },
+                    onClick = {
+                        onItemSelected(item)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CustomComboBox(
+    modifier: Modifier = Modifier,
+    items: List<DropdownItem>,
+    selectedItem: DropdownItem?,
+    listSize: Dp = 200.dp,
+    label: String,
+    onItemSelected: (DropdownItem) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+    ) {
+
+        Box(
+            modifier = modifier
+                .menuAnchor()
+                .fillMaxWidth()
+                .border(
+                    1.dp,
+                    MaterialTheme.colorScheme.outline,
+                    RoundedCornerShape(4.dp)
+                )
+                .padding(vertical = 12.dp, horizontal = 12.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                AppIcon(
+                    icon = Icons.Default.ArrowDropDown,
+                    modifier = Modifier
+                        .clickable {  }
+                )
+                Spacer(Modifier.width(16.dp))
+
+                Text(
+                    text = selectedItem?.name ?: label,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable(
+                            indication = null,
+                            interactionSource = MutableInteractionSource()
+                        ){
+                            expanded = true
+                        },
+                    style = TextStyle(
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontSize = if(selectedItem == null) 16.sp else 14.sp,
+                    ),
+                )
+                AppIcon(
+                    icon = Icons.Default.Clear,
+                    size = 20.dp,
+                    modifier = Modifier
+                        .clickable {
+                            expanded = false
+                            onItemSelected(items[0])
+                        }
+                )
+            }
+        }
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.primaryContainer)
+                .heightIn(max = listSize)
+        ) {
+            items.forEach { item ->
+                DropdownMenuItem(
+                    modifier = Modifier.height(34.dp),
+                    text = {
+                        Text(
+                            text = item.name,
+                            style = TextStyle(
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                fontSize = 14.sp,
+                            ),
+                            modifier = Modifier
+                                .padding(vertical = 2.dp)
+                        )
+                    },
+                    onClick = {
+                        onItemSelected(item)
+                        expanded = false
+                    }
+                )
             }
         }
     }

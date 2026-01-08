@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -24,22 +25,28 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.NavKey
@@ -186,8 +193,8 @@ fun BottomBar(
                 HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    thickness = if(selected) 2.dp else 1.dp,
-                    color = if(selected) selectedColor else MaterialTheme.colorScheme.primaryContainer,
+                    thickness = if (selected) 2.dp else 1.dp,
+                    color = if (selected) selectedColor else MaterialTheme.colorScheme.primaryContainer,
                 )
 
                 Spacer(Modifier.height(6.dp))
@@ -241,4 +248,35 @@ fun AppSnackbarHost(
             shape = RoundedCornerShape(16.dp),
         )
     }
+}
+
+@Composable
+fun BottomSheet(
+    modifier: Modifier = Modifier,
+    sheetState: SheetState,
+    onDismissRequest: () -> Unit,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
+    contentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    tonalElevation: Dp = 0.dp,
+    shape: Shape = BottomSheetDefaults.ExpandedShape,
+    dragHandle: @Composable (() -> Unit)? = {
+        BottomSheetDefaults.DragHandle(
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+        )
+    },
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetState = sheetState,
+        modifier = modifier
+            .fillMaxHeight()
+            .statusBarsPadding(),
+        containerColor = containerColor,
+        contentColor = contentColor,
+        tonalElevation = tonalElevation,
+        shape = shape,
+        dragHandle = dragHandle,
+        content = content
+    )
 }

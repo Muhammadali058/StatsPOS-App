@@ -1,20 +1,18 @@
 package com.example.statspos.utils
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.statspos.domain.models.DropdownItem
-import com.example.statspos.domain.models.items.Categories
 import com.example.statspos.domain.models.main.Branches
 import com.example.statspos.domain.models.main.LocalClients
 import com.example.statspos.domain.models.utilities.settings.AdminPasswords
 import com.example.statspos.domain.models.utilities.settings.AdminSettings
 import com.example.statspos.domain.models.utilities.settings.Passwords
+import com.example.statspos.domain.models.utilities.settings.Settings
 import com.example.statspos.domain.models.utilities.users.UserRights
 import com.example.statspos.domain.models.utilities.users.Users
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import okhttp3.internal.http2.Settings
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId

@@ -209,12 +209,12 @@ class ItemsViewModel @Inject constructor(
         }
     }
 
-    fun getItem() {
+    fun getItem(value: String) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
 
-            if (state.value.search.isEmpty())
+            if (value.isEmpty())
                 return@launch
 
             state.update {
@@ -226,7 +226,7 @@ class ItemsViewModel @Inject constructor(
                 )
             }
 
-            when (val result = itemsRepo.isBarcodeExists(state.value.search)) {
+            when (val result = itemsRepo.isBarcodeExists(value)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {

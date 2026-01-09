@@ -23,8 +23,8 @@ import com.example.statspos.presentation.ui.utils.ConstantSize
 
 @Composable
 fun AppIcon(
-    modifier: Modifier = Modifier,
     @DrawableRes icon: Int,
+    modifier: Modifier = Modifier,
     size: Dp = ConstantSize.DEFAULT_ICON,
     contentDescription: String? = null,
     tint: Color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -41,8 +41,8 @@ fun AppIcon(
 
 @Composable
 fun AppIcon(
-    modifier: Modifier = Modifier,
     icon: ImageVector,
+    modifier: Modifier = Modifier,
     size: Dp = ConstantSize.DEFAULT_ICON,
     contentDescription: String? = null,
     tint: Color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -58,9 +58,9 @@ fun AppIcon(
 
 @Composable
 fun AppIconButton(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
     icon: ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     buttonSize: Dp = ConstantSize.DEFAULT_ICON_BUTTON,
     size: Dp = ConstantSize.DEFAULT_ICON,
     enabled: Boolean = true,
@@ -88,9 +88,9 @@ fun AppIconButton(
 
 @Composable
 fun AppIconButton(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
     @DrawableRes icon: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     buttonSize: Dp = ConstantSize.DEFAULT_ICON_BUTTON,
     size: Dp = ConstantSize.DEFAULT_ICON,
     enabled: Boolean = true,

@@ -64,11 +64,11 @@ fun StatsPOSTheme(
     val view = LocalView.current
     SideEffect {
         val window = (view.context as Activity).window
-        window.navigationBarColor = colorScheme.surface.toArgb()
         window.statusBarColor = colorScheme.surfaceVariant.toArgb()
+        window.navigationBarColor = colorScheme.surface.toArgb()
         WindowCompat.getInsetsController(window, view).apply {
-            isAppearanceLightNavigationBars = !darkTheme
             isAppearanceLightStatusBars = false
+            isAppearanceLightNavigationBars = !darkTheme
         }
     }
 

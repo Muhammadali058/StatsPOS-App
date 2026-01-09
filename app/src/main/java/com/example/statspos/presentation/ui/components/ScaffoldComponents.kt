@@ -40,7 +40,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.contentColorFor
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -53,6 +55,7 @@ import androidx.navigation3.runtime.NavKey
 import com.example.statspos.presentation.ui.screens.BottomRoutes
 import com.example.statspos.presentation.ui.screens.TopRoutes
 import com.example.statspos.utils.SnackbarType
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 data class TopItem(
     val text: String,
@@ -276,7 +279,17 @@ fun BottomSheet(
         contentColor = contentColor,
         tonalElevation = tonalElevation,
         shape = shape,
+//        scrimColor = MaterialTheme.colorScheme.surfaceVariant,
         dragHandle = dragHandle,
-        content = content
-    )
+    ){
+        val systemUiController = rememberSystemUiController()
+        SideEffect {
+            systemUiController.setStatusBarColor(
+                color = Color.Transparent,
+                darkIcons = false
+            )
+        }
+
+        content()
+    }
 }

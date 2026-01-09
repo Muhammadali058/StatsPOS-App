@@ -2,9 +2,11 @@ package com.example.statspos.presentation.ui.screens.sales
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,12 +20,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
-import com.example.statspos.domain.models.DropdownItem
-import com.example.statspos.presentation.ui.components.ComboBox
-import com.example.statspos.presentation.ui.components.Dropdown
+import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
-import com.example.statspos.utils.HP
-import com.example.statspos.utils.showToast
 
 @Composable
 fun SalesScreen(
@@ -43,22 +41,9 @@ private fun Body(modifier: Modifier = Modifier) {
             .fillMaxSize()
             .padding(ConstantPaddings.BODY_HORIZONTAL)
             .padding(vertical = 8.dp),
-        verticalArrangement = Arrangement.Top,
+        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        var text by remember { mutableStateOf("") }
-        Dropdown(
-            modifier = Modifier
-                .fillMaxWidth(),
-            value = text,
-            onValueChange = { text = it },
-            items = HP.itemFilters,
-            onItemSelected = { dropdownItem ->
-                context.showToast(dropdownItem.id.toString())
-            },
-            label = {
-                Text(text = "Search By")
-            }
-        )
+        Text("Sales")
     }
 }

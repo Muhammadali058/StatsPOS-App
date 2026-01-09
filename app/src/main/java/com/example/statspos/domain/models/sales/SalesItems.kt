@@ -38,4 +38,6 @@ data class SalesItems(
 
     // Extras not part of database
     var isPostedBill: Boolean? = null,
+    var salesType: Int? = null,
+    var isEstimated: Boolean? = null,
 )

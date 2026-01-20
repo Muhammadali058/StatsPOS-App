@@ -20,8 +20,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
+import com.example.statspos.presentation.ui.components.AppSwitch
 import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
+import com.example.statspos.utils.ThemeMode
 
 @Composable
 fun SalesScreen(
@@ -36,6 +38,8 @@ fun SalesScreen(
 @Composable
 private fun Body(modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    var darkModeChecked by remember { mutableStateOf(false) }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -44,6 +48,12 @@ private fun Body(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Sales")
+        AppSwitch(
+            label = "Dark Mode",
+            checked = darkModeChecked,
+            onCheckedChange = {
+                darkModeChecked = it
+            }
+        )
     }
 }

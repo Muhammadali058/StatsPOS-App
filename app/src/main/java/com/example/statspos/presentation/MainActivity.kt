@@ -8,8 +8,10 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.statspos.presentation.ui.screens.items.AddUpdateItemScreen
 import com.example.statspos.presentation.ui.screens.main.main.MainScreen
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
+import com.example.statspos.presentation.viewmodels.items.ItemsSharedViewModel
 import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
 import com.example.statspos.utils.ThemeMode
 import dagger.hilt.android.AndroidEntryPoint
@@ -30,10 +32,17 @@ class MainActivity : ComponentActivity() {
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
             }
 
+            val sharedViewModel = hiltViewModel<ItemsSharedViewModel>()
             StatsPOSTheme(
                 darkTheme = darkTheme
             ) {
                 App()
+
+//                AddUpdateItemScreen(
+//                    sharedViewModel = sharedViewModel,
+//                ){
+//                    finish()
+//                }
             }
         }
     }

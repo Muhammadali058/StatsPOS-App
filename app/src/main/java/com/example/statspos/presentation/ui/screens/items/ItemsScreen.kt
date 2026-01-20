@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FilterList
@@ -465,11 +466,11 @@ private fun ItemListCard(
                                 .fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
-                            LabelMedium(item.cost.toString(), Modifier.weight(1f))
-                            LabelMedium(item.retail.toString(), Modifier.weight(1f))
-                            LabelMedium(item.wholesale.toString(), Modifier.weight(1f))
-                            LabelMedium(item.rate3.toString(), Modifier.weight(1f))
-                            LabelMedium(item.rate4.toString(), Modifier.weight(1f))
+                            LabelMedium(HP.formatRate(item.cost), Modifier.weight(1f))
+                            LabelMedium(HP.formatRate(item.retail), Modifier.weight(1f))
+                            LabelMedium(HP.formatRate(item.wholesale), Modifier.weight(1f))
+                            LabelMedium(HP.formatRate(item.rate3), Modifier.weight(1f))
+                            LabelMedium(HP.formatRate(item.rate4), Modifier.weight(1f))
                         }
                     } else {
                         // Rows else fourRateSystem
@@ -501,22 +502,46 @@ private fun ItemListCard(
                             horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
                             LabelMedium(
-                                text = item.cost.toString(),
+                                text = HP.formatRate(item.cost),
                                 Modifier.weight(1f)
                             )
                             LabelMedium(
-                                text = item.retail.toString(),
+                                text = HP.formatRate(item.retail),
                                 Modifier.weight(1f)
                             )
                             LabelMedium(
-                                text = item.wholesale.toString(),
+                                text = HP.formatRate(item.wholesale),
                                 Modifier.weight(1f)
                             )
                             LabelMedium(
-                                text = if (HP.settings.saleCartons == true) item.crtnRate.toString() else item.marketPrice.toString(),
+                                text = if (HP.settings.saleCartons == true) HP.formatRate(item.crtnRate) else HP.formatRate(item.marketPrice),
                                 Modifier.weight(1f)
                             )
                         }
+                    }
+                }
+            }
+
+            // Stock
+            Spacer(Modifier.height(2.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .weight(1f),
+                ) {
+                    HeadingMedium("Stock Pcs: ")
+                    LabelMedium(HP.formatRate(item.stockPcs))
+                }
+                if(HP.settings.saleCartons == true) {
+                    Row(
+                        modifier = Modifier
+                            .weight(1f),
+                    ) {
+                        HeadingMedium("Stock Crtn: ")
+                        LabelMedium(item.stockCrtn.toString())
                     }
                 }
             }

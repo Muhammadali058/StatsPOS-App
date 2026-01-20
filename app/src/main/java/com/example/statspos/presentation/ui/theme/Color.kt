@@ -20,7 +20,8 @@ val textLight = Color(0xFF494949)
 val primaryDark = Color(0xFFF3F3F3)
 val onPrimaryDark = Color(0xFF0A0A0A)
 val backgroundDark = Color(0xFF0A0A0A)
-val foregroundDark = Color(0xFF1E1E1E)
+//val foregroundDark = Color(0xFF1E1E1E)
+val foregroundDark = Color(0xFF1C1C22)
 val textDark = Color(0xFFF3F3F3)
 
 // Dark mode colors 2

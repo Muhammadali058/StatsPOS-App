@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.R
-import com.example.statspos.presentation.ui.components.MyCheckbox
+import com.example.statspos.presentation.ui.components.AppCheckbox
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
@@ -211,8 +211,9 @@ private fun Body(
         Spacer(
             Modifier.height(8.dp)
         )
-        MyCheckbox(
+        AppCheckbox(
             modifier = Modifier.fillMaxWidth(),
+            label = "Remember Me",
             checked = remember,
             onCheckedChange = onRememberCheckedChange
         )

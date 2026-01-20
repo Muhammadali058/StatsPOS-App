@@ -15,19 +15,24 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.statspos.domain.models.utilities.BarcodeLabels
 
 @Composable
-fun MyCheckbox(
+fun AppCheckbox(
     modifier: Modifier = Modifier,
     checked: Boolean,
+    label: String,
     enabled: Boolean = true,
     onCheckedChange: (Boolean) -> Unit
 ) {
@@ -51,7 +56,7 @@ fun MyCheckbox(
             )
         )
         Text(
-            text = "Remember me",
+            text = label,
             style = TextStyle(
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -63,9 +68,10 @@ fun MyCheckbox(
 }
 
 @Composable
-fun MyCircleCheckbox(
+fun CircleCheckbox(
     modifier: Modifier = Modifier,
     checked: Boolean,
+    label: String,
     enabled: Boolean = true,
     onCheckedChange: (Boolean) -> Unit
 ) {
@@ -98,7 +104,49 @@ fun MyCircleCheckbox(
             )
         }
         Text(
-            text = "Remember me",
+            text = label,
+            style = TextStyle(
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            ),
+            modifier = Modifier
+                .padding(start = 4.dp)
+        )
+    }
+}
+
+
+@Composable
+fun AppSwitch(
+    modifier: Modifier = Modifier,
+    checked: Boolean,
+    label: String,
+    enabled: Boolean = true,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .height(20.dp)
+    ) {
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            enabled = enabled,
+            modifier = Modifier
+                .scale(.7f)
+                .size(40.dp),
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                uncheckedThumbColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                checkedTrackColor = MaterialTheme.colorScheme.primary,
+                uncheckedTrackColor = MaterialTheme.colorScheme.primaryContainer,
+                uncheckedBorderColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+        )
+        Text(
+            text = label,
             style = TextStyle(
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,

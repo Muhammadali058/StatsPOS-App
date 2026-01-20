@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun AppText(
@@ -15,12 +16,14 @@ fun AppText(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onPrimaryContainer,
     style: TextStyle = LocalTextStyle.current,
+    textAlign: TextAlign? = null,
 ) {
     Text(
         modifier = modifier,
         text = text,
         color = color,
-        style = style
+        style = style,
+        textAlign = textAlign,
     )
 }
 

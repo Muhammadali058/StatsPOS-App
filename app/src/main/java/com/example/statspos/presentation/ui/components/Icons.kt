@@ -63,6 +63,7 @@ fun AppIconButton(
     modifier: Modifier = Modifier,
     buttonSize: Dp = ConstantSize.DEFAULT_ICON_BUTTON,
     size: Dp = ConstantSize.DEFAULT_ICON,
+    tint: Color = MaterialTheme.colorScheme.onPrimaryContainer,
     enabled: Boolean = true,
     colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     interactionSource: MutableInteractionSource? = null,
@@ -80,6 +81,7 @@ fun AppIconButton(
         AppIcon(
             icon = icon,
             size = size,
+            tint = tint,
             modifier = Modifier
         )
     }
@@ -94,6 +96,7 @@ fun AppIconButton(
     buttonSize: Dp = ConstantSize.DEFAULT_ICON_BUTTON,
     size: Dp = ConstantSize.DEFAULT_ICON,
     enabled: Boolean = true,
+    tint: Color = MaterialTheme.colorScheme.onPrimaryContainer,
     colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     interactionSource: MutableInteractionSource? = null,
     shape: Shape = IconButtonDefaults.standardShape,
@@ -110,6 +113,7 @@ fun AppIconButton(
         AppIcon(
             icon = icon,
             size = size,
+            tint = tint,
             modifier = Modifier
         )
     }

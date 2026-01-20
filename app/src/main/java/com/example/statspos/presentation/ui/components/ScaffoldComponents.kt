@@ -258,7 +258,7 @@ fun BottomSheet(
     modifier: Modifier = Modifier,
     sheetState: SheetState,
     onDismissRequest: () -> Unit,
-    containerColor: Color = MaterialTheme.colorScheme.surface,
+    containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
     contentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
     tonalElevation: Dp = 0.dp,
     shape: Shape = BottomSheetDefaults.ExpandedShape,

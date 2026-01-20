@@ -13,6 +13,7 @@ import com.example.statspos.domain.models.utilities.users.UserRights
 import com.example.statspos.domain.models.utilities.users.Users
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import java.text.DecimalFormat
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
@@ -126,6 +127,33 @@ object HP {
     fun getImageUrl(imageUrl: String): String {
         return DB.HOST + clientId.toString() + "/images/" + imageUrl
     }
+
+    fun formatRate(
+        rate: Double?,
+        numberOfDecimals: Int = 2   // optional parameter
+    ): String {
+        if (rate == null) {
+            return ""
+        }
+
+        val pattern = if (numberOfDecimals > 0) {
+            "0." + "#".repeat(numberOfDecimals)
+        } else {
+            "0"
+        }
+
+        val df = DecimalFormat(pattern)
+        return df.format(rate)
+    }
+
+//    fun formatRate(rate: Double?): String {
+//        if (rate == null) {
+//            return ""
+//        }
+//
+//        val df = DecimalFormat("0.###")
+//        return df.format(rate)
+//    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun getFormatedDate(localDate: LocalDate): String {

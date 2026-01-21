@@ -111,4 +111,7 @@ dependencies {
     // ML Kit Barcode Scanning
     implementation("com.google.mlkit:barcode-scanning:17.2.0")
 
+//    ExpressionBuilder
+    implementation("net.objecthunter:exp4j:0.4.8")
+
 }

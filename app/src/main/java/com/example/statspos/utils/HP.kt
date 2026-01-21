@@ -13,12 +13,14 @@ import com.example.statspos.domain.models.utilities.users.UserRights
 import com.example.statspos.domain.models.utilities.users.Users
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import net.objecthunter.exp4j.ExpressionBuilder
 import java.text.DecimalFormat
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import kotlin.math.exp
 
 object HP {
     var localClient: LocalClients? = null
@@ -128,10 +130,7 @@ object HP {
         return DB.HOST + clientId.toString() + "/images/" + imageUrl
     }
 
-    fun formatRate(
-        rate: Double?,
-        numberOfDecimals: Int = 2   // optional parameter
-    ): String {
+    fun formatRate(rate: Double?, numberOfDecimals: Int = 2): String {
         if (rate == null) {
             return ""
         }
@@ -146,14 +145,45 @@ object HP {
         return df.format(rate)
     }
 
-//    fun formatRate(rate: Double?): String {
-//        if (rate == null) {
-//            return ""
-//        }
-//
-//        val df = DecimalFormat("0.###")
-//        return df.format(rate)
-//    }
+    fun getDoubleValue(value: String): Double {
+        return try {
+            value.toDouble()
+        } catch (e: Exception) {
+            0.0
+        }
+    }
+
+    fun getIntValue(value: String): Int {
+        return try {
+            value.toInt()
+        } catch (e: Exception) {
+            0
+        }
+    }
+
+    fun getLongValue(value: String): Long {
+        return try {
+            value.toLong()
+        } catch (e: Exception) {
+            0L
+        }
+    }
+
+    fun evaluateExpression(expression: String): String {
+        return try {
+            val result = ExpressionBuilder(expression)
+                .build()
+                .evaluate()
+
+            if (result % 1 == 0.0)
+                result.toLong().toString()
+            else
+                result.toString()
+
+        } catch (e: Exception) {
+            expression
+        }
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun getFormatedDate(localDate: LocalDate): String {

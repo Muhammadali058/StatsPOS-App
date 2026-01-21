@@ -42,7 +42,8 @@ fun ExpandableSection(
                 .fillMaxWidth()
                 .clickable { expanded = !expanded }
                 .padding(ConstantPaddings.BODY_HORIZONTAL)
-                .padding(vertical = 16.dp),
+                .padding(vertical = 16.dp)
+            ,
             verticalAlignment = Alignment.CenterVertically
         ) {
             AppText(
@@ -66,7 +67,7 @@ fun ExpandableSection(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(ConstantPaddings.BODY_HORIZONTAL)
-                    .padding(vertical = 8.dp)
+//                    .padding(vertical = 8.dp)
             ) {
                 content()
             }

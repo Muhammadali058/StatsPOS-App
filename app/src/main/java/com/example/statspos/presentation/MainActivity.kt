@@ -36,13 +36,13 @@ class MainActivity : ComponentActivity() {
             StatsPOSTheme(
                 darkTheme = darkTheme
             ) {
-                App()
+//                App()
 
-//                AddUpdateItemScreen(
-//                    sharedViewModel = sharedViewModel,
-//                ){
-//                    finish()
-//                }
+                AddUpdateItemScreen(
+                    sharedViewModel = sharedViewModel,
+                ){
+                    finish()
+                }
             }
         }
     }

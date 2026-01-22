@@ -1,5 +1,10 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.example.statspos.presentation.ui.components
 
+import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -13,13 +18,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -27,11 +37,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
@@ -54,6 +66,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import com.example.statspos.R
+import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.utils.HP
 
@@ -154,18 +167,6 @@ fun PasswordTextbox(
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     shape: Shape = OutlinedTextFieldDefaults.shape,
-    colors: TextFieldColors = TextFieldDefaults.colors(
-        focusedIndicatorColor = MaterialTheme.colorScheme.outlineVariant,
-        unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
-        focusedLabelColor = MaterialTheme.colorScheme.outlineVariant,
-        unfocusedLabelColor = MaterialTheme.colorScheme.outline,
-        focusedContainerColor = Color.Transparent,
-        unfocusedContainerColor = Color.Transparent,
-        focusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        unfocusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        focusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer,
-    ),
     textStyle: TextStyle = TextStyle(),
     enabled: Boolean = true,
     readOnly: Boolean = false,
@@ -189,7 +190,6 @@ fun PasswordTextbox(
         label = label,
         placeholder = placeholder,
         shape = shape,
-        colors = colors,
         textStyle = textStyle,
         enabled = enabled,
         readOnly = readOnly,
@@ -225,18 +225,6 @@ fun AutoCompleteItemsTextbox(
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     shape: Shape = OutlinedTextFieldDefaults.shape,
-    colors: TextFieldColors = TextFieldDefaults.colors(
-        focusedIndicatorColor = MaterialTheme.colorScheme.outlineVariant,
-        unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
-        focusedLabelColor = MaterialTheme.colorScheme.outlineVariant,
-        unfocusedLabelColor = MaterialTheme.colorScheme.outline,
-        focusedContainerColor = Color.Transparent,
-        unfocusedContainerColor = Color.Transparent,
-        focusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        unfocusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        focusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer,
-    ),
     textStyle: TextStyle = TextStyle(),
     enabled: Boolean = true,
     readOnly: Boolean = false,
@@ -274,7 +262,6 @@ fun AutoCompleteItemsTextbox(
             label = label,
             placeholder = placeholder,
             shape = shape,
-            colors = colors,
             textStyle = textStyle,
             enabled = enabled,
             readOnly = readOnly,
@@ -351,6 +338,118 @@ fun AutoCompleteItemsTextbox(
                             )
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DiscountTextbox(
+    modifier: Modifier = Modifier,
+    value: String,
+    onValueChange: (String) -> Unit,
+    isDiscRsPer: Boolean,
+    onIsDiscRsPerChange: (Boolean) -> Unit,
+) {
+    Box(
+        modifier = modifier,
+    ) {
+        val items = remember {
+            listOf(
+                DropdownItem(0L, "Rs."),
+                DropdownItem(1L, "%"),
+            )
+        }
+        var selectedItem by remember { mutableStateOf(if(isDiscRsPer) items[0] else items[1]) }
+        var expanded by remember { mutableStateOf(false) }
+
+        LaunchedEffect(isDiscRsPer) {
+            selectedItem = if(isDiscRsPer)
+                items[0]
+            else
+                items[1]
+        }
+
+        Textbox(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier
+                .fillMaxWidth(),
+            label = {
+                Text("Discount")
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Decimal,
+            )
+        )
+
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded },
+            modifier = Modifier
+                .width(85.dp)
+                .align(Alignment.CenterEnd)
+        ) {
+            Textbox(
+                value = selectedItem.name,
+                onValueChange = {},
+                modifier = Modifier
+                    .menuAnchor()
+                    .border(0.dp, Color.Transparent),
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedLabelColor = MaterialTheme.colorScheme.outlineVariant,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.outline,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    focusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
+                readOnly = true,
+                trailingIcon = {
+                    IconButton(
+                        onClick = {
+                            expanded = true
+                        }
+                    ) {
+                        AppIcon(
+                            icon = Icons.Default.ArrowDropDown
+                        )
+                    }
+                },
+            )
+
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .heightIn(max = 100.dp)
+            ) {
+                items.forEach { item ->
+                    DropdownMenuItem(
+                        modifier = Modifier.height(34.dp),
+                        text = {
+                            Text(
+                                text = item.name,
+                                style = TextStyle(
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    fontSize = 14.sp,
+                                ),
+                                modifier = Modifier
+                                    .padding(vertical = 2.dp)
+                            )
+                        },
+                        onClick = {
+                            selectedItem = item
+                            onIsDiscRsPerChange(item.id == 0L)
+                            expanded = false
+                        }
+                    )
                 }
             }
         }

@@ -42,7 +42,7 @@ fun ExpandableSection(
                 .fillMaxWidth()
                 .clickable { expanded = !expanded }
                 .padding(ConstantPaddings.BODY_HORIZONTAL)
-                .padding(vertical = 16.dp)
+                .padding(vertical = 12.dp)
             ,
             verticalAlignment = Alignment.CenterVertically
         ) {

@@ -1,8 +1,10 @@
 package com.example.statspos.presentation.viewmodels.main
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.repository.main.MainRepository
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
@@ -63,6 +65,28 @@ class MainViewModel @Inject constructor(
     // endregion
 
     // region Network calls
+
+    fun loadMainData(onSuccess: () -> Unit){
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+            beforeRequest()
+
+            when (val result = mainRepository.loadData()) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    Log.d("TAG", result.data.toString())
+                    HP.setDropdowns(result.data)
+
+                    onSuccess()
+                }
+            }
+        }
+    }
+
     fun uploadImage(file: File) {
         // Call this method in compose in button onClick
 //        val context = LocalContext.current

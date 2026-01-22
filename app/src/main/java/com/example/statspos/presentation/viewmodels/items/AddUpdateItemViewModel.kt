@@ -1,5 +1,6 @@
 package com.example.statspos.presentation.viewmodels.items
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.repository.items.ItemsRepository
@@ -27,32 +28,32 @@ class AddUpdateItemViewModel @Inject constructor(
         val urduname: String = "",
         val refCode: String = "",
 
-        val cost: Double = 0.0,
-        val retail: Double = 0.0,
-        val wholesale: Double = 0.0,
-        val rate3: Double = 0.0,
-        val rate4: Double = 0.0,
-        val crtnRate: Double = 0.0,
-        val crtnSize: Int = 0,
-        val marketPrice: Double = 0.0,
+        val cost: String = "",
+        val retail: String = "",
+        val wholesale: String = "",
+        val rate3: String = "",
+        val rate4: String = "",
+        val crtnRate: String = "",
+        val crtnSize: String = "",
+        val marketPrice: String = "",
 
-        val isDistRsPer: Boolean = false,
-        val disc: Double = 0.0,
-        val isExpirable: Boolean = false,
+        val isDiscRsPer: Boolean = false,
+        val disc: String = "",
+        val expirable: Boolean = false,
         val expiry: String = "",
 
-        val stockWarningMin: Int = 0,
-        val stockWarningMax: Int = 0,
-        val maxSalePcs: Int = 0,
-        val maxSaleCrtn: Int = 0,
+        val stockWarningMin: String = "",
+        val stockWarningMax: String = "",
+        val maxSalePcs: String = "",
+        val maxSaleCrtn: String = "",
 
         val openingCost: Double = 0.0,
-        val openingStockPcs: Double = 0.0,
-        val openingStockCrtn: Long = 0L,
+        val openingStockPcs: String = "",
+        val openingStockCrtn: String = "",
         val openingCrtnSize: Int = 0,
 
-        val currentStockPcs: Double = 0.0,
-        val currentStockCrtn: Long = 0L,
+        val currentStockPcs: String = "",
+        val currentStockCrtn: String = "",
 
         val repeatable: Boolean = false,
         val searchable: Boolean = true,
@@ -134,35 +135,47 @@ class AddUpdateItemViewModel @Inject constructor(
     }
 
     fun onCostChange(value: String) {
-        state.update { it.copy(cost = HP.getDoubleValue(value)) }
+        state.update { it.copy(cost = value) }
     }
 
     fun onRetailChange(value: String) {
-        state.update { it.copy(retail = HP.getDoubleValue(value)) }
+        state.update { it.copy(retail = value) }
     }
 
     fun onWholesaleChange(value: String) {
-        state.update { it.copy(wholesale = HP.getDoubleValue(value)) }
+        state.update { it.copy(wholesale = value) }
     }
 
     fun onRate3Change(value: String) {
-        state.update { it.copy(rate3 = HP.getDoubleValue(value)) }
+        state.update { it.copy(rate3 = value) }
     }
 
     fun onRate4Change(value: String) {
-        state.update { it.copy(rate4 = HP.getDoubleValue(value)) }
+        state.update { it.copy(rate4 = value) }
     }
 
     fun onCrtnRateChange(value: String) {
-        state.update { it.copy(crtnRate = HP.getDoubleValue(value)) }
+        state.update { it.copy(crtnRate = value) }
     }
 
     fun onCrtnSizeChange(value: String) {
-        state.update { it.copy(crtnSize = HP.getIntValue(value)) }
+        state.update { it.copy(crtnSize = value) }
     }
 
     fun onMarketPriceChange(value: String) {
-        state.update { it.copy(marketPrice = HP.getDoubleValue(value)) }
+        state.update { it.copy(marketPrice = value) }
+    }
+
+    fun onCategoryIdChange(value: Long) {
+        state.update { it.copy(categoryId = value) }
+    }
+
+    fun onSubCategoryIdChange(value: Long) {
+        state.update { it.copy(subCategoryId = value) }
+    }
+
+    fun onVendorIdChange(value: Long) {
+        state.update { it.copy(vendorId = value) }
     }
 
     fun onCategoryNameChange(value: String) {
@@ -177,16 +190,88 @@ class AddUpdateItemViewModel @Inject constructor(
         state.update { it.copy(vendorName = value) }
     }
 
-    fun onCategoryIdChange(value: Long) {
-        state.update { it.copy(categoryId = value) }
+    fun onStockWarningMinChange(value: String) {
+        state.update { it.copy(stockWarningMin = value) }
     }
 
-    fun onSubCategoryIdChange(value: Long) {
-        state.update { it.copy(subCategoryId = value) }
+    fun onStockWarningMaxChange(value: String) {
+        state.update { it.copy(stockWarningMax = value) }
     }
 
-    fun onVendorIdChange(value: Long) {
-        state.update { it.copy(vendorId = value) }
+    fun onMaxSalePcsChange(value: String) {
+        state.update { it.copy(maxSalePcs = value) }
+    }
+
+    fun onMaxSaleCrtnChange(value: String) {
+        state.update { it.copy(maxSaleCrtn = value) }
+    }
+
+    fun onOpeningStockPcsChange(value: String) {
+        state.update { it.copy(openingStockPcs = value) }
+    }
+
+    fun onOpeningStockCrtnChange(value: String) {
+        state.update { it.copy(openingStockCrtn = value) }
+    }
+
+    fun onCurrentStockPcsChange(value: String) {
+        state.update { it.copy(currentStockPcs = value) }
+    }
+
+    fun onCurrentStockCrtnChange(value: String) {
+        state.update { it.copy(currentStockCrtn = value) }
+    }
+
+    fun onExpirableChange(value: Boolean) {
+        state.update { it.copy(expirable = value) }
+    }
+
+    fun onExpiryChange(value: String) {
+        state.update { it.copy(expiry = value) }
+    }
+
+    fun onDiscChange(value: String) {
+        state.update { it.copy(disc = value) }
+    }
+
+    fun onIsDiscRsPerChange(value: Boolean) {
+        state.update { it.copy(isDiscRsPer = value) }
+    }
+
+    fun onPackingChange(value: String) {
+        state.update { it.copy(packing = value) }
+    }
+
+    fun onLocationChange(value: String) {
+        state.update { it.copy(location = value) }
+    }
+
+    fun onChangeableChange(value: Boolean) {
+        state.update { it.copy(changeable = value) }
+    }
+
+    fun onRepeatableChange(value: Boolean) {
+        state.update { it.copy(repeatable = value) }
+    }
+
+    fun onLockPcsChange(value: Boolean) {
+        state.update { it.copy(lockPcs = value) }
+    }
+
+    fun onLockCrtnChange(value: Boolean) {
+        state.update { it.copy(lockCrtn = value) }
+    }
+
+    fun onButtonChange(value: Boolean) {
+        state.update { it.copy(button = value) }
+    }
+
+    fun onSearchableChange(value: Boolean) {
+        state.update { it.copy(searchable = value) }
+    }
+
+    fun onSaleUnderStockChange(value: Boolean) {
+        state.update { it.copy(saleUnderStock = value) }
     }
 
     // endregion

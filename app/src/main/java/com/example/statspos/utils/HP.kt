@@ -185,20 +185,38 @@ object HP {
         }
     }
 
+    fun getDropdownNameByIdPerformance(
+        id: Long,
+        list: List<DropdownItem>,
+        defaultValue: String = ""
+    ): String {
+        val dropdownMap = list.associateBy({ it.id }, { it.name })
+        return dropdownMap[id] ?: defaultValue
+    }
+
+    fun getDropdownNameById(
+        id: Long,
+        list: List<DropdownItem>,
+        defaultValue: String = ""
+    ): String {
+        return list.firstOrNull { it.id == id }?.name ?: defaultValue
+    }
+
+    // region Datetime
     @RequiresApi(Build.VERSION_CODES.O)
-    fun getFormatedDate(localDate: LocalDate): String {
+    fun getFormatedDate(localDate: LocalDate = LocalDate.now()): String {
         val customFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
         return localDate.format(customFormatter)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun getFormatedTime(localTime: LocalTime): String {
+    fun getFormatedTime(localTime: LocalTime = LocalTime.now()): String {
         val customFormatter = DateTimeFormatter.ofPattern("h:m a")
         return localTime.format(customFormatter)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun getZonedDate(localDate: LocalDate): String {
+    fun getZonedDate(localDate: LocalDate = LocalDate.now()): String {
         val zonedDateTime = ZonedDateTime.of(
             localDate,
             LocalTime.now(),
@@ -210,7 +228,7 @@ object HP {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun getZonedTime(localTime: LocalTime): String {
+    fun getZonedTime(localTime: LocalTime = LocalTime.now()): String {
         val zonedDateTime = ZonedDateTime.of(
             LocalDate.now(),
             localTime,
@@ -232,5 +250,6 @@ object HP {
         val isoString = zonedDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
         return isoString
     }
+    // endregion
 
 }

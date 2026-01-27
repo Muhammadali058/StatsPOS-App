@@ -24,4 +24,6 @@ object ConstantPaddings {
 object ConstantSize {
     val DEFAULT_ICON_BUTTON = 30.dp
     val DEFAULT_ICON = 24.dp
+    val DEFAULT_TEXTBOX_HEIGHT = 42.dp
+    val ORIGINAL_TEXTBOX_HEIGHT = 52.dp
 }

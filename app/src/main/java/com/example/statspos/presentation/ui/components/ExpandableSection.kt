@@ -74,3 +74,50 @@ fun ExpandableSection(
         }
     }
 }
+
+@Composable
+fun ExpandableSection(
+    title: String,
+    expanded: Boolean,
+    onHeaderClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .animateContentSize()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onHeaderClick() }
+                .padding(ConstantPaddings.BODY_HORIZONTAL)
+                .padding(vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AppText(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f)
+            )
+
+            AppIcon(
+                icon = if (expanded)
+                    Icons.Default.ExpandLess
+                else
+                    Icons.Default.ExpandMore
+            )
+        }
+
+        AnimatedVisibility(visible = expanded) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(ConstantPaddings.BODY_HORIZONTAL)
+            ) {
+                content()
+            }
+        }
+    }
+}

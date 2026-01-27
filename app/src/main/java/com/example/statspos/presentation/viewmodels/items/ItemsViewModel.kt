@@ -68,6 +68,12 @@ class ItemsViewModel @Inject constructor(
                 }
             }
 
+            is UiEvent.ShowMessage -> {
+                viewModelScope.launch {
+                    _event.send(UiEvent.ShowMessage(event.message))
+                }
+            }
+
             is UiEvent.ShowError -> {
                 viewModelScope.launch {
                     _event.send(UiEvent.ShowError(event.error))
@@ -84,6 +90,18 @@ class ItemsViewModel @Inject constructor(
 
     fun showSnackbar(message: String, type: SnackbarType = SnackbarType.INFORMATION) {
         onEvent(UiEvent.ShowSnackbar(message, type))
+    }
+
+    fun showMessage(message: String?) {
+        showSnackbar(message ?: "")
+
+//        state.update { it.copy(isLoading = false, error = null, message = message) }
+//        onEvent(UiEvent.ShowMessage(message ?: ""))
+    }
+
+    fun showError(error: String?) {
+        state.update { it.copy(error = error) }
+        onEvent(UiEvent.ShowError(error ?: ""))
     }
 
     // endregion
@@ -258,13 +276,13 @@ class ItemsViewModel @Inject constructor(
 
     // region Others
     private fun resultError(error: String?) {
-        state.update { it.copy(isLoading = false, error = error) }
-        error?.let { onEvent(UiEvent.ShowError(it)) }
+        state.update { it.copy(isLoading = false) }
+        showError(error)
     }
 
     private fun resultInformation(message: String?) {
         state.update { it.copy(isLoading = false) }
-        message?.let { showSnackbar(it) }
+        showMessage(message)
     }
 
     private fun resultSuccess() {

@@ -245,7 +245,7 @@ fun AppSnackbarHost(
             snackbarData = data,
             modifier = Modifier
                 .statusBarsPadding()
-                .padding(top = 44.dp),
+                .padding(top = 60.dp),
             containerColor = backgroundColor,
             contentColor = MaterialTheme.colorScheme.onPrimary,
             shape = RoundedCornerShape(16.dp),

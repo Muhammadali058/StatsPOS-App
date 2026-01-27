@@ -1,30 +1,24 @@
 package com.example.statspos.presentation.ui.screens.items
 
-import android.os.Build
-import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButton
@@ -42,11 +36,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.R
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.components.AppIcon
@@ -61,29 +64,110 @@ import com.example.statspos.presentation.ui.components.DiscountTextbox
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.ExpandableSection
+import com.example.statspos.presentation.ui.components.SaveButton
+import com.example.statspos.presentation.ui.components.SmallButton
 import com.example.statspos.presentation.ui.components.SubDropdown
 import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.components.TopAppBar
+import com.example.statspos.presentation.ui.components.UploadImageView
+import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.items.AddUpdateItemViewModel
-import com.example.statspos.presentation.viewmodels.items.ItemsSharedViewModel
+import com.example.statspos.presentation.viewmodels.items.SharedViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import com.example.statspos.utils.showToast
+import kotlinx.serialization.Serializable
+import okhttp3.MultipartBody
 import java.time.LocalDate
 
-@RequiresApi(Build.VERSION_CODES.O)
+private sealed class Routes : NavKey {
+    @Serializable
+    data object Home : Routes()
+
+    @Serializable
+    data class LinkedItems(val itemId: Long) : Routes()
+
+    @Serializable
+    data class SubBarcodes(val itemId: Long) : Routes()
+
+}
+
 @Composable
 fun AddUpdateItemScreen(
-    sharedViewModel: ItemsSharedViewModel,
+    sharedViewModel: SharedViewModel,
     updateId: Long = 0,
     isUpdate: Boolean = false,
     onBack: () -> Unit,
 ) {
+    val backStack = rememberNavBackStack(Routes.Home)
+    fun navigate(key: NavKey) {
+        if (backStack.lastOrNull() != key) {
+            backStack.add(key)
+        }
+    }
+    NavDisplay(
+        backStack = backStack,
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
+        entryProvider = entryProvider {
+            entry<Routes.Home> {
+                Home(
+                    sharedViewModel = sharedViewModel,
+                    updateId = updateId,
+                    isUpdate = isUpdate,
+                    onBack = {
+                        onBack()
+                    },
+                    onLinkedItemsClick = {
+                        navigate(Routes.LinkedItems(updateId))
+                    },
+                    onSubBarcodesClick = {
+                        navigate(Routes.SubBarcodes(updateId))
+                    }
+                )
+            }
+            entry<Routes.LinkedItems> { key ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Linked Item ${key.itemId}"
+                    )
+                }
+            }
+            entry<Routes.SubBarcodes> { key ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Sub Barcode Item ${key.itemId}"
+                    )
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun Home(
+    sharedViewModel: SharedViewModel,
+    updateId: Long,
+    isUpdate: Boolean,
+    onBack: () -> Unit,
+    onLinkedItemsClick: () -> Unit,
+    onSubBarcodesClick: () -> Unit,
+) {
     val context = LocalContext.current
 
     fun goBackWithResult() {
-        sharedViewModel.notifyItemChanged()
+        sharedViewModel.notifyDataChanged()
         onBack()
     }
 
@@ -106,6 +190,14 @@ fun AddUpdateItemScreen(
         )
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.updateInitialState(isUpdate = isUpdate, updateId = updateId)
+
+        if (isUpdate) {
+            viewModel.editData(updateId)
+        }
+    }
+
     if (showErrorDialog) {
         ErrorDialog(
             error = state.error,
@@ -123,7 +215,7 @@ fun AddUpdateItemScreen(
             },
             onConfirm = {
                 showDeleteDialog = false
-                viewModel.deleteItem(updateId) {
+                viewModel.deleteData(updateId) {
                     context.showToast("Item deleted successfully")
                     goBackWithResult()
                 }
@@ -131,15 +223,6 @@ fun AddUpdateItemScreen(
         )
     }
 
-    if (state.isLoading) {
-        Box(
-            Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            AppCircularProgressIndicator()
-        }
-    }
 
     var menuExpanded by remember { mutableStateOf(false) }
     Scaffold(
@@ -151,6 +234,9 @@ fun AddUpdateItemScreen(
         topBar = {
             TopAppBar(
                 navigationIcon = Icons.Default.ArrowBack,
+                onNavigationClick = {
+                    onBack()
+                },
                 title = if (isUpdate) "Update Item" else "Add Item",
                 actions = {
                     Row {
@@ -163,60 +249,51 @@ fun AddUpdateItemScreen(
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
-                        }
 
-                        IconButton(
-                            onClick = {
-                                menuExpanded = true
+                            IconButton(
+                                onClick = {
+                                    menuExpanded = true
+                                }
+                            ) {
+                                AppIcon(
+                                    icon = Icons.Default.MoreVert,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
                             }
-                        ) {
-                            AppIcon(
-                                icon = Icons.Default.MoreVert,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+
+                            DropdownMenu(
+                                expanded = menuExpanded,
+                                onDismissRequest = { menuExpanded = false },
+                                modifier = Modifier
+                                    .width(200.dp),
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            ) {
+                                DropdownMenuItem(
+                                    text = { AppText("Linked Items") },
+//                                leadingIcon = {
+//                                    AppIcon(Icons.Default.Edit)
+//                                },
+                                    onClick = {
+                                        menuExpanded = false
+                                        onLinkedItemsClick()
+                                    }
+                                )
+
+                                DropdownMenuItem(
+                                    text = { AppText("Sub Barcodes") },
+//                                leadingIcon = {
+//                                    AppIcon(Icons.Default.Delete)
+//                                },
+                                    onClick = {
+                                        menuExpanded = false
+                                        onSubBarcodesClick()
+                                    }
+                                )
+                            }
                         }
 
-                        DropdownMenu(
-                            expanded = menuExpanded,
-                            onDismissRequest = { menuExpanded = false },
-                            modifier = Modifier
-                                .width(200.dp),
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        ) {
-                            DropdownMenuItem(
-                                text = { AppText("Edit") },
-                                leadingIcon = {
-                                    AppIcon(Icons.Default.Edit)
-                                },
-                                onClick = {
-                                    menuExpanded = false
-                                }
-                            )
 
-                            DropdownMenuItem(
-                                text = { AppText("Delete") },
-                                leadingIcon = {
-                                    AppIcon(Icons.Default.Delete)
-                                },
-                                onClick = {
-                                    menuExpanded = false
-                                }
-                            )
-
-                            DropdownMenuItem(
-                                text = { AppText("Share") },
-                                leadingIcon = {
-                                    AppIcon(Icons.Default.Share)
-                                },
-                                onClick = {
-                                    menuExpanded = false
-                                }
-                            )
-                        }
                     }
-                },
-                onNavigationClick = {
-                    onBack()
                 }
             )
         }
@@ -227,10 +304,21 @@ fun AddUpdateItemScreen(
                 .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            if (state.isLoading) {
+                Box(
+                    Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    AppCircularProgressIndicator()
+                }
+            }
+
             Column(
                 Modifier
                     .weight(1f)
-                    .verticalScroll(scrollState),
+                    .verticalScroll(scrollState)
+                    .imePadding(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Basic(
@@ -292,6 +380,9 @@ fun AddUpdateItemScreen(
                     onOpeningStockCrtnChange = viewModel::onOpeningStockCrtnChange,
                     onCurrentStockPcsChange = viewModel::onCurrentStockPcsChange,
                     onCurrentStockCrtnChange = viewModel::onCurrentStockCrtnChange,
+
+                    openingStockPcsTBEnabled = state.openingStockPcsTBEnabled,
+                    openingStockCrtnTBEnabled = state.openingStockCrtnTBEnabled,
                 )
 
                 DiscountExpiry(
@@ -327,16 +418,30 @@ fun AddUpdateItemScreen(
                     onSearchAbleChange = viewModel::onSearchableChange,
                     onSaleUnderStockChange = viewModel::onSaleUnderStockChange,
                 )
+
+                ImageExpandable(
+                    isUploadingImage = state.isUploadingImage,
+                    imageUrl = state.imageUrl,
+                    onImageUrlChange = {
+                        viewModel.uploadImage(it)
+                    }
+                )
             }
 
-            Button(
-                onClick = {
-
-                }
+            Box(
+                modifier = Modifier
+                    .padding(ConstantPaddings.BODY_HORIZONTAL)
+                    .padding(vertical = 16.dp),
             ) {
-                Text(
-                    text = "Save"
-                )
+                if (state.isSaving) {
+                    AppCircularProgressIndicator()
+                } else {
+                    SaveButton {
+                        viewModel.insertOrUpdateData {
+                            goBackWithResult()
+                        }
+                    }
+                }
             }
 
         }
@@ -344,7 +449,6 @@ fun AddUpdateItemScreen(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun Basic(
     barcode: String,
@@ -434,7 +538,10 @@ private fun Basic(
             modifier = Modifier.fillMaxWidth(),
             label = {
                 Text("Urduname")
-            }
+            },
+            textStyle = TextStyle(
+                textDirection = TextDirection.Rtl
+            )
         )
 
         // Cost & Market Price
@@ -596,16 +703,16 @@ private fun Basic(
 
 @Composable
 private fun CategoryAndVendor(
-    categoryName:String,
-    subCategoryName:String,
-    vendorName:String,
-    categoryId:Long,
-    onCategoryNameChange:(String) -> Unit,
-    onSubCategoryNameChange:(String) -> Unit,
-    onVendorNameChange:(String) -> Unit,
-    onCategoryIdChange:(Long) -> Unit,
-    onSubCategoryIdChange:(Long) -> Unit,
-    onVendorIdChange:(Long) -> Unit,
+    categoryName: String,
+    subCategoryName: String,
+    vendorName: String,
+    categoryId: Long,
+    onCategoryNameChange: (String) -> Unit,
+    onSubCategoryNameChange: (String) -> Unit,
+    onVendorNameChange: (String) -> Unit,
+    onCategoryIdChange: (Long) -> Unit,
+    onSubCategoryIdChange: (Long) -> Unit,
+    onVendorIdChange: (Long) -> Unit,
 ) {
     ExpandableSection(
         title = "Category & Vendor",
@@ -616,7 +723,7 @@ private fun CategoryAndVendor(
             onValueChange = onCategoryNameChange,
             items = HP.categories,
             onItemSelected = { dropdownItem ->
-                    onCategoryIdChange(dropdownItem.id)
+                onCategoryIdChange(dropdownItem.id)
             },
             label = {
                 Text(text = "Category")
@@ -628,7 +735,7 @@ private fun CategoryAndVendor(
             items = HP.subCategories,
             mainId = categoryId,
             onItemSelected = { dropdownItem ->
-                    onSubCategoryIdChange(dropdownItem.id)
+                onSubCategoryIdChange(dropdownItem.id)
             },
             label = {
                 Text(text = "Sub-Category")
@@ -639,7 +746,7 @@ private fun CategoryAndVendor(
             onValueChange = onVendorNameChange,
             items = HP.vendors,
             onItemSelected = { dropdownItem ->
-                    onVendorIdChange(dropdownItem.id)
+                onVendorIdChange(dropdownItem.id)
             },
             label = {
                 Text(text = "Vendor")
@@ -667,6 +774,9 @@ private fun Stock(
     onOpeningStockCrtnChange: (String) -> Unit,
     onCurrentStockPcsChange: (String) -> Unit,
     onCurrentStockCrtnChange: (String) -> Unit,
+
+    openingStockPcsTBEnabled: Boolean,
+    openingStockCrtnTBEnabled: Boolean,
 ) {
     ExpandableSection(
         title = "Stock Warning, Opening Stock",
@@ -688,6 +798,9 @@ private fun Stock(
                 label = {
                     Text("Min")
                 },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal
+                )
             )
             Spacer(Modifier.width(8.dp))
             Textbox(
@@ -696,7 +809,10 @@ private fun Stock(
                 modifier = Modifier.weight(1f),
                 label = {
                     Text("Max")
-                }
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal
+                )
             )
         }
         // Max Sale Stock PCS & Crtn
@@ -715,8 +831,11 @@ private fun Stock(
                 label = {
                     Text("PCS")
                 },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal
+                )
             )
-            if(HP.settings.saleCartons == true){
+            if (HP.settings.saleCartons == true) {
                 Spacer(Modifier.width(8.dp))
                 Textbox(
                     value = maxSaleCrtn,
@@ -724,7 +843,10 @@ private fun Stock(
                     modifier = Modifier.weight(1f),
                     label = {
                         Text("Crtn")
-                    }
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal
+                    )
                 )
             }
         }
@@ -744,8 +866,12 @@ private fun Stock(
                 label = {
                     Text("PCS")
                 },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal
+                ),
+                enabled = openingStockPcsTBEnabled,
             )
-            if(HP.settings.saleCartons == true){
+            if (HP.settings.saleCartons == true) {
                 Spacer(Modifier.width(8.dp))
                 Textbox(
                     value = openingStockCrtn,
@@ -753,7 +879,11 @@ private fun Stock(
                     modifier = Modifier.weight(1f),
                     label = {
                         Text("Crtn")
-                    }
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal
+                    ),
+                    enabled = openingStockCrtnTBEnabled,
                 )
             }
         }
@@ -775,7 +905,7 @@ private fun Stock(
                 },
                 readOnly = true,
             )
-            if(HP.settings.saleCartons == true){
+            if (HP.settings.saleCartons == true) {
                 Spacer(Modifier.width(8.dp))
                 Textbox(
                     value = currentStockCrtn,
@@ -791,18 +921,17 @@ private fun Stock(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun DiscountExpiry(
     expirable: Boolean,
-    expiry: String,
+    expiry: LocalDate,
     disc: String,
     isDiscRsPer: Boolean,
     packing: String,
     location: String,
 
     onExpirableChange: (Boolean) -> Unit,
-    onExpiryChange: (String) -> Unit,
+    onExpiryChange: (LocalDate) -> Unit,
     onDiscChange: (String) -> Unit,
     onIsDiscRsPerChange: (Boolean) -> Unit,
     onPackingChange: (String) -> Unit,
@@ -811,11 +940,12 @@ private fun DiscountExpiry(
     var showDateDialog by remember { mutableStateOf(false) }
     if (showDateDialog) {
         CustomDatePickerDialog(
+            initialValue = expiry,
             onDismiss = {
                 showDateDialog = false
             },
             onSelected = {
-                onExpiryChange(HP.getFormatedDate(it))
+                onExpiryChange(it)
             }
         )
     }
@@ -829,16 +959,52 @@ private fun DiscountExpiry(
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            AppSwitch(
-                modifier = Modifier,
-                checked = expirable,
-                onCheckedChange = onExpirableChange,
-                label = "Expirable"
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                AppSwitch(
+                    modifier = Modifier,
+                    checked = expirable,
+                    onCheckedChange = onExpirableChange,
+                    label = "Expirable"
+                )
+                Row {
+                    SmallButton(
+                        "1"
+                    ) {
+                        val date = LocalDate.now().plusMonths(1)
+                        onExpiryChange(date)
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    SmallButton(
+                        "3"
+                    ) {
+                        val date = LocalDate.now().plusMonths(3)
+                        onExpiryChange(date)
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    SmallButton(
+                        "6"
+                    ) {
+                        val date = LocalDate.now().plusMonths(6)
+                        onExpiryChange(date)
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    SmallButton(
+                        "12"
+                    ) {
+                        val date = LocalDate.now().plusMonths(12)
+                        onExpiryChange(date)
+                    }
+                }
+            }
             Spacer(Modifier.height(8.dp))
             Textbox(
-                value = expiry,
-                onValueChange = onExpiryChange,
+                value = HP.getFormatedDate(expiry),
+                onValueChange = { },
                 modifier = Modifier
                     .fillMaxWidth(),
                 readOnly = true,
@@ -894,13 +1060,13 @@ private fun Switches(
     searchable: Boolean,
     saleUnderStock: Boolean,
 
-    onChangeableChange:(Boolean) -> Unit,
-    onRepeatableChange:(Boolean) -> Unit,
-    onLockPcsChange:(Boolean) -> Unit,
-    onLockCrtnChange:(Boolean) -> Unit,
-    onButtonChange:(Boolean) -> Unit,
-    onSearchAbleChange:(Boolean) -> Unit,
-    onSaleUnderStockChange:(Boolean) -> Unit,
+    onChangeableChange: (Boolean) -> Unit,
+    onRepeatableChange: (Boolean) -> Unit,
+    onLockPcsChange: (Boolean) -> Unit,
+    onLockCrtnChange: (Boolean) -> Unit,
+    onButtonChange: (Boolean) -> Unit,
+    onSearchAbleChange: (Boolean) -> Unit,
+    onSaleUnderStockChange: (Boolean) -> Unit,
 ) {
     ExpandableSection(
         title = "Lock & Others",
@@ -960,5 +1126,166 @@ private fun Switches(
             )
         }
         Spacer(Modifier.height(16.dp))
+    }
+}
+
+@Composable
+private fun ImageExpandable(
+    isUploadingImage: Boolean,
+    imageUrl: String,
+    onImageUrlChange: (MultipartBody.Part) -> Unit,
+) {
+    ExpandableSection(
+        title = "Image",
+        initiallyExpanded = false,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            if(isUploadingImage){
+                AppCircularProgressIndicator()
+            }else{
+                UploadImageView(
+                    imageUrl = imageUrl,
+                    onImageUrlChange = onImageUrlChange
+                )
+            }
+        }
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+private fun BodyPrev(modifier: Modifier = Modifier) {
+    val scrollState = rememberScrollState()
+
+    Column(
+        Modifier
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Column(
+            Modifier
+                .weight(1f)
+                .verticalScroll(scrollState),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Basic(
+                barcode = "",
+                refCode = "",
+                itemname = "",
+                urduname = "",
+                cost = "",
+                retail = "",
+                wholesale = "",
+                rate3 = "",
+                rate4 = "",
+                crtnRate = "",
+                crtnSize = "",
+                marketPrice = "",
+
+                onBarcodeChange = { },
+                onRefCodeChange = { },
+                onItemnameChange = { },
+                onUrdunameChange = { },
+                onCostChange = { },
+                onRetailChange = { },
+                onWholesaleChange = { },
+                onRate3Change = { },
+                onRate4Change = { },
+                onCrtnRateChange = { },
+                onCrtnSizeChange = { },
+                onMarketPriceChange = { },
+            )
+
+            CategoryAndVendor(
+                categoryName = "",
+                subCategoryName = "",
+                vendorName = "",
+                categoryId = 1,
+                onCategoryNameChange = { },
+                onSubCategoryNameChange = { },
+                onVendorNameChange = { },
+                onCategoryIdChange = { },
+                onSubCategoryIdChange = { },
+                onVendorIdChange = { },
+            )
+
+            Stock(
+                stockWarningMin = "",
+                stockWarningMax = "",
+                maxSalePcs = "",
+                maxSaleCrtn = "",
+                openingStockPcs = "",
+                openingStockCrtn = "",
+                currentStockPcs = "",
+                currentStockCrtn = "",
+
+                onStockWarningMinChange = { },
+                onStockWarningMaxChange = { },
+                onMaxSalePcsChange = { },
+                onMaxSaleCrtnChange = { },
+                onOpeningStockPcsChange = { },
+                onOpeningStockCrtnChange = { },
+                onCurrentStockPcsChange = { },
+                onCurrentStockCrtnChange = { },
+
+                openingStockPcsTBEnabled = false,
+                openingStockCrtnTBEnabled = false,
+            )
+
+            DiscountExpiry(
+                expirable = false,
+                expiry = LocalDate.now(),
+                disc = "",
+                isDiscRsPer = true,
+                packing = "",
+                location = "",
+
+                onExpirableChange = { },
+                onExpiryChange = { },
+                onDiscChange = { },
+                onIsDiscRsPerChange = { },
+                onPackingChange = { },
+                onLocationChange = { },
+            )
+
+            Switches(
+                changeable = false,
+                repeatable = false,
+                lockPcs = false,
+                lockCrtn = false,
+                button = false,
+                searchable = false,
+                saleUnderStock = false,
+
+                onChangeableChange = {},
+                onRepeatableChange = {},
+                onLockPcsChange = {},
+                onLockCrtnChange = {},
+                onButtonChange = {},
+                onSearchAbleChange = {},
+                onSaleUnderStockChange = {},
+            )
+
+            ImageExpandable(
+                isUploadingImage = false,
+                imageUrl = "",
+                onImageUrlChange = { },
+            )
+        }
+
+        Box(
+            modifier = Modifier
+//                .background(Color.Red)
+                .padding(16.dp),
+        ) {
+            SaveButton {}
+        }
+
     }
 }

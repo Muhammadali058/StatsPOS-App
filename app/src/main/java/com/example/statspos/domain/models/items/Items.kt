@@ -30,7 +30,7 @@ data class Items(
     var openingCost: Double? = null,
     var openingStockPcs: Double? = null,
     var openingStockCrtn: Long? = null,
-    val openingCrtnSize:Int? = null,
+    var openingCrtnSize:Int? = null,
 
     var repeatable: Boolean? = null,
     var searchable: Boolean? = null,

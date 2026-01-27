@@ -34,7 +34,7 @@ enum class SnackbarType { INFORMATION, ERROR }
 suspend fun checkEvent(
     event: UiEvent,
     snackbarHostState: SnackbarHostState,
-    onError: (String) -> Unit = {},
+    onError: (String) -> Unit,
     onMessage: (String) -> Unit = {},
     viewModelIdleEvent: (event: UiEvent) -> Unit,
 //    changeSnackbarType: (SnackbarType) -> Unit
@@ -57,7 +57,7 @@ suspend fun checkEvent(
         }
 
         is UiEvent.ShowMessage -> {
-            onError(event.message)
+            onMessage(event.message)
             viewModelIdleEvent(UiEvent.Idle)
 //            viewModel.onEvent(UiEvent.Idle)
         }
@@ -71,9 +71,6 @@ suspend fun checkEvent(
         else -> {}
     }
 }
-
-inline fun <reified T> Gson.getListOf(jsonArray: String): List<T> =
-    fromJson(jsonArray, object : TypeToken<List<T>>() {}.type)
 
 inline fun <reified T> Gson.getListOf(jsonArray: JsonArray): List<T> =
     fromJson(jsonArray, object : TypeToken<List<T>>() {}.type)

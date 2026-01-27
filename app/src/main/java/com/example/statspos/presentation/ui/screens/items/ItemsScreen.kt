@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FilterList
@@ -63,7 +62,7 @@ import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.PullToRefreshLayout
 import com.example.statspos.presentation.ui.components.SubDropdown
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
-import com.example.statspos.presentation.viewmodels.items.ItemsSharedViewModel
+import com.example.statspos.presentation.viewmodels.items.SharedViewModel
 import com.example.statspos.presentation.viewmodels.items.ItemsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
@@ -73,7 +72,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemsScreen(
-    sharedViewModel: ItemsSharedViewModel,
+    sharedViewModel: SharedViewModel,
     AddItemClick: (Long, Boolean) -> Unit,
 ) {
     val context = LocalContext.current
@@ -100,10 +99,10 @@ fun ItemsScreen(
     }
 
     val sharedViewModelState by sharedViewModel.state.collectAsStateWithLifecycle()
-    LaunchedEffect(sharedViewModelState.itemChanged) {
-        if (sharedViewModelState.itemChanged) {
+    LaunchedEffect(sharedViewModelState.dataChanged) {
+        if (sharedViewModelState.dataChanged) {
             viewModel.loadItems()
-            sharedViewModel.consumeItemChanged()
+            sharedViewModel.consumeDataChanged()
         }
     }
 

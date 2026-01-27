@@ -25,6 +25,7 @@ class ItemsRepositoryImpl @Inject constructor(
 
     override suspend fun insertItem(item: Items): Resource<JsonObject> {
         val body = DB.getJsonObject(item)
+        body.addProperty("userId", HP.user.id)
         body.addProperty("branchGroupId", HP.branchGroupId)
 
         return safeApiCall {
@@ -36,6 +37,7 @@ class ItemsRepositoryImpl @Inject constructor(
 
     override suspend fun updateItem(item: Items): Resource<JsonObject> {
         val body = DB.getJsonObject(item)
+        body.addProperty("userId", HP.user.id)
         body.addProperty("branchGroupId", HP.branchGroupId)
 
         return safeApiCall {

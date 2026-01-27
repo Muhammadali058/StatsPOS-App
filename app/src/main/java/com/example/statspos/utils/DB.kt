@@ -30,7 +30,7 @@ object DB {
 sealed class Resource<T> {
     data class Success<T>(val data: T) : Resource<T>()
     data class Error<T>(val error: String?) : Resource<T>()
-    data class Information<T>(val message: String?) : Resource<T>()
+    data class Information<T>(val message: String?, val data: JsonObject?) : Resource<T>()
 }
 
 suspend fun <T> safeApiCall(
@@ -53,7 +53,10 @@ suspend fun <T> safeApiCall(
             if (jsonObject.get("type").asString == ("e")) {
                 Resource.Error(jsonObject.get("message").asString)
             } else {
-                Resource.Information(jsonObject.get("message").asString)
+                Resource.Information(
+                    message = jsonObject.get("message").asString,
+                    data = if(jsonObject.has("data")) jsonObject.get("data").asJsonObject else null
+                )
             }
         }
     } catch (e: Exception) {

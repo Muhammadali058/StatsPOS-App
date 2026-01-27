@@ -2,7 +2,6 @@
 
 package com.example.statspos.presentation.ui.components
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,13 +17,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -45,7 +42,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -54,12 +50,12 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -68,6 +64,7 @@ import androidx.compose.ui.window.Popup
 import com.example.statspos.R
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
+import com.example.statspos.presentation.ui.utils.ConstantSize
 import com.example.statspos.utils.HP
 
 @Composable
@@ -77,6 +74,7 @@ fun Textbox(
     onValueChange: (String) -> Unit,
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
+    height: Dp = ConstantSize.DEFAULT_TEXTBOX_HEIGHT,
     shape: Shape = OutlinedTextFieldDefaults.shape,
     colors: TextFieldColors = TextFieldDefaults.colors(
         focusedIndicatorColor = MaterialTheme.colorScheme.outlineVariant,
@@ -89,6 +87,7 @@ fun Textbox(
         unfocusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
         focusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer,
         unfocusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        disabledContainerColor = Color.Transparent,
     ),
     textStyle: TextStyle = TextStyle(),
     enabled: Boolean = true,
@@ -118,9 +117,10 @@ fun Textbox(
                 focusRequester.requestFocus()
             }
             .padding(padding)
-            .height(42.dp),
+            .height(height),
         singleLine = singleLine,
         readOnly = readOnly,
+        enabled = enabled,
         interactionSource = interactionSource,
         textStyle = textStyle.copy(
             color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -166,6 +166,7 @@ fun PasswordTextbox(
     onValueChange: (String) -> Unit,
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
+    height: Dp = ConstantSize.DEFAULT_TEXTBOX_HEIGHT,
     shape: Shape = OutlinedTextFieldDefaults.shape,
     textStyle: TextStyle = TextStyle(),
     enabled: Boolean = true,
@@ -188,6 +189,7 @@ fun PasswordTextbox(
         value = value,
         onValueChange = onValueChange,
         label = label,
+        height = height,
         placeholder = placeholder,
         shape = shape,
         textStyle = textStyle,
@@ -224,6 +226,7 @@ fun AutoCompleteItemsTextbox(
     onKeyboardAction: (String) -> Unit,
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
+    height: Dp = ConstantSize.DEFAULT_TEXTBOX_HEIGHT,
     shape: Shape = OutlinedTextFieldDefaults.shape,
     textStyle: TextStyle = TextStyle(),
     enabled: Boolean = true,
@@ -241,7 +244,6 @@ fun AutoCompleteItemsTextbox(
         }
     }
 
-//    var textFieldPosition by remember { mutableStateOf(Offset.Zero) }
     var textFieldSize by remember { mutableStateOf(IntSize.Zero) }
 
     Box(
@@ -251,7 +253,6 @@ fun AutoCompleteItemsTextbox(
             modifier = Modifier
                 .fillMaxWidth()
                 .onGloballyPositioned { coordinates ->
-//                    textFieldPosition = coordinates.localToWindow(Offset.Zero)
                     textFieldSize = coordinates.size
                 },
             value = value,
@@ -259,6 +260,7 @@ fun AutoCompleteItemsTextbox(
                 onValueChange(it)
                 expanded = it.isNotEmpty()
             },
+            height = height,
             label = label,
             placeholder = placeholder,
             shape = shape,
@@ -298,12 +300,9 @@ fun AutoCompleteItemsTextbox(
 
         if (expanded && filteredItems.isNotEmpty()) {
             Popup(
-//                alignment = Alignment.TopStart,
                 offset = IntOffset(
                     x = 0,
-//                    x = textFieldPosition.x.toInt(),
                     y = textFieldSize.height - 6
-//                    y = (textFieldPosition.y + textFieldSize.height).toInt()
                 ),
                 onDismissRequest = { expanded = false }
             ) {

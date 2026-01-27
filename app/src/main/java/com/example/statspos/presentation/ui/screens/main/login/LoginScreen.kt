@@ -43,6 +43,7 @@ import com.example.statspos.presentation.ui.components.PasswordTextbox
 import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
+import com.example.statspos.presentation.ui.utils.ConstantSize
 import com.example.statspos.presentation.viewmodels.main.LoginViewModel
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
@@ -192,6 +193,7 @@ private fun Body(
             leadingIcon = {
                 AppIcon(icon = R.drawable.ic_user)
             },
+            height = ConstantSize.ORIGINAL_TEXTBOX_HEIGHT,
             contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
         )
         PasswordTextbox(
@@ -205,6 +207,7 @@ private fun Body(
             leadingIcon = {
                 AppIcon(icon = R.drawable.ic_password)
             },
+            height = ConstantSize.ORIGINAL_TEXTBOX_HEIGHT,
             contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
             imeAction = ImeAction.Done
         )

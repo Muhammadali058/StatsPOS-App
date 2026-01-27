@@ -1,7 +1,5 @@
 package com.example.statspos.utils
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.main.Branches
 import com.example.statspos.domain.models.main.LocalClients
@@ -15,12 +13,12 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import net.objecthunter.exp4j.ExpressionBuilder
 import java.text.DecimalFormat
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import kotlin.math.exp
 
 object HP {
     var localClient: LocalClients? = null
@@ -185,37 +183,32 @@ object HP {
         }
     }
 
-    fun getDropdownNameByIdPerformance(
-        id: Long,
-        list: List<DropdownItem>,
-        defaultValue: String = ""
-    ): String {
+    fun getDropdownNameByIdPerformance(id: Long, list: List<DropdownItem>, defaultValue: String = "" ): String {
         val dropdownMap = list.associateBy({ it.id }, { it.name })
         return dropdownMap[id] ?: defaultValue
     }
 
-    fun getDropdownNameById(
-        id: Long,
-        list: List<DropdownItem>,
-        defaultValue: String = ""
-    ): String {
+    fun getDropdownNameById(id: Long, list: List<DropdownItem>, defaultValue: String = ""): String {
         return list.firstOrNull { it.id == id }?.name ?: defaultValue
     }
 
     // region Datetime
-    @RequiresApi(Build.VERSION_CODES.O)
     fun getFormatedDate(localDate: LocalDate = LocalDate.now()): String {
         val customFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
         return localDate.format(customFormatter)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun getFormatedTime(localTime: LocalTime = LocalTime.now()): String {
         val customFormatter = DateTimeFormatter.ofPattern("h:m a")
         return localTime.format(customFormatter)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    fun toLocalDate(isoDateString: String): LocalDate {
+        return Instant.parse(isoDateString)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
+    }
+
     fun getZonedDate(localDate: LocalDate = LocalDate.now()): String {
         val zonedDateTime = ZonedDateTime.of(
             localDate,
@@ -227,7 +220,6 @@ object HP {
         return isoString
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun getZonedTime(localTime: LocalTime = LocalTime.now()): String {
         val zonedDateTime = ZonedDateTime.of(
             LocalDate.now(),
@@ -239,7 +231,6 @@ object HP {
         return isoString
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun getZonedDateTime(localDate: LocalDate, localTime: LocalTime): String {
         val zonedDateTime = ZonedDateTime.of(
             localDate,

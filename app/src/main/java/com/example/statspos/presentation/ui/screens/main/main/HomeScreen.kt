@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -32,18 +31,14 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
@@ -57,22 +52,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.example.statspos.presentation.App
-import com.example.statspos.presentation.ui.components.AppCheckbox
+import com.example.statspos.R
 import com.example.statspos.presentation.ui.components.BOTTOM_DESTINATIONS
 import com.example.statspos.presentation.ui.components.BottomBar
 import com.example.statspos.presentation.ui.components.AppIcon
-import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSwitch
 import com.example.statspos.presentation.ui.components.AppText
 import com.example.statspos.presentation.ui.components.BottomNavItem
@@ -87,7 +79,7 @@ import com.example.statspos.presentation.ui.screens.TopRoutes
 import com.example.statspos.presentation.ui.screens.items.ItemsScreen
 import com.example.statspos.presentation.ui.screens.reports.ReportsScreen
 import com.example.statspos.presentation.ui.screens.sales.SalesScreen
-import com.example.statspos.presentation.viewmodels.items.ItemsSharedViewModel
+import com.example.statspos.presentation.viewmodels.items.SharedViewModel
 import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.ThemeMode
@@ -98,7 +90,7 @@ import kotlinx.serialization.modules.polymorphic
 
 @Composable
 fun HomeScreen(
-    sharedViewModel: ItemsSharedViewModel,
+    sharedViewModel: SharedViewModel,
     onTopRouteClick: (NavKey) -> Unit,
 ) {
     val viewModel = hiltViewModel<LocalDataViewModel>()
@@ -291,14 +283,16 @@ fun NavigationDrawer(
                 imageUrl = HP.user.imageUrl,
                 showIfNull = true,
                 contentScale = ContentScale.Crop,
+                error = painterResource(R.drawable.select_image),
                 modifier = Modifier
                     .size(150.dp)
                     .clip(CircleShape)
-                    .border(
-                        width = 2.dp,
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = CircleShape
-                    ),
+//                    .border(
+//                        width = 2.dp,
+//                        color = MaterialTheme.colorScheme.primary,
+//                        shape = CircleShape
+//                    )
+                ,
             )
             Spacer(Modifier.height(16.dp))
             Column(

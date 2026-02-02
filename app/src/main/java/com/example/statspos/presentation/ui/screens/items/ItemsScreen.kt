@@ -13,14 +13,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -36,7 +32,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,6 +41,7 @@ import com.example.statspos.R
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.items.Items
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
+import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.AutoCompleteItemsTextbox
@@ -62,8 +58,8 @@ import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.PullToRefreshLayout
 import com.example.statspos.presentation.ui.components.SubDropdown
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
-import com.example.statspos.presentation.viewmodels.items.SharedViewModel
 import com.example.statspos.presentation.viewmodels.items.ItemsViewModel
+import com.example.statspos.presentation.viewmodels.items.SharedViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
@@ -73,9 +69,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun ItemsScreen(
     sharedViewModel: SharedViewModel,
-    AddItemClick: (Long, Boolean) -> Unit,
+    onAddButtonClick: (Long, Boolean) -> Unit,
 ) {
-    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -135,18 +130,8 @@ fun ItemsScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    AddItemClick(0L, false)
-                },
-                shape = CircleShape,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                )
+            AppFloatingActionButton {
+                onAddButtonClick(0L, false)
             }
         },
     ) { innerPadding ->
@@ -275,9 +260,9 @@ fun ItemsScreen(
                 loadNextItems = {
                     viewModel.loadNextItems()
                 },
-                items = state.items,
+                items = state.list,
                 onItemClick = { item ->
-                    AddItemClick(item.id!!, true)
+                    onAddButtonClick(item.id!!, true)
                 }
             )
 
@@ -353,7 +338,7 @@ private fun SearchBox(
 }
 
 @Composable
-fun ItemsList(
+private fun ItemsList(
     modifier: Modifier = Modifier,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
@@ -385,7 +370,7 @@ fun ItemsList(
                     loadNextItems()
                 }
 
-                ItemListCard(item = item) {
+                ListCard(item = item) {
                     onItemClick(it)
                 }
             }
@@ -407,7 +392,7 @@ fun ItemsList(
 }
 
 @Composable
-private fun ItemListCard(
+private fun ListCard(
     modifier: Modifier = Modifier,
     item: Items,
     onItemClick: (Items) -> Unit
@@ -420,170 +405,167 @@ private fun ItemListCard(
             onItemClick(item)
         }
     ) {
-        Column(
+        Row(
             modifier = Modifier
-                .padding(8.dp),
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
+            // Image
+            ImageView(
+                imageUrl = item.imageUrl,
                 modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
+                    .size(60.dp),
             ) {
-                // Image
-                ImageView(
-                    imageUrl = item.imageUrl,
-                    modifier = Modifier
-                        .size(60.dp),
-                ) {
-                    Spacer(Modifier.width(8.dp))
-                }
+                Spacer(Modifier.width(8.dp))
+            }
 
-                // Itemname & Rows
-                Column(
-                    modifier = Modifier
-                        .weight(1f),
-                ) {
-                    // Itemname
-                    LabelLarge(item.itemname.toString())
-                    Spacer(Modifier.height(2.dp))
+            // Itemname & Rows
+            Column(
+                modifier = Modifier
+                    .weight(1f),
+            ) {
+                // Itemname
+                LabelLarge(item.itemname.toString())
+                Spacer(Modifier.height(2.dp))
 
-                    // Rows when fourRateSystem
-                    if (HP.settings.fourRateSystem == true) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                        ) {
-                            HeadingMedium("Cost", Modifier.weight(1f))
-                            HeadingMedium("Rate 1", Modifier.weight(1f))
-                            HeadingMedium("Rate 2", Modifier.weight(1f))
-                            HeadingMedium("Rate 3", Modifier.weight(1f))
-                            HeadingMedium("Rate 4", Modifier.weight(1f))
-                        }
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                        ) {
-                            LabelMedium(HP.formatRate(item.cost), Modifier.weight(1f))
-                            LabelMedium(HP.formatRate(item.retail), Modifier.weight(1f))
-                            LabelMedium(HP.formatRate(item.wholesale), Modifier.weight(1f))
-                            LabelMedium(HP.formatRate(item.rate3), Modifier.weight(1f))
-                            LabelMedium(HP.formatRate(item.rate4), Modifier.weight(1f))
-                        }
-                    } else {
-                        // Rows else fourRateSystem
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                        ) {
-                            HeadingMedium(
-                                text = "Cost",
-                                Modifier.weight(1f)
-                            )
-                            HeadingMedium(
-                                text = "Retail",
-                                Modifier.weight(1f)
-                            )
-                            HeadingMedium(
-                                text = "W.Sale",
-                                Modifier.weight(1f)
-                            )
-                            HeadingMedium(
-                                text = if (HP.settings.saleCartons == true) "C.Rate" else "MP",
-                                Modifier.weight(1f)
-                            )
-                        }
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                        ) {
-                            LabelMedium(
-                                text = HP.formatRate(item.cost),
-                                Modifier.weight(1f)
-                            )
-                            LabelMedium(
-                                text = HP.formatRate(item.retail),
-                                Modifier.weight(1f)
-                            )
-                            LabelMedium(
-                                text = HP.formatRate(item.wholesale),
-                                Modifier.weight(1f)
-                            )
-                            LabelMedium(
-                                text = if (HP.settings.saleCartons == true) HP.formatRate(item.crtnRate) else HP.formatRate(item.marketPrice),
-                                Modifier.weight(1f)
-                            )
-                        }
+                // Rows when fourRateSystem
+                if (HP.settings.fourRateSystem == true) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        HeadingMedium("Cost", Modifier.weight(1f))
+                        HeadingMedium("Rate 1", Modifier.weight(1f))
+                        HeadingMedium("Rate 2", Modifier.weight(1f))
+                        HeadingMedium("Rate 3", Modifier.weight(1f))
+                        HeadingMedium("Rate 4", Modifier.weight(1f))
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        LabelMedium(HP.formatRate(item.cost), Modifier.weight(1f))
+                        LabelMedium(HP.formatRate(item.retail), Modifier.weight(1f))
+                        LabelMedium(HP.formatRate(item.wholesale), Modifier.weight(1f))
+                        LabelMedium(HP.formatRate(item.rate3), Modifier.weight(1f))
+                        LabelMedium(HP.formatRate(item.rate4), Modifier.weight(1f))
+                    }
+                } else {
+                    // Rows else fourRateSystem
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        HeadingMedium(
+                            text = "Cost",
+                            Modifier.weight(1f)
+                        )
+                        HeadingMedium(
+                            text = "Retail",
+                            Modifier.weight(1f)
+                        )
+                        HeadingMedium(
+                            text = "W.Sale",
+                            Modifier.weight(1f)
+                        )
+                        HeadingMedium(
+                            text = if (HP.settings.saleCartons == true) "C.Rate" else "MP",
+                            Modifier.weight(1f)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        LabelMedium(
+                            text = HP.formatRate(item.cost),
+                            Modifier.weight(1f)
+                        )
+                        LabelMedium(
+                            text = HP.formatRate(item.retail),
+                            Modifier.weight(1f)
+                        )
+                        LabelMedium(
+                            text = HP.formatRate(item.wholesale),
+                            Modifier.weight(1f)
+                        )
+                        LabelMedium(
+                            text = if (HP.settings.saleCartons == true) HP.formatRate(item.crtnRate) else HP.formatRate(
+                                item.marketPrice
+                            ),
+                            Modifier.weight(1f)
+                        )
                     }
                 }
             }
+        }
 
-            // Stock
-            Spacer(Modifier.height(2.dp))
+        // Stock
+        Spacer(Modifier.height(2.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .weight(1f),
             ) {
+                HeadingMedium("Stock Pcs: ")
+                LabelMedium(HP.formatRate(item.stockPcs))
+            }
+            if (HP.settings.saleCartons == true) {
                 Row(
                     modifier = Modifier
                         .weight(1f),
                 ) {
-                    HeadingMedium("Stock Pcs: ")
-                    LabelMedium(HP.formatRate(item.stockPcs))
-                }
-                if(HP.settings.saleCartons == true) {
-                    Row(
-                        modifier = Modifier
-                            .weight(1f),
-                    ) {
-                        HeadingMedium("Stock Crtn: ")
-                        LabelMedium(item.stockCrtn.toString())
-                    }
+                    HeadingMedium("Stock Crtn: ")
+                    LabelMedium(item.stockCrtn.toString())
                 }
             }
+        }
 
-            // Category
-            item.categoryName?.let {
-                if (it.isNotEmpty()) {
-                    Spacer(Modifier.height(2.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        HeadingMedium("Category: ")
-                        LabelMedium(item.categoryName.toString())
-                    }
+        // Category
+        item.categoryName?.let {
+            if (it.isNotEmpty()) {
+                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    HeadingMedium("Category: ")
+                    LabelMedium(item.categoryName.toString())
                 }
             }
+        }
 
-            // Sub-Category
-            item.subCategoryName?.let {
-                if (it.isNotEmpty()) {
-                    Spacer(Modifier.height(2.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        HeadingMedium("Sub-Category: ")
-                        LabelMedium(item.subCategoryName.toString())
-                    }
+        // Sub-Category
+        item.subCategoryName?.let {
+            if (it.isNotEmpty()) {
+                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    HeadingMedium("Sub-Category: ")
+                    LabelMedium(item.subCategoryName.toString())
                 }
             }
+        }
 
-            // Vendor
-            item.vendorName?.let {
-                if (it.isNotEmpty()) {
-                    Spacer(Modifier.height(2.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        HeadingMedium("Vendor: ")
-                        LabelMedium(item.vendorName.toString())
-                    }
+        // Vendor
+        item.vendorName?.let {
+            if (it.isNotEmpty()) {
+                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    HeadingMedium("Vendor: ")
+                    LabelMedium(item.vendorName.toString())
                 }
             }
         }

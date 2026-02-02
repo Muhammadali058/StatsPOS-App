@@ -15,6 +15,8 @@ class SalesRepositoryImpl @Inject constructor(
 ) : SalesRepository {
     override suspend fun insertSales(sale: Sales): Resource<JsonObject> {
         val body = DB.getJsonObject(sale)
+        body.addProperty("userId", HP.user.id)
+
         return safeApiCall {
             api.insertSales(
                 DB.addParams(body)
@@ -24,6 +26,8 @@ class SalesRepositoryImpl @Inject constructor(
 
     override suspend fun updateSales(sale: Sales): Resource<JsonObject> {
         val body = DB.getJsonObject(sale)
+        body.addProperty("userId", HP.user.id)
+
         return safeApiCall {
             api.updateSales(
                 DB.addParams(body)
@@ -59,6 +63,8 @@ class SalesRepositoryImpl @Inject constructor(
 
     override suspend fun tempClose(sale: Sales): Resource<JsonObject> {
         val body = DB.getJsonObject(sale)
+        body.addProperty("userId", HP.user.id)
+
         return safeApiCall {
             api.tempClose(
                 DB.addParams(body)

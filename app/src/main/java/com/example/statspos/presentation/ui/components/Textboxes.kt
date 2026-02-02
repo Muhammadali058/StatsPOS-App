@@ -454,3 +454,39 @@ fun DiscountTextbox(
         }
     }
 }
+
+@Composable
+fun SearchTextbox(
+    modifier: Modifier = Modifier,
+    value: String,
+    label: String = "Search",
+    onValueChange: (String) -> Unit,
+    onSearchClick: (String) -> Unit,
+) {
+    Textbox(
+        modifier = modifier,
+        value = value,
+        onValueChange = onValueChange,
+        label = {
+            Text(
+                text = label
+            )
+        },
+        trailingIcon = {
+            IconButton(onClick = {
+                onSearchClick(value)
+            }) {
+                AppIcon(icon = R.drawable.ic_search)
+            }
+        },
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Search
+        ),
+        keyboardActions = KeyboardActions(
+            onSearch = {
+                onSearchClick(value)
+            }
+        )
+    )
+}

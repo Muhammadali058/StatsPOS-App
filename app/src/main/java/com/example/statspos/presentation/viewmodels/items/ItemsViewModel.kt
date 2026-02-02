@@ -27,7 +27,7 @@ class ItemsViewModel @Inject constructor(
 
     // region ScreenState
     data class ScreenState(
-        val items: List<Items> = emptyList(),
+        val list: List<Items> = emptyList(),
         val totalItems: Int = 0,
         val page: Int = 1,
         val endReached: Boolean = false,
@@ -171,12 +171,12 @@ class ItemsViewModel @Inject constructor(
                 is Resource.Success -> {
                     resultSuccess()
 
-                    val totalItems = result.data.get("total").asJsonObject.get("totalItems").asInt
-                    val itemsList = Gson().getListOf<Items>(result.data.get("rows").asJsonArray)
+                    val resultTotal = result.data.get("total").asJsonObject.get("totalItems").asInt
+                    val resultList = Gson().getListOf<Items>(result.data.get("rows").asJsonArray)
                     state.update {
                         it.copy(
-                            items = itemsList,
-                            totalItems = totalItems,
+                            list = resultList,
+                            totalItems = resultTotal,
                         )
                     }
                 }
@@ -213,13 +213,13 @@ class ItemsViewModel @Inject constructor(
                 is Resource.Success -> {
                     state.update { it.copy(isLoadingNextPage = false, error = null) }
 
-                    val totalItems = result.data.get("total").asJsonObject.get("totalItems").asInt
-                    val itemsList = Gson().getListOf<Items>(result.data.get("rows").asJsonArray)
+                    val resultTotal = result.data.get("total").asJsonObject.get("totalItems").asInt
+                    val resultList = Gson().getListOf<Items>(result.data.get("rows").asJsonArray)
                     state.update {
                         it.copy(
-                            items = state.value.items + itemsList,
-                            totalItems = totalItems,
-                            endReached = itemsList.isEmpty(),
+                            list = state.value.list + resultList,
+                            totalItems = resultTotal,
+                            endReached = resultList.isEmpty(),
                         )
                     }
                 }
@@ -255,14 +255,14 @@ class ItemsViewModel @Inject constructor(
                         val item = Gson().get<Items>(result.data.get("data").asJsonObject)
                         state.update {
                             it.copy(
-                                items = listOf(item),
+                                list = listOf(item),
                                 totalItems = 1,
                             )
                         }
                     } else {
                         state.update {
                             it.copy(
-                                items = emptyList(),
+                                list = emptyList(),
                                 totalItems = 0,
                             )
                         }

@@ -2,7 +2,6 @@ package com.example.statspos.presentation.ui.screens.main.main
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -221,7 +220,7 @@ fun HomeScreen(
                         entry<BottomRoutes.Items> {
                             ItemsScreen(
                                 sharedViewModel = sharedViewModel,
-                                AddItemClick = { updateId, isUpdate ->
+                                onAddButtonClick = { updateId, isUpdate ->
                                     onTopRouteClick(TopRoutes.AddUpdateItem(updateId, isUpdate))
                                 }
                             )

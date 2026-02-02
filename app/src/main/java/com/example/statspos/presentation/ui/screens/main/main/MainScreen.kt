@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
@@ -25,7 +26,6 @@ import com.example.statspos.presentation.ui.screens.items.CategoriesScreen
 import com.example.statspos.presentation.ui.screens.purchase.PurchaseScreen
 import com.example.statspos.presentation.viewmodels.items.SharedViewModel
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreen() {
     val sharedViewModel = hiltViewModel<SharedViewModel>()
@@ -37,7 +37,11 @@ fun MainScreen() {
             activity.finish()
         }
     }
-
+    fun navigate(key: NavKey) {
+        if (backStack.lastOrNull() != key) {
+            backStack.add(key)
+        }
+    }
     NavDisplay(
         backStack = backStack,
         entryDecorators = listOf(
@@ -49,9 +53,7 @@ fun MainScreen() {
                 HomeScreen(
                     sharedViewModel= sharedViewModel,
                     onTopRouteClick = { key ->
-                        if (backStack.lastOrNull() != key) {
-                            backStack.add(key)
-                        }
+                        navigate(key)
                     }
                 )
             }

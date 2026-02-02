@@ -15,6 +15,8 @@ class PurchaseRepositoryImpl @Inject constructor(
 ) : PurchaseRepository {
     override suspend fun insertPurchase(purchase: Purchase): Resource<JsonObject> {
         val body = DB.getJsonObject(purchase)
+        body.addProperty("userId", HP.user.id)
+
         return safeApiCall {
             api.insertPurchase(
                 DB.addParams(body)
@@ -24,6 +26,8 @@ class PurchaseRepositoryImpl @Inject constructor(
 
     override suspend fun updatePurchase(purchase: Purchase): Resource<JsonObject> {
         val body = DB.getJsonObject(purchase)
+        body.addProperty("userId", HP.user.id)
+
         return safeApiCall {
             api.updatePurchase(
                 DB.addParams(body)
@@ -59,6 +63,8 @@ class PurchaseRepositoryImpl @Inject constructor(
 
     override suspend fun tempClose(purchase: Purchase): Resource<JsonObject> {
         val body = DB.getJsonObject(purchase)
+        body.addProperty("userId", HP.user.id)
+
         return safeApiCall {
             api.tempClose(
                 DB.addParams(body)

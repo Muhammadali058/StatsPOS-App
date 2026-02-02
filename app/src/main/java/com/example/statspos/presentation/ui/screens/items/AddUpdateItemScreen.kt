@@ -91,6 +91,8 @@ private sealed class Routes : NavKey {
     @Serializable
     data class SubBarcodes(val itemId: Long) : Routes()
 
+    @Serializable
+    data class AddUpdateSubBarcode(val updateId: Long, val isUpdate: Boolean, val itemId: Long) : Routes()
 }
 
 @Composable
@@ -141,15 +143,27 @@ fun AddUpdateItemScreen(
                 }
             }
             entry<Routes.SubBarcodes> { key ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Sub Barcode Item ${key.itemId}"
-                    )
-                }
+                SubBarcodesScreen(
+                    sharedViewModel = sharedViewModel,
+                    itemId = key.itemId,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                    onAddButtonClick = { updateId, isUpdate, itemId ->
+                        navigate(Routes.AddUpdateSubBarcode(updateId, isUpdate, itemId))
+                    }
+                )
+            }
+            entry<Routes.AddUpdateSubBarcode> { key ->
+                AddUpdateSubBarcodeScreen(
+                    sharedViewModel = sharedViewModel,
+                    updateId = key.updateId,
+                    isUpdate = key.isUpdate,
+                    itemId = key.itemId,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
             }
         }
     )
@@ -214,8 +228,8 @@ private fun Home(
                 showDeleteDialog = false
             },
             onConfirm = {
-                showDeleteDialog = false
                 viewModel.deleteData(updateId) {
+                    showDeleteDialog = false
                     context.showToast("Item deleted successfully")
                     goBackWithResult()
                 }
@@ -223,8 +237,8 @@ private fun Home(
         )
     }
 
-
     var menuExpanded by remember { mutableStateOf(false) }
+
     Scaffold(
         snackbarHost = {
             AppSnackbarHost(
@@ -443,7 +457,6 @@ private fun Home(
                     }
                 }
             }
-
         }
 
     }
@@ -1145,9 +1158,9 @@ private fun ImageExpandable(
                 .padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if(isUploadingImage){
+            if (isUploadingImage) {
                 AppCircularProgressIndicator()
-            }else{
+            } else {
                 UploadImageView(
                     imageUrl = imageUrl,
                     onImageUrlChange = onImageUrlChange
@@ -1160,7 +1173,7 @@ private fun ImageExpandable(
 
 @Preview(showBackground = true)
 @Composable
-private fun BodyPrev(modifier: Modifier = Modifier) {
+private fun BodyPrev() {
     val scrollState = rememberScrollState()
 
     Column(

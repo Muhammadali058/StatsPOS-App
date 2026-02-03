@@ -13,9 +13,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -40,8 +46,10 @@ import com.example.statspos.R
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.items.Items
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
+import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
+import com.example.statspos.presentation.ui.components.AppText
 import com.example.statspos.presentation.ui.components.AutoCompleteItemsTextbox
 import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
 import com.example.statspos.presentation.ui.components.BottomSheet
@@ -55,9 +63,11 @@ import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SubDropdown
+import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
-import com.example.statspos.presentation.viewmodels.items.ItemsViewModel
 import com.example.statspos.presentation.viewmodels.SharedViewModel
+import com.example.statspos.presentation.viewmodels.items.ItemsViewModel
+import com.example.statspos.presentation.viewmodels.items.SearchItemsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
@@ -65,17 +75,22 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ItemsScreen(
+fun SearchItemsScreen(
     sharedViewModel: SharedViewModel,
-    onAddButtonClick: (Long, Boolean) -> Unit,
+    onBack: () -> Unit,
 ) {
+    fun goBackWithResult() {
+        sharedViewModel.notifyDataChanged()
+        onBack()
+    }
+
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBottomSheet by remember { mutableStateOf(false) }
     var showBarcodeScanner by remember { mutableStateOf(false) }
 
-    val viewModel = hiltViewModel<ItemsViewModel>()
+    val viewModel = hiltViewModel<SearchItemsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -89,14 +104,6 @@ fun ItemsScreen(
                 showErrorDialog = true
             }
         )
-    }
-
-    val sharedViewModelState by sharedViewModel.state.collectAsStateWithLifecycle()
-    LaunchedEffect(sharedViewModelState.dataChanged) {
-        if (sharedViewModelState.dataChanged) {
-            viewModel.loadItems()
-            sharedViewModel.consumeDataChanged()
-        }
     }
 
     if (showErrorDialog) {
@@ -127,14 +134,16 @@ fun ItemsScreen(
                 snackbarHostState = snackbarHostState,
             )
         },
-        floatingActionButton = {
-            AppFloatingActionButton {
-                onAddButtonClick(0L, false)
-            }
-        },
+        topBar = {
+            TopAppBar(
+                navigationIcon = Icons.Default.ArrowBack,
+                onNavigationClick = {
+                    onBack()
+                },
+                title = "Search Item",
+            )
+        }
     ) { innerPadding ->
-        Box(Modifier.padding(innerPadding))
-
         // Bottom Sheet
         if (showBottomSheet) {
             BottomSheet(
@@ -208,6 +217,7 @@ fun ItemsScreen(
 
         Column(
             modifier = Modifier
+                .padding(innerPadding)
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
@@ -253,7 +263,8 @@ fun ItemsScreen(
                 },
                 items = state.list,
                 onItemClick = { item ->
-                    onAddButtonClick(item.id!!, true)
+                    sharedViewModel.setItem(item)
+                    goBackWithResult()
                 }
             )
 
@@ -407,7 +418,6 @@ private fun ListCard(
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        HeadingMedium("Cost", Modifier.weight(1f))
                         HeadingMedium("Rate 1", Modifier.weight(1f))
                         HeadingMedium("Rate 2", Modifier.weight(1f))
                         HeadingMedium("Rate 3", Modifier.weight(1f))
@@ -418,7 +428,6 @@ private fun ListCard(
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        LabelMedium(HP.formatRate(item.cost), Modifier.weight(1f))
                         LabelMedium(HP.formatRate(item.retail), Modifier.weight(1f))
                         LabelMedium(HP.formatRate(item.wholesale), Modifier.weight(1f))
                         LabelMedium(HP.formatRate(item.rate3), Modifier.weight(1f))
@@ -431,10 +440,6 @@ private fun ListCard(
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        HeadingMedium(
-                            text = "Cost",
-                            Modifier.weight(1f)
-                        )
                         HeadingMedium(
                             text = "Retail",
                             Modifier.weight(1f)
@@ -453,10 +458,6 @@ private fun ListCard(
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        LabelMedium(
-                            text = HP.formatRate(item.cost),
-                            Modifier.weight(1f)
-                        )
                         LabelMedium(
                             text = HP.formatRate(item.retail),
                             Modifier.weight(1f)
@@ -541,6 +542,21 @@ private fun ListCard(
                 }
             }
         }
+
+        // Location
+        item.location?.let {
+            if (it.isNotEmpty()) {
+                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    HeadingMedium("Location: ")
+                    LabelMedium(item.location.toString())
+                }
+            }
+        }
+
     }
 }
 

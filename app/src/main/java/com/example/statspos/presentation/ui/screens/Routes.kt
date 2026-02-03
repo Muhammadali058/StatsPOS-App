@@ -23,6 +23,9 @@ sealed class TopRoutes : NavKey{
     data object Home : TopRoutes()
 
     @Serializable
+    data object SearchItem : TopRoutes()
+
+    @Serializable
     data class AddUpdateItem(val updateId: Long, val isUpdate: Boolean) : TopRoutes()
 
     @Serializable

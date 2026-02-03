@@ -22,6 +22,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -222,10 +224,23 @@ fun AutoCompleteItemsTextbox(
     value: String,
     onValueChange: (String) -> Unit,
     onItemSelected: (String) -> Unit,
+    onEndIconClick: (String) -> Unit,
     onSearchClick: (String) -> Unit,
-    onKeyboardAction: (String) -> Unit,
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit) = {
+        IconButton(onClick = {
+            onEndIconClick(value)
+        }) {
+            AppIcon(
+                icon = Icons.Default.ArrowForward,
+                size = 20.dp
+            )
+        }
+    },
+    keyboardOptions: KeyboardOptions = KeyboardOptions(
+        imeAction = ImeAction.Search
+    ),
     height: Dp = ConstantSize.DEFAULT_TEXTBOX_HEIGHT,
     shape: Shape = OutlinedTextFieldDefaults.shape,
     textStyle: TextStyle = TextStyle(),
@@ -279,19 +294,14 @@ fun AutoCompleteItemsTextbox(
                     )
                 }
             },
-            trailingIcon = {
-                IconButton(onClick = {
-                    onSearchClick(value)
-                }) {
-                    AppIcon(icon = R.drawable.ic_search)
-                }
-            },
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Go
-            ),
+            trailingIcon = trailingIcon,
+            keyboardOptions = keyboardOptions,
             keyboardActions = KeyboardActions(
+                onSearch = {
+                    onSearchClick(value)
+                },
                 onGo = {
-                    onKeyboardAction(value)
+                    onSearchClick(value)
                 }
             ),
             contentPadding = contentPadding,
@@ -476,7 +486,11 @@ fun SearchTextbox(
             IconButton(onClick = {
                 onSearchClick(value)
             }) {
-                AppIcon(icon = R.drawable.ic_search)
+                AppIcon(
+                    icon = Icons.Default.Clear,
+                    modifier = Modifier.size(20.dp)
+                )
+//                AppIcon(icon = R.drawable.ic_search)
             }
         },
         keyboardOptions = KeyboardOptions(

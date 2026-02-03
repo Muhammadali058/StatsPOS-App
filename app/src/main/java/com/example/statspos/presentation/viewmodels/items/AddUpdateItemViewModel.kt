@@ -23,7 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AddUpdateItemViewModel @Inject constructor(
-    private val itemsRepo: ItemsRepository,
+    private val api: ItemsRepository,
     private val mainRepo: MainRepository,
 ) : ViewModel() {
     // region ScreenState
@@ -330,9 +330,9 @@ class AddUpdateItemViewModel @Inject constructor(
 
             val result = if (state.value.isUpdate) {
                 item.id = state.value.updateId
-                itemsRepo.updateItem(item)
+                api.updateItem(item)
             } else {
-                itemsRepo.insertItem(item)
+                api.insertItem(item)
             }
 
             state.update { it.copy(isSaving = false) }
@@ -372,7 +372,7 @@ class AddUpdateItemViewModel @Inject constructor(
 
             beforeRequest()
 
-            when (val result = itemsRepo.deleteItem(id)) {
+            when (val result = api.deleteItem(id)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
@@ -391,7 +391,7 @@ class AddUpdateItemViewModel @Inject constructor(
 
             beforeRequest()
 
-            when (val result = itemsRepo.getItem(id)) {
+            when (val result = api.getItem(id)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
@@ -436,7 +436,6 @@ class AddUpdateItemViewModel @Inject constructor(
             }
         }
     }
-
     // endregion
 
     // region Methods

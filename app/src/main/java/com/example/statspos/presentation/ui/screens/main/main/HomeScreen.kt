@@ -78,7 +78,7 @@ import com.example.statspos.presentation.ui.screens.TopRoutes
 import com.example.statspos.presentation.ui.screens.items.ItemsScreen
 import com.example.statspos.presentation.ui.screens.reports.ReportsScreen
 import com.example.statspos.presentation.ui.screens.sales.SalesScreen
-import com.example.statspos.presentation.viewmodels.items.SharedViewModel
+import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.ThemeMode
@@ -226,9 +226,12 @@ fun HomeScreen(
                             )
                         }
                         entry<BottomRoutes.Sales> {
-                            SalesScreen { key ->
-                                onTopRouteClick(key)
-                            }
+                            SalesScreen(
+                                sharedViewModel = sharedViewModel,
+                                onClick = { key ->
+                                    onTopRouteClick(key)
+                                }
+                            )
                         }
                         entry<BottomRoutes.Reports> {
                             ReportsScreen()

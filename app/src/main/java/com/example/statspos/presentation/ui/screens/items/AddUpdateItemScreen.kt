@@ -72,7 +72,7 @@ import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.components.UploadImageView
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.items.AddUpdateItemViewModel
-import com.example.statspos.presentation.viewmodels.items.SharedViewModel
+import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
@@ -89,10 +89,19 @@ private sealed class Routes : NavKey {
     data class LinkedItems(val itemId: Long) : Routes()
 
     @Serializable
+    data class AddUpdateLinkedItem(val updateId: Long, val isUpdate: Boolean, val itemId: Long) :
+        Routes()
+
+    @Serializable
     data class SubBarcodes(val itemId: Long) : Routes()
 
     @Serializable
-    data class AddUpdateSubBarcode(val updateId: Long, val isUpdate: Boolean, val itemId: Long) : Routes()
+    data class AddUpdateSubBarcode(val updateId: Long, val isUpdate: Boolean, val itemId: Long) :
+        Routes()
+
+    @Serializable
+    data object SearchItem : Routes()
+
 }
 
 @Composable
@@ -124,23 +133,38 @@ fun AddUpdateItemScreen(
                         onBack()
                     },
                     onLinkedItemsClick = {
-                        navigate(Routes.LinkedItems(updateId))
+                        navigate(Routes.LinkedItems(itemId = updateId))
                     },
                     onSubBarcodesClick = {
-                        navigate(Routes.SubBarcodes(updateId))
+                        navigate(Routes.SubBarcodes(itemId = updateId))
                     }
                 )
             }
             entry<Routes.LinkedItems> { key ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Linked Item ${key.itemId}"
-                    )
-                }
+                LinkedItemsScreen(
+                    sharedViewModel = sharedViewModel,
+                    itemId = key.itemId,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                    onAddButtonClick = { updateId, isUpdate, itemId ->
+                        navigate(Routes.AddUpdateLinkedItem(updateId, isUpdate, itemId))
+                    }
+                )
+            }
+            entry<Routes.AddUpdateLinkedItem> { key ->
+                AddUpdateLinkedItemScreen(
+                    sharedViewModel = sharedViewModel,
+                    updateId = key.updateId,
+                    isUpdate = key.isUpdate,
+                    itemId = key.itemId,
+                    onSearchItemClick = {
+                        navigate(Routes.SearchItem)
+                    },
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
             }
             entry<Routes.SubBarcodes> { key ->
                 SubBarcodesScreen(
@@ -160,6 +184,14 @@ fun AddUpdateItemScreen(
                     updateId = key.updateId,
                     isUpdate = key.isUpdate,
                     itemId = key.itemId,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<Routes.SearchItem> { key ->
+                SearchItemsScreen(
+                    sharedViewModel = sharedViewModel,
                     onBack = {
                         backStack.removeLastOrNull()
                     }
@@ -255,13 +287,15 @@ private fun Home(
                 actions = {
                     Row {
                         if (isUpdate) {
-                            IconButton(onClick = {
-                                showDeleteDialog = true
-                            }) {
-                                AppIcon(
-                                    icon = Icons.Default.Delete,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
+                            if (HP.userRights.deleteAnything == true) {
+                                IconButton(onClick = {
+                                    showDeleteDialog = true
+                                }) {
+                                    AppIcon(
+                                        icon = Icons.Default.Delete,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
                             }
 
                             IconButton(

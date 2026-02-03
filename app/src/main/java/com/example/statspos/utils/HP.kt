@@ -1,6 +1,7 @@
 package com.example.statspos.utils
 
 import com.example.statspos.domain.models.DropdownItem
+import com.example.statspos.domain.models.items.Items
 import com.example.statspos.domain.models.main.Branches
 import com.example.statspos.domain.models.main.LocalClients
 import com.example.statspos.domain.models.utilities.settings.AdminPasswords
@@ -79,7 +80,11 @@ object HP {
         adminSettings = Gson().get<AdminSettings>(jsonObject.get("adminSettings").asJsonObject)
         adminPasswords = Gson().get<AdminPasswords>(jsonObject.get("adminPasswords").asJsonObject)
 
-        autoCompleteItems = Gson().getListOf<String>(jsonObject.get("items").asJsonArray)
+        autoCompleteItems = Gson().getListOf<Items>(jsonObject.get("items").asJsonArray).map {
+            it.itemname!!
+        }
+
+//        autoCompleteItems = Gson().getListOf<String>(jsonObject.get("items").asJsonArray)
         categories = Gson().getListOf<DropdownItem>(jsonObject.get("categories").asJsonArray)
         subCategories = jsonObject.get("subCategories").asJsonArray.map { obj ->
             DropdownItem(

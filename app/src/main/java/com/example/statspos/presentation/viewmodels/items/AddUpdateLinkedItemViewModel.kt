@@ -2,7 +2,11 @@ package com.example.statspos.presentation.viewmodels.items
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.items.Items
+import com.example.statspos.domain.models.items.LinkedItems
 import com.example.statspos.domain.models.items.SubBarcodes
+import com.example.statspos.domain.repository.items.ItemsRepository
+import com.example.statspos.domain.repository.items.LinkedItemsRepository
 import com.example.statspos.domain.repository.items.SubBarcodesRepository
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
@@ -18,17 +22,26 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AddUpdateSubBarcodeViewModel @Inject constructor(
-    private val api: SubBarcodesRepository,
+class AddUpdateLinkedItemViewModel @Inject constructor(
+    private val api: LinkedItemsRepository,
+    private val itemsRepo: ItemsRepository,
 ) : ViewModel() {
     // region ScreenState
     data class ScreenState(
         val id: Long = 0L,
-        val subBarcode: String = "",
-        val isCrtn: Boolean = false,
         val itemId: Long = 0L,
+        val linkedItemId: Long = 0L,
+
+        val updateCost: Boolean = false,
+        val updateRetail: Boolean = false,
+        val updateWholesale: Boolean = false,
+        val updateCrtnRate: Boolean = false,
+        val updateMarketPrice: Boolean = true,
+        val updateExpiry: Boolean = true,
+        val rateFormula: String = "",
 
         // Extra
+        val itemname: String = "",
         val isUpdate: Boolean = false,
         val updateId: Long = 0L,
 
@@ -94,11 +107,32 @@ class AddUpdateSubBarcodeViewModel @Inject constructor(
     // endregion
 
     // region onChangeMethods
-    fun onSubBarcodeChange(value: String) {
-        state.update { it.copy(subBarcode = value) }
+    fun onUpdateCostChange(value: Boolean) {
+        state.update { it.copy(updateCost = value) }
     }
-    fun onIsCrtnChange(value: Boolean) {
-        state.update { it.copy(isCrtn = value) }
+    fun onUpdateRetailChange(value: Boolean) {
+        state.update { it.copy(updateRetail = value) }
+    }
+    fun onUpdateWholesaleChange(value: Boolean) {
+        state.update { it.copy(updateWholesale = value) }
+    }
+    fun onUpdateCrtnRateChange(value: Boolean) {
+        state.update { it.copy(updateCrtnRate = value) }
+    }
+    fun onUpdateMarketPriceChange(value: Boolean) {
+        state.update { it.copy(updateMarketPrice = value) }
+    }
+    fun onRateFormulaChange(value: String) {
+        state.update { it.copy(rateFormula = value) }
+    }
+    fun onLinkedItemIdChange(value: Long) {
+        state.update { it.copy(linkedItemId = value) }
+    }
+    fun onItemnameChange(value: String) {
+        state.update { it.copy(
+            itemname = value,
+            linkedItemId = 0L,
+        ) }
     }
     // endregion
 
@@ -116,27 +150,20 @@ class AddUpdateSubBarcodeViewModel @Inject constructor(
 
             state.update { it.copy(isSaving = true) }
 
-            val subBarcode = getFormData()
+            val linkedItem = getFormData()
 
             val result = if (state.value.isUpdate) {
-                subBarcode.id = state.value.updateId
-                api.updateSubBarcode(subBarcode)
+                linkedItem.id = state.value.updateId
+                api.updateLinkedItem(linkedItem)
             } else {
-                api.insertSubBarcode(subBarcode)
+                api.insertLinkedItem(linkedItem)
             }
 
             state.update { it.copy(isSaving = false) }
 
             when (result) {
                 is Resource.Error -> showError(result.error)
-                is Resource.Information -> {
-                    if(result.data != null){
-                        val message = result.message + " ${result.data.get("data").asJsonObject.get("itemname").asString}"
-                        showMessage(message)
-                    }else{
-                        showMessage(result.message)
-                    }
-                }
+                is Resource.Information -> showMessage(result.message)
                 is Resource.Success -> {
                     clearTextboxes()
                     onSuccess()
@@ -155,7 +182,7 @@ class AddUpdateSubBarcodeViewModel @Inject constructor(
 
             beforeRequest()
 
-            when (val result = api.deleteSubBarcode(id)) {
+            when (val result = api.deleteLinkedItem(id)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
@@ -174,36 +201,87 @@ class AddUpdateSubBarcodeViewModel @Inject constructor(
 
             beforeRequest()
 
-            when (val result = api.getSubBarcode(id)) {
+            when (val result = api.getLinkedItem(id)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
 
-                    val subBarcode = Gson().get<SubBarcodes>(result.data.asJsonObject)
-                    setFormData(subBarcode)
+                    val linkedItem = Gson().get<LinkedItems>(result.data.asJsonObject)
+                    setFormData(linkedItem)
                 }
             }
         }
     }
 
+    fun getItem(value: String) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if (value.isEmpty())
+                return@launch
+
+            beforeRequest()
+
+            when (val result = itemsRepo.isBarcodeExists(value)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val isExists = result.data.get("isExists").asBoolean
+                    if (isExists) {
+                        val item = Gson().get<Items>(result.data.get("data").asJsonObject)
+                        state.update {
+                            it.copy(
+                                itemname = item.itemname!!,
+                                linkedItemId = item.id!!,
+                            )
+                        }
+                    } else {
+                        state.update {
+                            it.copy(
+                                linkedItemId = 0L,
+                            )
+                        }
+                        showSnackbar("Items not found")
+                    }
+                }
+            }
+        }
+    }
     // endregion
 
     // region Methods
-    private fun getFormData(): SubBarcodes {
-        return SubBarcodes(
+    private fun getFormData(): LinkedItems {
+        return LinkedItems(
             itemId = state.value.itemId,
-            subBarcode = state.value.subBarcode,
-            isCrtn = state.value.isCrtn,
+            linkedItemId = state.value.linkedItemId,
+
+            updateCost = state.value.updateCost,
+            updateRetail = state.value.updateRetail,
+            updateWholesale = state.value.updateWholesale,
+            updateCrtnRate = state.value.updateCrtnRate,
+            updateMarketPrice = state.value.updateMarketPrice,
+            updateExpiry = state.value.updateExpiry,
+            rateFormula = state.value.rateFormula,
         )
     }
 
-    private fun setFormData(subBarcodeTemp: SubBarcodes) {
+    private fun setFormData(linkedItem: LinkedItems) {
         state.update {
             it.copy(
-                subBarcode = subBarcodeTemp.subBarcode.toString(),
-                isCrtn = subBarcodeTemp.isCrtn!!,
+                itemname =  linkedItem.itemname!!,
+                linkedItemId = linkedItem.linkedItemId!!,
 
+                updateCost = linkedItem.updateCost!!,
+                updateRetail = linkedItem.updateRetail!!,
+                updateWholesale = linkedItem.updateWholesale!!,
+                updateCrtnRate = linkedItem.updateCrtnRate!!,
+                updateMarketPrice = linkedItem.updateMarketPrice!!,
+                updateExpiry = linkedItem.updateExpiry!!,
+                rateFormula = linkedItem.rateFormula!!,
             )
         }
     }
@@ -211,8 +289,16 @@ class AddUpdateSubBarcodeViewModel @Inject constructor(
     private fun clearTextboxes() {
         state.update {
             it.copy(
-                subBarcode = "",
-                isCrtn = false,
+                itemname = "",
+                linkedItemId = 0L,
+
+                updateCost =  false,
+                updateRetail =  false,
+                updateWholesale =  false,
+                updateCrtnRate =  false,
+                updateMarketPrice =  true,
+                updateExpiry =  true,
+                rateFormula =  "",
 
                 isUpdate = false,
                 updateId = 0L,
@@ -221,8 +307,8 @@ class AddUpdateSubBarcodeViewModel @Inject constructor(
     }
 
     private fun isValid(): Boolean {
-        if (state.value.subBarcode.isEmpty()) {
-            showMessage("Please enter barcode")
+        if (state.value.linkedItemId == 0L) {
+            showMessage("Please select item")
             return false
         }
 

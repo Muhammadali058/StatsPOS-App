@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.NavKey
 import com.example.statspos.presentation.ui.screens.BottomRoutes
 import com.example.statspos.presentation.ui.screens.TopRoutes
+import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.utils.SnackbarType
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
@@ -258,7 +259,7 @@ fun BottomSheet(
     modifier: Modifier = Modifier,
     sheetState: SheetState,
     onDismissRequest: () -> Unit,
-    containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
+    containerColor: Color = MaterialTheme.colorScheme.background,
     contentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
     tonalElevation: Dp = 0.dp,
     shape: Shape = BottomSheetDefaults.ExpandedShape,
@@ -289,7 +290,13 @@ fun BottomSheet(
                 darkIcons = false
             )
         }
-
-        content()
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(ConstantPaddings.BODY_HORIZONTAL),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            content()
+        }
     }
 }

@@ -2,7 +2,9 @@ package com.example.statspos.presentation.viewmodels.items
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.items.LinkedItems
 import com.example.statspos.domain.models.items.SubBarcodes
+import com.example.statspos.domain.repository.items.LinkedItemsRepository
 import com.example.statspos.domain.repository.items.SubBarcodesRepository
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
@@ -19,14 +21,14 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SubBarcodesViewModel @Inject constructor(
-    private val api: SubBarcodesRepository
+class LinkedItemsViewModel @Inject constructor(
+    private val api: LinkedItemsRepository
 ) : ViewModel() {
 
     // region ScreenState
     data class ScreenState(
-        val list: List<SubBarcodes> = emptyList(),
-        val totalSubBarcodes: Int = 0,
+        val list: List<LinkedItems> = emptyList(),
+        val totalLinkedItems: Int = 0,
 
         val itemId: Long = 0L,
         val search: String = "",
@@ -113,20 +115,20 @@ class SubBarcodesViewModel @Inject constructor(
                 addProperty("text", state.value.search)
             }
 
-            when (val result = api.loadSubBarcodes(params)) {
+            when (val result = api.loadLinkedItems(params)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
 
                     val resultTotal =
-                        result.data.get("total").asJsonObject.get("totalSubBarcodes").asInt
+                        result.data.get("total").asJsonObject.get("totalLinkedItems").asInt
                     val resultList =
-                        Gson().getListOf<SubBarcodes>(result.data.get("rows").asJsonArray)
+                        Gson().getListOf<LinkedItems>(result.data.get("rows").asJsonArray)
                     state.update {
                         it.copy(
                             list = resultList,
-                            totalSubBarcodes = resultTotal,
+                            totalLinkedItems = resultTotal,
                         )
                     }
                 }

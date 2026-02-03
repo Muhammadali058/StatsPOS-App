@@ -10,7 +10,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.presentation.ui.screens.items.AddUpdateItemScreen
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
-import com.example.statspos.presentation.viewmodels.items.SharedViewModel
+import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
 import com.example.statspos.utils.ThemeMode
 import dagger.hilt.android.AndroidEntryPoint

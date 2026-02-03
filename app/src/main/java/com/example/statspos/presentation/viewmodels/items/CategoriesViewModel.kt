@@ -19,7 +19,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CategoriesViewModel @Inject constructor(
-    private val categoriesRepo: CategoriesRepository
+    private val api: CategoriesRepository
 ) : ViewModel() {
     // region ScreenState
     data class ScreenState(
@@ -79,7 +79,7 @@ class CategoriesViewModel @Inject constructor(
                 addProperty("branchGroupId", 0)
             }
 
-            when (val result = categoriesRepo.loadCategories(params)) {
+            when (val result = api.loadCategories(params)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {

@@ -23,8 +23,9 @@ import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.presentation.ui.screens.TopRoutes
 import com.example.statspos.presentation.ui.screens.items.AddUpdateItemScreen
 import com.example.statspos.presentation.ui.screens.items.CategoriesScreen
+import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
 import com.example.statspos.presentation.ui.screens.purchase.PurchaseScreen
-import com.example.statspos.presentation.viewmodels.items.SharedViewModel
+import com.example.statspos.presentation.viewmodels.SharedViewModel
 
 @Composable
 fun MainScreen() {
@@ -54,6 +55,14 @@ fun MainScreen() {
                     sharedViewModel= sharedViewModel,
                     onTopRouteClick = { key ->
                         navigate(key)
+                    }
+                )
+            }
+            entry<TopRoutes.SearchItem> {
+                SearchItemsScreen(
+                    sharedViewModel= sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
                     }
                 )
             }

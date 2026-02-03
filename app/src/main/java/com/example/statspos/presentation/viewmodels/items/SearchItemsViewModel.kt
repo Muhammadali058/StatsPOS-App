@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ItemsViewModel @Inject constructor(
+class SearchItemsViewModel @Inject constructor(
     private val api: ItemsRepository
 ) : ViewModel() {
 

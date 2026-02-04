@@ -472,6 +472,7 @@ fun SearchTextbox(
     label: String = "Search",
     onValueChange: (String) -> Unit,
     onSearchClick: (String) -> Unit,
+    onEndIconClick: (String) -> Unit,
 ) {
     Textbox(
         modifier = modifier,
@@ -484,7 +485,7 @@ fun SearchTextbox(
         },
         trailingIcon = {
             IconButton(onClick = {
-                onSearchClick(value)
+                onEndIconClick(value)
             }) {
                 AppIcon(
                     icon = Icons.Default.Clear,

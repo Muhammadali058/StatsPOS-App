@@ -1,6 +1,5 @@
 package com.example.statspos.presentation.viewmodels.main
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.repository.main.MainRepository
@@ -15,8 +14,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -65,7 +62,6 @@ class MainViewModel @Inject constructor(
     // endregion
 
     // region Network calls
-
     fun loadMainData(onSuccess: () -> Unit){
         viewModelScope.launch {
             if (state.value.isLoading)
@@ -78,7 +74,6 @@ class MainViewModel @Inject constructor(
                 is Resource.Success -> {
                     resultSuccess()
 
-                    Log.d("TAG", result.data.toString())
                     HP.setDropdowns(result.data)
 
                     onSuccess()
@@ -87,37 +82,29 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun uploadImage(file: File) {
-        // Call this method in compose in button onClick
-//        val context = LocalContext.current
-//        val file = File(context.cacheDir, "bearing1.jpg")
-//        file.outputStream().use {
-//            context.assets.open("bearing.jpg").copyTo(it)
-//        }
-//        viewModel.uploadImage(file)
-
+    fun uploadImage(multipart: MultipartBody.Part) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
+
             beforeRequest()
 
-            val result = mainRepository.uploadImage(
-                image = MultipartBody.Part.createFormData(
-                    "image",
-                    file.name,
-                    file.asRequestBody()
-                )
-            )
-
-            when (result) {
+            when (val result = mainRepository.uploadImage(multipart)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
+
+                    val fileName = result.data.asJsonObject.get("fileName").asString
+//                    state.update { it.copy(
+//                        isUploadingImage = false,
+//                        imageUrl = fileName,
+//                    ) }
                 }
             }
         }
     }
+
     // endregion
 
     // region Others

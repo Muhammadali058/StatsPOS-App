@@ -1,5 +1,6 @@
 package com.example.statspos.presentation.ui.screens.items
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,9 +33,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
@@ -64,6 +67,7 @@ import com.example.statspos.presentation.ui.components.DiscountTextbox
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.ExpandableSection
+import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.SmallButton
 import com.example.statspos.presentation.ui.components.SubDropdown
@@ -86,10 +90,15 @@ private sealed class Routes : NavKey {
     data object Home : Routes()
 
     @Serializable
-    data class LinkedItems(val itemId: Long) : Routes()
+    data class LinkedItems(val itemId: Long, val crtnSize: Int) : Routes()
 
     @Serializable
-    data class AddUpdateLinkedItem(val updateId: Long, val isUpdate: Boolean, val itemId: Long) :
+    data class AddUpdateLinkedItem(
+        val updateId: Long,
+        val isUpdate: Boolean,
+        val itemId: Long,
+        val crtnSize: Int
+    ) :
         Routes()
 
     @Serializable
@@ -132,8 +141,8 @@ fun AddUpdateItemScreen(
                     onBack = {
                         onBack()
                     },
-                    onLinkedItemsClick = {
-                        navigate(Routes.LinkedItems(itemId = updateId))
+                    onLinkedItemsClick = { crtnSize ->
+                        navigate(Routes.LinkedItems(itemId = updateId, crtnSize = crtnSize))
                     },
                     onSubBarcodesClick = {
                         navigate(Routes.SubBarcodes(itemId = updateId))
@@ -144,11 +153,12 @@ fun AddUpdateItemScreen(
                 LinkedItemsScreen(
                     sharedViewModel = sharedViewModel,
                     itemId = key.itemId,
+                    crtnSize = key.crtnSize,
                     onBack = {
                         backStack.removeLastOrNull()
                     },
-                    onAddButtonClick = { updateId, isUpdate, itemId ->
-                        navigate(Routes.AddUpdateLinkedItem(updateId, isUpdate, itemId))
+                    onAddButtonClick = { updateId, isUpdate, itemId, crtnSize ->
+                        navigate(Routes.AddUpdateLinkedItem(updateId, isUpdate, itemId, crtnSize))
                     }
                 )
             }
@@ -158,6 +168,7 @@ fun AddUpdateItemScreen(
                     updateId = key.updateId,
                     isUpdate = key.isUpdate,
                     itemId = key.itemId,
+                    crtnSize = key.crtnSize,
                     onSearchItemClick = {
                         navigate(Routes.SearchItem)
                     },
@@ -207,7 +218,7 @@ private fun Home(
     updateId: Long,
     isUpdate: Boolean,
     onBack: () -> Unit,
-    onLinkedItemsClick: () -> Unit,
+    onLinkedItemsClick: (Int) -> Unit,
     onSubBarcodesClick: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -236,10 +247,13 @@ private fun Home(
         )
     }
 
+    // Edit data when update
+    var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         viewModel.updateInitialState(isUpdate = isUpdate, updateId = updateId)
 
-        if (isUpdate) {
+        if (isUpdate && !hasLoadedOnce) {
+            hasLoadedOnce = true
             viewModel.editData(updateId)
         }
     }
@@ -260,8 +274,8 @@ private fun Home(
                 showDeleteDialog = false
             },
             onConfirm = {
+                showDeleteDialog = false
                 viewModel.deleteData(updateId) {
-                    showDeleteDialog = false
                     context.showToast("Item deleted successfully")
                     goBackWithResult()
                 }
@@ -323,7 +337,7 @@ private fun Home(
 //                                },
                                     onClick = {
                                         menuExpanded = false
-                                        onLinkedItemsClick()
+                                        onLinkedItemsClick(HP.getIntValue(state.crtnSize))
                                     }
                                 )
 
@@ -339,157 +353,155 @@ private fun Home(
                                 )
                             }
                         }
-
-
                     }
                 }
             )
         }
     ) { innerPadding ->
-        Column(
+        Box(
             Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .padding(innerPadding)
+                .background(MaterialTheme.colorScheme.background)
+                .padding(ConstantPaddings.BODY_HORIZONTAL)
         ) {
-            if (state.isLoading) {
-                Box(
-                    Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    AppCircularProgressIndicator()
-                }
-            }
-
             Column(
                 Modifier
-                    .weight(1f)
-                    .verticalScroll(scrollState)
-                    .imePadding(),
+                    .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Basic(
-                    barcode = state.barcode,
-                    refCode = state.refCode,
-                    itemname = state.itemname,
-                    urduname = state.urduname,
-                    cost = state.cost,
-                    retail = state.retail,
-                    wholesale = state.wholesale,
-                    rate3 = state.rate3,
-                    rate4 = state.rate4,
-                    crtnRate = state.crtnRate,
-                    crtnSize = state.crtnSize,
-                    marketPrice = state.marketPrice,
+                Column(
+                    Modifier
+                        .weight(1f)
+                        .verticalScroll(scrollState)
+                        .imePadding(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Basic(
+                        barcode = state.barcode,
+                        refCode = state.refCode,
+                        itemname = state.itemname,
+                        urduname = state.urduname,
+                        cost = state.cost,
+                        retail = state.retail,
+                        wholesale = state.wholesale,
+                        rate3 = state.rate3,
+                        rate4 = state.rate4,
+                        crtnRate = state.crtnRate,
+                        crtnSize = state.crtnSize,
+                        marketPrice = state.marketPrice,
 
-                    onBarcodeChange = viewModel::onBarcodeChange,
-                    onRefCodeChange = viewModel::onRefCodeChange,
-                    onItemnameChange = viewModel::onItemnameChange,
-                    onUrdunameChange = viewModel::onUrdunameChange,
-                    onCostChange = viewModel::onCostChange,
-                    onRetailChange = viewModel::onRetailChange,
-                    onWholesaleChange = viewModel::onWholesaleChange,
-                    onRate3Change = viewModel::onRate3Change,
-                    onRate4Change = viewModel::onRate4Change,
-                    onCrtnRateChange = viewModel::onCrtnRateChange,
-                    onCrtnSizeChange = viewModel::onCrtnSizeChange,
-                    onMarketPriceChange = viewModel::onMarketPriceChange,
-                )
+                        onBarcodeChange = viewModel::onBarcodeChange,
+                        onRefCodeChange = viewModel::onRefCodeChange,
+                        onItemnameChange = viewModel::onItemnameChange,
+                        onUrdunameChange = viewModel::onUrdunameChange,
+                        onCostChange = viewModel::onCostChange,
+                        onRetailChange = viewModel::onRetailChange,
+                        onWholesaleChange = viewModel::onWholesaleChange,
+                        onRate3Change = viewModel::onRate3Change,
+                        onRate4Change = viewModel::onRate4Change,
+                        onCrtnRateChange = viewModel::onCrtnRateChange,
+                        onCrtnSizeChange = viewModel::onCrtnSizeChange,
+                        onMarketPriceChange = viewModel::onMarketPriceChange,
+                    )
 
-                CategoryAndVendor(
-                    categoryName = state.categoryName,
-                    subCategoryName = state.subCategoryName,
-                    vendorName = state.vendorName,
-                    categoryId = state.categoryId,
-                    onCategoryNameChange = viewModel::onCategoryNameChange,
-                    onSubCategoryNameChange = viewModel::onSubCategoryNameChange,
-                    onVendorNameChange = viewModel::onVendorNameChange,
-                    onCategoryIdChange = viewModel::onCategoryIdChange,
-                    onSubCategoryIdChange = viewModel::onSubCategoryIdChange,
-                    onVendorIdChange = viewModel::onVendorIdChange,
-                )
+                    CategoryAndVendor(
+                        categoryName = state.categoryName,
+                        subCategoryName = state.subCategoryName,
+                        vendorName = state.vendorName,
+                        categoryId = state.categoryId,
+                        onCategoryNameChange = viewModel::onCategoryNameChange,
+                        onSubCategoryNameChange = viewModel::onSubCategoryNameChange,
+                        onVendorNameChange = viewModel::onVendorNameChange,
+                        onCategoryIdChange = viewModel::onCategoryIdChange,
+                        onSubCategoryIdChange = viewModel::onSubCategoryIdChange,
+                        onVendorIdChange = viewModel::onVendorIdChange,
+                    )
 
-                Stock(
-                    stockWarningMin = state.stockWarningMin,
-                    stockWarningMax = state.stockWarningMax,
-                    maxSalePcs = state.maxSalePcs,
-                    maxSaleCrtn = state.maxSaleCrtn,
-                    openingStockPcs = state.openingStockPcs,
-                    openingStockCrtn = state.openingStockCrtn,
-                    currentStockPcs = state.currentStockPcs,
-                    currentStockCrtn = state.currentStockCrtn,
+                    Stock(
+                        stockWarningMin = state.stockWarningMin,
+                        stockWarningMax = state.stockWarningMax,
+                        maxSalePcs = state.maxSalePcs,
+                        maxSaleCrtn = state.maxSaleCrtn,
+                        openingStockPcs = state.openingStockPcs,
+                        openingStockCrtn = state.openingStockCrtn,
+                        currentStockPcs = state.currentStockPcs,
+                        currentStockCrtn = state.currentStockCrtn,
 
-                    onStockWarningMinChange = viewModel::onStockWarningMinChange,
-                    onStockWarningMaxChange = viewModel::onStockWarningMaxChange,
-                    onMaxSalePcsChange = viewModel::onMaxSalePcsChange,
-                    onMaxSaleCrtnChange = viewModel::onMaxSaleCrtnChange,
-                    onOpeningStockPcsChange = viewModel::onOpeningStockPcsChange,
-                    onOpeningStockCrtnChange = viewModel::onOpeningStockCrtnChange,
-                    onCurrentStockPcsChange = viewModel::onCurrentStockPcsChange,
-                    onCurrentStockCrtnChange = viewModel::onCurrentStockCrtnChange,
+                        onStockWarningMinChange = viewModel::onStockWarningMinChange,
+                        onStockWarningMaxChange = viewModel::onStockWarningMaxChange,
+                        onMaxSalePcsChange = viewModel::onMaxSalePcsChange,
+                        onMaxSaleCrtnChange = viewModel::onMaxSaleCrtnChange,
+                        onOpeningStockPcsChange = viewModel::onOpeningStockPcsChange,
+                        onOpeningStockCrtnChange = viewModel::onOpeningStockCrtnChange,
+                        onCurrentStockPcsChange = viewModel::onCurrentStockPcsChange,
+                        onCurrentStockCrtnChange = viewModel::onCurrentStockCrtnChange,
 
-                    openingStockPcsTBEnabled = state.openingStockPcsTBEnabled,
-                    openingStockCrtnTBEnabled = state.openingStockCrtnTBEnabled,
-                )
+                        openingStockPcsTBEnabled = state.openingStockPcsTBEnabled,
+                        openingStockCrtnTBEnabled = state.openingStockCrtnTBEnabled,
+                    )
 
-                DiscountExpiry(
-                    expirable = state.expirable,
-                    expiry = state.expiry,
-                    disc = state.disc,
-                    isDiscRsPer = state.isDiscRsPer,
-                    packing = state.packing,
-                    location = state.location,
+                    DiscountExpiry(
+                        expirable = state.expirable,
+                        expiry = state.expiry,
+                        disc = state.disc,
+                        isDiscRsPer = state.isDiscRsPer,
+                        packing = state.packing,
+                        location = state.location,
 
-                    onExpirableChange = viewModel::onExpirableChange,
-                    onExpiryChange = viewModel::onExpiryChange,
-                    onDiscChange = viewModel::onDiscChange,
-                    onIsDiscRsPerChange = viewModel::onIsDiscRsPerChange,
-                    onPackingChange = viewModel::onPackingChange,
-                    onLocationChange = viewModel::onLocationChange,
-                )
+                        onExpirableChange = viewModel::onExpirableChange,
+                        onExpiryChange = viewModel::onExpiryChange,
+                        onDiscChange = viewModel::onDiscChange,
+                        onIsDiscRsPerChange = viewModel::onIsDiscRsPerChange,
+                        onPackingChange = viewModel::onPackingChange,
+                        onLocationChange = viewModel::onLocationChange,
+                    )
 
-                Switches(
-                    changeable = state.changeable,
-                    repeatable = state.repeatable,
-                    lockPcs = state.lockPcs,
-                    lockCrtn = state.lockCrtn,
-                    button = state.button,
-                    searchable = state.searchable,
-                    saleUnderStock = state.saleUnderStock,
+                    Switches(
+                        changeable = state.changeable,
+                        repeatable = state.repeatable,
+                        lockPcs = state.lockPcs,
+                        lockCrtn = state.lockCrtn,
+                        button = state.button,
+                        searchable = state.searchable,
+                        saleUnderStock = state.saleUnderStock,
 
-                    onChangeableChange = viewModel::onChangeableChange,
-                    onRepeatableChange = viewModel::onRepeatableChange,
-                    onLockPcsChange = viewModel::onLockPcsChange,
-                    onLockCrtnChange = viewModel::onLockCrtnChange,
-                    onButtonChange = viewModel::onButtonChange,
-                    onSearchAbleChange = viewModel::onSearchableChange,
-                    onSaleUnderStockChange = viewModel::onSaleUnderStockChange,
-                )
+                        onChangeableChange = viewModel::onChangeableChange,
+                        onRepeatableChange = viewModel::onRepeatableChange,
+                        onLockPcsChange = viewModel::onLockPcsChange,
+                        onLockCrtnChange = viewModel::onLockCrtnChange,
+                        onButtonChange = viewModel::onButtonChange,
+                        onSearchAbleChange = viewModel::onSearchableChange,
+                        onSaleUnderStockChange = viewModel::onSaleUnderStockChange,
+                    )
 
-                ImageExpandable(
-                    isUploadingImage = state.isUploadingImage,
-                    imageUrl = state.imageUrl,
-                    onImageUrlChange = {
-                        viewModel.uploadImage(it)
-                    }
-                )
-            }
+                    ImageExpandable(
+                        isUploadingImage = state.isUploadingImage,
+                        imageUrl = state.imageUrl,
+                        onImageUrlChange = {
+                            viewModel.uploadImage(it)
+                        }
+                    )
+                }
 
-            Box(
-                modifier = Modifier
-                    .padding(ConstantPaddings.BODY_HORIZONTAL)
-                    .padding(vertical = 16.dp),
-            ) {
-                if (state.isSaving) {
-                    AppCircularProgressIndicator()
-                } else {
-                    SaveButton {
-                        viewModel.insertOrUpdateData {
-                            goBackWithResult()
+                Box(
+                    modifier = Modifier
+                        .padding(vertical = 16.dp),
+                ) {
+                    if (state.isSaving) {
+                        AppCircularProgressIndicator()
+                    } else {
+                        SaveButton {
+                            viewModel.insertOrUpdateData {
+                                goBackWithResult()
+                            }
                         }
                     }
                 }
+            }
+
+            if (state.isLoading) {
+                ProgressBarLayout()
             }
         }
 

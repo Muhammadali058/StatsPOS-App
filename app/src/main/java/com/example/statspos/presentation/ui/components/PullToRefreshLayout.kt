@@ -65,7 +65,6 @@ fun PullToRefreshList(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
-                .padding(ConstantPaddings.BODY_HORIZONTAL)
         ) {
             content()
 //            items(items.size) { i ->
@@ -116,7 +115,6 @@ fun PullToRefreshList(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
-                .padding(ConstantPaddings.BODY_HORIZONTAL)
         ) {
             content()
 //            items(items) { item ->

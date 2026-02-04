@@ -1,5 +1,6 @@
 package com.example.statspos.presentation.viewmodels.items
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.items.Items
@@ -32,6 +33,8 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
         val itemId: Long = 0L,
         val linkedItemId: Long = 0L,
 
+        val mainItemCrtnSize: Int = 0,
+
         val updateCost: Boolean = false,
         val updateRetail: Boolean = false,
         val updateWholesale: Boolean = false,
@@ -39,6 +42,11 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
         val updateMarketPrice: Boolean = true,
         val updateExpiry: Boolean = true,
         val rateFormula: String = "",
+
+        val costCheckboxEnabled: Boolean = false,
+        val retailCheckboxEnabled: Boolean = false,
+        val wholesaleCheckboxEnabled: Boolean = false,
+        val crtnRateCheckboxEnabled: Boolean = false,
 
         // Extra
         val itemname: String = "",
@@ -122,11 +130,11 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
     fun onUpdateMarketPriceChange(value: Boolean) {
         state.update { it.copy(updateMarketPrice = value) }
     }
+    fun onUpdateExpiryChange(value: Boolean) {
+        state.update { it.copy(updateExpiry = value) }
+    }
     fun onRateFormulaChange(value: String) {
         state.update { it.copy(rateFormula = value) }
-    }
-    fun onLinkedItemIdChange(value: Long) {
-        state.update { it.copy(linkedItemId = value) }
     }
     fun onItemnameChange(value: String) {
         state.update { it.copy(
@@ -206,7 +214,7 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
-
+                    Log.d("TAG Loading", state.value.isLoading.toString())
                     val linkedItem = Gson().get<LinkedItems>(result.data.asJsonObject)
                     setFormData(linkedItem)
                 }
@@ -222,8 +230,7 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
             if (value.isEmpty())
                 return@launch
 
-            beforeRequest()
-
+//            beforeRequest()
             when (val result = itemsRepo.isBarcodeExists(value)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
@@ -239,6 +246,9 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
                                 linkedItemId = item.id!!,
                             )
                         }
+
+                        disableAllCheckboxes()
+                        enableOrDisableCheckboxes(item.crtnSize!!)
                     } else {
                         state.update {
                             it.copy(
@@ -270,6 +280,8 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
     }
 
     private fun setFormData(linkedItem: LinkedItems) {
+        enableOrDisableCheckboxes(linkedItem.crtnSize!!)
+
         state.update {
             it.copy(
                 itemname =  linkedItem.itemname!!,
@@ -304,6 +316,8 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
                 updateId = 0L,
             )
         }
+
+        disableAllCheckboxes()
     }
 
     private fun isValid(): Boolean {
@@ -313,6 +327,78 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
         }
 
         return true
+    }
+
+    private fun disableAllCheckboxes(){
+        state.update {
+            it.copy(
+                costCheckboxEnabled = false,
+                retailCheckboxEnabled = false,
+                wholesaleCheckboxEnabled = false,
+                crtnRateCheckboxEnabled = false,
+            )
+        }
+    }
+
+    private fun enableOrDisableCheckboxes(crtnSize:Int){
+        if (crtnSize == 0)
+        {
+            if (state.value.mainItemCrtnSize == 0 || state.value.mainItemCrtnSize > 1)
+            {
+                state.update {
+                    it.copy(
+                        costCheckboxEnabled = true,
+                        retailCheckboxEnabled = true,
+                        wholesaleCheckboxEnabled = true,
+
+                        updateCost = true,
+                        updateRetail = true,
+                        updateWholesale = true,
+                    )
+                }
+            }
+        }
+        else if (crtnSize == 1)
+        {
+            if (state.value.mainItemCrtnSize == 1 || state.value.mainItemCrtnSize > 1)
+            {
+                state.update {
+                    it.copy(
+                        crtnRateCheckboxEnabled = true,
+                        updateCrtnRate = true,
+                    )
+                }
+            }
+
+            if (state.value.mainItemCrtnSize == 1)
+            {
+                state.update {
+                    it.copy(
+                        costCheckboxEnabled = true,
+                        updateCost = true,
+                    )
+                }
+            }
+        }
+        else if (crtnSize > 1)
+        {
+            if (state.value.mainItemCrtnSize > 1)
+            {
+                state.update {
+                    it.copy(
+                        costCheckboxEnabled = true,
+                        retailCheckboxEnabled = true,
+                        wholesaleCheckboxEnabled = true,
+                        crtnRateCheckboxEnabled = true,
+
+                        updateCost = true,
+                        updateRetail = true,
+                        updateWholesale = true,
+                        updateCrtnRate = true,
+                    )
+                }
+            }
+        }
     }
 
     // endregion
@@ -332,11 +418,12 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
         state.update { it.copy(isLoading = false) }
     }
 
-    fun updateInitialState(isUpdate: Boolean, updateId: Long, itemId: Long) {
+    fun updateInitialState(isUpdate: Boolean, updateId: Long, itemId: Long, crtnSize:Int) {
         state.update { it.copy(
             isUpdate = isUpdate,
             updateId = updateId,
             itemId = itemId,
+            mainItemCrtnSize = crtnSize,
         ) }
     }
 

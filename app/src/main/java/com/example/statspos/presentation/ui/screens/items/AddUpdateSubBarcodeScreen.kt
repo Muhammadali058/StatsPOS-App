@@ -1,5 +1,6 @@
 package com.example.statspos.presentation.ui.screens.items
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,9 +26,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -42,6 +45,7 @@ import com.example.statspos.presentation.ui.components.AppSwitch
 import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
 import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.ErrorDialog
+import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.components.TopAppBar
@@ -88,6 +92,8 @@ fun AddUpdateSubBarcodeScreen(
         )
     }
 
+    // Edit data when update
+    var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         viewModel.updateInitialState(
             isUpdate = isUpdate,
@@ -95,7 +101,8 @@ fun AddUpdateSubBarcodeScreen(
             itemId = itemId,
         )
 
-        if (isUpdate) {
+        if (isUpdate && !hasLoadedOnce) {
+            hasLoadedOnce = true
             viewModel.editData(updateId)
         }
     }
@@ -116,8 +123,8 @@ fun AddUpdateSubBarcodeScreen(
                 showDeleteDialog = false
             },
             onConfirm = {
+                showDeleteDialog = false
                 viewModel.deleteData(updateId) {
-                    showDeleteDialog = false
                     context.showToast("Barcode deleted successfully")
                     goBackWithResult()
                 }
@@ -157,52 +164,49 @@ fun AddUpdateSubBarcodeScreen(
             )
         }
     ) { innerPadding ->
-        Column(
+        Box(
             Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(ConstantPaddings.BODY_HORIZONTAL)
-                .padding(vertical = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            if (state.isLoading) {
-                Box(
-                    Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    AppCircularProgressIndicator()
-                }
-            }
-
+                .padding(vertical = 16.dp)
+        ){
             Column(
                 Modifier
-                    .weight(1f)
-                    .verticalScroll(scrollState)
-                    .imePadding(),
+                    .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Body(
-                    subBarcode = state.subBarcode,
-                    isCrtn = state.isCrtn,
-                    onSubBarcodeChange = viewModel::onSubBarcodeChange,
-                    onIsCrtnChange = viewModel::onIsCrtnChange,
-                )
-            }
+                Column(
+                    Modifier
+                        .weight(1f)
+                        .verticalScroll(scrollState)
+                        .imePadding(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Body(
+                        subBarcode = state.subBarcode,
+                        isCrtn = state.isCrtn,
+                        onSubBarcodeChange = viewModel::onSubBarcodeChange,
+                        onIsCrtnChange = viewModel::onIsCrtnChange,
+                    )
+                }
 
-            Box(
-                modifier = Modifier
-                    .padding(vertical = 16.dp),
-            ) {
-                if (state.isSaving) {
-                    AppCircularProgressIndicator()
-                } else {
-                    SaveButton {
-                        viewModel.insertOrUpdateData {
-                            goBackWithResult()
+                Box{
+                    if (state.isSaving) {
+                        AppCircularProgressIndicator()
+                    } else {
+                        SaveButton {
+                            viewModel.insertOrUpdateData {
+                                goBackWithResult()
+                            }
                         }
                     }
                 }
+            }
+
+            if (state.isLoading) {
+                ProgressBarLayout()
             }
         }
 

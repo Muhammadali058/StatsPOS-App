@@ -215,73 +215,79 @@ fun SearchItemsScreen(
             }
         }
 
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
+        Box(
+            Modifier
                 .fillMaxSize()
+                .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            // Search Box
-            Spacer(Modifier.height(8.dp))
-            SearchBox(
+            Column(
                 modifier = Modifier
-                    .padding(bottom = 4.dp),
-                value = state.search,
-                onValueChange = viewModel::onSearchChange,
-                onItemSelected = {
-                    viewModel.getItem(it)
-                    keyboardController?.hide()
-                },
-                onSearchClick = {
-                    viewModel.loadItems()
-                    keyboardController?.hide()
-                },
-                onEndIconClick = {
-                    viewModel.getItem(it)
-                    keyboardController?.hide()
-                },
-                onBarcodeClick = {
-                    showBarcodeScanner = true
-                },
-                onFilterClick = {
-                    showBottomSheet = true
-                }
-            )
-
-            // List
-            BodyList(
-                modifier = Modifier
-                    .weight(1f),
-                isRefreshing = state.isLoading,
-                onRefresh = {
-                    viewModel.loadItems()
-                },
-                isLoadingNextPage = state.isLoadingNextPage,
-                endReached = state.endReached,
-                loadNextItems = {
-                    viewModel.loadNextItems()
-                },
-                items = state.list,
-                onItemClick = { item ->
-                    sharedViewModel.setItem(item)
-                    goBackWithResult()
-                }
-            )
-
-            // Total Items
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
+                    .fillMaxSize()
             ) {
-                HeadingMedium(
-                    text = "Total Items: ",
-                )
-                LabelMedium(
-                    text = state.totalItems.toString(),
-                )
-            }
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(ConstantPaddings.BODY_HORIZONTAL)
+                ) {
+                    Spacer(Modifier.height(8.dp))
+                    SearchBox(
+                        modifier = Modifier
+                            .padding(bottom = 4.dp),
+                        value = state.search,
+                        onValueChange = viewModel::onSearchChange,
+                        onItemSelected = {
+                            viewModel.getItem(it)
+                            keyboardController?.hide()
+                        },
+                        onSearchClick = {
+                            viewModel.loadItems()
+                            keyboardController?.hide()
+                        },
+                        onEndIconClick = {
+                            viewModel.getItem(it)
+                            keyboardController?.hide()
+                        },
+                        onBarcodeClick = {
+                            showBarcodeScanner = true
+                        },
+                        onFilterClick = {
+                            showBottomSheet = true
+                        }
+                    )
+                    BodyList(
+                        modifier = Modifier
+                            .weight(1f),
+                        isRefreshing = state.isLoading,
+                        onRefresh = {
+                            viewModel.loadItems()
+                        },
+                        isLoadingNextPage = state.isLoadingNextPage,
+                        endReached = state.endReached,
+                        loadNextItems = {
+                            viewModel.loadNextItems()
+                        },
+                        items = state.list,
+                        onItemClick = { item ->
+                            sharedViewModel.setItem(item)
+                            goBackWithResult()
+                        }
+                    )
+                }
 
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    HeadingMedium(
+                        text = "Total Items: ",
+                    )
+                    LabelMedium(
+                        text = state.totalItems.toString(),
+                    )
+                }
+            }
         }
     }
 }
@@ -299,8 +305,6 @@ private fun SearchBox(
 ) {
     Row(
         modifier = modifier
-            .background(MaterialTheme.colorScheme.background)
-            .padding(ConstantPaddings.BODY_HORIZONTAL)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {

@@ -1,6 +1,7 @@
 package com.example.statspos.presentation.ui.screens.items
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.items.LinkedItems
-import com.example.statspos.domain.models.items.SubBarcodes
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.ErrorDialog
@@ -45,7 +45,6 @@ import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.items.LinkedItemsViewModel
-import com.example.statspos.presentation.viewmodels.items.SubBarcodesViewModel
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
@@ -54,8 +53,9 @@ import com.example.statspos.utils.checkEvent
 fun LinkedItemsScreen(
     sharedViewModel: SharedViewModel,
     itemId: Long,
+    crtnSize: Int,
     onBack: () -> Unit,
-    onAddButtonClick: (Long, Boolean, Long) -> Unit,
+    onAddButtonClick: (Long, Boolean, Long, Int) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel = hiltViewModel<LinkedItemsViewModel>()
@@ -104,7 +104,7 @@ fun LinkedItemsScreen(
         },
         floatingActionButton = {
             AppFloatingActionButton {
-                onAddButtonClick(0L, false, itemId)
+                onAddButtonClick(0L, false, itemId, crtnSize)
             }
         },
         topBar = {
@@ -117,53 +117,59 @@ fun LinkedItemsScreen(
             )
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
+        Box(
+            Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
+                .padding(innerPadding)
+                .background(MaterialTheme.colorScheme.background)
         ) {
-            // Search Box
-            Spacer(Modifier.height(8.dp))
-            SearchBox(
+            Column(
                 modifier = Modifier
-                    .padding(bottom = 4.dp),
-                value = state.search,
-                onValueChange = viewModel::onSearchChange,
-                onSearchClick = {
-                    viewModel.loadData()
-                    keyboardController?.hide()
-                },
-            )
-
-            // List
-            BodyList(
-                modifier = Modifier
-                    .weight(1f),
-                isRefreshing = state.isLoading,
-                onRefresh = {
-                    viewModel.loadData()
-                },
-                items = state.list,
-                onItemClick = { item ->
-                    onAddButtonClick(item.id!!, true, itemId)
-                }
-            )
-
-            // Total Items
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
+                    .fillMaxSize()
             ) {
-                HeadingMedium(
-                    text = "Total Linked Items: ",
-                )
-                LabelMedium(
-                    text = state.totalLinkedItems.toString(),
-                )
-            }
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(ConstantPaddings.BODY_HORIZONTAL)
+                ) {
+                    Spacer(Modifier.height(8.dp))
+                    SearchBox(
+                        modifier = Modifier
+                            .padding(bottom = 4.dp),
+                        value = state.search,
+                        onValueChange = viewModel::onSearchChange,
+                        onSearchClick = {
+                            viewModel.loadData()
+                            keyboardController?.hide()
+                        },
+                    )
+                    BodyList(
+                        modifier = Modifier
+                            .weight(1f),
+                        isRefreshing = state.isLoading,
+                        onRefresh = {
+                            viewModel.loadData()
+                        },
+                        items = state.list,
+                        onItemClick = { item ->
+                            onAddButtonClick(item.id!!, true, itemId, crtnSize)
+                        }
+                    )
+                }
 
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    HeadingMedium(
+                        text = "Total Linked Items: ",
+                    )
+                    LabelMedium(
+                        text = state.totalLinkedItems.toString(),
+                    )
+                }
+            }
         }
     }
 }
@@ -177,8 +183,6 @@ private fun SearchBox(
 ) {
     Row(
         modifier = modifier
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(ConstantPaddings.BODY_HORIZONTAL)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -187,7 +191,10 @@ private fun SearchBox(
                 .fillMaxWidth(),
             value = value,
             onValueChange = onValueChange,
-            onSearchClick = onSearchClick
+            onEndIconClick = {
+                onValueChange("")
+            },
+            onSearchClick = onSearchClick,
         )
     }
 }

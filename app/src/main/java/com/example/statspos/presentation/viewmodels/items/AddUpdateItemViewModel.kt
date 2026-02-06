@@ -598,6 +598,8 @@ class AddUpdateItemViewModel @Inject constructor(
                 searchable = true,
                 saleUnderStock = true,
 
+                imageUrl = "",
+
                 // Extras
                 item = null,
                 isUpdate = false,

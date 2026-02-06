@@ -117,6 +117,44 @@ fun UploadImageView(
     )
 }
 
+
+@Composable
+fun ListImageView(
+    imageUrl: String?,
+    modifier: Modifier = Modifier,
+    showIfNull: Boolean = true,
+    error: Painter? = painterResource(R.drawable.select_image),
+    contentScale: ContentScale = ContentScale.Fit,
+    content: @Composable ColumnScope.() -> Unit = {},
+) {
+    if (showIfNull) {
+        Image(
+            painter = rememberAsyncImagePainter(
+                model = HP.getImageUrl(imageUrl!!),
+                error = error,
+            ),
+            contentDescription = null,
+            modifier = modifier,
+            contentScale = contentScale,
+        )
+        Column(content = content)
+    } else {
+        imageUrl?.let {
+            if (it.isNotEmpty()) {
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        model = HP.getImageUrl(imageUrl),
+                    ),
+                    contentDescription = null,
+                    modifier = modifier,
+                    contentScale = contentScale,
+                )
+                Column(content = content)
+            }
+        }
+    }
+}
+
 fun uriToMultipart(
     context: Context,
     uri: Uri,

@@ -1,10 +1,8 @@
 package com.example.statspos.presentation.ui.screens.main.main
 
 import android.app.Activity
-import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,7 +20,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.presentation.ui.screens.TopRoutes
 import com.example.statspos.presentation.ui.screens.items.AddUpdateItemScreen
-import com.example.statspos.presentation.ui.screens.items.CategoriesScreen
+import com.example.statspos.presentation.ui.screens.items.categories.CategoriesScreen
 import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
 import com.example.statspos.presentation.ui.screens.purchase.PurchaseScreen
 import com.example.statspos.presentation.viewmodels.SharedViewModel
@@ -58,14 +56,6 @@ fun MainScreen() {
                     }
                 )
             }
-            entry<TopRoutes.SearchItem> {
-                SearchItemsScreen(
-                    sharedViewModel= sharedViewModel,
-                    onBack = {
-                        backStack.removeLastOrNull()
-                    }
-                )
-            }
             entry<TopRoutes.AddUpdateItem> { key ->
                 AddUpdateItemScreen(
                     sharedViewModel= sharedViewModel,
@@ -77,7 +67,12 @@ fun MainScreen() {
                 )
             }
             entry<TopRoutes.Categories> {
-                CategoriesScreen()
+                CategoriesScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
             }
             entry<TopRoutes.Purchase> {
                 PurchaseScreen()

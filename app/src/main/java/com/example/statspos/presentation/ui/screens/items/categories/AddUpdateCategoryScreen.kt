@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.items
+package com.example.statspos.presentation.ui.screens.items.categories
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,40 +29,35 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.statspos.R
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.components.AppIcon
-import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
-import com.example.statspos.presentation.ui.components.AppSwitch
-import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
 import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.components.TopAppBar
+import com.example.statspos.presentation.ui.components.UploadImageView
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
-import com.example.statspos.presentation.viewmodels.items.AddUpdateItemViewModel
-import com.example.statspos.presentation.viewmodels.items.AddUpdateSubBarcodeViewModel
 import com.example.statspos.presentation.viewmodels.SharedViewModel
+import com.example.statspos.presentation.viewmodels.items.AddUpdateCategoryViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import com.example.statspos.utils.showToast
+import okhttp3.MultipartBody
 
 @Composable
-fun AddUpdateSubBarcodeScreen(
+fun AddUpdateCategoryScreen(
     sharedViewModel: SharedViewModel,
     updateId: Long = 0,
     isUpdate: Boolean = false,
-    itemId: Long = 0,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -73,7 +67,7 @@ fun AddUpdateSubBarcodeScreen(
         onBack()
     }
 
-    val viewModel = hiltViewModel<AddUpdateSubBarcodeViewModel>()
+    val viewModel = hiltViewModel<AddUpdateCategoryViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -98,7 +92,6 @@ fun AddUpdateSubBarcodeScreen(
         viewModel.updateInitialState(
             isUpdate = isUpdate,
             updateId = updateId,
-            itemId = itemId,
         )
 
         if (isUpdate && !hasLoadedOnce) {
@@ -118,14 +111,14 @@ fun AddUpdateSubBarcodeScreen(
 
     if (showDeleteDialog) {
         ConfirmDialog(
-            text = "Are you sure to delete this barcode",
+            text = "Are you sure to delete this category",
             onDismiss = {
                 showDeleteDialog = false
             },
             onConfirm = {
                 showDeleteDialog = false
                 viewModel.deleteData(updateId) {
-                    context.showToast("Barcode deleted successfully")
+                    context.showToast("Category deleted successfully")
                     goBackWithResult()
                 }
             }
@@ -145,7 +138,7 @@ fun AddUpdateSubBarcodeScreen(
                 onNavigationClick = {
                     onBack()
                 },
-                title = if (isUpdate) "Update Sub-Barcode" else "Add Sub-Barcode",
+                title = if (isUpdate) "Update Category" else "Add Category",
                 actions = {
                     Row {
                         if (isUpdate && HP.userRights.deleteAnything == true) {
@@ -184,10 +177,15 @@ fun AddUpdateSubBarcodeScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Body(
-                        subBarcode = state.subBarcode,
-                        isCrtn = state.isCrtn,
-                        onSubBarcodeChange = viewModel::onSubBarcodeChange,
-                        onIsCrtnChange = viewModel::onIsCrtnChange,
+                        categoryName = state.categoryName,
+                        remarks = state.remarks,
+                        onCategoryNameChange = viewModel::onCategoryNameChange,
+                        onRemarksChange = viewModel::onRemarksChange,
+                        isUploadingImage = state.isUploadingImage,
+                        imageUrl = state.imageUrl,
+                        onImageUrlChange = {
+                            viewModel.uploadImage(it)
+                        }
                     )
                 }
 
@@ -214,46 +212,49 @@ fun AddUpdateSubBarcodeScreen(
 
 @Composable
 private fun Body(
-    subBarcode: String,
-    isCrtn: Boolean,
-    onSubBarcodeChange: (String) -> Unit,
-    onIsCrtnChange: (Boolean) -> Unit,
+    categoryName: String,
+    remarks: String,
+    onCategoryNameChange: (String) -> Unit,
+    onRemarksChange: (String) -> Unit,
+    isUploadingImage: Boolean,
+    imageUrl: String,
+    onImageUrlChange: (MultipartBody.Part) -> Unit,
 ) {
-    var showBarcodeScanner by remember { mutableStateOf(false) }
-    if (showBarcodeScanner) {
-        BarcodeScannerDialog(
-            onDismiss = {
-                showBarcodeScanner = false
-            },
-            onScanned = { barcode ->
-                onSubBarcodeChange(barcode)
-                showBarcodeScanner = false
-            }
-        )
-    }
-
     Textbox(
-        value = subBarcode,
-        onValueChange = onSubBarcodeChange,
+        value = categoryName,
+        onValueChange = onCategoryNameChange,
         modifier = Modifier
             .fillMaxWidth(),
-        trailingIcon = {
-            AppIconButton(
-                icon = R.drawable.ic_barcode,
-                onClick = { showBarcodeScanner = true },
-            )
-        },
         label = {
-            Text("Barcode")
+            Text("Category Name")
         }
     )
-    Spacer(Modifier.height(8.dp))
-    AppSwitch(
-        modifier = Modifier,
-        checked = isCrtn,
-        onCheckedChange = onIsCrtnChange,
-        label = "Carton Barcode"
+    Textbox(
+        value = remarks,
+        onValueChange = onRemarksChange,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(84.dp),
+        label = {
+            Text("Remarks")
+        },
+        singleLine = false,
     )
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        if (isUploadingImage) {
+            AppCircularProgressIndicator()
+        } else {
+            UploadImageView(
+                imageUrl = imageUrl,
+                onImageUrlChange = onImageUrlChange
+            )
+        }
+    }
 }
 
 @Preview(showBackground = true)
@@ -264,10 +265,13 @@ private fun Prev() {
             .fillMaxSize(),
     ){
         Body(
-            subBarcode = "",
-            isCrtn = false,
-            onSubBarcodeChange = {  },
-            onIsCrtnChange = {  },
+            categoryName = "",
+            remarks = "",
+            onCategoryNameChange = {},
+            onRemarksChange = {},
+            isUploadingImage = false,
+            imageUrl = "",
+            onImageUrlChange = {}
         )
     }
 }

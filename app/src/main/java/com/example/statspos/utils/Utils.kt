@@ -15,6 +15,18 @@ enum class ThemeMode {
     SYSTEM
 }
 
+enum class PasswordFor {
+    DELETE_ITEM,
+    DELETE_ACCOUNT,
+    EDIT_SALES_BILL,
+    EDIT_PURCHASE_BILL,
+    DELETE_SALES_BILL,
+    DELETE_PURCHASE_BILL,
+    DELETE_ENTRY,
+    PRINT_DUPLICATES,
+    AUDIT,
+}
+
 fun Context.showToast(msg: String, length: Int = Toast.LENGTH_SHORT) =
     Toast.makeText(this, msg, length).show()
 

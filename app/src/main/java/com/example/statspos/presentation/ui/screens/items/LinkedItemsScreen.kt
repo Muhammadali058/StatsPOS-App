@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -39,6 +41,7 @@ import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListImageView
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.components.TopAppBar
@@ -109,7 +112,6 @@ fun LinkedItemsScreen(
         },
         topBar = {
             TopAppBar(
-                navigationIcon = Icons.Default.ArrowBack,
                 onNavigationClick = {
                     onBack()
                 },
@@ -228,13 +230,29 @@ private fun ListCard(
 ) {
     ListCard(
         modifier = modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .padding(vertical = ConstantPaddings.LIST_PADDING_VERTICAL),
         shape = RoundedCornerShape(6.dp),
         onClick = {
             onItemClick(item)
         }
     ) {
-        LabelLarge(item.itemname.toString())
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // Image
+            ListImageView(
+                imageUrl = item.imageUrl,
+                modifier = Modifier
+                    .size(60.dp),
+            ) {
+                Spacer(Modifier.width(8.dp))
+            }
+
+            LabelLarge(item.itemname.toString())
+        }
     }
 }
 

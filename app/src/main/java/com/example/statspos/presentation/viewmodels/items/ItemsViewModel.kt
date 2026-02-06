@@ -126,11 +126,6 @@ class ItemsViewModel @Inject constructor(
     fun onVendorNameChange(value: String) {
         state.update { it.copy(vendorName = value) }
     }
-
-    fun onFilterNameChange(value: String) {
-        state.update { it.copy(filterName = value) }
-    }
-
     fun onCategoryIdChange(value: Long) {
         state.update { it.copy(categoryId = value) }
     }

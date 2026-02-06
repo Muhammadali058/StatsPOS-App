@@ -55,6 +55,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.R
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
+import com.example.statspos.presentation.ui.components.AppDropdownMenu
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
@@ -67,6 +68,7 @@ import com.example.statspos.presentation.ui.components.DiscountTextbox
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.ExpandableSection
+import com.example.statspos.presentation.ui.components.PasswordDialog
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.SmallButton
@@ -78,6 +80,7 @@ import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.items.AddUpdateItemViewModel
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.utils.HP
+import com.example.statspos.utils.PasswordFor
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import com.example.statspos.utils.showToast
@@ -234,6 +237,7 @@ private fun Home(
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showPasswordDialog by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
     LaunchedEffect(event) {
@@ -283,6 +287,22 @@ private fun Home(
         )
     }
 
+    if (showPasswordDialog) {
+        PasswordDialog(
+            passwordFor = PasswordFor.DELETE_ITEM,
+            onDismiss = {
+                showPasswordDialog = false
+            },
+            onConfirm = {
+                showPasswordDialog = false
+                viewModel.deleteData(updateId) {
+                    context.showToast("Item deleted successfully")
+                    goBackWithResult()
+                }
+            }
+        )
+    }
+
     var menuExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -293,7 +313,6 @@ private fun Home(
         },
         topBar = {
             TopAppBar(
-                navigationIcon = Icons.Default.ArrowBack,
                 onNavigationClick = {
                     onBack()
                 },
@@ -303,7 +322,11 @@ private fun Home(
                         if (isUpdate) {
                             if (HP.userRights.deleteAnything == true) {
                                 IconButton(onClick = {
-                                    showDeleteDialog = true
+                                    if (HP.passwords.useDeleteItem == true) {
+                                        showPasswordDialog = true
+                                    } else {
+                                        showDeleteDialog = true
+                                    }
                                 }) {
                                     AppIcon(
                                         icon = Icons.Default.Delete,
@@ -323,18 +346,17 @@ private fun Home(
                                 )
                             }
 
-                            DropdownMenu(
+                            AppDropdownMenu(
                                 expanded = menuExpanded,
                                 onDismissRequest = { menuExpanded = false },
                                 modifier = Modifier
                                     .width(200.dp),
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
                             ) {
                                 DropdownMenuItem(
                                     text = { AppText("Linked Items") },
-//                                leadingIcon = {
-//                                    AppIcon(Icons.Default.Edit)
-//                                },
+                                    leadingIcon = {
+                                        AppIcon(R.drawable.linked)
+                                    },
                                     onClick = {
                                         menuExpanded = false
                                         onLinkedItemsClick(HP.getIntValue(state.crtnSize))
@@ -343,9 +365,9 @@ private fun Home(
 
                                 DropdownMenuItem(
                                     text = { AppText("Sub Barcodes") },
-//                                leadingIcon = {
-//                                    AppIcon(Icons.Default.Delete)
-//                                },
+                                    leadingIcon = {
+                                        AppIcon(R.drawable.sub)
+                                    },
                                     onClick = {
                                         menuExpanded = false
                                         onSubBarcodesClick()

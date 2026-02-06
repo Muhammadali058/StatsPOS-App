@@ -127,10 +127,6 @@ class SearchItemsViewModel @Inject constructor(
         state.update { it.copy(vendorName = value) }
     }
 
-    fun onFilterNameChange(value: String) {
-        state.update { it.copy(filterName = value) }
-    }
-
     fun onCategoryIdChange(value: Long) {
         state.update { it.copy(categoryId = value) }
     }

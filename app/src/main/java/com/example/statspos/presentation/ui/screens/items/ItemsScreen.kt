@@ -1,5 +1,6 @@
 package com.example.statspos.presentation.ui.screens.items
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -53,6 +54,7 @@ import com.example.statspos.presentation.ui.components.ImageView
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListImageView
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SubDropdown
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
@@ -376,7 +378,7 @@ private fun ListCard(
     ListCard(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = ConstantPaddings.LIST_PADDING_VERTICAL),
         onClick = {
             onItemClick(item)
         }
@@ -387,10 +389,11 @@ private fun ListCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // Image
-            ImageView(
+            ListImageView(
                 imageUrl = item.imageUrl,
                 modifier = Modifier
                     .size(60.dp),
+                showIfNull = false,
             ) {
                 Spacer(Modifier.width(8.dp))
             }

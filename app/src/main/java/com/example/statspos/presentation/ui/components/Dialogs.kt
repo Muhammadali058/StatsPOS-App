@@ -2,6 +2,8 @@
 
 package com.example.statspos.presentation.ui.components
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
@@ -16,7 +18,15 @@ import androidx.compose.material3.TimePickerDialog
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
+import com.example.statspos.utils.HP
+import com.example.statspos.utils.PasswordFor
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -140,9 +150,11 @@ fun ErrorDialog(
 
         },
         title = { Text(title) },
-        text = { Text(
-            text = error ?: ""
-        ) },
+        text = {
+            Text(
+                text = error ?: ""
+            )
+        },
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text("OK")
@@ -166,9 +178,11 @@ fun MessageDialog(
 
         },
         title = { Text(title) },
-        text = { Text(
-            text = message ?: ""
-        ) },
+        text = {
+            Text(
+                text = message ?: ""
+            )
+        },
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text("OK")
@@ -201,6 +215,139 @@ fun ConfirmDialog(
                 onConfirm()
             }) {
                 Text("YES")
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        textContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    )
+}
+
+@Composable
+fun PasswordDialog(
+    passwordFor: PasswordFor,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    var value by remember { mutableStateOf("") }
+    var isWrongPassword by remember { mutableStateOf(false) }
+
+
+    AlertDialog(
+        title = { Text("Password") },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                PasswordTextbox(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    value = value,
+                    onValueChange = { value = it },
+                    placeholder = {
+                        Text(
+                            text = "Enter Password",
+                            style = TextStyle(
+                                textAlign = TextAlign.Center,
+                            )
+                        )
+                    },
+                )
+
+                if (isWrongPassword) {
+                    Text(
+                        text = "Wrong Password",
+                        style = TextStyle(
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    )
+                }
+            }
+        },
+        onDismissRequest = onDismiss,
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                when (passwordFor) {
+                    PasswordFor.DELETE_ITEM -> {
+                        if (value == HP.passwords.deleteItem.toString()) {
+                            onConfirm()
+                        } else {
+                            isWrongPassword = true
+                        }
+                    }
+
+                    PasswordFor.DELETE_ACCOUNT -> {
+                        if (value == HP.passwords.deleteAccount.toString()) {
+                            onConfirm()
+                        } else {
+                            isWrongPassword = true
+                        }
+                    }
+
+                    PasswordFor.EDIT_SALES_BILL -> {
+                        if (value == HP.passwords.editSalesBill.toString()) {
+                            onConfirm()
+                        } else {
+                            isWrongPassword = true
+                        }
+                    }
+
+                    PasswordFor.EDIT_PURCHASE_BILL -> {
+                        if (value == HP.passwords.editPurchaseBill.toString()) {
+                            onConfirm()
+                        } else {
+                            isWrongPassword = true
+                        }
+                    }
+
+                    PasswordFor.DELETE_SALES_BILL -> {
+                        if (value == HP.passwords.deleteSalesBill.toString()) {
+                            onConfirm()
+                        } else {
+                            isWrongPassword = true
+                        }
+                    }
+
+                    PasswordFor.DELETE_PURCHASE_BILL -> {
+                        if (value == HP.passwords.deletePurchaseBill.toString()) {
+                            onConfirm()
+                        } else {
+                            isWrongPassword = true
+                        }
+                    }
+
+                    PasswordFor.DELETE_ENTRY -> {
+                        if (value == HP.passwords.deleteEntry.toString()) {
+                            onConfirm()
+                        } else {
+                            isWrongPassword = true
+                        }
+                    }
+
+                    PasswordFor.PRINT_DUPLICATES -> {
+                        if (value == HP.adminPasswords.printDuplicates.toString()) {
+                            onConfirm()
+                        } else {
+                            isWrongPassword = true
+                        }
+                    }
+
+                    PasswordFor.AUDIT -> {
+                        if (value == HP.adminPasswords.audit.toString()) {
+                            onConfirm()
+                        } else {
+                            isWrongPassword = true
+                        }
+                    }
+                }
+            }) {
+                Text("OK")
             }
         },
         containerColor = MaterialTheme.colorScheme.primaryContainer,

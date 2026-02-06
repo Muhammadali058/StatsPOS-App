@@ -214,7 +214,6 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
-                    Log.d("TAG Loading", state.value.isLoading.toString())
                     val linkedItem = Gson().get<LinkedItems>(result.data.asJsonObject)
                     setFormData(linkedItem)
                 }

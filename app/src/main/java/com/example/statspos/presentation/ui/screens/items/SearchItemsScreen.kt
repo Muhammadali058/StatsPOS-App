@@ -136,7 +136,6 @@ fun SearchItemsScreen(
         },
         topBar = {
             TopAppBar(
-                navigationIcon = Icons.Default.ArrowBack,
                 onNavigationClick = {
                     onBack()
                 },
@@ -402,6 +401,7 @@ private fun ListCard(
                 imageUrl = item.imageUrl,
                 modifier = Modifier
                     .size(60.dp),
+                showIfNull = false,
             ) {
                 Spacer(Modifier.width(8.dp))
             }

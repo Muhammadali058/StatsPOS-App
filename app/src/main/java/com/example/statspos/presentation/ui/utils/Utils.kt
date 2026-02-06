@@ -19,6 +19,8 @@ object ConstantPaddings {
     val BODY_HORIZONTAL = PaddingValues(
         horizontal = 16.dp
     )
+
+    val LIST_PADDING_VERTICAL = 8.dp
 }
 
 object ConstantSize {

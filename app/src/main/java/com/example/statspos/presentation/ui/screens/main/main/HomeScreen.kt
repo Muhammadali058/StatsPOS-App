@@ -1,6 +1,8 @@
 package com.example.statspos.presentation.ui.screens.main.main
 
+import android.app.Activity
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
@@ -61,6 +64,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.R
+import com.example.statspos.presentation.ui.components.AppDropdownMenu
 import com.example.statspos.presentation.ui.components.BOTTOM_DESTINATIONS
 import com.example.statspos.presentation.ui.components.BottomBar
 import com.example.statspos.presentation.ui.components.AppIcon
@@ -95,6 +99,7 @@ fun HomeScreen(
     val viewModel = hiltViewModel<LocalDataViewModel>()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val activity = LocalActivity.current as Activity
 
     // Navigation
     val navigationState = rememberNavigationState(
@@ -152,40 +157,20 @@ fun HomeScreen(
                                 )
                             }
 
-                            DropdownMenu(
+                            AppDropdownMenu(
                                 expanded = menuExpanded,
                                 onDismissRequest = { menuExpanded = false },
                                 modifier = Modifier
                                     .width(200.dp),
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
                             ) {
                                 DropdownMenuItem(
-                                    text = { AppText("Edit") },
+                                    text = { AppText("Exit App") },
                                     leadingIcon = {
-                                        AppIcon(Icons.Default.Edit)
+                                        AppIcon(Icons.Default.ExitToApp)
                                     },
                                     onClick = {
                                         menuExpanded = false
-                                    }
-                                )
-
-                                DropdownMenuItem(
-                                    text = { AppText("Delete") },
-                                    leadingIcon = {
-                                        AppIcon(Icons.Default.Delete)
-                                    },
-                                    onClick = {
-                                        menuExpanded = false
-                                    }
-                                )
-
-                                DropdownMenuItem(
-                                    text = { AppText("Share") },
-                                    leadingIcon = {
-                                        AppIcon(Icons.Default.Share)
-                                    },
-                                    onClick = {
-                                        menuExpanded = false
+                                        activity.finish()
                                     }
                                 )
                             }

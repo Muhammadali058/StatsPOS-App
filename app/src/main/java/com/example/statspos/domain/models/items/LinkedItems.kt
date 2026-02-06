@@ -20,5 +20,6 @@ data class LinkedItems(
 
     // Extras not part of database
     var itemname: String? = null,
+    var imageUrl: String? = null,
     val crtnSize:Int? = null,
 )

@@ -181,7 +181,6 @@ fun AddUpdateLinkedItemScreen(
         },
         topBar = {
             TopAppBar(
-                navigationIcon = Icons.Default.ArrowBack,
                 onNavigationClick = {
                     onBack()
                 },

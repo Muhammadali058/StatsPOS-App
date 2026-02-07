@@ -49,10 +49,11 @@ private sealed class Screens : NavKey {
 @Composable
 fun App() {
     val context = LocalContext.current
-    val backStack = rememberNavBackStack(Screens.Splash)
+    val backStack = rememberNavBackStack(Screens.Main)
     val viewModel = hiltViewModel<LocalDataViewModel>()
 
     LaunchedEffect(Unit) {
+        return@LaunchedEffect
         if (DB.IS_ONLINE_MODE) {
             val clientId = viewModel.getClientId().first()
 

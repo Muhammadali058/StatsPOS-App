@@ -3,6 +3,7 @@ package com.example.statspos.presentation.ui.screens.main.main
 import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,27 +15,25 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
@@ -42,7 +41,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,7 +55,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.NavKey
@@ -82,6 +82,7 @@ import com.example.statspos.presentation.ui.screens.TopRoutes
 import com.example.statspos.presentation.ui.screens.items.ItemsScreen
 import com.example.statspos.presentation.ui.screens.reports.ReportsScreen
 import com.example.statspos.presentation.ui.screens.sales.SalesScreen
+import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
 import com.example.statspos.utils.HP
@@ -90,6 +91,31 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
+
+private val items = listOf(
+    TopItem("Purchase", TopRoutes.Purchase, R.drawable.purchase),
+    TopItem("Categories", TopRoutes.Categories, R.drawable.categories),
+    TopItem("Packages", TopRoutes.Categories, R.drawable.package_icon),
+)
+private val accounts = listOf(
+    TopItem("Customers", TopRoutes.Categories, R.drawable.customer_accounts),
+    TopItem("Vendors", TopRoutes.Categories, R.drawable.vendor_accounts),
+    TopItem("Suppliers", TopRoutes.Categories, R.drawable.customer_accounts),
+    TopItem("Banks", TopRoutes.Categories, R.drawable.bank_accounts),
+    TopItem("Expenses", TopRoutes.Categories, R.drawable.expense_accounts),
+)
+private val entries = listOf(
+    TopItem("Receipt", TopRoutes.Categories),
+    TopItem("Payment", TopRoutes.Categories),
+    TopItem("Expense", TopRoutes.Categories),
+    TopItem("Journal", TopRoutes.Categories),
+    TopItem("Stock", TopRoutes.Categories),
+)
+private val warehouse = listOf(
+    TopItem("Warehouses", TopRoutes.Categories),
+    TopItem("Transfer Stock", TopRoutes.Categories),
+    TopItem("Gatepass", TopRoutes.Categories),
+)
 
 @Composable
 fun HomeScreen(
@@ -103,7 +129,7 @@ fun HomeScreen(
 
     // Navigation
     val navigationState = rememberNavigationState(
-        startRoute = BottomRoutes.Items,
+        startRoute = BottomRoutes.Home,
         topLevelRoutes = BOTTOM_DESTINATIONS.keys,
         serializersModules = SerializersModule {
             polymorphic(NavKey::class) {
@@ -197,8 +223,8 @@ fun HomeScreen(
                     entryProvider {
                         entry<BottomRoutes.Home> {
                             HomeBody(
-                                onTopRouteClick = { screen ->
-                                    onTopRouteClick(screen)
+                                onTopRouteClick = { key ->
+                                    onTopRouteClick(key)
                                 }
                             )
                         }
@@ -273,13 +299,12 @@ fun NavigationDrawer(
                 error = painterResource(R.drawable.select_image),
                 modifier = Modifier
                     .size(150.dp)
-                    .clip(CircleShape)
+                    .clip(CircleShape),
 //                    .border(
 //                        width = 2.dp,
 //                        color = MaterialTheme.colorScheme.primary,
 //                        shape = CircleShape
 //                    )
-                ,
             )
             Spacer(Modifier.height(16.dp))
             Column(
@@ -352,57 +377,124 @@ fun NavigationDrawer(
     }
 }
 
+@Preview(showBackground = true)
 @Composable
 private fun HomeBody(
     modifier: Modifier = Modifier,
-    onTopRouteClick: (screen: TopRoutes) -> Unit = {}
+    onTopRouteClick: (TopRoutes) -> Unit = {}
 ) {
-    val items = listOf(
-        TopItem("Categories", TopRoutes.Categories),
-        TopItem("Purchase", TopRoutes.Purchase),
-        TopItem("Warehouses", TopRoutes.Categories),
-        TopItem("Customers", TopRoutes.Categories),
-        TopItem("Vendors", TopRoutes.Categories),
-        TopItem("Suppliers", TopRoutes.Categories),
-        TopItem("Banks", TopRoutes.Categories),
-        TopItem("Expenses", TopRoutes.Categories),
-    )
-
-    Column(
+    LazyColumn(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp)
+            .padding(ConstantPaddings.BODY_HORIZONTAL),
     ) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
-            modifier = Modifier
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(items) { item ->
-                Card(
+        item {
+            Spacer(Modifier.height(8.dp))
+        }
+
+        item {
+            HomeGrid(items, onTopRouteClick)
+        }
+
+        item {
+            Title("Accounts", R.drawable.accounts)
+        }
+        item {
+            HomeGrid(accounts, onTopRouteClick)
+        }
+
+        item {
+            Title("Entry")
+        }
+        item {
+            HomeGrid(entries, onTopRouteClick)
+        }
+
+        item {
+            Title("Warehouse", R.drawable.warehouse)
+        }
+        item {
+            HomeGrid(warehouse, onTopRouteClick)
+        }
+
+        item {
+            Spacer(Modifier.height(8.dp))
+        }
+    }
+}
+
+@Composable
+private fun Title(
+    title: String,
+    @DrawableRes icon: Int? = null,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start,
+    ) {
+//        if (icon != null) {
+//            AppIcon(
+//                icon = icon,
+//                size = 24.dp,
+//            )
+//            Spacer(Modifier.width(16.dp))
+//        }
+        AppText(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+        )
+    }
+}
+
+@Composable
+private fun HomeGrid(
+    items: List<TopItem>,
+    onClick: (TopRoutes) -> Unit
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(3),
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(max = 400.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        items(items) { item ->
+            Card(
+                modifier = Modifier
+                    .width(100.dp)
+                    .height(112.dp)
+                    .padding(vertical = 6.dp),
+                onClick = { onClick(item.screen) },
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 2.dp
+                ),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                ),
+            ) {
+                Column(
                     modifier = Modifier
-                        .size(100.dp),
-                    elevation = CardDefaults.cardElevation(
-                        defaultElevation = 2.dp
-                    )
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.SpaceEvenly,
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clickable {
-                                onTopRouteClick(item.screen)
-                            }
-                            .background(MaterialTheme.colorScheme.primaryContainer)
-                    ) {
-                        Text(
-                            text = item.text,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                    item.icon?.run {
+                        AppIcon(
+                            icon = item.icon,
+                            size = 30.dp,
                         )
                     }
+//                    Spacer(Modifier.height(4.dp))
+                    AppText(
+                        text = item.text,
+                        style = TextStyle(
+                            textAlign = TextAlign.Center,
+                        )
+                    )
                 }
             }
         }

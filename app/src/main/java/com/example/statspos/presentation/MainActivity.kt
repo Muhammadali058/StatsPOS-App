@@ -31,17 +31,10 @@ class MainActivity : ComponentActivity() {
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
             }
 
-            val sharedViewModel = hiltViewModel<SharedViewModel>()
             StatsPOSTheme(
                 darkTheme = darkTheme
             ) {
                 App()
-
-//                AddUpdateItemScreen(
-//                    sharedViewModel = sharedViewModel,
-//                ){
-//                    finish()
-//                }
             }
         }
     }

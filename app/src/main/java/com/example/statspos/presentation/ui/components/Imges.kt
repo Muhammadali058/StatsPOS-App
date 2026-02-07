@@ -53,7 +53,7 @@ fun ImageView(
     if (showIfNull) {
         Image(
             painter = rememberAsyncImagePainter(
-                model = HP.getImageUrl(imageUrl!!),
+                model = HP.getImageUrl(imageUrl ?: ""),
                 error = error,
             ),
             contentDescription = null,
@@ -130,7 +130,7 @@ fun ListImageView(
     if (showIfNull) {
         Image(
             painter = rememberAsyncImagePainter(
-                model = HP.getImageUrl(imageUrl!!),
+                model = HP.getImageUrl(imageUrl ?: ""),
                 error = error,
             ),
             contentDescription = null,

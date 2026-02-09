@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.items.categories
+package com.example.statspos.presentation.ui.screens.purchase.purchase_orders
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -42,18 +42,16 @@ import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.components.TopAppBar
-import com.example.statspos.presentation.ui.components.UploadImageView
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.items.categories.AddUpdateCategoryViewModel
+import com.example.statspos.presentation.viewmodels.purchase.purchase_orders.AddUpdatePurchaseOrderViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import com.example.statspos.utils.showToast
-import okhttp3.MultipartBody
 
 @Composable
-fun AddUpdateCategoryScreen(
+fun AddUpdatePurchaseOrderScreen(
     sharedViewModel: SharedViewModel,
     updateId: Long = 0,
     isUpdate: Boolean = false,
@@ -66,7 +64,7 @@ fun AddUpdateCategoryScreen(
         onBack()
     }
 
-    val viewModel = hiltViewModel<AddUpdateCategoryViewModel>()
+    val viewModel = hiltViewModel<AddUpdatePurchaseOrderViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -110,14 +108,14 @@ fun AddUpdateCategoryScreen(
 
     if (showDeleteDialog) {
         ConfirmDialog(
-            text = "Are you sure to delete this category",
+            text = "Are you sure to delete this Order",
             onDismiss = {
                 showDeleteDialog = false
             },
             onConfirm = {
                 showDeleteDialog = false
                 viewModel.deleteData(updateId) {
-                    context.showToast("Category deleted successfully")
+                    context.showToast("Order deleted successfully")
                     goBackWithResult()
                 }
             }
@@ -137,7 +135,7 @@ fun AddUpdateCategoryScreen(
                 onNavigationClick = {
                     onBack()
                 },
-                title = if (isUpdate) "Update Category" else "Add Category",
+                title = if (isUpdate) "Update Order" else "Add Order",
                 actions = {
                     Row {
                         if (isUpdate && HP.userRights.deleteAnything == true) {
@@ -176,15 +174,10 @@ fun AddUpdateCategoryScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Body(
-                        categoryName = state.categoryName,
+                        purchaseOrderName = state.purchaseOrderName,
                         remarks = state.remarks,
-                        onCategoryNameChange = viewModel::onCategoryNameChange,
+                        onPackageNameChange = viewModel::onPurchaseOrderNameChange,
                         onRemarksChange = viewModel::onRemarksChange,
-                        isUploadingImage = state.isUploadingImage,
-                        imageUrl = state.imageUrl,
-                        onImageUrlChange = {
-                            viewModel.uploadImage(it)
-                        }
                     )
                 }
 
@@ -211,21 +204,18 @@ fun AddUpdateCategoryScreen(
 
 @Composable
 private fun Body(
-    categoryName: String,
+    purchaseOrderName: String,
     remarks: String,
-    onCategoryNameChange: (String) -> Unit,
+    onPackageNameChange: (String) -> Unit,
     onRemarksChange: (String) -> Unit,
-    isUploadingImage: Boolean,
-    imageUrl: String,
-    onImageUrlChange: (MultipartBody.Part) -> Unit,
 ) {
     Textbox(
-        value = categoryName,
-        onValueChange = onCategoryNameChange,
+        value = purchaseOrderName,
+        onValueChange = onPackageNameChange,
         modifier = Modifier
             .fillMaxWidth(),
         label = {
-            Text("Category Name")
+            Text("Order Name")
         }
     )
     Textbox(
@@ -239,21 +229,6 @@ private fun Body(
         },
         singleLine = false,
     )
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        if (isUploadingImage) {
-            AppCircularProgressIndicator()
-        } else {
-            UploadImageView(
-                imageUrl = imageUrl,
-                onImageUrlChange = onImageUrlChange
-            )
-        }
-    }
 }
 
 @Preview(showBackground = true)
@@ -264,13 +239,10 @@ private fun Prev() {
             .fillMaxSize(),
     ){
         Body(
-            categoryName = "",
+            purchaseOrderName = "",
             remarks = "",
-            onCategoryNameChange = {},
+            onPackageNameChange = {},
             onRemarksChange = {},
-            isUploadingImage = false,
-            imageUrl = "",
-            onImageUrlChange = {}
         )
     }
 }

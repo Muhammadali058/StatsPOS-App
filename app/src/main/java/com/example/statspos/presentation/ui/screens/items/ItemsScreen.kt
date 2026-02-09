@@ -1,6 +1,5 @@
 package com.example.statspos.presentation.ui.screens.items
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -50,7 +49,6 @@ import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
-import com.example.statspos.presentation.ui.components.ImageView
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
@@ -412,7 +410,6 @@ private fun ListCard(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         HeadingMedium("Cost", Modifier.weight(1f))
                         HeadingMedium("Rate 1", Modifier.weight(1f))
@@ -423,20 +420,18 @@ private fun ListCard(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        LabelMedium(HP.formatRate(item.cost), Modifier.weight(1f))
-                        LabelMedium(HP.formatRate(item.retail), Modifier.weight(1f))
-                        LabelMedium(HP.formatRate(item.wholesale), Modifier.weight(1f))
-                        LabelMedium(HP.formatRate(item.rate3), Modifier.weight(1f))
-                        LabelMedium(HP.formatRate(item.rate4), Modifier.weight(1f))
+                        LabelMedium(HP.formatDecimal(item.cost), Modifier.weight(1f))
+                        LabelMedium(HP.formatDecimal(item.retail), Modifier.weight(1f))
+                        LabelMedium(HP.formatDecimal(item.wholesale), Modifier.weight(1f))
+                        LabelMedium(HP.formatDecimal(item.rate3), Modifier.weight(1f))
+                        LabelMedium(HP.formatDecimal(item.rate4), Modifier.weight(1f))
                     }
                 } else {
                     // Rows else fourRateSystem
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         HeadingMedium(
                             text = "Cost",
@@ -458,22 +453,21 @@ private fun ListCard(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         LabelMedium(
-                            text = HP.formatRate(item.cost),
+                            text = HP.formatDecimal(item.cost),
                             Modifier.weight(1f)
                         )
                         LabelMedium(
-                            text = HP.formatRate(item.retail),
+                            text = HP.formatDecimal(item.retail),
                             Modifier.weight(1f)
                         )
                         LabelMedium(
-                            text = HP.formatRate(item.wholesale),
+                            text = HP.formatDecimal(item.wholesale),
                             Modifier.weight(1f)
                         )
                         LabelMedium(
-                            text = if (HP.settings.saleCartons == true) HP.formatRate(item.crtnRate) else HP.formatRate(
+                            text = if (HP.settings.saleCartons == true) HP.formatDecimal(item.crtnRate) else HP.formatDecimal(
                                 item.marketPrice
                             ),
                             Modifier.weight(1f)
@@ -494,7 +488,7 @@ private fun ListCard(
                     .weight(1f),
             ) {
                 HeadingMedium("Stock Pcs: ")
-                LabelMedium(HP.formatRate(item.stockPcs))
+                LabelMedium(HP.formatDecimal(item.stockPcs))
             }
             if (HP.settings.saleCartons == true) {
                 Row(

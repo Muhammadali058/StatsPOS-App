@@ -1,9 +1,9 @@
-package com.example.statspos.presentation.viewmodels.items
+package com.example.statspos.presentation.viewmodels.items.categories
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
-import com.example.statspos.domain.models.items.SubCategories
+import com.example.statspos.domain.models.items.Categories
 import com.example.statspos.domain.repository.items.CategoriesRepository
 import com.example.statspos.domain.repository.main.MainRepository
 import com.example.statspos.utils.HP
@@ -23,19 +23,18 @@ import okhttp3.MultipartBody
 import javax.inject.Inject
 
 @HiltViewModel
-class AddUpdateSubCategoryViewModel @Inject constructor(
+class AddUpdateCategoryViewModel @Inject constructor(
     private val api: CategoriesRepository,
     private val mainRepo: MainRepository,
 ) : ViewModel() {
     // region ScreenState
     data class ScreenState(
         val id: Long = 0L,
-        val categoryId: Long = 0L,
-        val subCategoryName: String = "",
+        val categoryName: String = "",
+        val remarks: String = "",
         val imageUrl: String = "",
 
         // Extra
-        val categoryName: String = "",
         val isUpdate: Boolean = false,
         val updateId: Long = 0L,
 
@@ -105,11 +104,8 @@ class AddUpdateSubCategoryViewModel @Inject constructor(
     fun onCategoryNameChange(value: String) {
         state.update { it.copy(categoryName = value) }
     }
-    fun onCategoryIdChange(value: Long) {
-        state.update { it.copy(categoryId = value) }
-    }
-    fun onSubCategoryNameChange(value: String) {
-        state.update { it.copy(subCategoryName = value) }
+    fun onRemarksChange(value: String) {
+        state.update { it.copy(remarks = value) }
     }
     // endregion
 
@@ -127,13 +123,13 @@ class AddUpdateSubCategoryViewModel @Inject constructor(
 
             state.update { it.copy(isSaving = true) }
 
-            val subCategory = getFormData()
+            val category = getFormData()
 
             val result = if (state.value.isUpdate) {
-                subCategory.id = state.value.updateId
-                api.updateSubCategory(subCategory)
+                category.id = state.value.updateId
+                api.updateCategory(category)
             } else {
-                api.insertSubCategory(subCategory)
+                api.insertCategory(category)
             }
 
             state.update { it.copy(isSaving = false) }
@@ -142,7 +138,7 @@ class AddUpdateSubCategoryViewModel @Inject constructor(
                 is Resource.Error -> showError(result.error)
                 is Resource.Information -> showMessage(result.message)
                 is Resource.Success -> {
-                    HP.subCategories = Gson().getListOf<DropdownItem>(result.data.get("subCategories").asJsonArray)
+                    HP.categories = Gson().getListOf<DropdownItem>(result.data.get("categories").asJsonArray)
                     clearTextboxes()
                     onSuccess()
                 }
@@ -160,13 +156,13 @@ class AddUpdateSubCategoryViewModel @Inject constructor(
 
             beforeRequest()
 
-            when (val result = api.deleteSubCategory(id)) {
+            when (val result = api.deleteCategory(id)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
 
-                    HP.subCategories = Gson().getListOf<DropdownItem>(result.data.get("subCategories").asJsonArray)
+                    HP.categories = Gson().getListOf<DropdownItem>(result.data.get("categories").asJsonArray)
                     onSuccess()
                 }
             }
@@ -180,13 +176,13 @@ class AddUpdateSubCategoryViewModel @Inject constructor(
 
             beforeRequest()
 
-            when (val result = api.getSubCategory(id)) {
+            when (val result = api.getCategory(id)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
-                    val subCategory = Gson().get<SubCategories>(result.data.asJsonObject)
-                    setFormData(subCategory)
+                    val category = Gson().get<Categories>(result.data.asJsonObject)
+                    setFormData(category)
                 }
             }
         }
@@ -227,22 +223,20 @@ class AddUpdateSubCategoryViewModel @Inject constructor(
     // endregion
 
     // region Methods
-    private fun getFormData(): SubCategories {
-        return SubCategories(
-            categoryId = state.value.categoryId,
-            subCategoryName = state.value.subCategoryName,
+    private fun getFormData(): Categories {
+        return Categories(
+            categoryName = state.value.categoryName,
+            remarks = state.value.remarks,
             imageUrl = state.value.imageUrl,
         )
     }
 
-    private fun setFormData(subCategory: SubCategories) {
+    private fun setFormData(category: Categories) {
         state.update {
             it.copy(
-                categoryId = subCategory.categoryId!!,
-                subCategoryName =  subCategory.subCategoryName.toString(),
-                imageUrl = subCategory.imageUrl!!,
-
-                categoryName = HP.getDropdownNameById(subCategory.categoryId!!, HP.categories)
+                categoryName =  category.categoryName.toString(),
+                remarks =  category.remarks.toString(),
+                imageUrl = category.imageUrl!!,
             )
         }
     }
@@ -250,10 +244,9 @@ class AddUpdateSubCategoryViewModel @Inject constructor(
     private fun clearTextboxes() {
         state.update {
             it.copy(
-                categoryId = 0L,
-                subCategoryName = "",
-                imageUrl = "",
                 categoryName = "",
+                remarks = "",
+                imageUrl = "",
 
                 isUpdate = false,
                 updateId = 0L,
@@ -262,13 +255,8 @@ class AddUpdateSubCategoryViewModel @Inject constructor(
     }
 
     private fun isValid(): Boolean {
-        if (state.value.categoryId == 0L) {
-            showMessage("Please select category")
-            return false
-        }
-
-        if (state.value.subCategoryName.isEmpty()) {
-            showMessage("Please enter sub-category name")
+        if (state.value.categoryName.isEmpty()) {
+            showMessage("Please enter category name")
             return false
         }
 
@@ -292,12 +280,10 @@ class AddUpdateSubCategoryViewModel @Inject constructor(
         state.update { it.copy(isLoading = false) }
     }
 
-    fun updateInitialState(isUpdate: Boolean, updateId: Long, categoryId: Long) {
+    fun updateInitialState(isUpdate: Boolean, updateId: Long) {
         state.update { it.copy(
             isUpdate = isUpdate,
             updateId = updateId,
-            categoryId = categoryId,
-            categoryName = if(categoryId == 0L) "" else HP.getDropdownNameById(categoryId, HP.categories)
         ) }
     }
 

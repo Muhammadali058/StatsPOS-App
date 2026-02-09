@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.items.categories
+package com.example.statspos.presentation.ui.screens.purchase.purchase_orders
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -9,13 +9,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,30 +28,32 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.statspos.domain.models.items.Categories
+import com.example.statspos.domain.models.items.PackageItems
+import com.example.statspos.domain.models.purchase.PurchaseOrderItems
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
+import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
-import com.example.statspos.presentation.ui.components.ListImageView
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.items.categories.CategoriesViewModel
+import com.example.statspos.presentation.viewmodels.purchase.purchase_orders.PurchaseOrderItemsViewModel
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
 @Composable
-fun CategoriesBody(
+fun PurchaseOrderItemsBody(
     sharedViewModel: SharedViewModel,
-    onAddButtonClick: (Long, Boolean) -> Unit,
+    onAddButtonClick: (Long, Boolean, Long) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<CategoriesViewModel>()
+    val viewModel = hiltViewModel<PurchaseOrderItemsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -93,7 +94,11 @@ fun CategoriesBody(
         },
         floatingActionButton = {
             AppFloatingActionButton {
-                onAddButtonClick(0L, false)
+                if (state.purchaseOrderId == 0L) {
+                    viewModel.onEvent(UiEvent.ShowSnackbar("Please select order"))
+                } else {
+                    onAddButtonClick(0L, false, state.purchaseOrderId)
+                }
             }
         },
     ) { innerPadding ->
@@ -114,6 +119,18 @@ fun CategoriesBody(
                         .padding(ConstantPaddings.BODY_HORIZONTAL)
                 ) {
                     Spacer(Modifier.height(8.dp))
+                    Dropdown(
+                        value = state.purchaseOrderName,
+                        onValueChange = viewModel::onPurchaseOrderNameChange,
+                        items = HP.purchaseOrders,
+                        onItemSelected = { dropdownItem ->
+                            viewModel.onPurchaseOrderIdChange(dropdownItem.id)
+                            viewModel.loadData()
+                        },
+                        label = {
+                            Text("Order")
+                        }
+                    )
                     SearchBox(
                         modifier = Modifier
                             .padding(bottom = 4.dp),
@@ -132,8 +149,8 @@ fun CategoriesBody(
                             viewModel.loadData()
                         },
                         items = state.list,
-                        onItemClick = { category ->
-                            onAddButtonClick(category.id!!, true)
+                        onItemClick = { purchaseOrderItem ->
+                            onAddButtonClick(purchaseOrderItem.id!!, true, state.purchaseOrderId)
                         }
                     )
                 }
@@ -144,10 +161,10 @@ fun CategoriesBody(
                         .padding(8.dp)
                 ) {
                     HeadingMedium(
-                        text = "Total Categories: ",
+                        text = "Total Order Items: ",
                     )
                     LabelMedium(
-                        text = state.totalCategories.toString(),
+                        text = state.totalPurchaseOrderItems.toString(),
                     )
                 }
             }
@@ -185,8 +202,8 @@ private fun BodyList(
     modifier: Modifier = Modifier,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
-    items: List<Categories>,
-    onItemClick: (Categories) -> Unit,
+    items: List<PurchaseOrderItems>,
+    onItemClick: (PurchaseOrderItems) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -204,8 +221,8 @@ private fun BodyList(
 @Composable
 private fun ListCard(
     modifier: Modifier = Modifier,
-    item: Categories,
-    onItemClick: (Categories) -> Unit
+    item: PurchaseOrderItems,
+    onItemClick: (PurchaseOrderItems) -> Unit
 ) {
     ListCard(
         modifier = modifier
@@ -221,32 +238,30 @@ private fun ListCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Image
-            ListImageView(
-                imageUrl = item.imageUrl,
-                modifier = Modifier
-                    .size(60.dp),
-            ) {
-                Spacer(Modifier.width(8.dp))
+            LabelLarge(item.itemname.toString())
+        }
+        Spacer(Modifier.height(2.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            HeadingMedium("Qty", Modifier.weight(1f))
+            if (HP.settings.saleCartons == true) {
+                HeadingMedium("Crtn", Modifier.weight(1f))
             }
-
-            Column{
-                LabelLarge(item.categoryName.toString())
-
-                item.remarks?.let {
-                    if (it.isNotEmpty()) {
-                        Spacer(Modifier.height(2.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                        ) {
-                            HeadingMedium("Remarks: ")
-                            LabelMedium(item.remarks.toString())
-                        }
-                    }
-                }
+            HeadingMedium("Cost", Modifier.weight(1f))
+            HeadingMedium("Total", Modifier.weight(1f))
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            LabelMedium(HP.formatDecimal(item.qty), Modifier.weight(1f))
+            if (HP.settings.saleCartons == true) {
+                LabelMedium(item.crtn.toString(), Modifier.weight(1f))
             }
+            LabelMedium(HP.formatDecimal(item.cost), Modifier.weight(1f))
+            LabelMedium(HP.formatDecimal(item.total), Modifier.weight(1f))
         }
     }
 }
-

@@ -13,15 +13,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -45,11 +39,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.R
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.items.Items
-import com.example.statspos.presentation.ui.components.AppFloatingActionButton
-import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
-import com.example.statspos.presentation.ui.components.AppText
 import com.example.statspos.presentation.ui.components.AutoCompleteItemsTextbox
 import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
 import com.example.statspos.presentation.ui.components.BottomSheet
@@ -66,7 +57,6 @@ import com.example.statspos.presentation.ui.components.SubDropdown
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.items.ItemsViewModel
 import com.example.statspos.presentation.viewmodels.items.SearchItemsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
@@ -432,10 +422,10 @@ private fun ListCard(
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        LabelMedium(HP.formatRate(item.retail), Modifier.weight(1f))
-                        LabelMedium(HP.formatRate(item.wholesale), Modifier.weight(1f))
-                        LabelMedium(HP.formatRate(item.rate3), Modifier.weight(1f))
-                        LabelMedium(HP.formatRate(item.rate4), Modifier.weight(1f))
+                        LabelMedium(HP.formatDecimal(item.retail), Modifier.weight(1f))
+                        LabelMedium(HP.formatDecimal(item.wholesale), Modifier.weight(1f))
+                        LabelMedium(HP.formatDecimal(item.rate3), Modifier.weight(1f))
+                        LabelMedium(HP.formatDecimal(item.rate4), Modifier.weight(1f))
                     }
                 } else {
                     // Rows else fourRateSystem
@@ -463,15 +453,15 @@ private fun ListCard(
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         LabelMedium(
-                            text = HP.formatRate(item.retail),
+                            text = HP.formatDecimal(item.retail),
                             Modifier.weight(1f)
                         )
                         LabelMedium(
-                            text = HP.formatRate(item.wholesale),
+                            text = HP.formatDecimal(item.wholesale),
                             Modifier.weight(1f)
                         )
                         LabelMedium(
-                            text = if (HP.settings.saleCartons == true) HP.formatRate(item.crtnRate) else HP.formatRate(
+                            text = if (HP.settings.saleCartons == true) HP.formatDecimal(item.crtnRate) else HP.formatDecimal(
                                 item.marketPrice
                             ),
                             Modifier.weight(1f)
@@ -492,7 +482,7 @@ private fun ListCard(
                     .weight(1f),
             ) {
                 HeadingMedium("Stock Pcs: ")
-                LabelMedium(HP.formatRate(item.stockPcs))
+                LabelMedium(HP.formatDecimal(item.stockPcs))
             }
             if (HP.settings.saleCartons == true) {
                 Row(

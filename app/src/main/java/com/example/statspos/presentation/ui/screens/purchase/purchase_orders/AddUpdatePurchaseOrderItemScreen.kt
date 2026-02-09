@@ -1,5 +1,6 @@
-package com.example.statspos.presentation.ui.screens.items
+package com.example.statspos.presentation.ui.screens.purchase.purchase_orders
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -7,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -35,10 +35,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -47,10 +45,10 @@ import com.example.statspos.presentation.ui.components.AppCircularProgressIndica
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
-import com.example.statspos.presentation.ui.components.AppSwitch
 import com.example.statspos.presentation.ui.components.AutoCompleteItemsTextbox
 import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
 import com.example.statspos.presentation.ui.components.ConfirmDialog
+import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
@@ -58,19 +56,20 @@ import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.items.AddUpdateLinkedItemViewModel
+import com.example.statspos.presentation.viewmodels.items.packages.AddUpdatePackageItemViewModel
+import com.example.statspos.presentation.viewmodels.purchase.purchase_orders.AddUpdatePurchaseOrderItemViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import com.example.statspos.utils.showToast
+import kotlin.math.cos
 
 @Composable
-fun AddUpdateLinkedItemScreen(
+fun AddUpdatePurchaseOrderItemScreen(
     sharedViewModel: SharedViewModel,
     updateId: Long = 0,
     isUpdate: Boolean = false,
-    itemId: Long = 0L,
-    crtnSize:Int = 0,
+    purchaseOrderId: Long = 0,
     onSearchItemClick: () -> Unit,
     onBack: () -> Unit,
 ) {
@@ -82,7 +81,7 @@ fun AddUpdateLinkedItemScreen(
     }
 
     val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<AddUpdateLinkedItemViewModel>()
+    val viewModel = hiltViewModel<AddUpdatePurchaseOrderItemViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -108,8 +107,7 @@ fun AddUpdateLinkedItemScreen(
         viewModel.updateInitialState(
             isUpdate = isUpdate,
             updateId = updateId,
-            itemId = itemId,
-            crtnSize = crtnSize,
+            purchaseOrderId = purchaseOrderId,
         )
 
         if (isUpdate && !hasLoadedOnce) {
@@ -120,6 +118,7 @@ fun AddUpdateLinkedItemScreen(
 
     val sharedViewModelState by sharedViewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(sharedViewModelState.dataChanged) {
+        Log.d("TAG Search Item", sharedViewModelState.dataChanged.toString())
         if (sharedViewModelState.dataChanged) {
             val item = sharedViewModelState.item
             item?.run {
@@ -141,14 +140,14 @@ fun AddUpdateLinkedItemScreen(
 
     if (showDeleteDialog) {
         ConfirmDialog(
-            text = "Are you sure to delete this linked item",
+            text = "Are you sure to delete this order item",
             onDismiss = {
                 showDeleteDialog = false
             },
             onConfirm = {
                 showDeleteDialog = false
                 viewModel.deleteData(updateId) {
-                    context.showToast("Linked item deleted successfully")
+                    context.showToast("Order item deleted successfully")
                     goBackWithResult()
                 }
             }
@@ -181,7 +180,7 @@ fun AddUpdateLinkedItemScreen(
                 onNavigationClick = {
                     onBack()
                 },
-                title = if (isUpdate) "Update Linked Item" else "Add Linked Item",
+                title = if (isUpdate) "Update Order Item" else "Add Order Item",
                 actions = {
                     Row {
                         if (isUpdate && HP.userRights.deleteAnything == true) {
@@ -219,6 +218,18 @@ fun AddUpdateLinkedItemScreen(
                         .imePadding(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
+                    Dropdown(
+                        value = state.purchaseOrderName,
+                        onValueChange = viewModel::onPurchaseOrderNameChange,
+                        items = HP.packages,
+                        onItemSelected = { dropdownItem ->
+                            viewModel.onPurchaseOrderIdChange(dropdownItem.id)
+                        },
+                        label = {
+                            Text("Order")
+                        },
+                        enabled = false,
+                    )
                     ItemnameBox(
                         value = state.itemname,
                         onValueChange = viewModel::onItemnameChange,
@@ -238,28 +249,14 @@ fun AddUpdateLinkedItemScreen(
                         },
                         onSearchItemClick = onSearchItemClick
                     )
-
-                    BottomBody(
-                        updateCost = state.updateCost,
-                        updateRetail = state.updateRetail,
-                        updateWholesale = state.updateWholesale,
-                        updateCrtnRate = state.updateCrtnRate,
-                        updateMarketPrice = state.updateMarketPrice,
-                        updateExpiry = state.updateExpiry,
-                        rateFormula = state.rateFormula,
-
-                        onUpdateCostChange = viewModel::onUpdateCostChange,
-                        onUpdateRetailChange = viewModel::onUpdateRetailChange,
-                        onUpdateWholesaleChange = viewModel::onUpdateWholesaleChange,
-                        onUpdateCrtnRateChange = viewModel::onUpdateCrtnRateChange,
-                        onUpdateMarketPriceChange = viewModel::onUpdateMarketPriceChange,
-                        onUpdateExpiryChange = viewModel::onUpdateExpiryChange,
-                        onRateFormulaChange = viewModel::onRateFormulaChange,
-
-                        costCheckboxEnabled = state.costCheckboxEnabled,
-                        retailCheckboxEnabled = state.retailCheckboxEnabled,
-                        wholesaleCheckboxEnabled = state.wholesaleCheckboxEnabled,
-                        crtnRateCheckboxEnabled = state.crtnRateCheckboxEnabled,
+                    Body(
+                        qty = state.qty,
+                        crtn = state.crtn,
+                        cost = state.cost,
+                        total = state.total,
+                        onQtyChange = viewModel::onQtyChange,
+                        onCrtnChange = viewModel::onCrtnChange,
+                        onCostChange = viewModel::onCostChange,
                     )
                 }
 
@@ -348,130 +345,66 @@ private fun ItemnameBox(
 }
 
 @Composable
-private fun BottomBody(
-    updateCost: Boolean,
-    updateRetail: Boolean,
-    updateWholesale: Boolean,
-    updateCrtnRate: Boolean,
-    updateMarketPrice: Boolean,
-    updateExpiry: Boolean,
-    rateFormula: String,
-
-    onUpdateCostChange: (Boolean) -> Unit,
-    onUpdateRetailChange: (Boolean) -> Unit,
-    onUpdateWholesaleChange: (Boolean) -> Unit,
-    onUpdateCrtnRateChange: (Boolean) -> Unit,
-    onUpdateMarketPriceChange: (Boolean) -> Unit,
-    onUpdateExpiryChange: (Boolean) -> Unit,
-    onRateFormulaChange: (String) -> Unit,
-
-    costCheckboxEnabled: Boolean,
-    retailCheckboxEnabled: Boolean,
-    wholesaleCheckboxEnabled: Boolean,
-    crtnRateCheckboxEnabled: Boolean,
+private fun Body(
+    qty: String,
+    crtn: String,
+    cost: String,
+    total: String,
+    onQtyChange: (String) -> Unit,
+    onCrtnChange: (String) -> Unit,
+    onCostChange: (String) -> Unit,
 ) {
-    Column{
-        Spacer(Modifier.height(16.dp))
-        Row{
-            AppSwitch(
-                modifier = Modifier.weight(1f),
-                checked = updateCost,
-                onCheckedChange = onUpdateCostChange,
-                label = "Update Cost",
-                enabled = costCheckboxEnabled,
-            )
-            AppSwitch(
-                modifier = Modifier.weight(1f),
-                checked = updateMarketPrice,
-                onCheckedChange = onUpdateMarketPriceChange,
-                label = "Update Market Price"
-            )
-        }
-        Spacer(Modifier.height(16.dp))
-        Row {
-            AppSwitch(
-                modifier = Modifier.weight(1f),
-                checked = updateRetail,
-                onCheckedChange = onUpdateRetailChange,
-                label = "Update Retail",
-                enabled = retailCheckboxEnabled,
-            )
-            AppSwitch(
-                modifier = Modifier.weight(1f),
-                checked = updateWholesale,
-                onCheckedChange = onUpdateWholesaleChange,
-                label = "Update Wholesale",
-                enabled = wholesaleCheckboxEnabled,
-            )
-        }
-        Spacer(Modifier.height(16.dp))
-        Row {
-            AppSwitch(
-                modifier = Modifier.weight(1f),
-                checked = updateCrtnRate,
-                onCheckedChange = onUpdateCrtnRateChange,
-                label = "Update Crtn Rate",
-                enabled = crtnRateCheckboxEnabled,
-            )
-            AppSwitch(
-                modifier = Modifier.weight(1f),
-                checked = updateExpiry,
-                onCheckedChange = onUpdateExpiryChange,
-                label = "Update Expiry"
-            )
-        }
-        Spacer(Modifier.height(16.dp))
+    Row{
         Textbox(
+            value = qty,
+            onValueChange = onQtyChange,
             modifier = Modifier
-                .fillMaxWidth(),
-            value = rateFormula,
-            onValueChange = onRateFormulaChange,
+                .fillMaxWidth()
+                .weight(1f),
             label = {
-                Text("Rate Formula")
+                Text("Qty")
             },
-            textStyle = TextStyle(
-                textAlign = TextAlign.Center,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Decimal
+            ),
+        )
+        if(HP.settings.saleCartons == true) {
+            Spacer(Modifier.width(8.dp))
+            Textbox(
+                value = crtn,
+                onValueChange = onCrtnChange,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                label = {
+                    Text("Crtn")
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal
+                ),
             )
-        )
+        }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun Prev() {
-    Column(
-        Modifier
-            .fillMaxSize(),
-    ) {
-        ItemnameBox(
-            value = "",
-            onValueChange = {},
-            onItemSelected = {},
-            onSearchClick = {},
-            onEndIconClick = {},
-            onBarcodeClick = {},
-            onSearchItemClick = {}
-        )
-
-        BottomBody(
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            "",
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            true,
-            true,
-            true,
-            true,
-        )
-    }
+    Textbox(
+        value = cost,
+        onValueChange = onCostChange,
+        modifier = Modifier
+            .fillMaxWidth(),
+        label = {
+            Text("Cost")
+        },
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Decimal
+        ),
+    )
+    Textbox(
+        value = total,
+        onValueChange = { },
+        modifier = Modifier
+            .fillMaxWidth(),
+        label = {
+            Text("Total")
+        },
+        readOnly = true,
+    )
 }

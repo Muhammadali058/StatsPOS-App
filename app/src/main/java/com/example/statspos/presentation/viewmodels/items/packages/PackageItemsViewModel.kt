@@ -1,10 +1,10 @@
-package com.example.statspos.presentation.viewmodels.items
+package com.example.statspos.presentation.viewmodels.items.packages
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.statspos.domain.models.items.Categories
-import com.example.statspos.domain.models.items.LinkedItems
-import com.example.statspos.domain.repository.items.CategoriesRepository
+import com.example.statspos.domain.models.items.PackageItems
+import com.example.statspos.domain.models.items.SubCategories
+import com.example.statspos.domain.repository.items.PackagesRepository
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
@@ -20,16 +20,18 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CategoriesViewModel @Inject constructor(
-    private val api: CategoriesRepository
+class PackageItemsViewModel @Inject constructor(
+    private val api: PackagesRepository
 ) : ViewModel() {
 
     // region ScreenState
     data class ScreenState(
-        val list: List<Categories> = emptyList(),
-        val totalCategories: Int = 0,
+        val list: List<PackageItems> = emptyList(),
+        val totalPackageItems: Int = 0,
 
         val search: String = "",
+        val packageName: String = "",
+        val packageId: Long = 0L,
 
         val isLoading: Boolean = false,
         val error: String? = null,
@@ -94,13 +96,15 @@ class CategoriesViewModel @Inject constructor(
     }
     // endregion
 
-    init {
-        loadData()
-    }
-
     // region onChangeMethods
     fun onSearchChange(value: String) {
         state.update { it.copy(search = value) }
+    }
+    fun onPackageNameChange(value: String) {
+        state.update { it.copy(packageName = value) }
+    }
+    fun onPackageIdChange(value: Long) {
+        state.update { it.copy(packageId = value) }
     }
     // endregion
 
@@ -113,23 +117,24 @@ class CategoriesViewModel @Inject constructor(
             beforeRequest()
 
             val params = JsonObject().apply {
+                addProperty("packageId", state.value.packageId)
                 addProperty("text", state.value.search)
             }
 
-            when (val result = api.loadCategories(params)) {
+            when (val result = api.loadPackageItems(params)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
 
                     val resultTotal =
-                        result.data.get("total").asJsonObject.get("totalCategories").asInt
+                        result.data.get("total").asJsonObject.get("totalPackageItems").asInt
                     val resultList =
-                        Gson().getListOf<Categories>(result.data.get("rows").asJsonArray)
+                        Gson().getListOf<PackageItems>(result.data.get("rows").asJsonArray)
                     state.update {
                         it.copy(
                             list = resultList,
-                            totalCategories = resultTotal,
+                            totalPackageItems = resultTotal,
                         )
                     }
                 }

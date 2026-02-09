@@ -1,11 +1,12 @@
-package com.example.statspos.presentation.viewmodels.items
+package com.example.statspos.presentation.viewmodels.items.packages
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.items.Items
-import com.example.statspos.domain.models.items.LinkedItems
+import com.example.statspos.domain.models.items.PackageItems
 import com.example.statspos.domain.repository.items.ItemsRepository
-import com.example.statspos.domain.repository.items.LinkedItemsRepository
+import com.example.statspos.domain.repository.items.PackagesRepository
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
@@ -20,32 +21,21 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AddUpdateLinkedItemViewModel @Inject constructor(
-    private val api: LinkedItemsRepository,
+class AddUpdatePackageItemViewModel @Inject constructor(
+    private val api: PackagesRepository,
     private val itemsRepo: ItemsRepository,
 ) : ViewModel() {
     // region ScreenState
     data class ScreenState(
         val id: Long = 0L,
+        val packageId: Long = 0L,
         val itemId: Long = 0L,
-        val linkedItemId: Long = 0L,
-
-        val mainItemCrtnSize: Int = 0,
-
-        val updateCost: Boolean = false,
-        val updateRetail: Boolean = false,
-        val updateWholesale: Boolean = false,
-        val updateCrtnRate: Boolean = false,
-        val updateMarketPrice: Boolean = true,
-        val updateExpiry: Boolean = true,
-        val rateFormula: String = "",
-
-        val costCheckboxEnabled: Boolean = false,
-        val retailCheckboxEnabled: Boolean = false,
-        val wholesaleCheckboxEnabled: Boolean = false,
-        val crtnRateCheckboxEnabled: Boolean = false,
+        val qty: String = "",
+        val rate: String = "",
+        val total: String = "",
 
         // Extra
+        val packageName: String = "",
         val itemname: String = "",
         val isUpdate: Boolean = false,
         val updateId: Long = 0L,
@@ -112,32 +102,31 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
     // endregion
 
     // region onChangeMethods
-    fun onUpdateCostChange(value: Boolean) {
-        state.update { it.copy(updateCost = value) }
-    }
-    fun onUpdateRetailChange(value: Boolean) {
-        state.update { it.copy(updateRetail = value) }
-    }
-    fun onUpdateWholesaleChange(value: Boolean) {
-        state.update { it.copy(updateWholesale = value) }
-    }
-    fun onUpdateCrtnRateChange(value: Boolean) {
-        state.update { it.copy(updateCrtnRate = value) }
-    }
-    fun onUpdateMarketPriceChange(value: Boolean) {
-        state.update { it.copy(updateMarketPrice = value) }
-    }
-    fun onUpdateExpiryChange(value: Boolean) {
-        state.update { it.copy(updateExpiry = value) }
-    }
-    fun onRateFormulaChange(value: String) {
-        state.update { it.copy(rateFormula = value) }
-    }
     fun onItemnameChange(value: String) {
-        state.update { it.copy(
-            itemname = value,
-            linkedItemId = 0L,
-        ) }
+        state.update {
+            it.copy(
+                itemname = value,
+                itemId = 0L,
+            )
+        }
+    }
+
+    fun onPackageNameChange(value: String) {
+        state.update { it.copy(packageName = value) }
+    }
+
+    fun onPackageIdChange(value: Long) {
+        state.update { it.copy(packageId = value) }
+    }
+
+    fun onQtyChange(value: String) {
+        state.update { it.copy(qty = value) }
+        updateTotal()
+    }
+
+    fun onRateChange(value: String) {
+        state.update { it.copy(rate = value) }
+        updateTotal()
     }
     // endregion
 
@@ -155,13 +144,13 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
 
             state.update { it.copy(isSaving = true) }
 
-            val linkedItem = getFormData()
+            val packageItem = getFormData()
 
             val result = if (state.value.isUpdate) {
-                linkedItem.id = state.value.updateId
-                api.updateLinkedItem(linkedItem)
+                packageItem.id = state.value.updateId
+                api.updatePackageItem(packageItem)
             } else {
-                api.insertLinkedItem(linkedItem)
+                api.insertPackageItem(packageItem)
             }
 
             state.update { it.copy(isSaving = false) }
@@ -187,7 +176,7 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
 
             beforeRequest()
 
-            when (val result = api.deleteLinkedItem(id)) {
+            when (val result = api.deletePackageItem(id)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
@@ -206,13 +195,14 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
 
             beforeRequest()
 
-            when (val result = api.getLinkedItem(id)) {
+            when (val result = api.getPackageItem(id)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
-                    val linkedItem = Gson().get<LinkedItems>(result.data.asJsonObject)
-                    setFormData(linkedItem)
+                    val packageItem = Gson().get<PackageItems>(result.data.asJsonObject)
+                    setFormData(packageItem)
+                    updateTotal()
                 }
             }
         }
@@ -239,16 +229,14 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
                         state.update {
                             it.copy(
                                 itemname = item.itemname!!,
-                                linkedItemId = item.id!!,
+                                itemId = item.id!!,
+                                rate = item.retail.toString(),
                             )
                         }
-
-                        disableAllCheckboxes()
-                        enableOrDisableCheckboxes(item.crtnSize!!)
                     } else {
                         state.update {
                             it.copy(
-                                linkedItemId = 0L,
+                                itemId = 0L,
                             )
                         }
                         showSnackbar("Items not found")
@@ -260,36 +248,22 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
     // endregion
 
     // region Methods
-    private fun getFormData(): LinkedItems {
-        return LinkedItems(
+    private fun getFormData(): PackageItems {
+        return PackageItems(
+            packageId = state.value.packageId,
             itemId = state.value.itemId,
-            linkedItemId = state.value.linkedItemId,
-
-            updateCost = state.value.updateCost,
-            updateRetail = state.value.updateRetail,
-            updateWholesale = state.value.updateWholesale,
-            updateCrtnRate = state.value.updateCrtnRate,
-            updateMarketPrice = state.value.updateMarketPrice,
-            updateExpiry = state.value.updateExpiry,
-            rateFormula = state.value.rateFormula,
+            qty = HP.getDoubleValue(state.value.qty),
+            rate = HP.getDoubleValue(state.value.rate),
         )
     }
 
-    private fun setFormData(linkedItem: LinkedItems) {
-        enableOrDisableCheckboxes(linkedItem.crtnSize!!)
-
+    private fun setFormData(packageItem: PackageItems) {
         state.update {
             it.copy(
-                itemname =  linkedItem.itemname!!,
-                linkedItemId = linkedItem.linkedItemId!!,
-
-                updateCost = linkedItem.updateCost!!,
-                updateRetail = linkedItem.updateRetail!!,
-                updateWholesale = linkedItem.updateWholesale!!,
-                updateCrtnRate = linkedItem.updateCrtnRate!!,
-                updateMarketPrice = linkedItem.updateMarketPrice!!,
-                updateExpiry = linkedItem.updateExpiry!!,
-                rateFormula = linkedItem.rateFormula!!,
+                itemname = packageItem.itemname!!,
+                itemId = packageItem.itemId!!,
+                qty = packageItem.qty.toString(),
+                rate = packageItem.rate.toString(),
             )
         }
     }
@@ -298,105 +272,34 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
         state.update {
             it.copy(
                 itemname = "",
-                linkedItemId = 0L,
-
-                updateCost =  false,
-                updateRetail =  false,
-                updateWholesale =  false,
-                updateCrtnRate =  false,
-                updateMarketPrice =  true,
-                updateExpiry =  true,
-                rateFormula =  "",
+                itemId = 0L,
+                qty = "",
+                rate = "",
 
                 isUpdate = false,
                 updateId = 0L,
             )
         }
-
-        disableAllCheckboxes()
     }
 
     private fun isValid(): Boolean {
-        if (state.value.linkedItemId == 0L) {
+        if (state.value.itemId == 0L) {
             showMessage("Please select item")
+            return false
+        }
+
+        if (HP.getDoubleValue(state.value.qty) == 0.0) {
+            showMessage("Please enter quantity")
+            return false
+        }
+
+        if (HP.getDoubleValue(state.value.rate) == 0.0) {
+            showMessage("Please enter rate")
             return false
         }
 
         return true
     }
-
-    private fun disableAllCheckboxes(){
-        state.update {
-            it.copy(
-                costCheckboxEnabled = false,
-                retailCheckboxEnabled = false,
-                wholesaleCheckboxEnabled = false,
-                crtnRateCheckboxEnabled = false,
-            )
-        }
-    }
-
-    private fun enableOrDisableCheckboxes(crtnSize:Int){
-        if (crtnSize == 0)
-        {
-            if (state.value.mainItemCrtnSize == 0 || state.value.mainItemCrtnSize > 1)
-            {
-                state.update {
-                    it.copy(
-                        costCheckboxEnabled = true,
-                        retailCheckboxEnabled = true,
-                        wholesaleCheckboxEnabled = true,
-
-                        updateCost = true,
-                        updateRetail = true,
-                        updateWholesale = true,
-                    )
-                }
-            }
-        }
-        else if (crtnSize == 1)
-        {
-            if (state.value.mainItemCrtnSize == 1 || state.value.mainItemCrtnSize > 1)
-            {
-                state.update {
-                    it.copy(
-                        crtnRateCheckboxEnabled = true,
-                        updateCrtnRate = true,
-                    )
-                }
-            }
-
-            if (state.value.mainItemCrtnSize == 1)
-            {
-                state.update {
-                    it.copy(
-                        costCheckboxEnabled = true,
-                        updateCost = true,
-                    )
-                }
-            }
-        }
-        else if (crtnSize > 1)
-        {
-            if (state.value.mainItemCrtnSize > 1)
-            {
-                state.update {
-                    it.copy(
-                        costCheckboxEnabled = true,
-                        retailCheckboxEnabled = true,
-                        wholesaleCheckboxEnabled = true,
-                        crtnRateCheckboxEnabled = true,
-
-                        updateCost = true,
-                        updateRetail = true,
-                        updateWholesale = true,
-                        updateCrtnRate = true,
-                    )
-                }
-            }
-        }
-    }
-
     // endregion
 
     // region Others
@@ -414,14 +317,29 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
         state.update { it.copy(isLoading = false) }
     }
 
-    fun updateInitialState(isUpdate: Boolean, updateId: Long, itemId: Long, crtnSize:Int) {
-        state.update { it.copy(
-            isUpdate = isUpdate,
-            updateId = updateId,
-            itemId = itemId,
-            mainItemCrtnSize = crtnSize,
-        ) }
+    fun updateInitialState(isUpdate: Boolean, updateId: Long, packageId: Long) {
+        state.update {
+            it.copy(
+                isUpdate = isUpdate,
+                updateId = updateId,
+                packageId = packageId,
+                packageName = if (packageId == 0L) "" else HP.getDropdownNameById(
+                    packageId,
+                    HP.packages
+                )
+            )
+        }
     }
 
+    private fun updateTotal() {
+        val qty = HP.getDoubleValue(state.value.qty)
+        val rate = HP.getDoubleValue(state.value.rate)
+
+        state.update {
+            it.copy(
+                total = (qty * rate).toString()
+            )
+        }
+    }
     // endregion
 }

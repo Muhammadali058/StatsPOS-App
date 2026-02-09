@@ -95,7 +95,8 @@ import kotlinx.serialization.modules.polymorphic
 private val items = listOf(
     TopItem("Purchase", TopRoutes.Purchase, R.drawable.purchase),
     TopItem("Categories", TopRoutes.Categories, R.drawable.categories),
-    TopItem("Packages", TopRoutes.Categories, R.drawable.package_icon),
+    TopItem("Packages", TopRoutes.Packages, R.drawable.package_icon),
+    TopItem("Purchase\nOrders", TopRoutes.PurchaseOrders, R.drawable.package_icon),
 )
 private val accounts = listOf(
     TopItem("Customers", TopRoutes.Categories, R.drawable.customer_accounts),

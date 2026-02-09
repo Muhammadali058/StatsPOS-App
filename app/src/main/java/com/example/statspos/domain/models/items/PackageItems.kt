@@ -12,4 +12,5 @@ data class PackageItems(
 
     // Extras not part of database
     var itemname: String? = null,
+    var total: Double? = null,
 )

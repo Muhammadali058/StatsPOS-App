@@ -7,4 +7,7 @@ data class Packages(
 
     val clientId:Int? = null,
     val branchId:Int? = null,
+
+    // Extras
+    val total: Double? = null,
 )

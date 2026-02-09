@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.items.categories
+package com.example.statspos.presentation.ui.screens.items.packages
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -29,7 +27,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.statspos.domain.models.items.Categories
+import com.example.statspos.domain.models.items.Packages
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.ErrorDialog
@@ -37,22 +35,22 @@ import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
-import com.example.statspos.presentation.ui.components.ListImageView
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.items.categories.CategoriesViewModel
+import com.example.statspos.presentation.viewmodels.items.packages.PackagesViewModel
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
 @Composable
-fun CategoriesBody(
+fun PackagesBody(
     sharedViewModel: SharedViewModel,
     onAddButtonClick: (Long, Boolean) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<CategoriesViewModel>()
+    val viewModel = hiltViewModel<PackagesViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -132,8 +130,8 @@ fun CategoriesBody(
                             viewModel.loadData()
                         },
                         items = state.list,
-                        onItemClick = { category ->
-                            onAddButtonClick(category.id!!, true)
+                        onItemClick = { packages ->
+                            onAddButtonClick(packages.id!!, true)
                         }
                     )
                 }
@@ -144,10 +142,10 @@ fun CategoriesBody(
                         .padding(8.dp)
                 ) {
                     HeadingMedium(
-                        text = "Total Categories: ",
+                        text = "Total Packages: ",
                     )
                     LabelMedium(
-                        text = state.totalCategories.toString(),
+                        text = state.totalPackages.toString(),
                     )
                 }
             }
@@ -185,8 +183,8 @@ private fun BodyList(
     modifier: Modifier = Modifier,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
-    items: List<Categories>,
-    onItemClick: (Categories) -> Unit,
+    items: List<Packages>,
+    onItemClick: (Packages) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -204,8 +202,8 @@ private fun BodyList(
 @Composable
 private fun ListCard(
     modifier: Modifier = Modifier,
-    item: Categories,
-    onItemClick: (Categories) -> Unit
+    item: Packages,
+    onItemClick: (Packages) -> Unit
 ) {
     ListCard(
         modifier = modifier
@@ -221,18 +219,16 @@ private fun ListCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Image
-            ListImageView(
-                imageUrl = item.imageUrl,
-                modifier = Modifier
-                    .size(60.dp),
-            ) {
-                Spacer(Modifier.width(8.dp))
-            }
-
             Column{
-                LabelLarge(item.categoryName.toString())
-
+                LabelLarge(item.packageName.toString())
+                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    HeadingMedium("Total: ")
+                    LabelMedium(HP.formatDecimal(item.total))
+                }
                 item.remarks?.let {
                     if (it.isNotEmpty()) {
                         Spacer(Modifier.height(2.dp))

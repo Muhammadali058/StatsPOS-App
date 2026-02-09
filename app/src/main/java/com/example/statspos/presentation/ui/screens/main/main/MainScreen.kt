@@ -22,7 +22,9 @@ import com.example.statspos.presentation.ui.screens.TopRoutes
 import com.example.statspos.presentation.ui.screens.items.AddUpdateItemScreen
 import com.example.statspos.presentation.ui.screens.items.categories.CategoriesScreen
 import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
+import com.example.statspos.presentation.ui.screens.items.packages.PackagesScreen
 import com.example.statspos.presentation.ui.screens.purchase.PurchaseScreen
+import com.example.statspos.presentation.ui.screens.purchase.purchase_orders.PurchaseOrdersScreen
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 
 @Composable
@@ -68,6 +70,22 @@ fun MainScreen() {
             }
             entry<TopRoutes.Categories> {
                 CategoriesScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<TopRoutes.Packages> {
+                PackagesScreen (
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<TopRoutes.PurchaseOrders> {
+                PurchaseOrdersScreen (
                     sharedViewModel = sharedViewModel,
                     onBack = {
                         backStack.removeLastOrNull()

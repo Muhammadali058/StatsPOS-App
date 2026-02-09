@@ -1,14 +1,11 @@
-package com.example.statspos.presentation.viewmodels.items
+package com.example.statspos.presentation.viewmodels.purchase.purchase_orders
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
-import com.example.statspos.domain.models.items.Categories
-import com.example.statspos.domain.repository.items.CategoriesRepository
-import com.example.statspos.domain.repository.main.MainRepository
+import com.example.statspos.domain.models.purchase.PurchaseOrders
+import com.example.statspos.domain.repository.purchase.PurchaseOrdersRepository
 import com.example.statspos.utils.HP
-import com.example.statspos.utils.HP.categories
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
@@ -21,20 +18,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import okhttp3.MultipartBody
 import javax.inject.Inject
 
 @HiltViewModel
-class AddUpdateCategoryViewModel @Inject constructor(
-    private val api: CategoriesRepository,
-    private val mainRepo: MainRepository,
+class AddUpdatePurchaseOrderViewModel @Inject constructor(
+    private val api: PurchaseOrdersRepository,
 ) : ViewModel() {
     // region ScreenState
     data class ScreenState(
         val id: Long = 0L,
-        val categoryName: String = "",
+        val purchaseOrderName: String = "",
         val remarks: String = "",
-        val imageUrl: String = "",
 
         // Extra
         val isUpdate: Boolean = false,
@@ -42,7 +36,6 @@ class AddUpdateCategoryViewModel @Inject constructor(
 
         val isLoading: Boolean = false,
         val isSaving: Boolean = false,
-        val isUploadingImage: Boolean = false,
         val message: String? = null,
         val error: String? = null,
     )
@@ -103,8 +96,8 @@ class AddUpdateCategoryViewModel @Inject constructor(
     // endregion
 
     // region onChangeMethods
-    fun onCategoryNameChange(value: String) {
-        state.update { it.copy(categoryName = value) }
+    fun onPurchaseOrderNameChange(value: String) {
+        state.update { it.copy(purchaseOrderName = value) }
     }
     fun onRemarksChange(value: String) {
         state.update { it.copy(remarks = value) }
@@ -125,13 +118,13 @@ class AddUpdateCategoryViewModel @Inject constructor(
 
             state.update { it.copy(isSaving = true) }
 
-            val category = getFormData()
+            val purchaseOrder = getFormData()
 
             val result = if (state.value.isUpdate) {
-                category.id = state.value.updateId
-                api.updateCategory(category)
+                purchaseOrder.id = state.value.updateId
+                api.updatePurchaseOrder(purchaseOrder)
             } else {
-                api.insertCategory(category)
+                api.insertPurchaseOrder(purchaseOrder)
             }
 
             state.update { it.copy(isSaving = false) }
@@ -140,7 +133,7 @@ class AddUpdateCategoryViewModel @Inject constructor(
                 is Resource.Error -> showError(result.error)
                 is Resource.Information -> showMessage(result.message)
                 is Resource.Success -> {
-                    HP.categories = Gson().getListOf<DropdownItem>(result.data.get("categories").asJsonArray)
+                    HP.purchaseOrders = Gson().getListOf<DropdownItem>(result.data.get("purchaseOrders").asJsonArray)
                     clearTextboxes()
                     onSuccess()
                 }
@@ -158,13 +151,13 @@ class AddUpdateCategoryViewModel @Inject constructor(
 
             beforeRequest()
 
-            when (val result = api.deleteCategory(id)) {
+            when (val result = api.deletePurchaseOrder(id)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
 
-                    HP.categories = Gson().getListOf<DropdownItem>(result.data.get("categories").asJsonArray)
+                    HP.purchaseOrders = Gson().getListOf<DropdownItem>(result.data.get("purchaseOrders").asJsonArray)
                     onSuccess()
                 }
             }
@@ -178,46 +171,13 @@ class AddUpdateCategoryViewModel @Inject constructor(
 
             beforeRequest()
 
-            when (val result = api.getCategory(id)) {
+            when (val result = api.getPurchaseOrder(id)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
-                    val category = Gson().get<Categories>(result.data.asJsonObject)
-                    setFormData(category)
-                }
-            }
-        }
-    }
-
-    fun uploadImage(multipart: MultipartBody.Part) {
-        viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
-
-            if (state.value.isSaving)
-                return@launch
-
-            if (state.value.isUploadingImage)
-                return@launch
-
-            state.update { it.copy(isUploadingImage = true) }
-
-            when (val result = mainRepo.uploadImage(multipart)) {
-                is Resource.Error -> {
-                    state.update { it.copy(isUploadingImage = false) }
-                    showError(result.error)
-                }
-                is Resource.Information -> {
-                    state.update { it.copy(isUploadingImage = false) }
-                    showMessage(result.message)
-                }
-                is Resource.Success -> {
-                    val fileName = result.data.asJsonObject.get("fileName").asString
-                    state.update { it.copy(
-                        isUploadingImage = false,
-                        imageUrl = fileName,
-                    ) }
+                    val purchaseOrder = Gson().get<PurchaseOrders>(result.data.asJsonObject)
+                    setFormData(purchaseOrder)
                 }
             }
         }
@@ -225,20 +185,18 @@ class AddUpdateCategoryViewModel @Inject constructor(
     // endregion
 
     // region Methods
-    private fun getFormData(): Categories {
-        return Categories(
-            categoryName = state.value.categoryName,
+    private fun getFormData(): PurchaseOrders {
+        return PurchaseOrders(
+            purchaseOrderName = state.value.purchaseOrderName,
             remarks = state.value.remarks,
-            imageUrl = state.value.imageUrl,
         )
     }
 
-    private fun setFormData(category: Categories) {
+    private fun setFormData(purchaseOrder: PurchaseOrders) {
         state.update {
             it.copy(
-                categoryName =  category.categoryName.toString(),
-                remarks =  category.remarks.toString(),
-                imageUrl = category.imageUrl!!,
+                purchaseOrderName =  purchaseOrder.purchaseOrderName.toString(),
+                remarks =  purchaseOrder.remarks.toString(),
             )
         }
     }
@@ -246,9 +204,8 @@ class AddUpdateCategoryViewModel @Inject constructor(
     private fun clearTextboxes() {
         state.update {
             it.copy(
-                categoryName = "",
+                purchaseOrderName = "",
                 remarks = "",
-                imageUrl = "",
 
                 isUpdate = false,
                 updateId = 0L,
@@ -257,8 +214,8 @@ class AddUpdateCategoryViewModel @Inject constructor(
     }
 
     private fun isValid(): Boolean {
-        if (state.value.categoryName.isEmpty()) {
-            showMessage("Please enter category name")
+        if (state.value.purchaseOrderName.isEmpty()) {
+            showMessage("Please enter order name")
             return false
         }
 

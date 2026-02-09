@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
@@ -81,6 +82,8 @@ fun Dropdown(
         bottom = 10.dp
     ),
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     // First time to add None in items list
     val itemsWithNone by remember(items) {
         derivedStateOf {
@@ -131,7 +134,8 @@ fun Dropdown(
                 IconButton(
                     onClick = {
                         expanded = !expanded
-                    }
+                    },
+                    enabled = enabled,
                 ) {
                     AppIcon(
                         icon = Icons.Default.ArrowDropDown
@@ -143,7 +147,8 @@ fun Dropdown(
                     onClick = {
                         onValueChange("")
                         onItemSelected(DropdownItem(0L,"None"))
-                    }
+                    },
+                    enabled = enabled,
                 ) {
                     AppIcon(
                         icon = Icons.Default.Clear,
@@ -192,6 +197,7 @@ fun Dropdown(
                                         onValueChange(item.name)
                                         expanded = false
                                         onItemSelected(item)
+                                        keyboardController?.hide()
                                     }
                                     .padding(8.dp)
                             )
@@ -231,6 +237,8 @@ fun SubDropdown(
         bottom = 10.dp
     ),
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     // First time to add None in items list
     val itemsWithNone by remember(items) {
         derivedStateOf {
@@ -300,7 +308,8 @@ fun SubDropdown(
                 IconButton(
                     onClick = {
                         expanded = !expanded
-                    }
+                    },
+                    enabled = enabled,
                 ) {
                     AppIcon(
                         icon = Icons.Default.ArrowDropDown
@@ -312,7 +321,8 @@ fun SubDropdown(
                     onClick = {
                         onValueChange("")
                         onItemSelected(DropdownItem(0L, "None"))
-                    }
+                    },
+                    enabled = enabled,
                 ) {
                     AppIcon(
                         icon = Icons.Default.Clear,
@@ -360,6 +370,7 @@ fun SubDropdown(
                                         onValueChange(item.name)
                                         expanded = false
                                         onItemSelected(item)
+                                        keyboardController?.hide()
                                     }
                                     .padding(8.dp)
                             )
@@ -379,10 +390,24 @@ fun ComboBox(
     selectedItem: DropdownItem?,
     onItemSelected: (DropdownItem) -> Unit,
     listSize: Dp = 200.dp,
+    addNone: Boolean = false,
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     shape: Shape = OutlinedTextFieldDefaults.shape,
 ) {
+    val itemsWithNone by remember(items) {
+        derivedStateOf {
+            if(addNone) {
+                if (items.any { it.id == 0L }) {
+                    items
+                } else {
+                    listOf(DropdownItem(0L, "None")) + items
+                }
+            }else
+                items
+        }
+    }
+
     var expanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
@@ -413,7 +438,7 @@ fun ComboBox(
                 IconButton(
                     onClick = {
                         expanded = false
-                        onItemSelected(items[0])
+                        onItemSelected(itemsWithNone[0])
                     }
                 ) {
                     AppIcon(
@@ -431,7 +456,7 @@ fun ComboBox(
                 .background(MaterialTheme.colorScheme.primaryContainer)
                 .heightIn(max = listSize)
         ) {
-            items.forEach { item ->
+            itemsWithNone.forEach { item ->
                 DropdownMenuItem(
                     modifier = Modifier.height(34.dp),
                     text = {

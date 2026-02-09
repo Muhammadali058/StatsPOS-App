@@ -41,6 +41,7 @@ object HP {
     var categories = emptyList<DropdownItem>()
     var subCategories = emptyList<DropdownItem>()
     var packages = emptyList<DropdownItem>()
+    var purchaseOrders = emptyList<DropdownItem>()
     var customers = emptyList<DropdownItem>()
     var vendors = emptyList<DropdownItem>()
     var suppliers = emptyList<DropdownItem>()
@@ -94,6 +95,7 @@ object HP {
             )
         }
         packages = Gson().getListOf<DropdownItem>(jsonObject.get("packages").asJsonArray)
+        purchaseOrders = Gson().getListOf<DropdownItem>(jsonObject.get("purchaseOrders").asJsonArray)
         customers = Gson().getListOf<DropdownItem>(jsonObject.get("customers").asJsonArray)
         vendors = Gson().getListOf<DropdownItem>(jsonObject.get("vendors").asJsonArray)
         suppliers = Gson().getListOf<DropdownItem>(jsonObject.get("suppliers").asJsonArray)
@@ -133,7 +135,7 @@ object HP {
         return DB.HOST + clientId.toString() + "/images/" + imageUrl
     }
 
-    fun formatRate(rate: Double?, numberOfDecimals: Int = 2): String {
+    fun formatDecimal(rate: Double?, numberOfDecimals: Int = 2): String {
         if (rate == null) {
             return ""
         }

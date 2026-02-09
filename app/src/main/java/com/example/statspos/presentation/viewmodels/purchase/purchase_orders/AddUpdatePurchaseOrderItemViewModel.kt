@@ -1,11 +1,12 @@
-package com.example.statspos.presentation.viewmodels.items
+package com.example.statspos.presentation.viewmodels.purchase.purchase_orders
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.items.Items
-import com.example.statspos.domain.models.items.LinkedItems
+import com.example.statspos.domain.models.purchase.PurchaseOrderItems
 import com.example.statspos.domain.repository.items.ItemsRepository
-import com.example.statspos.domain.repository.items.LinkedItemsRepository
+import com.example.statspos.domain.repository.purchase.PurchaseOrderItemsRepository
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
@@ -20,33 +21,26 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AddUpdateLinkedItemViewModel @Inject constructor(
-    private val api: LinkedItemsRepository,
+class AddUpdatePurchaseOrderItemViewModel @Inject constructor(
+    private val api: PurchaseOrderItemsRepository,
     private val itemsRepo: ItemsRepository,
 ) : ViewModel() {
     // region ScreenState
     data class ScreenState(
         val id: Long = 0L,
+        val purchaseOrderId: Long = 0L,
         val itemId: Long = 0L,
-        val linkedItemId: Long = 0L,
 
-        val mainItemCrtnSize: Int = 0,
-
-        val updateCost: Boolean = false,
-        val updateRetail: Boolean = false,
-        val updateWholesale: Boolean = false,
-        val updateCrtnRate: Boolean = false,
-        val updateMarketPrice: Boolean = true,
-        val updateExpiry: Boolean = true,
-        val rateFormula: String = "",
-
-        val costCheckboxEnabled: Boolean = false,
-        val retailCheckboxEnabled: Boolean = false,
-        val wholesaleCheckboxEnabled: Boolean = false,
-        val crtnRateCheckboxEnabled: Boolean = false,
+        val qty: String = "",
+        val crtn: String = "",
+        val cost: String = "",
+        val total: String = "",
 
         // Extra
+        val purchaseOrderName: String = "",
         val itemname: String = "",
+        val crtnSize: Int = 0,
+
         val isUpdate: Boolean = false,
         val updateId: Long = 0L,
 
@@ -112,32 +106,36 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
     // endregion
 
     // region onChangeMethods
-    fun onUpdateCostChange(value: Boolean) {
-        state.update { it.copy(updateCost = value) }
-    }
-    fun onUpdateRetailChange(value: Boolean) {
-        state.update { it.copy(updateRetail = value) }
-    }
-    fun onUpdateWholesaleChange(value: Boolean) {
-        state.update { it.copy(updateWholesale = value) }
-    }
-    fun onUpdateCrtnRateChange(value: Boolean) {
-        state.update { it.copy(updateCrtnRate = value) }
-    }
-    fun onUpdateMarketPriceChange(value: Boolean) {
-        state.update { it.copy(updateMarketPrice = value) }
-    }
-    fun onUpdateExpiryChange(value: Boolean) {
-        state.update { it.copy(updateExpiry = value) }
-    }
-    fun onRateFormulaChange(value: String) {
-        state.update { it.copy(rateFormula = value) }
-    }
     fun onItemnameChange(value: String) {
-        state.update { it.copy(
-            itemname = value,
-            linkedItemId = 0L,
-        ) }
+        state.update {
+            it.copy(
+                itemname = value,
+                itemId = 0L,
+            )
+        }
+    }
+
+    fun onPurchaseOrderNameChange(value: String) {
+        state.update { it.copy(purchaseOrderName = value) }
+    }
+
+    fun onPurchaseOrderIdChange(value: Long) {
+        state.update { it.copy(purchaseOrderId = value) }
+    }
+
+    fun onQtyChange(value: String) {
+        state.update { it.copy(qty = value) }
+        updateTotal()
+    }
+
+    fun onCrtnChange(value: String) {
+        state.update { it.copy(crtn = value) }
+        updateTotal()
+    }
+
+    fun onCostChange(value: String) {
+        state.update { it.copy(cost = value) }
+        updateTotal()
     }
     // endregion
 
@@ -155,13 +153,13 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
 
             state.update { it.copy(isSaving = true) }
 
-            val linkedItem = getFormData()
+            val purchaseOrderItem = getFormData()
 
             val result = if (state.value.isUpdate) {
-                linkedItem.id = state.value.updateId
-                api.updateLinkedItem(linkedItem)
+                purchaseOrderItem.id = state.value.updateId
+                api.updatePurchaseOrderItem(purchaseOrderItem)
             } else {
-                api.insertLinkedItem(linkedItem)
+                api.insertPurchaseOrderItem(purchaseOrderItem)
             }
 
             state.update { it.copy(isSaving = false) }
@@ -187,7 +185,7 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
 
             beforeRequest()
 
-            when (val result = api.deleteLinkedItem(id)) {
+            when (val result = api.deletePurchaseOrderItem(id)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
@@ -206,13 +204,14 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
 
             beforeRequest()
 
-            when (val result = api.getLinkedItem(id)) {
+            when (val result = api.getPurchaseOrderItem(id)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
-                    val linkedItem = Gson().get<LinkedItems>(result.data.asJsonObject)
-                    setFormData(linkedItem)
+                    val purchaseOrderItem = Gson().get<PurchaseOrderItems>(result.data.asJsonObject)
+                    setFormData(purchaseOrderItem)
+                    updateTotal()
                 }
             }
         }
@@ -239,16 +238,15 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
                         state.update {
                             it.copy(
                                 itemname = item.itemname!!,
-                                linkedItemId = item.id!!,
+                                itemId = item.id!!,
+                                cost = if (item.lastCost == 0.0) item.cost.toString() else item.lastCost.toString(),
+                                crtnSize = item.crtnSize!!,
                             )
                         }
-
-                        disableAllCheckboxes()
-                        enableOrDisableCheckboxes(item.crtnSize!!)
                     } else {
                         state.update {
                             it.copy(
-                                linkedItemId = 0L,
+                                itemId = 0L,
                             )
                         }
                         showSnackbar("Items not found")
@@ -260,36 +258,30 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
     // endregion
 
     // region Methods
-    private fun getFormData(): LinkedItems {
-        return LinkedItems(
+    private fun getFormData(): PurchaseOrderItems {
+        return PurchaseOrderItems(
+            purchaseOrderId = state.value.purchaseOrderId,
             itemId = state.value.itemId,
-            linkedItemId = state.value.linkedItemId,
 
-            updateCost = state.value.updateCost,
-            updateRetail = state.value.updateRetail,
-            updateWholesale = state.value.updateWholesale,
-            updateCrtnRate = state.value.updateCrtnRate,
-            updateMarketPrice = state.value.updateMarketPrice,
-            updateExpiry = state.value.updateExpiry,
-            rateFormula = state.value.rateFormula,
+            qty = HP.getDoubleValue(state.value.qty),
+            crtn = HP.getIntValue(state.value.crtn),
+            cost = HP.getDoubleValue(state.value.cost),
+            total = HP.getDoubleValue(state.value.total),
         )
     }
 
-    private fun setFormData(linkedItem: LinkedItems) {
-        enableOrDisableCheckboxes(linkedItem.crtnSize!!)
-
+    private fun setFormData(purchaseOrderItem: PurchaseOrderItems) {
         state.update {
             it.copy(
-                itemname =  linkedItem.itemname!!,
-                linkedItemId = linkedItem.linkedItemId!!,
+                itemname = purchaseOrderItem.itemname!!,
+                itemId = purchaseOrderItem.itemId!!,
 
-                updateCost = linkedItem.updateCost!!,
-                updateRetail = linkedItem.updateRetail!!,
-                updateWholesale = linkedItem.updateWholesale!!,
-                updateCrtnRate = linkedItem.updateCrtnRate!!,
-                updateMarketPrice = linkedItem.updateMarketPrice!!,
-                updateExpiry = linkedItem.updateExpiry!!,
-                rateFormula = linkedItem.rateFormula!!,
+                qty = purchaseOrderItem.qty.toString(),
+                crtn = purchaseOrderItem.crtn.toString(),
+                cost = purchaseOrderItem.cost.toString(),
+                total = purchaseOrderItem.total.toString(),
+
+                crtnSize = purchaseOrderItem.crtnSize!!,
             )
         }
     }
@@ -298,105 +290,36 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
         state.update {
             it.copy(
                 itemname = "",
-                linkedItemId = 0L,
-
-                updateCost =  false,
-                updateRetail =  false,
-                updateWholesale =  false,
-                updateCrtnRate =  false,
-                updateMarketPrice =  true,
-                updateExpiry =  true,
-                rateFormula =  "",
+                itemId = 0L,
+                qty = "",
+                crtn = "",
+                cost = "",
+                total = "",
 
                 isUpdate = false,
                 updateId = 0L,
             )
         }
-
-        disableAllCheckboxes()
     }
 
     private fun isValid(): Boolean {
-        if (state.value.linkedItemId == 0L) {
+        if (state.value.itemId == 0L) {
             showMessage("Please select item")
+            return false
+        }
+
+        if (HP.getDoubleValue(state.value.qty) == 0.0 && HP.getIntValue(state.value.crtn) == 0) {
+            showMessage("Please enter quantity")
+            return false
+        }
+
+        if (HP.getDoubleValue(state.value.cost) == 0.0) {
+            showMessage("Please enter cost")
             return false
         }
 
         return true
     }
-
-    private fun disableAllCheckboxes(){
-        state.update {
-            it.copy(
-                costCheckboxEnabled = false,
-                retailCheckboxEnabled = false,
-                wholesaleCheckboxEnabled = false,
-                crtnRateCheckboxEnabled = false,
-            )
-        }
-    }
-
-    private fun enableOrDisableCheckboxes(crtnSize:Int){
-        if (crtnSize == 0)
-        {
-            if (state.value.mainItemCrtnSize == 0 || state.value.mainItemCrtnSize > 1)
-            {
-                state.update {
-                    it.copy(
-                        costCheckboxEnabled = true,
-                        retailCheckboxEnabled = true,
-                        wholesaleCheckboxEnabled = true,
-
-                        updateCost = true,
-                        updateRetail = true,
-                        updateWholesale = true,
-                    )
-                }
-            }
-        }
-        else if (crtnSize == 1)
-        {
-            if (state.value.mainItemCrtnSize == 1 || state.value.mainItemCrtnSize > 1)
-            {
-                state.update {
-                    it.copy(
-                        crtnRateCheckboxEnabled = true,
-                        updateCrtnRate = true,
-                    )
-                }
-            }
-
-            if (state.value.mainItemCrtnSize == 1)
-            {
-                state.update {
-                    it.copy(
-                        costCheckboxEnabled = true,
-                        updateCost = true,
-                    )
-                }
-            }
-        }
-        else if (crtnSize > 1)
-        {
-            if (state.value.mainItemCrtnSize > 1)
-            {
-                state.update {
-                    it.copy(
-                        costCheckboxEnabled = true,
-                        retailCheckboxEnabled = true,
-                        wholesaleCheckboxEnabled = true,
-                        crtnRateCheckboxEnabled = true,
-
-                        updateCost = true,
-                        updateRetail = true,
-                        updateWholesale = true,
-                        updateCrtnRate = true,
-                    )
-                }
-            }
-        }
-    }
-
     // endregion
 
     // region Others
@@ -414,14 +337,31 @@ class AddUpdateLinkedItemViewModel @Inject constructor(
         state.update { it.copy(isLoading = false) }
     }
 
-    fun updateInitialState(isUpdate: Boolean, updateId: Long, itemId: Long, crtnSize:Int) {
-        state.update { it.copy(
-            isUpdate = isUpdate,
-            updateId = updateId,
-            itemId = itemId,
-            mainItemCrtnSize = crtnSize,
-        ) }
+    fun updateInitialState(isUpdate: Boolean, updateId: Long, purchaseOrderId: Long) {
+        state.update {
+            it.copy(
+                isUpdate = isUpdate,
+                updateId = updateId,
+                purchaseOrderId = purchaseOrderId,
+                purchaseOrderName = if (purchaseOrderId == 0L) "" else HP.getDropdownNameById(
+                    purchaseOrderId,
+                    HP.purchaseOrders
+                )
+            )
+        }
     }
 
+    private fun updateTotal() {
+        val qty = HP.getDoubleValue(state.value.qty)
+        val crtn = HP.getIntValue(state.value.crtn)
+        val cost = HP.getDoubleValue(state.value.cost)
+
+        val total = cost * (qty + (crtn * state.value.crtnSize))
+        state.update {
+            it.copy(
+                total = total.toString()
+            )
+        }
+    }
     // endregion
 }

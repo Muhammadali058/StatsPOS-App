@@ -1,9 +1,8 @@
-package com.example.statspos.presentation.viewmodels.items
+package com.example.statspos.presentation.viewmodels.items.categories
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.items.Categories
-import com.example.statspos.domain.models.items.SubCategories
 import com.example.statspos.domain.repository.items.CategoriesRepository
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
@@ -20,18 +19,16 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SubCategoriesViewModel @Inject constructor(
+class CategoriesViewModel @Inject constructor(
     private val api: CategoriesRepository
 ) : ViewModel() {
 
     // region ScreenState
     data class ScreenState(
-        val list: List<SubCategories> = emptyList(),
-        val totalSubCategories: Int = 0,
+        val list: List<Categories> = emptyList(),
+        val totalCategories: Int = 0,
 
         val search: String = "",
-        val categoryName: String = "",
-        val categoryId: Long = 0L,
 
         val isLoading: Boolean = false,
         val error: String? = null,
@@ -104,12 +101,6 @@ class SubCategoriesViewModel @Inject constructor(
     fun onSearchChange(value: String) {
         state.update { it.copy(search = value) }
     }
-    fun onCategoryNameChange(value: String) {
-        state.update { it.copy(categoryName = value) }
-    }
-    fun onCategoryIdChange(value: Long) {
-        state.update { it.copy(categoryId = value) }
-    }
     // endregion
 
     // region Network calls
@@ -121,24 +112,23 @@ class SubCategoriesViewModel @Inject constructor(
             beforeRequest()
 
             val params = JsonObject().apply {
-                addProperty("categoryId", state.value.categoryId)
                 addProperty("text", state.value.search)
             }
 
-            when (val result = api.loadSubCategories(params)) {
+            when (val result = api.loadCategories(params)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
 
                     val resultTotal =
-                        result.data.get("total").asJsonObject.get("totalSubCategories").asInt
+                        result.data.get("total").asJsonObject.get("totalCategories").asInt
                     val resultList =
-                        Gson().getListOf<SubCategories>(result.data.get("rows").asJsonArray)
+                        Gson().getListOf<Categories>(result.data.get("rows").asJsonArray)
                     state.update {
                         it.copy(
                             list = resultList,
-                            totalSubCategories = resultTotal,
+                            totalCategories = resultTotal,
                         )
                     }
                 }

@@ -1,7 +1,6 @@
 package com.example.statspos.presentation.ui.screens.items.categories
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,14 +30,12 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.statspos.domain.models.items.Categories
 import com.example.statspos.domain.models.items.SubCategories
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
-import com.example.statspos.presentation.ui.components.ImageView
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
@@ -47,8 +44,7 @@ import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.items.CategoriesViewModel
-import com.example.statspos.presentation.viewmodels.items.SubCategoriesViewModel
+import com.example.statspos.presentation.viewmodels.items.categories.SubCategoriesViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
@@ -100,7 +96,11 @@ fun SubCategoriesBody(
         },
         floatingActionButton = {
             AppFloatingActionButton {
-                onAddButtonClick(0L, false, state.categoryId)
+                if(state.categoryId == 0L){
+                    viewModel.onEvent(UiEvent.ShowSnackbar("Please select category"))
+                }else {
+                    onAddButtonClick(0L, false, state.categoryId)
+                }
             }
         },
     ) { innerPadding ->

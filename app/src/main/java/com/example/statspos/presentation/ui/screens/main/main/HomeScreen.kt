@@ -99,11 +99,11 @@ private val items = listOf(
     TopItem("Purchase\nOrders", TopRoutes.PurchaseOrders, R.drawable.package_icon),
 )
 private val accounts = listOf(
-    TopItem("Customers", TopRoutes.Categories, R.drawable.customer_accounts),
-    TopItem("Vendors", TopRoutes.Categories, R.drawable.vendor_accounts),
-    TopItem("Suppliers", TopRoutes.Categories, R.drawable.customer_accounts),
-    TopItem("Banks", TopRoutes.Categories, R.drawable.bank_accounts),
-    TopItem("Expenses", TopRoutes.Categories, R.drawable.expense_accounts),
+    TopItem("Customers", TopRoutes.Customers, R.drawable.customer_accounts),
+    TopItem("Vendors", TopRoutes.Vendors, R.drawable.vendor_accounts),
+    TopItem("Suppliers", TopRoutes.Suppliers, R.drawable.customer_accounts),
+    TopItem("Banks", TopRoutes.Banks, R.drawable.bank_accounts),
+    TopItem("Expenses", TopRoutes.Expenses, R.drawable.expense_accounts),
 )
 private val entries = listOf(
     TopItem("Receipt", TopRoutes.Categories),

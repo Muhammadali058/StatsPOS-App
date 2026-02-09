@@ -19,6 +19,8 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.presentation.ui.screens.TopRoutes
+import com.example.statspos.presentation.ui.screens.accounts.banks.BanksScreen
+import com.example.statspos.presentation.ui.screens.accounts.expenses.ExpensesScreen
 import com.example.statspos.presentation.ui.screens.items.AddUpdateItemScreen
 import com.example.statspos.presentation.ui.screens.items.categories.CategoriesScreen
 import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
@@ -52,7 +54,7 @@ fun MainScreen() {
         entryProvider = entryProvider {
             entry<TopRoutes.Home> {
                 HomeScreen(
-                    sharedViewModel= sharedViewModel,
+                    sharedViewModel = sharedViewModel,
                     onTopRouteClick = { key ->
                         navigate(key)
                     }
@@ -60,7 +62,7 @@ fun MainScreen() {
             }
             entry<TopRoutes.AddUpdateItem> { key ->
                 AddUpdateItemScreen(
-                    sharedViewModel= sharedViewModel,
+                    sharedViewModel = sharedViewModel,
                     updateId = key.updateId,
                     isUpdate = key.isUpdate,
                     onBack = {
@@ -77,7 +79,7 @@ fun MainScreen() {
                 )
             }
             entry<TopRoutes.Packages> {
-                PackagesScreen (
+                PackagesScreen(
                     sharedViewModel = sharedViewModel,
                     onBack = {
                         backStack.removeLastOrNull()
@@ -85,7 +87,7 @@ fun MainScreen() {
                 )
             }
             entry<TopRoutes.PurchaseOrders> {
-                PurchaseOrdersScreen (
+                PurchaseOrdersScreen(
                     sharedViewModel = sharedViewModel,
                     onBack = {
                         backStack.removeLastOrNull()
@@ -94,6 +96,54 @@ fun MainScreen() {
             }
             entry<TopRoutes.Purchase> {
                 PurchaseScreen()
+            }
+
+//            Accounts
+            entry<TopRoutes.Customers> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Blue),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Customers")
+                }
+            }
+            entry<TopRoutes.Vendors> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Blue),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Vendors")
+                }
+            }
+            entry<TopRoutes.Suppliers> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Blue),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Suppliers")
+                }
+            }
+            entry<TopRoutes.Expenses> {
+                ExpensesScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<TopRoutes.Banks> {
+                BanksScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
             }
             entry<TopRoutes.AddSales> {
                 Box(

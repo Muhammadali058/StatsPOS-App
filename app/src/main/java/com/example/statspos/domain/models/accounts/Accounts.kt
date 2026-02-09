@@ -39,4 +39,6 @@ data class Accounts(
 
     // Extras not part of database
     var openingBalance: Double? = null,
+    var subExpenseName: String? = null,
+    var subBankName: String? = null,
 )

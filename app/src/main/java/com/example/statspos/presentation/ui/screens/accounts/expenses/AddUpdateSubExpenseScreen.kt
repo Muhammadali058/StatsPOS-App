@@ -1,23 +1,17 @@
-package com.example.statspos.presentation.ui.screens.items.packages
+package com.example.statspos.presentation.ui.screens.accounts.expenses
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -34,43 +28,35 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.statspos.R
-import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.components.AppIcon
-import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
-import com.example.statspos.presentation.ui.components.AutoCompleteItemsTextbox
-import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
 import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
+import com.example.statspos.presentation.ui.components.PasswordDialog
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.items.packages.AddUpdatePackageItemViewModel
+import com.example.statspos.presentation.viewmodels.accounts.expenses.AddUpdateSubExpenseViewModel
 import com.example.statspos.utils.HP
+import com.example.statspos.utils.PasswordFor
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import com.example.statspos.utils.showToast
 
 @Composable
-fun AddUpdatePackageItemScreen(
+fun AddUpdateSubExpenseScreen(
     sharedViewModel: SharedViewModel,
     updateId: Long = 0,
     isUpdate: Boolean = false,
-    packageId: Long = 0,
-    onSearchItemClick: () -> Unit,
+    expenseId: Long = 0,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -80,14 +66,13 @@ fun AddUpdatePackageItemScreen(
         onBack()
     }
 
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<AddUpdatePackageItemViewModel>()
+    val viewModel = hiltViewModel<AddUpdateSubExpenseViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
-    var showBarcodeScanner by remember { mutableStateOf(false) }
+    var showPasswordDialog by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
     LaunchedEffect(event) {
@@ -107,24 +92,12 @@ fun AddUpdatePackageItemScreen(
         viewModel.updateInitialState(
             isUpdate = isUpdate,
             updateId = updateId,
-            packageId = packageId,
+            expenseId = expenseId,
         )
 
         if (isUpdate && !hasLoadedOnce) {
             hasLoadedOnce = true
             viewModel.editData(updateId)
-        }
-    }
-
-    val sharedViewModelState by sharedViewModel.state.collectAsStateWithLifecycle()
-    LaunchedEffect(sharedViewModelState.dataChanged) {
-        if (sharedViewModelState.dataChanged) {
-            val item = sharedViewModelState.item
-            item?.run {
-                viewModel.onItemnameChange(itemname!!)
-                viewModel.getItem(itemname!!)
-                sharedViewModel.consumeDataChanged()
-            }
         }
     }
 
@@ -139,29 +112,32 @@ fun AddUpdatePackageItemScreen(
 
     if (showDeleteDialog) {
         ConfirmDialog(
-            text = "Are you sure to delete this package item",
+            text = "Are you sure to delete this sub-expense",
             onDismiss = {
                 showDeleteDialog = false
             },
             onConfirm = {
                 showDeleteDialog = false
                 viewModel.deleteData(updateId) {
-                    context.showToast("Package item deleted successfully")
+                    context.showToast("Sub-Expense deleted successfully")
                     goBackWithResult()
                 }
             }
         )
     }
 
-    if (showBarcodeScanner) {
-        BarcodeScannerDialog(
+    if (showPasswordDialog) {
+        PasswordDialog(
+            passwordFor = PasswordFor.DELETE_ACCOUNT,
             onDismiss = {
-                showBarcodeScanner = false
+                showPasswordDialog = false
             },
-            onScanned = {
-                viewModel.onItemnameChange(it)
-                viewModel.getItem(it)
-                showBarcodeScanner = false
+            onConfirm = {
+                showPasswordDialog = false
+                viewModel.deleteData(updateId) {
+                    context.showToast("Sub-Expense deleted successfully")
+                    goBackWithResult()
+                }
             }
         )
     }
@@ -179,12 +155,16 @@ fun AddUpdatePackageItemScreen(
                 onNavigationClick = {
                     onBack()
                 },
-                title = if (isUpdate) "Update Package Item" else "Add Package Item",
+                title = if (isUpdate) "Update Sub-Expense" else "Add Sub-Expense",
                 actions = {
                     Row {
                         if (isUpdate && HP.userRights.deleteAnything == true) {
                             IconButton(onClick = {
-                                showDeleteDialog = true
+                                if (HP.passwords.useDeleteAccount == true) {
+                                    showPasswordDialog = true
+                                } else {
+                                    showDeleteDialog = true
+                                }
                             }) {
                                 AppIcon(
                                     icon = Icons.Default.Delete,
@@ -204,7 +184,7 @@ fun AddUpdatePackageItemScreen(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(ConstantPaddings.BODY_HORIZONTAL)
                 .padding(vertical = 16.dp)
-        ){
+        ) {
             Column(
                 Modifier
                     .fillMaxSize(),
@@ -218,46 +198,24 @@ fun AddUpdatePackageItemScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Dropdown(
-                        value = state.packageName,
-                        onValueChange = viewModel::onPackageNameChange,
-                        items = HP.packages,
+                        value = state.expenseName,
+                        onValueChange = viewModel::onExpenseNameChange,
+                        items = HP.expenses,
                         onItemSelected = { dropdownItem ->
-                            viewModel.onPackageIdChange(dropdownItem.id)
+                            viewModel.onExpenseIdChange(dropdownItem.id)
                         },
                         label = {
-                            Text("Package")
+                            Text("Expense")
                         },
                         enabled = false,
                     )
-                    ItemnameBox(
-                        value = state.itemname,
-                        onValueChange = viewModel::onItemnameChange,
-                        onItemSelected = {
-                            viewModel.getItem(it)
-                            keyboardController?.hide()
-                        },
-                        onSearchClick = {
-                            viewModel.getItem(it)
-                            keyboardController?.hide()
-                        },
-                        onEndIconClick = {
-                            viewModel.onItemnameChange("")
-                        },
-                        onBarcodeClick = {
-                            showBarcodeScanner = true
-                        },
-                        onSearchItemClick = onSearchItemClick
-                    )
                     Body(
-                        qty = state.qty,
-                        rate = state.rate,
-                        total = state.total,
-                        onQtyChange = viewModel::onQtyChange,
-                        onRateChange = viewModel::onRateChange,
+                        subExpenseName = state.subExpenseName,
+                        onSubExpenseNameChange = viewModel::onSubExpenseNameChange,
                     )
                 }
 
-                Box{
+                Box {
                     if (state.isSaving) {
                         AppCircularProgressIndicator()
                     } else {
@@ -279,113 +237,22 @@ fun AddUpdatePackageItemScreen(
 }
 
 @Composable
-private fun ItemnameBox(
-    value: String,
-    onValueChange: (String) -> Unit,
-    onItemSelected: (String) -> Unit,
-    onSearchClick: (String) -> Unit,
-    onEndIconClick: (String) -> Unit,
-    onBarcodeClick: () -> Unit,
-    onSearchItemClick: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        AutoCompleteItemsTextbox(
-            modifier = Modifier
-                .weight(1f),
-            value = value,
-            onValueChange = onValueChange,
-            onItemSelected = onItemSelected,
-            onEndIconClick = onEndIconClick,
-            onSearchClick = onSearchClick,
-            label = {
-                Text(
-                    text = "Select Item"
-                )
-            },
-            trailingIcon = {
-                IconButton(onClick = {
-                    onEndIconClick(value)
-                }) {
-                    AppIcon(
-                        icon = Icons.Default.Clear,
-                        size = 20.dp
-                    )
-                }
-            },
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Go
-            )
-        )
-        Spacer(Modifier.width(4.dp))
-        AppIconButton(
-            onClick = {
-                onBarcodeClick()
-            },
-            icon = R.drawable.ic_barcode,
-            buttonSize = 32.dp,
-            size = 26.dp
-        )
-        Spacer(Modifier.width(4.dp))
-        AppIconButton(
-            onClick = {
-                onSearchItemClick()
-            },
-            icon = Icons.Default.Search,
-            buttonSize = 32.dp,
-            size = 26.dp
-        )
-    }
-}
-
-@Composable
 private fun Body(
-    qty: String,
-    rate: String,
-    total: String,
-    onQtyChange: (String) -> Unit,
-    onRateChange: (String) -> Unit,
+    subExpenseName: String,
+    onSubExpenseNameChange: (String) -> Unit,
 ) {
-    Row{
-        Textbox(
-            value = qty,
-            onValueChange = onQtyChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            label = {
-                Text("Qty")
-            },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Decimal
-            ),
-        )
-        Spacer(Modifier.width(8.dp))
-        Textbox(
-            value = rate,
-            onValueChange = onRateChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            label = {
-                Text("Rate")
-            },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Decimal
-            ),
-        )
-    }
-    Textbox(
-        value = total,
-        onValueChange = { },
+    Column(
         modifier = Modifier
             .fillMaxWidth(),
-        label = {
-            Text("Total")
-        },
-        readOnly = true,
-    )
+    ) {
+        Textbox(
+            modifier = Modifier
+                .fillMaxWidth(),
+            value = subExpenseName,
+            onValueChange = onSubExpenseNameChange,
+            label = {
+                Text("Sub-Expense Name")
+            }
+        )
+    }
 }

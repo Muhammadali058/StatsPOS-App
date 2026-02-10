@@ -19,11 +19,14 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.presentation.ui.screens.TopRoutes
+import com.example.statspos.presentation.ui.screens.accounts.account_categories.AccountCategoriesScreen
 import com.example.statspos.presentation.ui.screens.accounts.banks.BanksScreen
+import com.example.statspos.presentation.ui.screens.accounts.customers.CustomersScreen
 import com.example.statspos.presentation.ui.screens.accounts.expenses.ExpensesScreen
+import com.example.statspos.presentation.ui.screens.accounts.suppliers.SuppliersScreen
+import com.example.statspos.presentation.ui.screens.accounts.vendors.VendorsScreen
 import com.example.statspos.presentation.ui.screens.items.AddUpdateItemScreen
 import com.example.statspos.presentation.ui.screens.items.categories.CategoriesScreen
-import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
 import com.example.statspos.presentation.ui.screens.items.packages.PackagesScreen
 import com.example.statspos.presentation.ui.screens.purchase.PurchaseScreen
 import com.example.statspos.presentation.ui.screens.purchase.purchase_orders.PurchaseOrdersScreen
@@ -100,34 +103,36 @@ fun MainScreen() {
 
 //            Accounts
             entry<TopRoutes.Customers> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Blue),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("Customers")
-                }
+                CustomersScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
             }
             entry<TopRoutes.Vendors> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Blue),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("Vendors")
-                }
+                VendorsScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
             }
             entry<TopRoutes.Suppliers> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Blue),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("Suppliers")
-                }
+                SuppliersScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<TopRoutes.Banks> {
+                BanksScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
             }
             entry<TopRoutes.Expenses> {
                 ExpensesScreen(
@@ -137,8 +142,8 @@ fun MainScreen() {
                     }
                 )
             }
-            entry<TopRoutes.Banks> {
-                BanksScreen(
+            entry<TopRoutes.AccountCategories> {
+                AccountCategoriesScreen(
                     sharedViewModel = sharedViewModel,
                     onBack = {
                         backStack.removeLastOrNull()

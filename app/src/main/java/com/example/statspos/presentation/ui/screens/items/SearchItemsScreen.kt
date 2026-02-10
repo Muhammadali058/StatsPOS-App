@@ -176,15 +176,13 @@ fun SearchItemsScreen(
                     }
                 )
 
-                var selectedItem by remember { mutableStateOf<DropdownItem?>(HP.itemFilters[0]) }
                 ComboBox(
                     modifier = Modifier
                         .fillMaxWidth(),
                     items = HP.itemFilters,
-                    selectedItem = selectedItem,
+                    selectedItem = state.selectedSearchBy,
                     onItemSelected = { item ->
-                        selectedItem = item
-                        viewModel.onFilterIdChange(item.id)
+                        viewModel.onSelectedSearchByChange(item)
                     },
                     label = {
                         Text(text = "Search By")

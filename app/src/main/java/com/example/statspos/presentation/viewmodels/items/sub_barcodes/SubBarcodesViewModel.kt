@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.viewmodels.items
+package com.example.statspos.presentation.viewmodels.items.sub_barcodes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

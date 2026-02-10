@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.viewmodels.items
+package com.example.statspos.presentation.viewmodels.items.linked_items
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.accounts.banks
+package com.example.statspos.presentation.ui.screens.accounts.account_categories
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -28,8 +28,13 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.statspos.domain.models.accounts.Banks
-import com.example.statspos.domain.models.accounts.Expenses
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
+import com.example.statspos.domain.models.accounts.AccountCategories
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.ErrorDialog
@@ -39,20 +44,74 @@ import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchTextbox
+import com.example.statspos.presentation.ui.components.TopAppBar
+import com.example.statspos.presentation.ui.screens.accounts.customers.AddUpdateCustomerScreen
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.accounts.banks.BanksViewModel
-import com.example.statspos.presentation.viewmodels.accounts.expenses.ExpensesViewModel
+import com.example.statspos.presentation.viewmodels.accounts.account_categories.AccountCategoriesViewModel
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
+import kotlinx.serialization.Serializable
+
+private sealed class Routes : NavKey {
+    @Serializable
+    data object Home : Routes()
+
+    @Serializable
+    data class AddUpdateAccountCategory(val updateId: Long, val isUpdate: Boolean) : Routes()
+}
 
 @Composable
-fun BanksBody(
+fun AccountCategoriesScreen(
+    sharedViewModel: SharedViewModel,
+    onBack: () -> Unit,
+) {
+    val backStack = rememberNavBackStack(Routes.Home)
+    fun navigate(key: NavKey) {
+        if (backStack.lastOrNull() != key) {
+            backStack.add(key)
+        }
+    }
+    NavDisplay(
+        backStack = backStack,
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
+        entryProvider = entryProvider {
+            entry<Routes.Home> {
+                Home(
+                    sharedViewModel = sharedViewModel,
+                    onAddButtonClick = { updateId, isUpdate ->
+                        navigate(Routes.AddUpdateAccountCategory(updateId, isUpdate))
+                    },
+                    onBack = {
+                        onBack()
+                    },
+                )
+            }
+            entry<Routes.AddUpdateAccountCategory> { key ->
+                AddUpdateAccountCategoryScreen(
+                    sharedViewModel = sharedViewModel,
+                    updateId = key.updateId,
+                    isUpdate = key.isUpdate,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                )
+            }
+        }
+    )
+}
+
+@Composable
+private fun Home(
     sharedViewModel: SharedViewModel,
     onAddButtonClick: (Long, Boolean) -> Unit,
+    onBack: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<BanksViewModel>()
+    val viewModel = hiltViewModel<AccountCategoriesViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -92,16 +151,26 @@ fun BanksBody(
             )
         },
         floatingActionButton = {
-            AppFloatingActionButton{
+            AppFloatingActionButton(
+                modifier = Modifier
+                    .navigationBarsPadding()
+            ) {
                 onAddButtonClick(0L, false)
             }
         },
+        topBar = {
+            TopAppBar(
+                onNavigationClick = {
+                    onBack()
+                },
+                title = "Account Categories",
+            )
+        }
     ) { innerPadding ->
-        Box(Modifier.padding(innerPadding))
-
         Box(
             Modifier
                 .fillMaxSize()
+                .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
             Column(
@@ -144,10 +213,10 @@ fun BanksBody(
                         .padding(8.dp)
                 ) {
                     HeadingMedium(
-                        text = "Total Banks: ",
+                        text = "Total Account Categories: ",
                     )
                     LabelMedium(
-                        text = state.totalBanks.toString(),
+                        text = state.totalAccountCategories.toString(),
                     )
                 }
             }
@@ -185,8 +254,8 @@ private fun BodyList(
     modifier: Modifier = Modifier,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
-    items: List<Banks>,
-    onItemClick: (Banks) -> Unit,
+    items: List<AccountCategories>,
+    onItemClick: (AccountCategories) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -204,8 +273,8 @@ private fun BodyList(
 @Composable
 private fun ListCard(
     modifier: Modifier = Modifier,
-    item: Banks,
-    onItemClick: (Banks) -> Unit
+    item: AccountCategories,
+    onItemClick: (AccountCategories) -> Unit
 ) {
     ListCard(
         modifier = modifier
@@ -216,7 +285,7 @@ private fun ListCard(
             onItemClick(item)
         }
     ) {
-        LabelLarge(item.bankName.toString())
+        LabelLarge(item.categoryName.toString())
         Spacer(Modifier.height(2.dp))
         Row(
             modifier = Modifier

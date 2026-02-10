@@ -2,6 +2,7 @@ package com.example.statspos.presentation.viewmodels.items
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.items.Items
 import com.example.statspos.domain.repository.items.ItemsRepository
 import com.example.statspos.utils.HP
@@ -35,11 +36,10 @@ class SearchItemsViewModel @Inject constructor(
         val categoryName: String = "",
         val subCategoryName: String = "",
         val vendorName: String = "",
-        val filterName: String = "",
         val categoryId: Long = 0L,
         val subCategoryId: Long = 0L,
         val vendorId: Long = 0L,
-        val filterId: Long = 0L,
+        val selectedSearchBy: DropdownItem? = HP.itemFilters[0],
 
         val isLoading: Boolean = false,
         val isLoadingNextPage: Boolean = false,
@@ -139,8 +139,8 @@ class SearchItemsViewModel @Inject constructor(
         state.update { it.copy(vendorId = value) }
     }
 
-    fun onFilterIdChange(value: Long) {
-        state.update { it.copy(filterId = value) }
+    fun onSelectedSearchByChange(value: DropdownItem) {
+        state.update { it.copy(selectedSearchBy = value) }
     }
     // endregion
 
@@ -288,7 +288,7 @@ class SearchItemsViewModel @Inject constructor(
     private fun getSearchParams(page: Int): JsonObject = JsonObject().apply {
         addProperty("page", page)
         addProperty("itemsPerPage", HP.itemsPerPage)
-        addProperty("searchBy", state.value.filterId)
+        addProperty("searchBy", state.value.selectedSearchBy?.id ?: 0L)
         addProperty("categoryId", state.value.categoryId)
         addProperty("subCategoryId", state.value.subCategoryId)
         addProperty("vendorId", state.value.vendorId)

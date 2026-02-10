@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.items
+package com.example.statspos.presentation.ui.screens.items.linked_items
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -9,10 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -31,7 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.statspos.domain.models.items.SubBarcodes
+import com.example.statspos.domain.models.items.LinkedItems
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.ErrorDialog
@@ -39,25 +39,27 @@ import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListImageView
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.items.SubBarcodesViewModel
+import com.example.statspos.presentation.viewmodels.items.linked_items.LinkedItemsViewModel
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SubBarcodesScreen(
+fun LinkedItemsScreen(
     sharedViewModel: SharedViewModel,
     itemId: Long,
+    crtnSize: Int,
     onBack: () -> Unit,
-    onAddButtonClick: (Long, Boolean, Long) -> Unit,
+    onAddButtonClick: (Long, Boolean, Long, Int) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<SubBarcodesViewModel>()
+    val viewModel = hiltViewModel<LinkedItemsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -103,7 +105,7 @@ fun SubBarcodesScreen(
         },
         floatingActionButton = {
             AppFloatingActionButton {
-                onAddButtonClick(0L, false, itemId)
+                onAddButtonClick(0L, false, itemId, crtnSize)
             }
         },
         topBar = {
@@ -111,7 +113,7 @@ fun SubBarcodesScreen(
                 onNavigationClick = {
                     onBack()
                 },
-                title = "Sub-Barcodes",
+                title = "Linked Items",
             )
         }
     ) { innerPadding ->
@@ -150,7 +152,7 @@ fun SubBarcodesScreen(
                         },
                         items = state.list,
                         onItemClick = { item ->
-                            onAddButtonClick(item.id!!, true, itemId)
+                            onAddButtonClick(item.id!!, true, itemId, crtnSize)
                         }
                     )
                 }
@@ -161,10 +163,10 @@ fun SubBarcodesScreen(
                         .padding(8.dp)
                 ) {
                     HeadingMedium(
-                        text = "Total Sub-Barcodes: ",
+                        text = "Total Linked Items: ",
                     )
                     LabelMedium(
-                        text = state.totalSubBarcodes.toString(),
+                        text = state.totalLinkedItems.toString(),
                     )
                 }
             }
@@ -202,8 +204,8 @@ private fun BodyList(
     modifier: Modifier = Modifier,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
-    items: List<SubBarcodes>,
-    onItemClick: (SubBarcodes) -> Unit,
+    items: List<LinkedItems>,
+    onItemClick: (LinkedItems) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -221,18 +223,34 @@ private fun BodyList(
 @Composable
 private fun ListCard(
     modifier: Modifier = Modifier,
-    item: SubBarcodes,
-    onItemClick: (SubBarcodes) -> Unit
+    item: LinkedItems,
+    onItemClick: (LinkedItems) -> Unit
 ) {
     ListCard(
         modifier = modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .padding(vertical = ConstantPaddings.LIST_PADDING_VERTICAL),
         shape = RoundedCornerShape(6.dp),
         onClick = {
             onItemClick(item)
         }
     ) {
-        LabelLarge(item.subBarcode.toString())
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // Image
+            ListImageView(
+                imageUrl = item.imageUrl,
+                modifier = Modifier
+                    .size(60.dp),
+            ) {
+                Spacer(Modifier.width(8.dp))
+            }
+
+            LabelLarge(item.itemname.toString())
+        }
     }
 }
 
@@ -260,9 +278,9 @@ private fun Prev() {
 
             },
             items = (1..50).map {
-                SubBarcodes(
+                LinkedItems(
                     id = it.toLong(),
-                    subBarcode = "$it"
+                    itemname = "Item $it"
                 )
             },
             onItemClick = { item ->
@@ -276,7 +294,7 @@ private fun Prev() {
                 .padding(8.dp)
         ) {
             HeadingMedium(
-                text = "Total Sub-Barcodes: ",
+                text = "Total Linked Items: ",
             )
             LabelMedium(
                 text = "50.0",

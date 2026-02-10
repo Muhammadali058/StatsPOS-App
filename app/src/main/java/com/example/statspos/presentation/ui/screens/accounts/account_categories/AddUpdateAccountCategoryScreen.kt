@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.accounts.expenses
+package com.example.statspos.presentation.ui.screens.accounts.account_categories
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.union
@@ -40,28 +40,24 @@ import com.example.statspos.presentation.ui.components.AppCircularProgressIndica
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.ConfirmDialog
-import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
-import com.example.statspos.presentation.ui.components.PasswordDialog
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.accounts.expenses.AddUpdateSubExpenseViewModel
+import com.example.statspos.presentation.viewmodels.accounts.account_categories.AddUpdateAccountCategoryViewModel
 import com.example.statspos.utils.HP
-import com.example.statspos.utils.PasswordFor
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import com.example.statspos.utils.showToast
 
 @Composable
-fun AddUpdateSubExpenseScreen(
+fun AddUpdateAccountCategoryScreen(
     sharedViewModel: SharedViewModel,
     updateId: Long = 0,
     isUpdate: Boolean = false,
-    expenseId: Long = 0,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -71,7 +67,7 @@ fun AddUpdateSubExpenseScreen(
         onBack()
     }
 
-    val viewModel = hiltViewModel<AddUpdateSubExpenseViewModel>()
+    val viewModel = hiltViewModel<AddUpdateAccountCategoryViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -97,7 +93,6 @@ fun AddUpdateSubExpenseScreen(
         viewModel.updateInitialState(
             isUpdate = isUpdate,
             updateId = updateId,
-            expenseId = expenseId,
         )
 
         if (isUpdate && !hasLoadedOnce) {
@@ -117,30 +112,14 @@ fun AddUpdateSubExpenseScreen(
 
     if (showDeleteDialog) {
         ConfirmDialog(
-            text = "Are you sure to delete this sub-expense",
+            text = "Are you sure to delete this account category",
             onDismiss = {
                 showDeleteDialog = false
             },
             onConfirm = {
                 showDeleteDialog = false
                 viewModel.deleteData(updateId) {
-                    context.showToast("Sub-Expense deleted successfully")
-                    goBackWithResult()
-                }
-            }
-        )
-    }
-
-    if (showPasswordDialog) {
-        PasswordDialog(
-            passwordFor = PasswordFor.DELETE_ACCOUNT,
-            onDismiss = {
-                showPasswordDialog = false
-            },
-            onConfirm = {
-                showPasswordDialog = false
-                viewModel.deleteData(updateId) {
-                    context.showToast("Sub-Expense deleted successfully")
+                    context.showToast("Account category deleted successfully")
                     goBackWithResult()
                 }
             }
@@ -159,16 +138,12 @@ fun AddUpdateSubExpenseScreen(
                 onNavigationClick = {
                     onBack()
                 },
-                title = if (isUpdate) "Update Sub-Expense" else "Add Sub-Expense",
+                title = if (isUpdate) "Update Account Category" else "Add Account Category",
                 actions = {
                     Row {
                         if (isUpdate && HP.userRights.deleteAnything == true) {
                             IconButton(onClick = {
-                                if (HP.passwords.useDeleteAccount == true) {
-                                    showPasswordDialog = true
-                                } else {
-                                    showDeleteDialog = true
-                                }
+                                showDeleteDialog = true
                             }) {
                                 AppIcon(
                                     icon = Icons.Default.Delete,
@@ -200,31 +175,21 @@ fun AddUpdateSubExpenseScreen(
                         .verticalScroll(scrollState),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Dropdown(
-                        value = state.expenseName,
-                        onValueChange = viewModel::onExpenseNameChange,
-                        items = HP.expenses,
-                        onItemSelected = { dropdownItem ->
-                            viewModel.onExpenseIdChange(dropdownItem.id)
-                        },
-                        label = {
-                            Text("Expense")
-                        },
-                        enabled = false,
-                    )
                     Body(
-                        subExpenseName = state.subExpenseName,
-                        onSubExpenseNameChange = viewModel::onSubExpenseNameChange,
+                        categoryName = state.categoryName,
+                        remarks = state.remarks,
+                        onBankNameChange = viewModel::onBankNameChange,
+                        onRemarksChange = viewModel::onRemarksChange,
                     )
                 }
 
-                Box (
+                Box(
                     modifier = Modifier
                         .windowInsetsPadding(
                             WindowInsets.navigationBars
                                 .union(WindowInsets.ime)
                         )
-                ){
+                ) {
                     if (state.isSaving) {
                         AppCircularProgressIndicator()
                     } else {
@@ -247,21 +212,29 @@ fun AddUpdateSubExpenseScreen(
 
 @Composable
 private fun Body(
-    subExpenseName: String,
-    onSubExpenseNameChange: (String) -> Unit,
+    categoryName: String,
+    remarks: String,
+    onBankNameChange: (String) -> Unit,
+    onRemarksChange: (String) -> Unit,
 ) {
-    Column(
+    Textbox(
+        value = categoryName,
+        onValueChange = onBankNameChange,
         modifier = Modifier
             .fillMaxWidth(),
-    ) {
-        Textbox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            value = subExpenseName,
-            onValueChange = onSubExpenseNameChange,
-            label = {
-                Text("Sub-Expense Name")
-            }
-        )
-    }
+        label = {
+            Text("Category Name")
+        }
+    )
+    Textbox(
+        value = remarks,
+        onValueChange = onRemarksChange,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(84.dp),
+        label = {
+            Text("Remarks")
+        },
+        singleLine = false,
+    )
 }

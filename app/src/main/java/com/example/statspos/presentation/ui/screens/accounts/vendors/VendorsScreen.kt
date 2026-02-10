@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.items
+package com.example.statspos.presentation.ui.screens.accounts.vendors
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -31,19 +32,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.statspos.R
-import com.example.statspos.domain.models.items.Items
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
+import com.example.statspos.domain.models.accounts.Accounts
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
-import com.example.statspos.presentation.ui.components.AutoCompleteItemsTextbox
-import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
 import com.example.statspos.presentation.ui.components.BottomSheet
-import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
@@ -52,28 +54,82 @@ import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.ListImageView
 import com.example.statspos.presentation.ui.components.PullToRefreshList
-import com.example.statspos.presentation.ui.components.SubDropdown
+import com.example.statspos.presentation.ui.components.SearchTextbox
+import com.example.statspos.presentation.ui.components.TopAppBar
+import com.example.statspos.presentation.ui.screens.accounts.customers.AddUpdateCustomerScreen
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
-import com.example.statspos.presentation.viewmodels.items.ItemsViewModel
 import com.example.statspos.presentation.viewmodels.SharedViewModel
+import com.example.statspos.presentation.viewmodels.accounts.vendors.VendorsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+
+private sealed class Routes : NavKey {
+    @Serializable
+    data object Home : Routes()
+
+    @Serializable
+    data class AddUpdateVendor(val updateId: Long, val isUpdate: Boolean) : Routes()
+}
+
+@Composable
+fun VendorsScreen(
+    sharedViewModel: SharedViewModel,
+    onBack: () -> Unit,
+) {
+    val backStack = rememberNavBackStack(Routes.Home)
+    fun navigate(key: NavKey) {
+        if (backStack.lastOrNull() != key) {
+            backStack.add(key)
+        }
+    }
+    NavDisplay(
+        backStack = backStack,
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
+        entryProvider = entryProvider {
+            entry<Routes.Home> {
+                Home(
+                    sharedViewModel = sharedViewModel,
+                    onAddButtonClick = { updateId, isUpdate ->
+                        navigate(Routes.AddUpdateVendor(updateId, isUpdate))
+                    },
+                    onBack = {
+                        onBack()
+                    },
+                )
+            }
+            entry<Routes.AddUpdateVendor> { key ->
+                AddUpdateVendorScreen(
+                    sharedViewModel = sharedViewModel,
+                    updateId = key.updateId,
+                    isUpdate = key.isUpdate,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                )
+            }
+        }
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ItemsScreen(
+private fun Home(
     sharedViewModel: SharedViewModel,
     onAddButtonClick: (Long, Boolean) -> Unit,
+    onBack: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBottomSheet by remember { mutableStateOf(false) }
-    var showBarcodeScanner by remember { mutableStateOf(false) }
 
-    val viewModel = hiltViewModel<ItemsViewModel>()
+    val viewModel = hiltViewModel<VendorsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -92,7 +148,7 @@ fun ItemsScreen(
     val sharedViewModelState by sharedViewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(sharedViewModelState.dataChanged) {
         if (sharedViewModelState.dataChanged) {
-            viewModel.loadItems()
+            viewModel.loadData()
             sharedViewModel.consumeDataChanged()
         }
     }
@@ -106,19 +162,6 @@ fun ItemsScreen(
         )
     }
 
-    if (showBarcodeScanner) {
-        BarcodeScannerDialog(
-            onDismiss = {
-                showBarcodeScanner = false
-            },
-            onScanned = {
-                viewModel.onSearchChange(it)
-                viewModel.getItem(it)
-                showBarcodeScanner = false
-            }
-        )
-    }
-
     Scaffold(
         snackbarHost = {
             AppSnackbarHost(
@@ -126,13 +169,22 @@ fun ItemsScreen(
             )
         },
         floatingActionButton = {
-            AppFloatingActionButton {
+            AppFloatingActionButton(
+                modifier = Modifier
+                    .navigationBarsPadding()
+            ) {
                 onAddButtonClick(0L, false)
             }
         },
+        topBar = {
+            TopAppBar(
+                onNavigationClick = {
+                    onBack()
+                },
+                title = "Vendors",
+            )
+        }
     ) { innerPadding ->
-        Box(Modifier.padding(innerPadding))
-
         // Bottom Sheet
         if (showBottomSheet) {
             BottomSheet(
@@ -144,7 +196,7 @@ fun ItemsScreen(
                 Dropdown(
                     value = state.categoryName,
                     onValueChange = viewModel::onCategoryNameChange,
-                    items = HP.categories,
+                    items = HP.accountCategories,
                     onItemSelected = { dropdownItem ->
                         viewModel.onCategoryIdChange(dropdownItem.id)
                     },
@@ -152,45 +204,9 @@ fun ItemsScreen(
                         Text(text = "Category")
                     }
                 )
-                SubDropdown(
-                    value = state.subCategoryName,
-                    onValueChange = viewModel::onSubCategoryNameChange,
-                    items = HP.subCategories,
-                    mainId = state.categoryId,
-                    onItemSelected = { dropdownItem ->
-                        viewModel.onSubCategoryIdChange(dropdownItem.id)
-                    },
-                    label = {
-                        Text(text = "Sub-Category")
-                    }
-                )
-                Dropdown(
-                    value = state.vendorName,
-                    onValueChange = viewModel::onVendorNameChange,
-                    items = HP.vendors,
-                    onItemSelected = { dropdownItem ->
-                        viewModel.onVendorIdChange(dropdownItem.id)
-                    },
-                    label = {
-                        Text(text = "Vendor")
-                    }
-                )
-
-                ComboBox(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    items = HP.itemFilters,
-                    selectedItem = state.selectedSearchBy,
-                    onItemSelected = { item ->
-                        viewModel.onSelectedSearchByChange(item)
-                    },
-                    label = {
-                        Text(text = "Search By")
-                    },
-                )
 
                 Button(onClick = {
-                    viewModel.loadItems()
+                    viewModel.loadData()
                     scope.launch { sheetState.hide() }.invokeOnCompletion {
                         if (!sheetState.isVisible) {
                             showBottomSheet = false
@@ -205,6 +221,7 @@ fun ItemsScreen(
         Box(
             Modifier
                 .fillMaxSize()
+                .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
             Column(
@@ -222,20 +239,12 @@ fun ItemsScreen(
                             .padding(bottom = 4.dp),
                         value = state.search,
                         onValueChange = viewModel::onSearchChange,
-                        onItemSelected = {
-                            viewModel.getItem(it)
-                            keyboardController?.hide()
-                        },
                         onSearchClick = {
-                            viewModel.loadItems()
+                            viewModel.loadData()
                             keyboardController?.hide()
                         },
                         onEndIconClick = {
-                            viewModel.getItem(it)
-                            keyboardController?.hide()
-                        },
-                        onBarcodeClick = {
-                            showBarcodeScanner = true
+                            viewModel.onSearchChange("")
                         },
                         onFilterClick = {
                             showBottomSheet = true
@@ -246,7 +255,7 @@ fun ItemsScreen(
                             .weight(1f),
                         isRefreshing = state.isLoading,
                         onRefresh = {
-                            viewModel.loadItems()
+                            viewModel.loadData()
                         },
                         isLoadingNextPage = state.isLoadingNextPage,
                         endReached = state.endReached,
@@ -266,10 +275,10 @@ fun ItemsScreen(
                         .padding(8.dp)
                 ) {
                     HeadingMedium(
-                        text = "Total Items: ",
+                        text = "Total Vendors: ",
                     )
                     LabelMedium(
-                        text = state.totalItems.toString(),
+                        text = state.totalVendors.toString(),
                     )
                 }
             }
@@ -282,10 +291,8 @@ private fun SearchBox(
     modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
-    onItemSelected: (String) -> Unit,
     onSearchClick: (String) -> Unit,
     onEndIconClick: (String) -> Unit,
-    onBarcodeClick: () -> Unit,
     onFilterClick: () -> Unit,
 ) {
     Row(
@@ -293,28 +300,13 @@ private fun SearchBox(
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AutoCompleteItemsTextbox(
+        SearchTextbox(
             modifier = Modifier
                 .weight(1f),
             value = value,
             onValueChange = onValueChange,
-            onItemSelected = onItemSelected,
             onEndIconClick = onEndIconClick,
             onSearchClick = onSearchClick,
-            label = {
-                Text(
-                    text = "Search"
-                )
-            },
-        )
-        Spacer(Modifier.width(4.dp))
-        AppIconButton(
-            onClick = {
-                onBarcodeClick()
-            },
-            icon = R.drawable.ic_barcode,
-            buttonSize = 32.dp,
-            size = 26.dp
         )
         Spacer(Modifier.width(4.dp))
         AppIconButton(
@@ -336,8 +328,8 @@ private fun BodyList(
     isLoadingNextPage: Boolean,
     endReached: Boolean,
     loadNextItems: () -> Unit,
-    items: List<Items>,
-    onItemClick: (Items) -> Unit,
+    items: List<Accounts>,
+    onItemClick: (Accounts) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -366,8 +358,8 @@ private fun BodyList(
 @Composable
 private fun ListCard(
     modifier: Modifier = Modifier,
-    item: Items,
-    onItemClick: (Items) -> Unit
+    item: Accounts,
+    onItemClick: (Accounts) -> Unit
 ) {
     ListCard(
         modifier = modifier
@@ -387,112 +379,43 @@ private fun ListCard(
                 imageUrl = item.imageUrl,
                 modifier = Modifier
                     .size(60.dp),
-                showIfNull = false,
+                showIfNull = true,
             ) {
                 Spacer(Modifier.width(8.dp))
             }
 
-            // Itemname & Rows
             Column(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                // Itemname
-                LabelLarge(item.itemname.toString())
-                Spacer(Modifier.height(2.dp))
+                LabelLarge(item.vendorName.toString())
 
-                // Rows when fourRateSystem
-                if (HP.settings.fourRateSystem == true) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                    ) {
-                        HeadingMedium("Cost", Modifier.weight(1f))
-                        HeadingMedium("Rate 1", Modifier.weight(1f))
-                        HeadingMedium("Rate 2", Modifier.weight(1f))
-                        HeadingMedium("Rate 3", Modifier.weight(1f))
-                        HeadingMedium("Rate 4", Modifier.weight(1f))
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                    ) {
-                        LabelMedium(HP.formatDecimal(item.cost), Modifier.weight(1f))
-                        LabelMedium(HP.formatDecimal(item.retail), Modifier.weight(1f))
-                        LabelMedium(HP.formatDecimal(item.wholesale), Modifier.weight(1f))
-                        LabelMedium(HP.formatDecimal(item.rate3), Modifier.weight(1f))
-                        LabelMedium(HP.formatDecimal(item.rate4), Modifier.weight(1f))
-                    }
-                } else {
-                    // Rows else fourRateSystem
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                    ) {
-                        HeadingMedium(
-                            text = "Cost",
-                            Modifier.weight(1f)
-                        )
-                        HeadingMedium(
-                            text = "Retail",
-                            Modifier.weight(1f)
-                        )
-                        HeadingMedium(
-                            text = "W.Sale",
-                            Modifier.weight(1f)
-                        )
-                        HeadingMedium(
-                            text = if (HP.settings.saleCartons == true) "C.Rate" else "MP",
-                            Modifier.weight(1f)
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                    ) {
-                        LabelMedium(
-                            text = HP.formatDecimal(item.cost),
-                            Modifier.weight(1f)
-                        )
-                        LabelMedium(
-                            text = HP.formatDecimal(item.retail),
-                            Modifier.weight(1f)
-                        )
-                        LabelMedium(
-                            text = HP.formatDecimal(item.wholesale),
-                            Modifier.weight(1f)
-                        )
-                        LabelMedium(
-                            text = if (HP.settings.saleCartons == true) HP.formatDecimal(item.crtnRate) else HP.formatDecimal(
-                                item.marketPrice
-                            ),
-                            Modifier.weight(1f)
-                        )
+                // Contact
+                item.contact?.let {
+                    if (it.isNotEmpty()) {
+                        Spacer(Modifier.height(2.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            HeadingMedium("Contact: ")
+                            LabelMedium(item.contact.toString())
+                        }
                     }
                 }
-            }
-        }
 
-        // Stock
-        Spacer(Modifier.height(2.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-        ) {
-            Row(
-                modifier = Modifier
-                    .weight(1f),
-            ) {
-                HeadingMedium("Stock Pcs: ")
-                LabelMedium(HP.formatDecimal(item.stockPcs))
-            }
-            if (HP.settings.saleCartons == true) {
-                Row(
-                    modifier = Modifier
-                        .weight(1f),
-                ) {
-                    HeadingMedium("Stock Crtn: ")
-                    LabelMedium(item.stockCrtn.toString())
+                // City
+                item.city?.let {
+                    if (it.isNotEmpty()) {
+                        Spacer(Modifier.height(2.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            HeadingMedium("City: ")
+                            LabelMedium(item.city.toString())
+                        }
+                    }
                 }
             }
         }
@@ -511,91 +434,5 @@ private fun ListCard(
             }
         }
 
-        // Sub-Category
-        item.subCategoryName?.let {
-            if (it.isNotEmpty()) {
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    HeadingMedium("Sub-Category: ")
-                    LabelMedium(item.subCategoryName.toString())
-                }
-            }
-        }
-
-        // Vendor
-        item.vendorName?.let {
-            if (it.isNotEmpty()) {
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    HeadingMedium("Vendor: ")
-                    LabelMedium(item.vendorName.toString())
-                }
-            }
-        }
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-private fun Prev() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-    ) {
-        Spacer(Modifier.height(8.dp))
-        SearchBox(
-            value = "",
-            onValueChange = {},
-            onItemSelected = {},
-            onSearchClick = {},
-            onEndIconClick = {},
-            onBarcodeClick = {},
-            onFilterClick = {},
-        )
-
-        BodyList(
-            modifier = Modifier
-                .weight(1f),
-            isRefreshing = false,
-            onRefresh = {
-
-            },
-            isLoadingNextPage = false,
-            endReached = false,
-            loadNextItems = {
-
-            },
-            items = (1..50).map {
-                Items(
-                    id = it.toLong(),
-                    itemname = "Coca cola 1.5 ltr item $it",
-                    imageUrl = HP.getImageUrl("43512549.png")
-                )
-            },
-            onItemClick = { item ->
-
-            }
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            HeadingMedium(
-                text = "Total Items: ",
-            )
-            LabelMedium(
-                text = "500.0",
-            )
-        }
     }
 }

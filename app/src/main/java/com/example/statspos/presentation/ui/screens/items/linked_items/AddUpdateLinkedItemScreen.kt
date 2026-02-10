@@ -1,16 +1,21 @@
-package com.example.statspos.presentation.ui.screens.items
+package com.example.statspos.presentation.ui.screens.items.linked_items
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -58,7 +63,7 @@ import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.items.AddUpdateLinkedItemViewModel
+import com.example.statspos.presentation.viewmodels.items.linked_items.AddUpdateLinkedItemViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
@@ -168,9 +173,8 @@ fun AddUpdateLinkedItemScreen(
         )
     }
 
-    var menuExpanded by remember { mutableStateOf(false) }
-
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = {
             AppSnackbarHost(
                 snackbarHostState = snackbarHostState,
@@ -263,7 +267,13 @@ fun AddUpdateLinkedItemScreen(
                     )
                 }
 
-                Box{
+                Box(
+                    modifier = Modifier
+                        .windowInsetsPadding(
+                            WindowInsets.navigationBars
+                                .union(WindowInsets.ime)
+                        )
+                ){
                     if (state.isSaving) {
                         AppCircularProgressIndicator()
                     } else {

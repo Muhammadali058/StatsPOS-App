@@ -1,15 +1,14 @@
-package com.example.statspos.presentation.viewmodels.items
+package com.example.statspos.presentation.viewmodels.accounts.customers
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
-import com.example.statspos.domain.models.items.Items
-import com.example.statspos.domain.repository.items.ItemsRepository
+import com.example.statspos.domain.models.accounts.Accounts
+import com.example.statspos.domain.repository.accounts.CustomersRepository
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
-import com.example.statspos.utils.get
 import com.example.statspos.utils.getListOf
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -22,24 +21,21 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ItemsViewModel @Inject constructor(
-    private val api: ItemsRepository
+class CustomersViewModel @Inject constructor(
+    private val api: CustomersRepository
 ) : ViewModel() {
 
     // region ScreenState
     data class ScreenState(
-        val list: List<Items> = emptyList(),
-        val totalItems: Int = 0,
+        val list: List<Accounts> = emptyList(),
+        val totalCustomers: Int = 0,
         val page: Int = 1,
         val endReached: Boolean = false,
+
         val search: String = "",
         val categoryName: String = "",
-        val subCategoryName: String = "",
-        val vendorName: String = "",
         val categoryId: Long = 0L,
-        val subCategoryId: Long = 0L,
-        val vendorId: Long = 0L,
-        val selectedSearchBy: DropdownItem? = HP.itemFilters[0],
+        val selectedSearchType: DropdownItem? = null,
 
         val isLoading: Boolean = false,
         val isLoadingNextPage: Boolean = false,
@@ -107,7 +103,7 @@ class ItemsViewModel @Inject constructor(
     // endregion
 
     init {
-        loadItems()
+        loadData()
     }
 
     // region onChangeMethods
@@ -119,32 +115,17 @@ class ItemsViewModel @Inject constructor(
         state.update { it.copy(categoryName = value) }
     }
 
-    fun onSubCategoryNameChange(value: String) {
-        state.update { it.copy(subCategoryName = value) }
-    }
-
-    fun onVendorNameChange(value: String) {
-        state.update { it.copy(vendorName = value) }
-    }
     fun onCategoryIdChange(value: Long) {
         state.update { it.copy(categoryId = value) }
     }
 
-    fun onSubCategoryIdChange(value: Long) {
-        state.update { it.copy(subCategoryId = value) }
-    }
-
-    fun onVendorIdChange(value: Long) {
-        state.update { it.copy(vendorId = value) }
-    }
-
-    fun onSelectedSearchByChange(value: DropdownItem) {
-        state.update { it.copy(selectedSearchBy = value) }
+    fun onSelectedSearchTypeChange(value: DropdownItem) {
+        state.update { it.copy(selectedSearchType = value) }
     }
     // endregion
 
     // region Network calls
-    fun loadItems() {
+    fun loadData() {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -163,18 +144,18 @@ class ItemsViewModel @Inject constructor(
 
             val params = getSearchParams(1)
 
-            when (val result = api.loadItems(params)) {
+            when (val result = api.loadCustomers(params)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
 
-                    val resultTotal = result.data.get("total").asJsonObject.get("totalItems").asInt
-                    val resultList = Gson().getListOf<Items>(result.data.get("rows").asJsonArray)
+                    val resultTotal = result.data.get("total").asJsonObject.get("totalCustomers").asInt
+                    val resultList = Gson().getListOf<Accounts>(result.data.get("rows").asJsonArray)
                     state.update {
                         it.copy(
                             list = resultList,
-                            totalItems = resultTotal,
+                            totalCustomers = resultTotal,
                         )
                     }
                 }
@@ -203,7 +184,7 @@ class ItemsViewModel @Inject constructor(
 
             val params = getSearchParams(state.value.page)
 
-            when (val result = api.loadItems(params)) {
+            when (val result = api.loadCustomers(params)) {
                 is Resource.Error -> {
                     state.update { it.copy(isLoadingNextPage = false, error = result.error) }
                     result.error?.let { onEvent(UiEvent.ShowError(result.error)) }
@@ -217,60 +198,14 @@ class ItemsViewModel @Inject constructor(
                 is Resource.Success -> {
                     state.update { it.copy(isLoadingNextPage = false, error = null) }
 
-                    val resultTotal = result.data.get("total").asJsonObject.get("totalItems").asInt
-                    val resultList = Gson().getListOf<Items>(result.data.get("rows").asJsonArray)
+                    val resultTotal = result.data.get("total").asJsonObject.get("totalCustomers").asInt
+                    val resultList = Gson().getListOf<Accounts>(result.data.get("rows").asJsonArray)
                     state.update {
                         it.copy(
                             list = state.value.list + resultList,
-                            totalItems = resultTotal,
+                            totalCustomers = resultTotal,
                             endReached = resultList.isEmpty(),
                         )
-                    }
-                }
-            }
-        }
-    }
-
-    fun getItem(value: String) {
-        viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
-
-            if (value.isEmpty())
-                return@launch
-
-            state.update {
-                it.copy(
-                    isLoading = true,
-                    error = null,
-                    page = 1,
-                    endReached = true,
-                )
-            }
-
-            when (val result = api.isBarcodeExists(value)) {
-                is Resource.Error -> resultError(result.error)
-                is Resource.Information -> resultInformation(result.message)
-                is Resource.Success -> {
-                    resultSuccess()
-
-                    val isExists = result.data.get("isExists").asBoolean
-                    if (isExists) {
-                        val item = Gson().get<Items>(result.data.get("data").asJsonObject)
-                        state.update {
-                            it.copy(
-                                list = listOf(item),
-                                totalItems = 1,
-                            )
-                        }
-                    } else {
-                        state.update {
-                            it.copy(
-                                list = emptyList(),
-                                totalItems = 0,
-                            )
-                        }
-                        showSnackbar("Items not found")
                     }
                 }
             }
@@ -296,10 +231,8 @@ class ItemsViewModel @Inject constructor(
     private fun getSearchParams(page: Int): JsonObject = JsonObject().apply {
         addProperty("page", page)
         addProperty("itemsPerPage", HP.itemsPerPage)
-        addProperty("searchBy", state.value.selectedSearchBy?.id ?: 0L)
+        addProperty("searchType", state.value.selectedSearchType?.id ?: 0L)
         addProperty("categoryId", state.value.categoryId)
-        addProperty("subCategoryId", state.value.subCategoryId)
-        addProperty("vendorId", state.value.vendorId)
         addProperty("text", state.value.search)
     }
 

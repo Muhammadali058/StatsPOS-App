@@ -104,6 +104,7 @@ private val accounts = listOf(
     TopItem("Suppliers", TopRoutes.Suppliers, R.drawable.customer_accounts),
     TopItem("Banks", TopRoutes.Banks, R.drawable.bank_accounts),
     TopItem("Expenses", TopRoutes.Expenses, R.drawable.expense_accounts),
+    TopItem("Account\nCategories", TopRoutes.AccountCategories, R.drawable.categories),
 )
 private val entries = listOf(
     TopItem("Receipt", TopRoutes.Categories),

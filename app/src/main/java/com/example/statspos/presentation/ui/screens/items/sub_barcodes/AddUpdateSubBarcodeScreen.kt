@@ -1,19 +1,23 @@
-package com.example.statspos.presentation.ui.screens.items
+package com.example.statspos.presentation.ui.screens.items.sub_barcodes
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +34,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -50,8 +53,7 @@ import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
-import com.example.statspos.presentation.viewmodels.items.AddUpdateItemViewModel
-import com.example.statspos.presentation.viewmodels.items.AddUpdateSubBarcodeViewModel
+import com.example.statspos.presentation.viewmodels.items.sub_barcodes.AddUpdateSubBarcodeViewModel
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
@@ -132,9 +134,8 @@ fun AddUpdateSubBarcodeScreen(
         )
     }
 
-    var menuExpanded by remember { mutableStateOf(false) }
-
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = {
             AppSnackbarHost(
                 snackbarHostState = snackbarHostState,
@@ -179,8 +180,7 @@ fun AddUpdateSubBarcodeScreen(
                 Column(
                     Modifier
                         .weight(1f)
-                        .verticalScroll(scrollState)
-                        .imePadding(),
+                        .verticalScroll(scrollState),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Body(
@@ -191,7 +191,13 @@ fun AddUpdateSubBarcodeScreen(
                     )
                 }
 
-                Box{
+                Box(
+                    modifier = Modifier
+                        .windowInsetsPadding(
+                            WindowInsets.navigationBars
+                                .union(WindowInsets.ime)
+                        )
+                ){
                     if (state.isSaving) {
                         AppCircularProgressIndicator()
                     } else {

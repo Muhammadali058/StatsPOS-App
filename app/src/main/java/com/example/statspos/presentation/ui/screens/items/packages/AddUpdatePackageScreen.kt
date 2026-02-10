@@ -4,11 +4,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -122,9 +130,8 @@ fun AddUpdatePackageScreen(
         )
     }
 
-    var menuExpanded by remember { mutableStateOf(false) }
-
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = {
             AppSnackbarHost(
                 snackbarHostState = snackbarHostState,
@@ -169,8 +176,7 @@ fun AddUpdatePackageScreen(
                 Column(
                     Modifier
                         .weight(1f)
-                        .verticalScroll(scrollState)
-                        .imePadding(),
+                        .verticalScroll(scrollState),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Body(
@@ -181,11 +187,17 @@ fun AddUpdatePackageScreen(
                     )
                 }
 
-                Box{
+                Box(
+                    modifier = Modifier
+                        .windowInsetsPadding(
+                            WindowInsets.navigationBars
+                                .union(WindowInsets.ime)
+                        )
+                ){
                     if (state.isSaving) {
                         AppCircularProgressIndicator()
                     } else {
-                        SaveButton {
+                        SaveButton{
                             viewModel.insertOrUpdateData {
                                 goBackWithResult()
                             }

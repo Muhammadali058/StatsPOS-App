@@ -1,11 +1,11 @@
-package com.example.statspos.presentation.viewmodels.items
+package com.example.statspos.presentation.viewmodels.accounts.suppliers
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.statspos.domain.models.items.LinkedItems
-import com.example.statspos.domain.models.items.SubBarcodes
-import com.example.statspos.domain.repository.items.LinkedItemsRepository
-import com.example.statspos.domain.repository.items.SubBarcodesRepository
+import com.example.statspos.domain.models.accounts.Accounts
+import com.example.statspos.domain.repository.accounts.SuppliersRepository
+import com.example.statspos.domain.repository.accounts.VendorsRepository
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
@@ -21,19 +21,21 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class LinkedItemsViewModel @Inject constructor(
-    private val api: LinkedItemsRepository
+class SuppliersViewModel @Inject constructor(
+    private val api: SuppliersRepository
 ) : ViewModel() {
 
     // region ScreenState
     data class ScreenState(
-        val list: List<LinkedItems> = emptyList(),
-        val totalLinkedItems: Int = 0,
+        val list: List<Accounts> = emptyList(),
+        val totalSuppliers: Int = 0,
+        val page: Int = 1,
+        val endReached: Boolean = false,
 
-        val itemId: Long = 0L,
         val search: String = "",
 
         val isLoading: Boolean = false,
+        val isLoadingNextPage: Boolean = false,
         val error: String? = null,
     )
 
@@ -94,7 +96,12 @@ class LinkedItemsViewModel @Inject constructor(
         state.update { it.copy(error = error) }
         onEvent(UiEvent.ShowError(error ?: ""))
     }
+
     // endregion
+
+    init {
+        loadData()
+    }
 
     // region onChangeMethods
     fun onSearchChange(value: String) {
@@ -108,27 +115,81 @@ class LinkedItemsViewModel @Inject constructor(
             if (state.value.isLoading)
                 return@launch
 
-            beforeRequest()
+            if (state.value.isLoadingNextPage)
+                return@launch
 
-            val params = JsonObject().apply {
-                addProperty("itemId", state.value.itemId)
-                addProperty("text", state.value.search)
+            state.update {
+                it.copy(
+                    isLoading = true,
+                    error = null,
+                    page = 1,
+                    endReached = false,
+                )
             }
 
-            when (val result = api.loadLinkedItems(params)) {
+            val params = getSearchParams(1)
+
+            when (val result = api.loadSuppliers(params)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
 
-                    val resultTotal =
-                        result.data.get("total").asJsonObject.get("totalLinkedItems").asInt
-                    val resultList =
-                        Gson().getListOf<LinkedItems>(result.data.get("rows").asJsonArray)
+                    val resultTotal = result.data.get("total").asJsonObject.get("totalSuppliers").asInt
+                    val resultList = Gson().getListOf<Accounts>(result.data.get("rows").asJsonArray)
                     state.update {
                         it.copy(
                             list = resultList,
-                            totalLinkedItems = resultTotal,
+                            totalSuppliers = resultTotal,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun loadNextItems() {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if (state.value.isLoadingNextPage)
+                return@launch
+
+            if(state.value.list.size < HP.itemsPerPage)
+                return@launch
+
+            state.update {
+                it.copy(
+                    isLoadingNextPage = true,
+                    error = null,
+                    page = state.value.page + 1,
+                )
+            }
+
+            val params = getSearchParams(state.value.page)
+
+            when (val result = api.loadSuppliers(params)) {
+                is Resource.Error -> {
+                    state.update { it.copy(isLoadingNextPage = false, error = result.error) }
+                    result.error?.let { onEvent(UiEvent.ShowError(result.error)) }
+                }
+
+                is Resource.Information -> {
+                    state.update { it.copy(isLoadingNextPage = false) }
+                    result.message?.let { showSnackbar(result.message) }
+                }
+
+                is Resource.Success -> {
+                    state.update { it.copy(isLoadingNextPage = false, error = null) }
+
+                    val resultTotal = result.data.get("total").asJsonObject.get("totalSuppliers").asInt
+                    val resultList = Gson().getListOf<Accounts>(result.data.get("rows").asJsonArray)
+                    state.update {
+                        it.copy(
+                            list = state.value.list + resultList,
+                            totalSuppliers = resultTotal,
+                            endReached = resultList.isEmpty(),
                         )
                     }
                 }
@@ -152,8 +213,10 @@ class LinkedItemsViewModel @Inject constructor(
         state.update { it.copy(isLoading = false, error = null) }
     }
 
-    fun updateInitialState(itemId: Long) {
-        state.update { it.copy(itemId = itemId) }
+    private fun getSearchParams(page: Int): JsonObject = JsonObject().apply {
+        addProperty("page", page)
+        addProperty("itemsPerPage", HP.itemsPerPage)
+        addProperty("text", state.value.search)
     }
 
     // endregion

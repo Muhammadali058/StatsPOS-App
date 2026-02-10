@@ -41,13 +41,15 @@ fun ExpandableSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { expanded = !expanded }
+                .padding(ConstantPaddings.BODY_HORIZONTAL)
                 .padding(vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             AppText(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
             )
 
             AppIcon(
@@ -64,6 +66,7 @@ fun ExpandableSection(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(ConstantPaddings.BODY_HORIZONTAL)
             ) {
                 content()
             }

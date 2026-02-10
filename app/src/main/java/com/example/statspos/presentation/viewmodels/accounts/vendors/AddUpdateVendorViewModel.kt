@@ -1,0 +1,410 @@
+package com.example.statspos.presentation.viewmodels.accounts.vendors
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.DropdownItem
+import com.example.statspos.domain.models.accounts.Accounts
+import com.example.statspos.domain.repository.accounts.VendorsRepository
+import com.example.statspos.domain.repository.main.MainRepository
+import com.example.statspos.utils.HP
+import com.example.statspos.utils.Resource
+import com.example.statspos.utils.SnackbarType
+import com.example.statspos.utils.UiEvent
+import com.example.statspos.utils.get
+import com.example.statspos.utils.getListOf
+import com.google.gson.Gson
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import okhttp3.MultipartBody
+import javax.inject.Inject
+
+@HiltViewModel
+class AddUpdateVendorViewModel @Inject constructor(
+    private val api: VendorsRepository,
+    private val mainRepo: MainRepository,
+) : ViewModel() {
+    // region ScreenState
+    data class ScreenState(
+        val id: Long = 0L,
+        val accountName: String = "",
+        val address: String = "",
+        val contact: String = "",
+        val city: String = "",
+        val remarks: String = "",
+        val ntn: String = "",
+        val stn: String = "",
+
+        val categoryId: Long = 0L,
+
+        val disc: String = "",
+        val isDiscRsPer: Boolean = HP.settings.isDefaultDiscRs!!,
+        val openingBalance: String = "",
+
+        val isCredit: Boolean = false,
+
+        val imageUrl: String = "",
+
+        // Extras
+        val categoryName: String = "",
+
+        val isUpdate: Boolean = false,
+        val updateId: Long = 0L,
+        val openingBalanceTBEnabled: Boolean = true,
+
+        val isLoading: Boolean = false,
+        val isSaving: Boolean = false,
+        val isUploadingImage: Boolean = false,
+        val message: String? = null,
+        val error: String? = null,
+    )
+
+    var state = MutableStateFlow(ScreenState())
+        private set
+
+    fun beforeRequest() {
+        state.update { it.copy(isLoading = true, error = null) }
+    }
+
+    private val _event = Channel<UiEvent>()
+    var event = _event.receiveAsFlow()
+    fun onEvent(event: UiEvent) {
+        when (event) {
+            is UiEvent.ShowSnackbar -> {
+                viewModelScope.launch {
+                    _event.send(UiEvent.ShowSnackbar(event.message, event.type))
+                }
+            }
+
+            is UiEvent.ShowMessage -> {
+                viewModelScope.launch {
+                    _event.send(UiEvent.ShowMessage(event.message))
+                }
+            }
+
+            is UiEvent.ShowError -> {
+                viewModelScope.launch {
+                    _event.send(UiEvent.ShowError(event.error))
+                }
+            }
+
+            else -> {
+                viewModelScope.launch {
+                    _event.send(UiEvent.Idle)
+                }
+            }
+        }
+    }
+
+    fun showSnackbar(message: String, type: SnackbarType = SnackbarType.INFORMATION) {
+        onEvent(UiEvent.ShowSnackbar(message, type))
+    }
+
+    fun showMessage(message: String?) {
+        showSnackbar(message ?: "")
+
+//        state.update { it.copy(isLoading = false, error = null, message = message) }
+//        onEvent(UiEvent.ShowMessage(message ?: ""))
+    }
+
+    fun showError(error: String?) {
+        state.update { it.copy(error = error) }
+        onEvent(UiEvent.ShowError(error ?: ""))
+    }
+
+    // endregion
+
+    // region onChangeMethods
+    fun onAccountNameChange(value: String) {
+        state.update { it.copy(accountName = value) }
+    }
+
+    fun onAddressChange(value: String) {
+        state.update { it.copy(address = value) }
+    }
+
+    fun onContactChange(value: String) {
+        state.update { it.copy(contact = value) }
+    }
+
+    fun onCityChange(value: String) {
+        state.update { it.copy(city = value) }
+    }
+
+    fun onRemarksChange(value: String) {
+        state.update { it.copy(remarks = value) }
+    }
+
+    fun onNtnChange(value: String) {
+        state.update { it.copy(ntn = value) }
+    }
+
+    fun onStnChange(value: String) {
+        state.update { it.copy(stn = value) }
+    }
+
+    fun onCategoryIdChange(value: Long) {
+        state.update { it.copy(categoryId = value) }
+    }
+
+    fun onCategoryNameChange(value: String) {
+        state.update { it.copy(categoryName = value) }
+    }
+
+    fun onDiscChange(value: String) {
+        state.update { it.copy(disc = value) }
+    }
+
+    fun onIsDiscRsPerChange(value: Boolean) {
+        state.update { it.copy(isDiscRsPer = value) }
+    }
+
+    fun onOpeningBalanceChange(value: String) {
+        state.update { it.copy(openingBalance = value) }
+    }
+
+    fun onIsCreditChange(value: Boolean) {
+        state.update { it.copy(isCredit = value) }
+    }
+
+    // endregion
+
+    // region Network calls
+    fun insertOrUpdateData(onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if (state.value.isSaving)
+                return@launch
+
+            if (state.value.isUploadingImage)
+                return@launch
+
+            if (!isValid())
+                return@launch
+
+            state.update { it.copy(isSaving = true) }
+
+            val vendor = getFormData()
+
+            val result = if (state.value.isUpdate) {
+                vendor.id = state.value.updateId
+                api.updateVendor(vendor)
+            } else {
+                api.insertVendor(vendor)
+            }
+
+            state.update { it.copy(isSaving = false) }
+
+            when (result) {
+                is Resource.Error -> showError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    HP.vendors =
+                        Gson().getListOf<DropdownItem>(result.data.get("vendors").asJsonArray)
+                    clearTextboxes()
+                    onSuccess()
+                }
+            }
+        }
+    }
+
+    fun deleteData(id: Long, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if (state.value.isSaving)
+                return@launch
+
+            if (state.value.isUploadingImage)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.deleteVendor(id)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    HP.vendors =
+                        Gson().getListOf<DropdownItem>(result.data.get("vendors").asJsonArray)
+                    onSuccess()
+                }
+            }
+        }
+    }
+
+    fun editData(id: Long) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.getVendor(id)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val vendor = Gson().get<Accounts>(result.data.asJsonObject)
+                    setFormData(vendor)
+                }
+            }
+        }
+    }
+
+    fun uploadImage(multipart: MultipartBody.Part) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if (state.value.isSaving)
+                return@launch
+
+            if (state.value.isUploadingImage)
+                return@launch
+
+            state.update { it.copy(isUploadingImage = true) }
+
+            when (val result = mainRepo.uploadImage(multipart)) {
+                is Resource.Error -> {
+                    state.update { it.copy(isUploadingImage = false) }
+                    showError(result.error)
+                }
+
+                is Resource.Information -> {
+                    state.update { it.copy(isUploadingImage = false) }
+                    showMessage(result.message)
+                }
+
+                is Resource.Success -> {
+                    val fileName = result.data.asJsonObject.get("fileName").asString
+                    state.update {
+                        it.copy(
+                            isUploadingImage = false,
+                            imageUrl = fileName,
+                        )
+                    }
+                }
+            }
+        }
+    }
+    // endregion
+
+    // region Methods
+    private fun getFormData(): Accounts {
+        return Accounts(
+            accountName = state.value.accountName,
+            address = state.value.address,
+            contact = state.value.contact,
+            city = state.value.city,
+            remarks = state.value.remarks,
+            ntn = state.value.ntn,
+            stn = state.value.stn,
+
+            categoryId = state.value.categoryId,
+
+            disc = HP.getDoubleValue(state.value.disc),
+            isDiscRsPer = state.value.isDiscRsPer,
+            openingBalance = HP.getDoubleValue(state.value.openingBalance),
+
+            isCredit = state.value.isCredit,
+
+            imageUrl = state.value.imageUrl,
+        )
+    }
+
+    private fun setFormData(customer: Accounts) {
+        state.update {
+            it.copy(
+                accountName = customer.accountName.toString(),
+                address = customer.address.toString(),
+                contact = customer.contact.toString(),
+                city = customer.city.toString(),
+                remarks = customer.remarks.toString(),
+                ntn = customer.ntn.toString(),
+                stn = customer.stn.toString(),
+
+                categoryId = customer.categoryId!!,
+
+                disc = customer.disc.toString(),
+                isDiscRsPer = customer.isDiscRsPer!!,
+
+                isCredit = customer.isCredit!!,
+
+                imageUrl = customer.imageUrl!!,
+
+                // Extras
+                openingBalanceTBEnabled = false,
+            )
+        }
+    }
+
+    private fun clearTextboxes() {
+        state.update {
+            it.copy(
+                accountName = "",
+                address = "",
+                contact = "",
+                city = "",
+                remarks = "",
+                ntn = "",
+                stn = "",
+
+                categoryId = 0L,
+
+                disc = "",
+                isDiscRsPer = HP.settings.isDefaultDiscRs!!,
+                openingBalance = "",
+
+                isCredit = false,
+
+                imageUrl = "",
+
+                // Extras
+                isUpdate = false,
+                updateId = 0L,
+
+                openingBalanceTBEnabled = true,
+            )
+        }
+    }
+
+    private fun isValid(): Boolean {
+        if (state.value.accountName.isEmpty()) {
+            showMessage("Please enter vendor name")
+            return false
+        }
+
+        return true
+    }
+    // endregion
+
+    // region Others
+    private fun resultError(error: String?) {
+        state.update { it.copy(isLoading = false) }
+        showError(error)
+    }
+
+    private fun resultInformation(message: String?) {
+        state.update { it.copy(isLoading = false) }
+        showMessage(message)
+    }
+
+    private fun resultSuccess() {
+        state.update { it.copy(isLoading = false) }
+    }
+
+    fun updateInitialState(isUpdate: Boolean, updateId: Long) {
+        state.update { it.copy(isUpdate = isUpdate, updateId = updateId) }
+    }
+
+    // endregion
+}

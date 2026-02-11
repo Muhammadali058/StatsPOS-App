@@ -25,4 +25,9 @@ data class Entries(
     // Extras not part of database
     var itemId: Long? = null,
     var stock: Double? = null,
+    var accountName: String? = null,
+    var mop: String? = null,
+    var username: String? = null,
+    var debitAccountName: String? = null,
+    var creditAccountName: String? = null,
 )

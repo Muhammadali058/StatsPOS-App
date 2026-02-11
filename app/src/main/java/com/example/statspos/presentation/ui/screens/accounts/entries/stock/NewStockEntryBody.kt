@@ -1,0 +1,499 @@
+package com.example.statspos.presentation.ui.screens.accounts.entries.stock
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.statspos.R
+import com.example.statspos.domain.models.DropdownItem
+import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
+import com.example.statspos.presentation.ui.components.AppIcon
+import com.example.statspos.presentation.ui.components.AppIconButton
+import com.example.statspos.presentation.ui.components.AutoCompleteItemsTextbox
+import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
+import com.example.statspos.presentation.ui.components.ComboBox
+import com.example.statspos.presentation.ui.components.DateTextbox
+import com.example.statspos.presentation.ui.components.ErrorDialog
+import com.example.statspos.presentation.ui.components.ExpandableSection
+import com.example.statspos.presentation.ui.components.ProgressBarLayout
+import com.example.statspos.presentation.ui.components.SaveButton
+import com.example.statspos.presentation.ui.components.SubComboBox
+import com.example.statspos.presentation.ui.components.Textbox
+import com.example.statspos.presentation.ui.utils.ConstantPaddings
+import com.example.statspos.presentation.viewmodels.SharedViewModel
+import com.example.statspos.presentation.viewmodels.accounts.entries.stock.NewStockEntryViewModel
+import com.example.statspos.utils.HP
+import com.example.statspos.utils.UiEvent
+import com.example.statspos.utils.checkEvent
+import com.example.statspos.utils.showToast
+import java.time.LocalDate
+
+@Composable
+fun NewStockEntryBody(
+    mainSharedViewModel: SharedViewModel,
+    sharedViewModel: SharedViewModel,
+    onSearchItemClick: () -> Unit,
+    snackbarHostState: SnackbarHostState
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val context = LocalContext.current
+    val viewModel = hiltViewModel<NewStockEntryViewModel>()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val event by viewModel.event.collectAsState(UiEvent.Idle)
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var showBarcodeScanner by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
+
+    LaunchedEffect(event) {
+        checkEvent(
+            event = event,
+            snackbarHostState = snackbarHostState,
+            viewModelIdleEvent = viewModel::onEvent,
+            onError = {
+                showErrorDialog = true
+            }
+        )
+    }
+
+    val sharedViewModelState by mainSharedViewModel.state.collectAsStateWithLifecycle()
+    LaunchedEffect(sharedViewModelState.dataChanged) {
+        if (sharedViewModelState.dataChanged) {
+            val item = sharedViewModelState.item
+            item?.run {
+                viewModel.onItemnameChange(itemname!!)
+                viewModel.getItem(itemname!!)
+                mainSharedViewModel.consumeDataChanged()
+            }
+        }
+    }
+
+    if (showErrorDialog) {
+        ErrorDialog(
+            error = state.error,
+            onDismiss = {
+                showErrorDialog = false
+            },
+        )
+    }
+
+    if (showBarcodeScanner) {
+        BarcodeScannerDialog(
+            onDismiss = {
+                showBarcodeScanner = false
+            },
+            onScanned = {
+                viewModel.onItemnameChange(it)
+                viewModel.getItem(it)
+                showBarcodeScanner = false
+            }
+        )
+    }
+
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Column(
+                Modifier
+                    .weight(1f)
+                    .verticalScroll(scrollState),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                ItemnameBox(
+                    value = state.itemname,
+                    onValueChange = viewModel::onItemnameChange,
+                    onItemSelected = {
+                        viewModel.getItem(it)
+                        keyboardController?.hide()
+                    },
+                    onSearchClick = {
+                        viewModel.getItem(it)
+                        keyboardController?.hide()
+                    },
+                    onEndIconClick = {
+                        viewModel.onItemnameChange("")
+                    },
+                    onBarcodeClick = {
+                        showBarcodeScanner = true
+                    },
+                    onSearchItemClick = onSearchItemClick
+                )
+                Body(
+                    expense = state.expense,
+                    subExpense = state.subExpense,
+                    qty = state.qty,
+                    crtn = state.crtn,
+                    amount = state.amount,
+                    date = state.date,
+                    naration = state.naration,
+                    onExpenseSelected = viewModel::onExpenseSelected,
+                    onSubExpenseSelected = viewModel::onSubExpenseSelected,
+                    onAmountChanged = viewModel::onAmountChange,
+                    onQtyChanged = viewModel::onQtyChange,
+                    onCrtnChanged = viewModel::onCrtnChange,
+                    onDateChanged = viewModel::onDateChange,
+                    onNarationChanged = viewModel::onNarationChange,
+                )
+                MOP(
+                    mop = state.mop,
+                    bank = state.bank,
+                    subBank = state.subBank,
+                    bankEnabled = state.bankEnabled,
+                    subBankEnabled = state.subBankEnabled,
+                    onMOPChange = viewModel::onMOPChange,
+                    onBankSelected = viewModel::onBankSelected,
+                    onSubBankSelected = viewModel::onSubBankSelected,
+                )
+            }
+
+            // Post Button
+            Box(
+                modifier = Modifier
+                    .padding(ConstantPaddings.BODY_HORIZONTAL)
+                    .windowInsetsPadding(
+                        WindowInsets.navigationBars
+                            .union(WindowInsets.ime)
+                    )
+            ) {
+                if (state.isSaving) {
+                    AppCircularProgressIndicator()
+                } else {
+                    SaveButton(
+                        text = "Post"
+                    ) {
+                        viewModel.passEntry {
+                            context.showToast("Enter posted successfully")
+                            sharedViewModel.notifyDataChanged()
+                            keyboardController?.hide()
+                        }
+                    }
+                }
+            }
+        }
+
+        if (state.isLoading) {
+            ProgressBarLayout()
+        }
+    }
+}
+
+@Composable
+private fun ItemnameBox(
+    value: String,
+    onValueChange: (String) -> Unit,
+    onItemSelected: (String) -> Unit,
+    onSearchClick: (String) -> Unit,
+    onEndIconClick: (String) -> Unit,
+    onBarcodeClick: () -> Unit,
+    onSearchItemClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(ConstantPaddings.BODY_HORIZONTAL),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AutoCompleteItemsTextbox(
+            modifier = Modifier
+                .weight(1f),
+            value = value,
+            onValueChange = onValueChange,
+            onItemSelected = onItemSelected,
+            onEndIconClick = onEndIconClick,
+            onSearchClick = onSearchClick,
+            label = {
+                Text(
+                    text = "Select Item"
+                )
+            },
+            trailingIcon = {
+                IconButton(onClick = {
+                    onEndIconClick(value)
+                }) {
+                    AppIcon(
+                        icon = Icons.Default.Clear,
+                        size = 20.dp
+                    )
+                }
+            },
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Go
+            )
+        )
+        Spacer(Modifier.width(4.dp))
+        AppIconButton(
+            onClick = {
+                onBarcodeClick()
+            },
+            icon = R.drawable.ic_barcode,
+            buttonSize = 32.dp,
+            size = 26.dp
+        )
+        Spacer(Modifier.width(4.dp))
+        AppIconButton(
+            onClick = {
+                onSearchItemClick()
+            },
+            icon = Icons.Default.Search,
+            buttonSize = 32.dp,
+            size = 26.dp
+        )
+    }
+}
+
+@Composable
+private fun Body(
+    expense: DropdownItem?,
+    subExpense: DropdownItem?,
+    qty: String,
+    crtn: String,
+    amount: String,
+    date: LocalDate,
+    naration: String,
+    onExpenseSelected: (DropdownItem) -> Unit,
+    onSubExpenseSelected: (DropdownItem) -> Unit,
+    onAmountChanged: (String) -> Unit,
+    onQtyChanged: (String) -> Unit,
+    onCrtnChanged: (String) -> Unit,
+    onDateChanged: (LocalDate) -> Unit,
+    onNarationChanged: (String) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(ConstantPaddings.BODY_HORIZONTAL)
+    ) {
+        ComboBox(
+            modifier = Modifier
+                .fillMaxWidth(),
+            items = HP.expenses,
+            selectedItem = expense,
+            onItemSelected = onExpenseSelected,
+            label = {
+                Text("Expense")
+            },
+            addNone = true,
+        )
+        SubComboBox(
+            modifier = Modifier
+                .fillMaxWidth(),
+            items = HP.subExpenses,
+            selectedItem = subExpense,
+            onItemSelected = onSubExpenseSelected,
+            label = {
+                Text("Sub-Expense")
+            },
+            addNone = true,
+            mainId = expense?.id ?: 0L
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            Textbox(
+                modifier = Modifier
+                    .weight(1f),
+                value = qty,
+                onValueChange = onQtyChanged,
+                label = {
+                    Text("Qty")
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal
+                ),
+            )
+            if (HP.settings.saleCartons == true) {
+                Spacer(Modifier.width(8.dp))
+                Textbox(
+                    modifier = Modifier
+                        .weight(1f),
+                    value = crtn,
+                    onValueChange = onCrtnChanged,
+                    label = {
+                        Text("Crtn")
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal
+                    ),
+                )
+            }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            Textbox(
+                modifier = Modifier
+                    .weight(1f),
+                value = amount,
+                onValueChange = onAmountChanged,
+                label = {
+                    Text("Amount")
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal
+                ),
+            )
+            if (HP.userRights.dateWiseEntry == true) {
+                Spacer(Modifier.width(8.dp))
+                DateTextbox(
+                    modifier = Modifier
+                        .weight(1f),
+                    date = date,
+                    onDateChange = onDateChanged,
+                )
+            }
+        }
+        Textbox(
+            modifier = Modifier
+                .fillMaxWidth(),
+            value = naration,
+            onValueChange = onNarationChanged,
+            label = {
+                Text("Naration")
+            },
+        )
+    }
+}
+
+@Composable
+private fun MOP(
+    mop: DropdownItem,
+    bank: DropdownItem?,
+    subBank: DropdownItem?,
+    bankEnabled: Boolean,
+    subBankEnabled: Boolean,
+    onMOPChange: (DropdownItem) -> Unit,
+    onBankSelected: (DropdownItem) -> Unit,
+    onSubBankSelected: (DropdownItem) -> Unit,
+) {
+    ExpandableSection(
+        title = "M.O.P Bank",
+        initiallyExpanded = false,
+    ) {
+        ComboBox(
+            modifier = Modifier
+                .fillMaxWidth(),
+            items = HP.mop,
+            selectedItem = mop,
+            onItemSelected = onMOPChange,
+            label = {
+                Text("M.O.P")
+            }
+        )
+        ComboBox(
+            modifier = Modifier
+                .fillMaxWidth(),
+            items = HP.banks,
+            selectedItem = bank,
+            onItemSelected = onBankSelected,
+            label = {
+                Text("Bank")
+            },
+            addNone = true,
+            enabled = bankEnabled,
+        )
+        SubComboBox(
+            modifier = Modifier
+                .fillMaxWidth(),
+            items = HP.subBanks,
+            selectedItem = subBank,
+            onItemSelected = onSubBankSelected,
+            label = {
+                Text("Bank Account")
+            },
+            addNone = true,
+            enabled = subBankEnabled,
+            mainId = bank?.id ?: 0L
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun Prev() {
+    Column(
+        Modifier
+            .fillMaxSize(),
+    ) {
+        ItemnameBox(
+            value = "",
+            onValueChange = {},
+            onItemSelected = {},
+            onSearchClick = {},
+            onEndIconClick = {},
+            onBarcodeClick = {},
+            onSearchItemClick = {}
+        )
+        Body(
+            null,
+            null,
+            "",
+            "",
+            "",
+            LocalDate.now(),
+            "",
+            { },
+            { },
+            { },
+            { },
+            { },
+            { },
+            { },
+        )
+        MOP(
+            mop = HP.mop[0],
+            bank = null,
+            subBank = null,
+            bankEnabled = true,
+            subBankEnabled = true,
+            onMOPChange = {},
+            onBankSelected = {},
+            onSubBankSelected = {},
+        )
+    }
+}

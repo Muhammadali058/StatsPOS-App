@@ -23,6 +23,9 @@ sealed class TopRoutes : NavKey{
     data object Home : TopRoutes()
 
     @Serializable
+    data object SearchItem : BottomRoutes()
+
+    @Serializable
     data class AddUpdateItem(val updateId: Long, val isUpdate: Boolean) : TopRoutes()
 
     @Serializable
@@ -58,4 +61,20 @@ sealed class TopRoutes : NavKey{
 
     @Serializable
     data object AccountCategories : TopRoutes()
+
+//    Entries
+    @Serializable
+    data object ReceiptEntry : TopRoutes()
+
+    @Serializable
+    data object PaymentEntry : TopRoutes()
+
+    @Serializable
+    data object ExpenseEntry : TopRoutes()
+
+    @Serializable
+    data object JournalEntry : TopRoutes()
+
+    @Serializable
+    data object StockEntry : TopRoutes()
 }

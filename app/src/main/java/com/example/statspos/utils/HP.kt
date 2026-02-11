@@ -20,11 +20,17 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import kotlin.math.abs
 
 object HP {
     var localClient: LocalClients? = null
 
-    const val itemsPerPage: Int = 10
+    const val itemsPerPage = 10
+    val mop = listOf(
+        DropdownItem(0L, "Cash"),
+        DropdownItem(1L, "Bank"),
+    )
+
 
     var clientId: Int = 1
     var branchId: Int = 1
@@ -95,7 +101,8 @@ object HP {
             )
         }
         packages = Gson().getListOf<DropdownItem>(jsonObject.get("packages").asJsonArray)
-        purchaseOrders = Gson().getListOf<DropdownItem>(jsonObject.get("purchaseOrders").asJsonArray)
+        purchaseOrders =
+            Gson().getListOf<DropdownItem>(jsonObject.get("purchaseOrders").asJsonArray)
         customers = Gson().getListOf<DropdownItem>(jsonObject.get("customers").asJsonArray)
         vendors = Gson().getListOf<DropdownItem>(jsonObject.get("vendors").asJsonArray)
         suppliers = Gson().getListOf<DropdownItem>(jsonObject.get("suppliers").asJsonArray)
@@ -190,13 +197,31 @@ object HP {
         }
     }
 
-    fun getDropdownNameByIdPerformance(id: Long, list: List<DropdownItem>, defaultValue: String = "" ): String {
+    fun getDropdownNameByIdPerformance(
+        id: Long,
+        list: List<DropdownItem>,
+        defaultValue: String = ""
+    ): String {
         val dropdownMap = list.associateBy({ it.id }, { it.name })
         return dropdownMap[id] ?: defaultValue
     }
 
     fun getDropdownNameById(id: Long, list: List<DropdownItem>, defaultValue: String = ""): String {
         return list.firstOrNull { it.id == id }?.name ?: defaultValue
+    }
+
+    fun getBalanceWithLabel(balance: Double): String {
+        val label = getReceivableOrPayableLabel(balance);
+        return "Balance: " + abs(balance).toString() + " " + label
+    }
+
+    fun getReceivableOrPayableLabel(balance: Double): String {
+        return if (balance > 0)
+            "(R)";
+        else if (balance < 0)
+            "(P)";
+        else
+            ""
     }
 
     // region Datetime

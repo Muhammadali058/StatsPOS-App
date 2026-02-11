@@ -66,6 +66,7 @@ import com.example.statspos.presentation.ui.components.AppText
 import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
 import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.CustomDatePickerDialog
+import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.DiscountTextbox
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
@@ -1024,19 +1025,6 @@ private fun DiscountExpiry(
     onPackingChange: (String) -> Unit,
     onLocationChange: (String) -> Unit,
 ) {
-    var showDateDialog by remember { mutableStateOf(false) }
-    if (showDateDialog) {
-        CustomDatePickerDialog(
-            initialValue = expiry,
-            onDismiss = {
-                showDateDialog = false
-            },
-            onSelected = {
-                onExpiryChange(it)
-            }
-        )
-    }
-
     ExpandableSection(
         title = "Discount, Expiry, Location",
         initiallyExpanded = false,
@@ -1089,23 +1077,12 @@ private fun DiscountExpiry(
                 }
             }
             Spacer(Modifier.height(8.dp))
-            Textbox(
-                value = HP.getFormatedDate(expiry),
-                onValueChange = { },
+            DateTextbox(
                 modifier = Modifier
                     .fillMaxWidth(),
-                readOnly = true,
-                trailingIcon = {
-                    AppIconButton(
-                        icon = Icons.Default.CalendarMonth,
-                        onClick = {
-                            showDateDialog = true
-                        }
-                    )
-                },
-                label = {
-                    Text("Expiry")
-                },
+                date = expiry,
+                onDateChange = onExpiryChange,
+                label = "Expiry"
             )
             DiscountTextbox(
                 value = disc,

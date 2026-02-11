@@ -107,11 +107,11 @@ private val accounts = listOf(
     TopItem("Account\nCategories", TopRoutes.AccountCategories, R.drawable.categories),
 )
 private val entries = listOf(
-    TopItem("Receipt", TopRoutes.Categories),
-    TopItem("Payment", TopRoutes.Categories),
-    TopItem("Expense", TopRoutes.Categories),
-    TopItem("Journal", TopRoutes.Categories),
-    TopItem("Stock", TopRoutes.Categories),
+    TopItem("Receipt", TopRoutes.ReceiptEntry),
+    TopItem("Payment", TopRoutes.PaymentEntry),
+    TopItem("Expense", TopRoutes.ExpenseEntry),
+    TopItem("Journal", TopRoutes.JournalEntry),
+    TopItem("Stock", TopRoutes.StockEntry),
 )
 private val warehouse = listOf(
     TopItem("Warehouses", TopRoutes.Categories),

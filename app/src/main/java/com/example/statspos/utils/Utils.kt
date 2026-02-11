@@ -27,6 +27,34 @@ enum class PasswordFor {
     AUDIT,
 }
 
+enum class EntryType {
+    RECEIPT,
+    PAYMENT,
+    EXPENSE,
+    SALES,
+    SALES_RETURN,
+    PURCHASE,
+    PURCHASE_RETURN,
+    JOURNAL,
+    STOCK,
+}
+
+enum class FixedAccounts {
+    CASH,
+    SALES,
+    SALES_RETURN,
+    PURCHASE,
+    PURCHASE_RETURN,
+}
+
+fun getEntryType(entryType: EntryType): Int {
+    return entryType.ordinal + 1
+}
+
+fun getFixedAccount(fixedAccount: FixedAccounts): Long {
+    return (fixedAccount.ordinal + 1).toLong()
+}
+
 fun Context.showToast(msg: String, length: Int = Toast.LENGTH_SHORT) =
     Toast.makeText(this, msg, length).show()
 

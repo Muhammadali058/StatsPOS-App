@@ -22,10 +22,16 @@ import com.example.statspos.presentation.ui.screens.TopRoutes
 import com.example.statspos.presentation.ui.screens.accounts.account_categories.AccountCategoriesScreen
 import com.example.statspos.presentation.ui.screens.accounts.banks.BanksScreen
 import com.example.statspos.presentation.ui.screens.accounts.customers.CustomersScreen
+import com.example.statspos.presentation.ui.screens.accounts.entries.expense.ExpenseEntryScreen
+import com.example.statspos.presentation.ui.screens.accounts.entries.journal.JournalEntryScreen
+import com.example.statspos.presentation.ui.screens.accounts.entries.payment.PaymentEntryScreen
+import com.example.statspos.presentation.ui.screens.accounts.entries.receipt.ReceiptEntryScreen
+import com.example.statspos.presentation.ui.screens.accounts.entries.stock.StockEntryScreen
 import com.example.statspos.presentation.ui.screens.accounts.expenses.ExpensesScreen
 import com.example.statspos.presentation.ui.screens.accounts.suppliers.SuppliersScreen
 import com.example.statspos.presentation.ui.screens.accounts.vendors.VendorsScreen
 import com.example.statspos.presentation.ui.screens.items.AddUpdateItemScreen
+import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
 import com.example.statspos.presentation.ui.screens.items.categories.CategoriesScreen
 import com.example.statspos.presentation.ui.screens.items.packages.PackagesScreen
 import com.example.statspos.presentation.ui.screens.purchase.PurchaseScreen
@@ -60,6 +66,14 @@ fun MainScreen() {
                     sharedViewModel = sharedViewModel,
                     onTopRouteClick = { key ->
                         navigate(key)
+                    }
+                )
+            }
+            entry<TopRoutes.SearchItem> {
+                SearchItemsScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
                     }
                 )
             }
@@ -145,6 +159,46 @@ fun MainScreen() {
             entry<TopRoutes.AccountCategories> {
                 AccountCategoriesScreen(
                     sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+//            Entries
+            entry<TopRoutes.ReceiptEntry> {
+                ReceiptEntryScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<TopRoutes.PaymentEntry> {
+                PaymentEntryScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<TopRoutes.ExpenseEntry> {
+                ExpenseEntryScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<TopRoutes.JournalEntry> {
+                JournalEntryScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<TopRoutes.StockEntry> {
+                StockEntryScreen(
+                    mainSharedViewModel = sharedViewModel,
+                    onSearchItemClick = {
+                        navigate(TopRoutes.SearchItem)
+                    },
                     onBack = {
                         backStack.removeLastOrNull()
                     }

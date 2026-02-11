@@ -23,6 +23,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -68,6 +69,7 @@ import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.ui.utils.ConstantSize
 import com.example.statspos.utils.HP
+import java.time.LocalDate
 
 @Composable
 fun Textbox(
@@ -503,5 +505,44 @@ fun SearchTextbox(
                 onSearchClick(value)
             }
         )
+    )
+}
+
+@Composable
+fun DateTextbox(
+    modifier: Modifier = Modifier,
+    date: LocalDate,
+    onDateChange: (LocalDate) -> Unit,
+    label: String = "Date",
+) {
+    var showDateDialog by remember { mutableStateOf(false) }
+    if (showDateDialog) {
+        CustomDatePickerDialog(
+            initialValue = date,
+            onDismiss = {
+                showDateDialog = false
+            },
+            onSelected = {
+                onDateChange(it)
+            }
+        )
+    }
+
+    Textbox(
+        value = HP.getFormatedDate(date),
+        onValueChange = { },
+        modifier = modifier,
+        readOnly = true,
+        trailingIcon = {
+            AppIconButton(
+                icon = Icons.Default.CalendarMonth,
+                onClick = {
+                    showDateDialog = true
+                }
+            )
+        },
+        label = {
+            Text(label)
+        },
     )
 }

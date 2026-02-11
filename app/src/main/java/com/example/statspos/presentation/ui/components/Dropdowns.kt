@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import com.example.statspos.domain.models.DropdownItem
+import com.example.statspos.presentation.ui.utils.ConstantPaddings
 
 @Composable
 fun Dropdown(
@@ -64,6 +65,8 @@ fun Dropdown(
     items: List<DropdownItem>,
     onItemSelected: (DropdownItem) -> Unit,
     listSize: Dp = 200.dp,
+    noneText: String = "None",
+    addType: Boolean = false,
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     shape: Shape = OutlinedTextFieldDefaults.shape,
@@ -71,9 +74,6 @@ fun Dropdown(
     enabled: Boolean = true,
     readOnly: Boolean = false,
     singleLine: Boolean = true,
-    keyboardOptions: KeyboardOptions = KeyboardOptions(
-        imeAction = ImeAction.Next
-    ),
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     contentPadding: PaddingValues = PaddingValues(
         start = 15.dp,
@@ -81,6 +81,7 @@ fun Dropdown(
         end = 10.dp,
         bottom = 10.dp
     ),
+    padding: PaddingValues = ConstantPaddings.CUSTOM_TEXTBOX_OUTSIDE,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -90,14 +91,14 @@ fun Dropdown(
             if (items.any { it.id == 0L }) {
                 items
             } else {
-                listOf(DropdownItem(0L, "None")) + items
+                listOf(DropdownItem(0L, noneText)) + items
             }
         }
     }
 
     val filteredItems by remember(itemsWithNone, value) {
         derivedStateOf {
-            if (value == "None")
+            if (value == noneText)
                 itemsWithNone
             else
                 itemsWithNone.filter {
@@ -146,7 +147,7 @@ fun Dropdown(
                 IconButton(
                     onClick = {
                         onValueChange("")
-                        onItemSelected(DropdownItem(0L,"None"))
+                        onItemSelected(DropdownItem(0L, noneText))
                     },
                     enabled = enabled,
                 ) {
@@ -156,9 +157,9 @@ fun Dropdown(
                     )
                 }
             },
-            keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
-            contentPadding = contentPadding
+            contentPadding = contentPadding,
+            padding = padding,
         )
 
         if (expanded && filteredItems.isNotEmpty()) {
@@ -174,8 +175,7 @@ fun Dropdown(
                     modifier = Modifier
                         .width(with(LocalDensity.current) {
                             textFieldSize.width.toDp()
-                        })
-                    ,
+                        }),
                     elevation = CardDefaults.cardElevation(2.dp),
                     shape = RectangleShape,
                     colors = CardDefaults.cardColors(
@@ -187,7 +187,7 @@ fun Dropdown(
                     ) {
                         items(filteredItems) { item ->
                             Text(
-                                text = item.name,
+                                text = if (addType) item.name + " -> " + item.type else item.name,
                                 style = TextStyle(
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
                                 ),
@@ -219,6 +219,7 @@ fun SubDropdown(
     onItemSelected: (DropdownItem) -> Unit,
     mainId: Long = 0L,
     listSize: Dp = 200.dp,
+    noneText: String = "None",
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     shape: Shape = OutlinedTextFieldDefaults.shape,
@@ -226,9 +227,6 @@ fun SubDropdown(
     enabled: Boolean = true,
     readOnly: Boolean = false,
     singleLine: Boolean = true,
-    keyboardOptions: KeyboardOptions = KeyboardOptions(
-        imeAction = ImeAction.Next
-    ),
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     contentPadding: PaddingValues = PaddingValues(
         start = 15.dp,
@@ -245,7 +243,7 @@ fun SubDropdown(
             if (items.any { it.id == 0L }) {
                 items
             } else {
-                listOf(DropdownItem(0L, "None")) + items
+                listOf(DropdownItem(0L, noneText)) + items
             }
         }
     }
@@ -253,16 +251,22 @@ fun SubDropdown(
     val filteredItems by remember(itemsWithNone, value, mainId) {
         derivedStateOf {
             if (mainId == 0L) {
-                if (items.any { it.id == 0L }) {
-                    items
-                } else {
-                    listOf(DropdownItem(0L, "None")) + items
-                }
+                listOf(DropdownItem(0L, noneText))
+//                if (items.any { it.id == 0L }) {
+//                    items
+//                } else {
+//                    listOf(DropdownItem(0L, noneText)) + items
+//                }
             } else {
-                if (value == "None")
-                    listOf(DropdownItem(0L, "None")) + itemsWithNone.filter { it.mainId == mainId}
+                if (value == noneText)
+                    listOf(
+                        DropdownItem(
+                            0L,
+                            noneText
+                        )
+                    ) + itemsWithNone.filter { it.mainId == mainId }
                 else
-                    listOf(DropdownItem(0L, "None")) + itemsWithNone.filter {
+                    listOf(DropdownItem(0L, noneText)) + itemsWithNone.filter {
                         it.mainId == mainId && it.name.contains(value, ignoreCase = true)
                     }
             }
@@ -277,7 +281,7 @@ fun SubDropdown(
         }
 
         onValueChange("")
-        onItemSelected(DropdownItem(0L, "None"))
+        onItemSelected(DropdownItem(0L, noneText))
     }
 
     var expanded by remember { mutableStateOf(false) }
@@ -320,7 +324,7 @@ fun SubDropdown(
                 IconButton(
                     onClick = {
                         onValueChange("")
-                        onItemSelected(DropdownItem(0L, "None"))
+                        onItemSelected(DropdownItem(0L, noneText))
                     },
                     enabled = enabled,
                 ) {
@@ -330,7 +334,6 @@ fun SubDropdown(
                     )
                 }
             },
-            keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
             contentPadding = contentPadding
         )
@@ -391,19 +394,21 @@ fun ComboBox(
     onItemSelected: (DropdownItem) -> Unit,
     listSize: Dp = 200.dp,
     addNone: Boolean = false,
+    noneText: String = "None",
+    enabled: Boolean = true,
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     shape: Shape = OutlinedTextFieldDefaults.shape,
 ) {
     val itemsWithNone by remember(items) {
         derivedStateOf {
-            if(addNone) {
+            if (addNone) {
                 if (items.any { it.id == 0L }) {
                     items
                 } else {
-                    listOf(DropdownItem(0L, "None")) + items
+                    listOf(DropdownItem(0L, noneText)) + items
                 }
-            }else
+            } else
                 items
         }
     }
@@ -412,7 +417,10 @@ fun ComboBox(
 
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = { expanded = !expanded }
+        onExpandedChange = {
+            if (enabled)
+                expanded = !expanded
+        }
     ) {
         Textbox(
             value = selectedItem?.name ?: "",
@@ -421,13 +429,16 @@ fun ComboBox(
                 .menuAnchor(),
             shape = shape,
             readOnly = true,
+            enabled = enabled,
             label = label,
             placeholder = placeholder,
             leadingIcon = {
                 IconButton(
                     onClick = {
-                        expanded = true
-                    }
+                        if (enabled)
+                            expanded = true
+                    },
+                    enabled = enabled,
                 ) {
                     AppIcon(
                         icon = Icons.Default.ArrowDropDown
@@ -437,9 +448,12 @@ fun ComboBox(
             trailingIcon = {
                 IconButton(
                     onClick = {
-                        expanded = false
-                        onItemSelected(itemsWithNone[0])
-                    }
+                        if (enabled) {
+                            expanded = false
+                            onItemSelected(itemsWithNone[0])
+                        }
+                    },
+                    enabled = enabled,
                 ) {
                     AppIcon(
                         icon = Icons.Default.Clear,
@@ -457,6 +471,142 @@ fun ComboBox(
                 .heightIn(max = listSize)
         ) {
             itemsWithNone.forEach { item ->
+                DropdownMenuItem(
+                    modifier = Modifier.height(34.dp),
+                    text = {
+                        Text(
+                            text = item.name,
+                            style = TextStyle(
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                fontSize = 14.sp,
+                            ),
+                            modifier = Modifier
+                                .padding(vertical = 2.dp)
+                        )
+                    },
+                    onClick = {
+                        onItemSelected(item)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SubComboBox(
+    modifier: Modifier = Modifier,
+    items: List<DropdownItem>,
+    selectedItem: DropdownItem?,
+    onItemSelected: (DropdownItem) -> Unit,
+    mainId: Long = 0L,
+    listSize: Dp = 200.dp,
+    addNone: Boolean = false,
+    noneText: String = "None",
+    enabled: Boolean = true,
+    label: @Composable (() -> Unit)? = null,
+    placeholder: @Composable (() -> Unit)? = null,
+    shape: Shape = OutlinedTextFieldDefaults.shape,
+) {
+    val itemsWithNone by remember(items) {
+        derivedStateOf {
+            if (addNone) {
+                if (items.any { it.id == 0L }) {
+                    items
+                } else {
+                    listOf(DropdownItem(0L, noneText)) + items
+                }
+            } else
+                items
+        }
+    }
+
+    val filteredItems by remember(itemsWithNone, mainId) {
+        derivedStateOf {
+            if (mainId == 0L) {
+                listOf(DropdownItem(0L, noneText))
+//                if (items.any { it.id == 0L }) {
+//                    items
+//                } else {
+//                    listOf(DropdownItem(0L, noneText)) + items
+//                }
+            } else {
+                listOf(DropdownItem(0L, noneText)) + items.filter { it.mainId == mainId }
+            }
+        }
+    }
+
+    var isFirstRun by rememberSaveable { mutableStateOf(true) }
+    LaunchedEffect(mainId) {
+        if (isFirstRun) {
+            isFirstRun = false
+            return@LaunchedEffect
+        }
+
+        onItemSelected(DropdownItem(0L, noneText))
+    }
+
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = {
+            if (enabled)
+                expanded = !expanded
+        }
+    ) {
+        Textbox(
+            value = selectedItem?.name ?: "",
+            onValueChange = {},
+            modifier = modifier
+                .menuAnchor(),
+            shape = shape,
+            readOnly = true,
+            enabled = enabled,
+            label = label,
+            placeholder = placeholder,
+            leadingIcon = {
+                IconButton(
+                    onClick = {
+                        if (enabled)
+                            expanded = true
+                    },
+                    enabled = enabled,
+                ) {
+                    AppIcon(
+                        icon = Icons.Default.ArrowDropDown
+                    )
+                }
+            },
+            trailingIcon = {
+                IconButton(
+                    onClick = {
+                        if (enabled) {
+                            expanded = false
+                            onItemSelected(itemsWithNone[0])
+                        }
+                    },
+                    enabled = enabled,
+                ) {
+                    AppIcon(
+                        icon = Icons.Default.Clear,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            },
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.primaryContainer)
+                .heightIn(max = listSize)
+        ) {
+            filteredItems.forEach { item ->
                 DropdownMenuItem(
                     modifier = Modifier.height(34.dp),
                     text = {

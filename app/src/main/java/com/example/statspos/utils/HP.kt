@@ -210,6 +210,10 @@ object HP {
         return list.firstOrNull { it.id == id }?.name ?: defaultValue
     }
 
+    fun getDropdownById(id: Long, list: List<DropdownItem>): DropdownItem? {
+        return list.firstOrNull { it.id == id }
+    }
+
     fun getBalanceWithLabel(balance: Double): String {
         val label = getReceivableOrPayableLabel(balance);
         return "Balance: " + abs(balance).toString() + " " + label

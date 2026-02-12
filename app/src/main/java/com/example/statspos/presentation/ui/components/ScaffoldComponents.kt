@@ -250,7 +250,7 @@ fun AppSnackbarHost(
                 .padding(top = 60.dp),
             containerColor = backgroundColor,
             contentColor = MaterialTheme.colorScheme.onPrimary,
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(8.dp),
         )
     }
 }

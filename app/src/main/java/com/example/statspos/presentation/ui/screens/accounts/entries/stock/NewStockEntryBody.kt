@@ -134,7 +134,8 @@ fun NewStockEntryBody(
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(vertical = 16.dp),
+                .padding(top = 8.dp)
+                .padding(bottom = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Column(

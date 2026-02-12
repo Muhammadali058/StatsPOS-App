@@ -47,12 +47,22 @@ enum class FixedAccounts {
     PURCHASE_RETURN,
 }
 
+enum class UserTypes {
+    ADMINISTRATOR,
+    POS_USER,
+    INVENTORY_MANAGER,
+}
+
 fun getEntryType(entryType: EntryType): Int {
     return entryType.ordinal + 1
 }
 
 fun getFixedAccount(fixedAccount: FixedAccounts): Long {
     return (fixedAccount.ordinal + 1).toLong()
+}
+
+fun getUserType(userType: UserTypes): Long {
+    return (userType.ordinal + 1).toLong()
 }
 
 fun Context.showToast(msg: String, length: Int = Toast.LENGTH_SHORT) =

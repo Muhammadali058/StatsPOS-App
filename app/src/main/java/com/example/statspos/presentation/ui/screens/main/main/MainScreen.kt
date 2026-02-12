@@ -37,6 +37,7 @@ import com.example.statspos.presentation.ui.screens.items.packages.PackagesScree
 import com.example.statspos.presentation.ui.screens.purchase.PurchaseScreen
 import com.example.statspos.presentation.ui.screens.purchase.purchase_orders.PurchaseOrdersScreen
 import com.example.statspos.presentation.viewmodels.SharedViewModel
+import com.example.statspos.presentation.ui.screens.utilities.UsersScreen
 
 @Composable
 fun MainScreen() {
@@ -105,6 +106,14 @@ fun MainScreen() {
             }
             entry<TopRoutes.PurchaseOrders> {
                 PurchaseOrdersScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<TopRoutes.Users> {
+                UsersScreen(
                     sharedViewModel = sharedViewModel,
                     onBack = {
                         backStack.removeLastOrNull()

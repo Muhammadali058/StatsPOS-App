@@ -177,7 +177,7 @@ fun PasswordTextbox(
     readOnly: Boolean = false,
     singleLine: Boolean = true,
     leadingIcon: @Composable (() -> Unit)? = null,
-    imeAction: ImeAction = ImeAction.Next,
+    imeAction: ImeAction = ImeAction.Done,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     contentPadding: PaddingValues = ConstantPaddings.CUSTOM_TEXTBOX_INSIDE,
     padding: PaddingValues = ConstantPaddings.CUSTOM_TEXTBOX_OUTSIDE,

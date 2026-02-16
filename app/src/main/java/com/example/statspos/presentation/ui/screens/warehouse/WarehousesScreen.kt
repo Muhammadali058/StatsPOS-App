@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.utilities
+package com.example.statspos.presentation.ui.screens.warehouse
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -36,7 +34,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.example.statspos.domain.models.utilities.users.Users
+import com.example.statspos.domain.models.warehouse.Warehouses
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.ErrorDialog
@@ -44,15 +42,13 @@ import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
-import com.example.statspos.presentation.ui.components.ListImageView
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.components.TopAppBar
-import com.example.statspos.presentation.ui.screens.accounts.suppliers.AddUpdateSupplierScreen
 import com.example.statspos.presentation.ui.screens.utilities.users.AddUpdateUserScreen
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.utilities.UsersViewModel
+import com.example.statspos.presentation.viewmodels.warehouse.WarehousesViewModel
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import kotlinx.serialization.Serializable
@@ -62,11 +58,11 @@ private sealed class Routes : NavKey {
     data object Home : Routes()
 
     @Serializable
-    data class AddUpdateUser(val updateId: Long, val isUpdate: Boolean) : Routes()
+    data class AddUpdateWarehouse(val updateId: Long, val isUpdate: Boolean) : Routes()
 }
 
 @Composable
-fun UsersScreen(
+fun WarehousesScreen(
     sharedViewModel: SharedViewModel,
     onBack: () -> Unit,
 ) {
@@ -87,15 +83,15 @@ fun UsersScreen(
                 Home(
                     sharedViewModel = sharedViewModel,
                     onAddButtonClick = { updateId, isUpdate ->
-                        navigate(Routes.AddUpdateUser(updateId, isUpdate))
+                        navigate(Routes.AddUpdateWarehouse(updateId, isUpdate))
                     },
                     onBack = {
                         onBack()
                     },
                 )
             }
-            entry<Routes.AddUpdateUser> { key ->
-                AddUpdateUserScreen(
+            entry<Routes.AddUpdateWarehouse> { key ->
+                AddUpdateWarehouseScreen(
                     sharedViewModel = sharedViewModel,
                     updateId = key.updateId,
                     isUpdate = key.isUpdate,
@@ -116,7 +112,7 @@ private fun Home(
     onBack: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<UsersViewModel>()
+    val viewModel = hiltViewModel<WarehousesViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -168,7 +164,7 @@ private fun Home(
                 onNavigationClick = {
                     onBack()
                 },
-                title = "Users",
+                title = "Warehouses",
             )
         }
     ) { innerPadding ->
@@ -221,10 +217,10 @@ private fun Home(
                         .padding(8.dp)
                 ) {
                     HeadingMedium(
-                        text = "Total Users: ",
+                        text = "Total Warehouses: ",
                     )
                     LabelMedium(
-                        text = state.totalusers.toString(),
+                        text = state.totalWarehouses.toString(),
                     )
                 }
             }
@@ -261,8 +257,8 @@ private fun BodyList(
     modifier: Modifier = Modifier,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
-    items: List<Users>,
-    onItemClick: (Users) -> Unit,
+    items: List<Warehouses>,
+    onItemClick: (Warehouses) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -280,8 +276,8 @@ private fun BodyList(
 @Composable
 private fun ListCard(
     modifier: Modifier = Modifier,
-    item: Users,
-    onItemClick: (Users) -> Unit
+    item: Warehouses,
+    onItemClick: (Warehouses) -> Unit
 ) {
     ListCard(
         modifier = modifier
@@ -291,35 +287,14 @@ private fun ListCard(
             onItemClick(item)
         }
     ) {
+        LabelLarge(item.warehouseName.toString())
+        Spacer(Modifier.height(2.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Image
-            ListImageView(
-                imageUrl = item.imageUrl,
-                modifier = Modifier
-                    .size(60.dp),
-                showIfNull = true,
-            ) {
-                Spacer(Modifier.width(8.dp))
-            }
-
-            Column(
-                modifier = Modifier
-                    .weight(1f),
-            ) {
-                LabelLarge(item.username.toString())
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    HeadingMedium("User Type: ")
-                    LabelMedium(item.userTypeDescription.toString())
-                }
-            }
+            HeadingMedium("Remarks: ")
+            LabelMedium(item.remarks.toString())
         }
     }
 }

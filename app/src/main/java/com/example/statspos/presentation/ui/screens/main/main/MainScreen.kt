@@ -36,8 +36,10 @@ import com.example.statspos.presentation.ui.screens.items.categories.CategoriesS
 import com.example.statspos.presentation.ui.screens.items.packages.PackagesScreen
 import com.example.statspos.presentation.ui.screens.purchase.PurchaseScreen
 import com.example.statspos.presentation.ui.screens.purchase.purchase_orders.PurchaseOrdersScreen
+import com.example.statspos.presentation.ui.screens.utilities.SettingsScreen
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.ui.screens.utilities.UsersScreen
+import com.example.statspos.presentation.ui.screens.utilities.users.UsersScreen
+import com.example.statspos.presentation.ui.screens.warehouse.WarehousesScreen
 
 @Composable
 fun MainScreen() {
@@ -114,6 +116,14 @@ fun MainScreen() {
             }
             entry<TopRoutes.Users> {
                 UsersScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<TopRoutes.Settings> {
+                SettingsScreen(
                     sharedViewModel = sharedViewModel,
                     onBack = {
                         backStack.removeLastOrNull()
@@ -208,6 +218,15 @@ fun MainScreen() {
                     onSearchItemClick = {
                         navigate(TopRoutes.SearchItem)
                     },
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+//            Warehouses
+            entry<TopRoutes.Warehouses> {
+                WarehousesScreen(
+                    sharedViewModel = sharedViewModel,
                     onBack = {
                         backStack.removeLastOrNull()
                     }

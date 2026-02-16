@@ -98,6 +98,7 @@ private val items = listOf(
     TopItem("Packages", TopRoutes.Packages, R.drawable.package_icon),
     TopItem("Purchase\nOrders", TopRoutes.PurchaseOrders, R.drawable.package_icon),
     TopItem("Users", TopRoutes.Users, R.drawable.users),
+    TopItem("Settings", TopRoutes.Settings, R.drawable.settings),
 )
 private val accounts = listOf(
     TopItem("Customers", TopRoutes.Customers, R.drawable.customer_accounts),
@@ -115,7 +116,7 @@ private val entries = listOf(
     TopItem("Stock", TopRoutes.StockEntry),
 )
 private val warehouse = listOf(
-    TopItem("Warehouses", TopRoutes.Categories),
+    TopItem("Warehouses", TopRoutes.Warehouses),
     TopItem("Transfer Stock", TopRoutes.Categories),
     TopItem("Gatepass", TopRoutes.Categories),
 )

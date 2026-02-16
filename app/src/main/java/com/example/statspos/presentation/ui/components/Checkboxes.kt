@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.statspos.domain.models.utilities.BarcodeLabels
@@ -152,7 +153,8 @@ fun AppSwitch(
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
             ),
             modifier = Modifier
-                .padding(start = 4.dp)
+                .padding(start = 4.dp),
+            overflow = TextOverflow.Visible
         )
     }
 }

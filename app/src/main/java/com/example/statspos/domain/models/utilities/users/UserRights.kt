@@ -38,22 +38,26 @@ data class UserRights(
     // POS
     var changeRates: Boolean? = null,
     var seeMargin: Boolean? = null,
-    var entry: Boolean? = null,
+    var salesReturn: Boolean? = null,
+    var creditBill: Boolean? = null,
+    var editSaleBill: Boolean? = null,
+    var editCreditBill: Boolean? = null,
     var dateWiseSales: Boolean? = null,
     var payBill: Boolean? = null,
-    var salesReturn: Boolean? = null,
     var discount: Boolean? = null,
+    var seeCost: Boolean? = null,
+    var searchItems: Boolean? = null,
     var fbrInvoice: Boolean? = null,
-    var creditBill: Boolean? = null,
-    var editCreditBill: Boolean? = null,
 
     // Others
     var dateWiseEntry: Boolean? = null,
     var dateWisePurchase: Boolean? = null,
-    var branchWisePurchase: Boolean? = null,
-    var branchWiseReports: Boolean? = null,
     var printDuplicates: Boolean? = null,
     var deleteAnything: Boolean? = null,
+    var entry: Boolean? = null,
+
+    var branchWisePurchase: Boolean? = null,
+    var branchWiseReports: Boolean? = null,
 
     val clientId:Int? = null,
     val branchId:Int? = null,

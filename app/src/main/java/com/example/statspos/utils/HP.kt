@@ -30,6 +30,14 @@ object HP {
         DropdownItem(0L, "Cash"),
         DropdownItem(1L, "Bank"),
     )
+    val defaultRate = listOf(
+        DropdownItem(0L, "Retail"),
+        DropdownItem(1L, "Wholesale"),
+    )
+    val defaultDiscount = listOf(
+        DropdownItem(0L, "Rs."),
+        DropdownItem(1L, "Percent"),
+    )
 
 
     var clientId: Int = 1

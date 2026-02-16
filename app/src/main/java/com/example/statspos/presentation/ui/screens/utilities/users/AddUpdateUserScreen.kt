@@ -1,6 +1,7 @@
 package com.example.statspos.presentation.ui.screens.utilities.users
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,6 +40,7 @@ import com.example.statspos.presentation.ui.components.AppCircularProgressIndica
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.AppSwitch
+import com.example.statspos.presentation.ui.components.AppText
 import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.ErrorDialog
@@ -202,6 +204,85 @@ fun AddUpdateUserScreen(
                     UserRights(
                         items = state.items,
                         onItemsChange = viewModel::onItemsChange,
+                        categories = state.categories,
+                        onCategoriesChange = viewModel::onCategoriesChange,
+                        sales = state.sales,
+                        onSalesChange = viewModel::onSalesChange,
+                        purchase = state.purchase,
+                        onPurchaseChange = viewModel::onPurchaseChange,
+                        warehouse = state.warehouse,
+                        onWarehouseChange = viewModel::onWarehouseChange,
+//                        Accounts
+                        customers = state.customers,
+                        onCustomersChange = viewModel::onCustomersChange,
+                        vendors = state.vendors,
+                        onVendorsChange = viewModel::onVendorsChange,
+                        suppliers = state.suppliers,
+                        onSuppliersChange = viewModel::onSuppliersChange,
+                        banks = state.banks,
+                        onBanksChange = viewModel::onBanksChange,
+                        expenses = state.expenses,
+                        onExpensesChange = viewModel::onExpensesChange,
+//                        Users
+                        users = state.users,
+                        onUsersChange = viewModel::onUsersChange,
+                        settings = state.settings,
+                        onSettingsChange = viewModel::onSettingsChange,
+                        barcodeLabels = state.barcodeLabels,
+                        onBarcodeLabelsChange = viewModel::onBarcodeLabelsChange,
+                        employees = state.employees,
+                        onEmployeesChange = viewModel::onEmployeesChange,
+//                        Reports
+                        salesReports = state.salesReports,
+                        onSalesReportsChange = viewModel::onSalesReportsChange,
+                        purchaseReports = state.purchaseReports,
+                        onPurchaseReportsChange = viewModel::onPurchaseReportsChange,
+                        profitReports = state.profitReports,
+                        onProfitReportsChange = viewModel::onProfitReportsChange,
+                        stockReports = state.stockReports,
+                        onStockReportsChange = viewModel::onStockReportsChange,
+                        accountReports = state.accountReports,
+                        onAccountReportsChange = viewModel::onAccountReportsChange,
+                        itemsReports = state.itemsReports,
+                        onItemsReportsChange = viewModel::onItemsReportsChange,
+                        auditReports = state.auditReports,
+                        onAuditReportsChange = viewModel::onAuditReportsChange,
+//                        Others
+                        dateWiseEntry = state.dateWiseEntry,
+                        onDateWiseEntryChange = viewModel::onDateWiseEntryChange,
+                        dateWisePurchase = state.dateWisePurchase,
+                        onDateWisePurchaseChange = viewModel::onDateWisePurchaseChange,
+                        printDuplicates = state.printDuplicates,
+                        onPrintDuplicatesChange = viewModel::onPrintDuplicatesChange,
+                        deleteAnything = state.deleteAnything,
+                        onDeleteAnythingChange = viewModel::onDeleteAnythingChange,
+                        entry = state.entry,
+                        onEntryChange = viewModel::onEntryChange,
+//                        POS
+                        changeRates = state.changeRates,
+                        onChangeRatesChange = viewModel::onChangeRatesChange,
+                        seeMargin = state.seeMargin,
+                        onSeeMarginChange = viewModel::onSeeMarginChange,
+                        salesReturn = state.salesReturn,
+                        onSalesReturnChange = viewModel::onSalesReturnChange,
+                        creditBill = state.creditBill,
+                        onCreditBillChange = viewModel::onCreditBillChange,
+                        editSalesBill = state.editSalesBill,
+                        onEditSalesBillChange = viewModel::onEditSalesBillChange,
+                        editCreditBill = state.editCreditBill,
+                        onEditCreditBillChange = viewModel::onEditCreditBillChange,
+                        dateWiseSales = state.dateWiseSales,
+                        onDateWiseSalesChange = viewModel::onDateWiseSalesChange,
+                        payBill = state.payBill,
+                        onPayBillChange = viewModel::onPayBillChange,
+                        discount = state.discount,
+                        onDiscountChange = viewModel::onDiscountChange,
+                        seeCost = state.seeCost,
+                        onSeeCostChange = viewModel::onSeeCostChange,
+                        searchItems = state.searchItems,
+                        onSearchItemsChange = viewModel::onSearchItemsChange,
+                        fbrInvoice = state.fbrInvoice,
+                        onFbrInvoiceChange = viewModel::onFbrInvoiceChange,
                     )
                 }
 
@@ -303,11 +384,91 @@ private fun Basic(
 private fun UserRights(
     items: Boolean,
     onItemsChange: (Boolean) -> Unit,
+    categories: Boolean,
+    onCategoriesChange: (Boolean) -> Unit,
+    sales: Boolean,
+    onSalesChange: (Boolean) -> Unit,
+    purchase: Boolean,
+    onPurchaseChange: (Boolean) -> Unit,
+    warehouse: Boolean,
+    onWarehouseChange: (Boolean) -> Unit,
+//    Accounts
+    customers: Boolean,
+    onCustomersChange: (Boolean) -> Unit,
+    vendors: Boolean,
+    onVendorsChange: (Boolean) -> Unit,
+    suppliers: Boolean,
+    onSuppliersChange: (Boolean) -> Unit,
+    banks: Boolean,
+    onBanksChange: (Boolean) -> Unit,
+    expenses: Boolean,
+    onExpensesChange: (Boolean) -> Unit,
+//    Utilities
+    users: Boolean,
+    onUsersChange: (Boolean) -> Unit,
+    settings: Boolean,
+    onSettingsChange: (Boolean) -> Unit,
+    barcodeLabels: Boolean,
+    onBarcodeLabelsChange: (Boolean) -> Unit,
+    employees: Boolean,
+    onEmployeesChange: (Boolean) -> Unit,
+//    Reports
+    salesReports: Boolean,
+    onSalesReportsChange: (Boolean) -> Unit,
+    purchaseReports: Boolean,
+    onPurchaseReportsChange: (Boolean) -> Unit,
+    profitReports: Boolean,
+    onProfitReportsChange: (Boolean) -> Unit,
+    stockReports: Boolean,
+    onStockReportsChange: (Boolean) -> Unit,
+    accountReports: Boolean,
+    onAccountReportsChange: (Boolean) -> Unit,
+    itemsReports: Boolean,
+    onItemsReportsChange: (Boolean) -> Unit,
+    auditReports: Boolean,
+    onAuditReportsChange: (Boolean) -> Unit,
+//    Others
+    dateWiseEntry: Boolean,
+    onDateWiseEntryChange: (Boolean) -> Unit,
+    dateWisePurchase: Boolean,
+    onDateWisePurchaseChange: (Boolean) -> Unit,
+    printDuplicates: Boolean,
+    onPrintDuplicatesChange: (Boolean) -> Unit,
+    deleteAnything: Boolean,
+    onDeleteAnythingChange: (Boolean) -> Unit,
+    entry: Boolean,
+    onEntryChange: (Boolean) -> Unit,
+//    POS
+    changeRates: Boolean,
+    onChangeRatesChange: (Boolean) -> Unit,
+    seeMargin: Boolean,
+    onSeeMarginChange: (Boolean) -> Unit,
+    salesReturn: Boolean,
+    onSalesReturnChange: (Boolean) -> Unit,
+    creditBill: Boolean,
+    onCreditBillChange: (Boolean) -> Unit,
+    editSalesBill: Boolean,
+    onEditSalesBillChange: (Boolean) -> Unit,
+    editCreditBill: Boolean,
+    onEditCreditBillChange: (Boolean) -> Unit,
+    dateWiseSales: Boolean,
+    onDateWiseSalesChange: (Boolean) -> Unit,
+    payBill: Boolean,
+    onPayBillChange: (Boolean) -> Unit,
+    discount: Boolean,
+    onDiscountChange: (Boolean) -> Unit,
+    seeCost: Boolean,
+    onSeeCostChange: (Boolean) -> Unit,
+    searchItems: Boolean,
+    onSearchItemsChange: (Boolean) -> Unit,
+    fbrInvoice: Boolean,
+    onFbrInvoiceChange: (Boolean) -> Unit,
 ) {
     ExpandableSection(
         title = "User Rights",
         initiallyExpanded = false,
     ) {
+        Spacer(Modifier.height(8.dp))
         Row {
             AppSwitch(
                 modifier = Modifier.weight(1f),
@@ -315,6 +476,298 @@ private fun UserRights(
                 onCheckedChange = onItemsChange,
                 label = "Items"
             )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = categories,
+                onCheckedChange = onCategoriesChange,
+                label = "Categories"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = sales,
+                onCheckedChange = onSalesChange,
+                label = "Sales"
+            )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = purchase,
+                onCheckedChange = onPurchaseChange,
+                label = "Purchase"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = warehouse,
+                onCheckedChange = onWarehouseChange,
+                label = "Warehouse"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Title("Accounts")
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = customers,
+                onCheckedChange = onCustomersChange,
+                label = "Customers"
+            )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = vendors,
+                onCheckedChange = onVendorsChange,
+                label = "Vendors"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = suppliers,
+                onCheckedChange = onSuppliersChange,
+                label = "Suppliers"
+            )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = banks,
+                onCheckedChange = onBanksChange,
+                label = "Banks"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = expenses,
+                onCheckedChange = onExpensesChange,
+                label = "Expenses"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Title("Utilities")
+        Spacer(Modifier.height(8.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = users,
+                onCheckedChange = onUsersChange,
+                label = "Users"
+            )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = settings,
+                onCheckedChange = onSettingsChange,
+                label = "Settings"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = barcodeLabels,
+                onCheckedChange = onBarcodeLabelsChange,
+                label = "Barcode Labels"
+            )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = employees,
+                onCheckedChange = onEmployeesChange,
+                label = "Employees"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Title("Reports")
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = salesReports,
+                onCheckedChange = onSalesReportsChange,
+                label = "Sales Reports"
+            )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = purchaseReports,
+                onCheckedChange = onPurchaseReportsChange,
+                label = "Purchase Reports"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = profitReports,
+                onCheckedChange = onProfitReportsChange,
+                label = "Profit Reports"
+            )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = stockReports,
+                onCheckedChange = onStockReportsChange,
+                label = "Stock Reports"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = accountReports,
+                onCheckedChange = onAccountReportsChange,
+                label = "Accounts Reports"
+            )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = itemsReports,
+                onCheckedChange = onItemsReportsChange,
+                label = "Items Reports"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = auditReports,
+                onCheckedChange = onAuditReportsChange,
+                label = "Audit Reports"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Title("Others")
+        Spacer(Modifier.height(8.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = dateWiseEntry,
+                onCheckedChange = onDateWiseEntryChange,
+                label = "Date Wise Entry"
+            )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = dateWisePurchase,
+                onCheckedChange = onDateWisePurchaseChange,
+                label = "Date Wise Purchase"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = printDuplicates,
+                onCheckedChange = onPrintDuplicatesChange,
+                label = "Print Duplicates"
+            )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = deleteAnything,
+                onCheckedChange = onDeleteAnythingChange,
+                label = "Delete Anything"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = entry,
+                onCheckedChange = onEntryChange,
+                label = "Entry"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Title("POS")
+        Spacer(Modifier.height(8.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = changeRates,
+                onCheckedChange = onChangeRatesChange,
+                label = "Change Rates"
+            )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = seeMargin,
+                onCheckedChange = onSeeMarginChange,
+                label = "See Margin"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = salesReturn,
+                onCheckedChange = onSalesReturnChange,
+                label = "Sales Return"
+            )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = creditBill,
+                onCheckedChange = onCreditBillChange,
+                label = "Credit Bill"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = editSalesBill,
+                onCheckedChange = onEditSalesBillChange,
+                label = "Edit Sales Bill"
+            )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = editCreditBill,
+                onCheckedChange = onEditCreditBillChange,
+                label = "Edit Credit Bill"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = dateWiseSales,
+                onCheckedChange = onDateWiseSalesChange,
+                label = "Date Wise Sales"
+            )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = discount,
+                onCheckedChange = onDiscountChange,
+                label = "Discount"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = payBill,
+                onCheckedChange = onPayBillChange,
+                label = "Pay Bill"
+            )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = seeCost,
+                onCheckedChange = onSeeCostChange,
+                label = "See Cost"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = searchItems,
+                onCheckedChange = onSearchItemsChange,
+                label = "Search Items"
+            )
+            if(HP.branch.fbrIntegrated == true){
+                AppSwitch(
+                    modifier = Modifier.weight(1f),
+                    checked = fbrInvoice,
+                    onCheckedChange = onFbrInvoiceChange,
+                    label = "FBR Invoice"
+                )
+            }
         }
         Spacer(Modifier.height(8.dp))
     }
@@ -348,6 +801,23 @@ private fun ImageExpandable(
     }
 }
 
+@Composable
+private fun Title(
+    title: String,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start,
+    ) {
+        AppText(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+        )
+    }
+}
 
 @Preview(showBackground = true)
 @Composable
@@ -385,6 +855,80 @@ private fun BodyPrev() {
             )
 
             UserRights(
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
+                false,
+                { },
                 false,
                 { },
             )

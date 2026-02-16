@@ -1,9 +1,10 @@
-package com.example.statspos.presentation.viewmodels.utilities
+package com.example.statspos.presentation.viewmodels.warehouse
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.utilities.users.Users
-import com.example.statspos.domain.repository.utilities.UsersRepository
+import com.example.statspos.domain.models.warehouse.Warehouses
+import com.example.statspos.domain.repository.warehouse.WarehousesRepository
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
@@ -19,14 +20,14 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class UsersViewModel @Inject constructor(
-    private val api: UsersRepository
+class WarehousesViewModel @Inject constructor(
+    private val api: WarehousesRepository
 ) : ViewModel() {
 
     // region ScreenState
     data class ScreenState(
-        val list: List<Users> = emptyList(),
-        val totalusers: Int = 0,
+        val list: List<Warehouses> = emptyList(),
+        val totalWarehouses: Int = 0,
 
         val search: String = "",
 
@@ -115,20 +116,20 @@ class UsersViewModel @Inject constructor(
                 addProperty("text", state.value.search)
             }
 
-            when (val result = api.loadUsers(params)) {
+            when (val result = api.loadWarehouses(params)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
 
                     val resultTotal =
-                        result.data.get("total").asJsonObject.get("totalUsers").asInt
+                        result.data.get("total").asJsonObject.get("totalWarehouses").asInt
                     val resultList =
-                        Gson().getListOf<Users>(result.data.get("rows").asJsonArray)
+                        Gson().getListOf<Warehouses>(result.data.get("rows").asJsonArray)
                     state.update {
                         it.copy(
                             list = resultList,
-                            totalusers = resultTotal,
+                            totalWarehouses = resultTotal,
                         )
                     }
                 }

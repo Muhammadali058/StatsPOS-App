@@ -50,13 +50,13 @@ import com.example.statspos.utils.checkEvent
 @Composable
 fun SubBanksBody(
     sharedViewModel: SharedViewModel,
+    snackbarHostState: SnackbarHostState,
     onAddButtonClick: (Long, Boolean, Long) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel = hiltViewModel<SubBanksViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
-    val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
     LaunchedEffect(event) {
         checkEvent(
@@ -86,20 +86,13 @@ fun SubBanksBody(
         )
     }
 
-    var selectedItem by remember { mutableStateOf<DropdownItem?>(null) }
-
     Scaffold(
-        snackbarHost = {
-            AppSnackbarHost(
-                snackbarHostState = snackbarHostState,
-            )
-        },
         floatingActionButton = {
             AppFloatingActionButton {
-                if (state.bankId == 0L) {
+                if (state.bank.id == 0L) {
                     viewModel.onEvent(UiEvent.ShowSnackbar("Please select bank"))
                 } else {
-                    onAddButtonClick(0L, false, state.bankId)
+                    onAddButtonClick(0L, false, state.bank.id)
                 }
             }
         },
@@ -124,11 +117,10 @@ fun SubBanksBody(
                     ComboBox(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        selectedItem = selectedItem,
+                        selectedItem = state.bank,
                         items = HP.banks,
                         onItemSelected = { dropdownItem ->
-                            selectedItem = dropdownItem
-                            viewModel.onBankIdChange(dropdownItem.id)
+                            viewModel.onBankSelected(dropdownItem)
                             viewModel.loadData()
                         },
                         label = {
@@ -155,7 +147,7 @@ fun SubBanksBody(
                         },
                         items = state.list,
                         onItemClick = { subBank ->
-                            onAddButtonClick(subBank.id!!, true, state.bankId)
+                            onAddButtonClick(subBank.id!!, true, state.bank.id)
                         }
                     )
                 }

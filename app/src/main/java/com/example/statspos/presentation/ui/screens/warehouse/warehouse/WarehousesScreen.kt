@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.accounts.expenses
+package com.example.statspos.presentation.ui.screens.warehouse.warehouse
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -8,13 +8,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -28,10 +28,15 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.statspos.domain.models.accounts.Accounts
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
+import com.example.statspos.domain.models.warehouse.Warehouses
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
-import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
@@ -39,23 +44,77 @@ import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchTextbox
+import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.accounts.expenses.SubExpensesViewModel
-import com.example.statspos.utils.HP
+import com.example.statspos.presentation.viewmodels.warehouse.warehouse.WarehousesViewModel
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
+import kotlinx.serialization.Serializable
+
+private sealed class Routes : NavKey {
+    @Serializable
+    data object Home : Routes()
+
+    @Serializable
+    data class AddUpdateWarehouse(val updateId: Long, val isUpdate: Boolean) : Routes()
+}
 
 @Composable
-fun SubExpensesBody(
+fun WarehousesScreen(
     sharedViewModel: SharedViewModel,
-    snackbarHostState: SnackbarHostState,
-    onAddButtonClick: (Long, Boolean, Long) -> Unit,
+    onBack: () -> Unit,
+) {
+    val backStack = rememberNavBackStack(Routes.Home)
+    fun navigate(key: NavKey) {
+        if (backStack.lastOrNull() != key) {
+            backStack.add(key)
+        }
+    }
+    NavDisplay(
+        backStack = backStack,
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
+        entryProvider = entryProvider {
+            entry<Routes.Home> {
+                Home(
+                    sharedViewModel = sharedViewModel,
+                    onAddButtonClick = { updateId, isUpdate ->
+                        navigate(Routes.AddUpdateWarehouse(updateId, isUpdate))
+                    },
+                    onBack = {
+                        onBack()
+                    },
+                )
+            }
+            entry<Routes.AddUpdateWarehouse> { key ->
+                AddUpdateWarehouseScreen(
+                    sharedViewModel = sharedViewModel,
+                    updateId = key.updateId,
+                    isUpdate = key.isUpdate,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                )
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun Home(
+    sharedViewModel: SharedViewModel,
+    onAddButtonClick: (Long, Boolean) -> Unit,
+    onBack: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<SubExpensesViewModel>()
+    val viewModel = hiltViewModel<WarehousesViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
+    val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
     LaunchedEffect(event) {
         checkEvent(
@@ -86,21 +145,32 @@ fun SubExpensesBody(
     }
 
     Scaffold(
+        snackbarHost = {
+            AppSnackbarHost(
+                snackbarHostState = snackbarHostState,
+            )
+        },
         floatingActionButton = {
-            AppFloatingActionButton {
-                if (state.expense.id == 0L) {
-                    viewModel.onEvent(UiEvent.ShowSnackbar("Please select expense"))
-                } else {
-                    onAddButtonClick(0L, false, state.expense.id)
-                }
+            AppFloatingActionButton(
+                modifier = Modifier
+                    .navigationBarsPadding()
+            ) {
+                onAddButtonClick(0L, false)
             }
         },
+        topBar = {
+            TopAppBar(
+                onNavigationClick = {
+                    onBack()
+                },
+                title = "Warehouses",
+            )
+        }
     ) { innerPadding ->
-        Box(Modifier.padding(innerPadding))
-
         Box(
             Modifier
                 .fillMaxSize()
+                .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
             Column(
@@ -113,20 +183,6 @@ fun SubExpensesBody(
                         .padding(ConstantPaddings.BODY_HORIZONTAL)
                 ) {
                     Spacer(Modifier.height(8.dp))
-                    ComboBox(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        selectedItem = state.expense,
-                        items = HP.expenses,
-                        onItemSelected = { dropdownItem ->
-                            viewModel.onExpenseSelected(dropdownItem)
-                            viewModel.loadData()
-                        },
-                        label = {
-                            Text("Expense")
-                        },
-                        addNone = true,
-                    )
                     SearchBox(
                         modifier = Modifier
                             .padding(bottom = 4.dp),
@@ -135,6 +191,9 @@ fun SubExpensesBody(
                         onSearchClick = {
                             viewModel.loadData()
                             keyboardController?.hide()
+                        },
+                        onEndIconClick = {
+                            viewModel.onSearchChange("")
                         },
                     )
                     BodyList(
@@ -145,8 +204,8 @@ fun SubExpensesBody(
                             viewModel.loadData()
                         },
                         items = state.list,
-                        onItemClick = { subExpense ->
-                            onAddButtonClick(subExpense.id!!, true, state.expense?.id ?: 0L)
+                        onItemClick = { item ->
+                            onAddButtonClick(item.id!!, true)
                         }
                     )
                 }
@@ -157,10 +216,10 @@ fun SubExpensesBody(
                         .padding(8.dp)
                 ) {
                     HeadingMedium(
-                        text = "Total Sub-Expenses: ",
+                        text = "Total Warehouses: ",
                     )
                     LabelMedium(
-                        text = state.totalSubExpenses.toString(),
+                        text = state.totalWarehouses.toString(),
                     )
                 }
             }
@@ -174,6 +233,7 @@ private fun SearchBox(
     value: String,
     onValueChange: (String) -> Unit,
     onSearchClick: (String) -> Unit,
+    onEndIconClick: (String) -> Unit,
 ) {
     Row(
         modifier = modifier
@@ -182,12 +242,10 @@ private fun SearchBox(
     ) {
         SearchTextbox(
             modifier = Modifier
-                .fillMaxWidth(),
+                .weight(1f),
             value = value,
             onValueChange = onValueChange,
-            onEndIconClick = {
-                onValueChange("")
-            },
+            onEndIconClick = onEndIconClick,
             onSearchClick = onSearchClick,
         )
     }
@@ -198,8 +256,8 @@ private fun BodyList(
     modifier: Modifier = Modifier,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
-    items: List<Accounts>,
-    onItemClick: (Accounts) -> Unit,
+    items: List<Warehouses>,
+    onItemClick: (Warehouses) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -217,23 +275,25 @@ private fun BodyList(
 @Composable
 private fun ListCard(
     modifier: Modifier = Modifier,
-    item: Accounts,
-    onItemClick: (Accounts) -> Unit
+    item: Warehouses,
+    onItemClick: (Warehouses) -> Unit
 ) {
     ListCard(
         modifier = modifier
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(6.dp),
+            .fillMaxWidth()
+            .padding(vertical = ConstantPaddings.LIST_PADDING_VERTICAL),
         onClick = {
             onItemClick(item)
         }
     ) {
+        LabelLarge(item.warehouseName.toString())
+        Spacer(Modifier.height(2.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
         ) {
-            LabelLarge(item.subExpenseName.toString())
+            HeadingMedium("Remarks: ")
+            LabelMedium(item.remarks.toString())
         }
     }
 }

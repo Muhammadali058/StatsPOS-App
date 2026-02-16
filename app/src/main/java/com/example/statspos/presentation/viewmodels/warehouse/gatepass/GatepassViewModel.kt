@@ -1,10 +1,11 @@
-package com.example.statspos.presentation.viewmodels.warehouse
+package com.example.statspos.presentation.viewmodels.warehouse.gatepass
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.statspos.domain.models.utilities.users.Users
-import com.example.statspos.domain.models.warehouse.Warehouses
-import com.example.statspos.domain.repository.warehouse.WarehousesRepository
+import com.example.statspos.domain.models.DropdownItem
+import com.example.statspos.domain.models.warehouse.Gatepasses
+import com.example.statspos.domain.repository.warehouse.GatepassesRepository
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
@@ -17,19 +18,22 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
-class WarehousesViewModel @Inject constructor(
-    private val api: WarehousesRepository
+class GatepassViewModel @Inject constructor(
+    private val api: GatepassesRepository
 ) : ViewModel() {
 
     // region ScreenState
     data class ScreenState(
-        val list: List<Warehouses> = emptyList(),
-        val totalWarehouses: Int = 0,
+        val list: List<Gatepasses> = emptyList(),
+        val totalGatepasses: Int = 0,
 
         val search: String = "",
+        val date: LocalDate = LocalDate.now(),
+        val warehouse: DropdownItem = HP.noneDropdownItem,
 
         val isLoading: Boolean = false,
         val error: String? = null,
@@ -102,6 +106,14 @@ class WarehousesViewModel @Inject constructor(
     fun onSearchChange(value: String) {
         state.update { it.copy(search = value) }
     }
+
+    fun onDateChange(value: LocalDate) {
+        state.update { it.copy(date = value) }
+    }
+
+    fun onWarehouseSelected(value: DropdownItem) {
+        state.update { it.copy(warehouse = value) }
+    }
     // endregion
 
     // region Network calls
@@ -113,23 +125,25 @@ class WarehousesViewModel @Inject constructor(
             beforeRequest()
 
             val params = JsonObject().apply {
+                addProperty("warehouseId", state.value.warehouse.id)
+                addProperty("date", HP.getZonedDate(state.value.date))
                 addProperty("text", state.value.search)
             }
 
-            when (val result = api.loadWarehouses(params)) {
+            when (val result = api.loadGatepasses(params)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
 
                     val resultTotal =
-                        result.data.get("total").asJsonObject.get("totalWarehouses").asInt
+                        result.data.get("total").asJsonObject.get("totalGatepasses").asInt
                     val resultList =
-                        Gson().getListOf<Warehouses>(result.data.get("rows").asJsonArray)
+                        Gson().getListOf<Gatepasses>(result.data.get("rows").asJsonArray)
                     state.update {
                         it.copy(
                             list = resultList,
-                            totalWarehouses = resultTotal,
+                            totalGatepasses = resultTotal,
                         )
                     }
                 }

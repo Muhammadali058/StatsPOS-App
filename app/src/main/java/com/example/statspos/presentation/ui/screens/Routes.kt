@@ -89,4 +89,10 @@ sealed class TopRoutes : NavKey{
     @Serializable
     data object Warehouses : TopRoutes()
 
+    @Serializable
+    data object TransferStock : TopRoutes()
+
+    @Serializable
+    data object Gatepass : TopRoutes()
+
 }

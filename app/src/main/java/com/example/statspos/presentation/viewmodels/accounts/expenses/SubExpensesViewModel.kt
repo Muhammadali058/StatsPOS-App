@@ -2,8 +2,10 @@ package com.example.statspos.presentation.viewmodels.accounts.expenses
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.accounts.Accounts
 import com.example.statspos.domain.repository.accounts.ExpensesRepository
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
@@ -30,7 +32,7 @@ class SubExpensesViewModel @Inject constructor(
 
         val search: String = "",
         val expenseName: String = "",
-        val expenseId: Long = 0L,
+        val expense: DropdownItem = HP.noneDropdownItem,
 
         val isLoading: Boolean = false,
         val error: String? = null,
@@ -99,11 +101,8 @@ class SubExpensesViewModel @Inject constructor(
     fun onSearchChange(value: String) {
         state.update { it.copy(search = value) }
     }
-    fun onExpenseNameChange(value: String) {
-        state.update { it.copy(expenseName = value) }
-    }
-    fun onExpenseIdChange(value: Long) {
-        state.update { it.copy(expenseId = value) }
+    fun onExpenseSelected(value: DropdownItem) {
+        state.update { it.copy(expense = value) }
     }
     // endregion
 
@@ -116,7 +115,7 @@ class SubExpensesViewModel @Inject constructor(
             beforeRequest()
 
             val params = JsonObject().apply {
-                addProperty("expenseId", state.value.expenseId)
+                addProperty("expenseId", state.value.expense.id)
                 addProperty("text", state.value.search)
             }
 

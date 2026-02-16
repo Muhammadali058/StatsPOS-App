@@ -26,6 +26,7 @@ object HP {
     var localClient: LocalClients? = null
 
     const val itemsPerPage = 10
+    val noneDropdownItem = DropdownItem(0L, "None")
     val mop = listOf(
         DropdownItem(0L, "Cash"),
         DropdownItem(1L, "Bank"),

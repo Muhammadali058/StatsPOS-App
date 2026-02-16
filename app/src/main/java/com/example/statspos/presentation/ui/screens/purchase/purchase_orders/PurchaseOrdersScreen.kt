@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
@@ -14,6 +16,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.TabLayout
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
@@ -115,7 +118,13 @@ private fun Home(
         pageCount = { tabs.size }
     )
 
+    val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
+        snackbarHost = {
+            AppSnackbarHost(
+                snackbarHostState = snackbarHostState,
+            )
+        },
         topBar = {
             TopAppBar(
                 onNavigationClick = {
@@ -152,6 +161,7 @@ private fun Home(
                     1 ->
                         PurchaseOrderItemsBody (
                             sharedViewModel = sharedViewModel,
+                            snackbarHostState = snackbarHostState,
                             onAddButtonClick = { updateId, isUpdated, purchaseOrderId ->
                                 addUpdatePurchaseOrderItemClick(updateId, isUpdated, purchaseOrderId)
                             },

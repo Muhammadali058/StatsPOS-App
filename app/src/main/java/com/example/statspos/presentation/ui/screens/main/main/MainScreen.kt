@@ -39,7 +39,8 @@ import com.example.statspos.presentation.ui.screens.purchase.purchase_orders.Pur
 import com.example.statspos.presentation.ui.screens.utilities.SettingsScreen
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.ui.screens.utilities.users.UsersScreen
-import com.example.statspos.presentation.ui.screens.warehouse.WarehousesScreen
+import com.example.statspos.presentation.ui.screens.warehouse.warehouse.WarehousesScreen
+import com.example.statspos.presentation.ui.screens.warehouse.gatepass.GatepassScreen
 
 @Composable
 fun MainScreen() {
@@ -226,6 +227,14 @@ fun MainScreen() {
 //            Warehouses
             entry<TopRoutes.Warehouses> {
                 WarehousesScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<TopRoutes.Gatepass> {
+                GatepassScreen(
                     sharedViewModel = sharedViewModel,
                     onBack = {
                         backStack.removeLastOrNull()

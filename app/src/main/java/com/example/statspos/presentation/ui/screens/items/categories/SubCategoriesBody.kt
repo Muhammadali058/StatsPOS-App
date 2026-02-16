@@ -52,13 +52,13 @@ import com.example.statspos.utils.checkEvent
 @Composable
 fun SubCategoriesBody(
     sharedViewModel: SharedViewModel,
+    snackbarHostState: SnackbarHostState,
     onAddButtonClick: (Long, Boolean, Long) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel = hiltViewModel<SubCategoriesViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
-    val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
     LaunchedEffect(event) {
         checkEvent(
@@ -89,11 +89,6 @@ fun SubCategoriesBody(
     }
 
     Scaffold(
-        snackbarHost = {
-            AppSnackbarHost(
-                snackbarHostState = snackbarHostState,
-            )
-        },
         floatingActionButton = {
             AppFloatingActionButton {
                 if(state.categoryId == 0L){

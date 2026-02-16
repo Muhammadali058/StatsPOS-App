@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -49,13 +50,13 @@ import com.example.statspos.utils.checkEvent
 @Composable
 fun PackageItemsBody(
     sharedViewModel: SharedViewModel,
+    snackbarHostState: SnackbarHostState,
     onAddButtonClick: (Long, Boolean, Long) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel = hiltViewModel<PackageItemsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
-    val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
     LaunchedEffect(event) {
         checkEvent(
@@ -86,11 +87,6 @@ fun PackageItemsBody(
     }
 
     Scaffold(
-        snackbarHost = {
-            AppSnackbarHost(
-                snackbarHostState = snackbarHostState,
-            )
-        },
         floatingActionButton = {
             AppFloatingActionButton {
                 if (state.packageId == 0L) {

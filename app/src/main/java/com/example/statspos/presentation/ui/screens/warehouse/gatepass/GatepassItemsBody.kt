@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.accounts.expenses
+package com.example.statspos.presentation.ui.screens.warehouse.gatepass
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -28,7 +28,8 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.statspos.domain.models.accounts.Accounts
+import com.example.statspos.domain.models.items.PackageItems
+import com.example.statspos.domain.models.warehouse.GatepassItems
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.ComboBox
@@ -41,19 +42,19 @@ import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.accounts.expenses.SubExpensesViewModel
+import com.example.statspos.presentation.viewmodels.warehouse.gatepass.GatepassItemsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
 @Composable
-fun SubExpensesBody(
+fun GatepassItemsBody(
     sharedViewModel: SharedViewModel,
     snackbarHostState: SnackbarHostState,
     onAddButtonClick: (Long, Boolean, Long) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<SubExpensesViewModel>()
+    val viewModel = hiltViewModel<GatepassItemsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     var showErrorDialog by remember { mutableStateOf(false) }
@@ -88,10 +89,10 @@ fun SubExpensesBody(
     Scaffold(
         floatingActionButton = {
             AppFloatingActionButton {
-                if (state.expense.id == 0L) {
-                    viewModel.onEvent(UiEvent.ShowSnackbar("Please select expense"))
+                if (state.gatepass.id == 0L) {
+                    viewModel.onEvent(UiEvent.ShowSnackbar("Please select gatepass"))
                 } else {
-                    onAddButtonClick(0L, false, state.expense.id)
+                    onAddButtonClick(0L, false, state.gatepass.id)
                 }
             }
         },
@@ -116,16 +117,15 @@ fun SubExpensesBody(
                     ComboBox(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        selectedItem = state.expense,
-                        items = HP.expenses,
+                        items = HP.packages,
+                        selectedItem = state.gatepass,
                         onItemSelected = { dropdownItem ->
-                            viewModel.onExpenseSelected(dropdownItem)
+                            viewModel.onGatepassSelected(dropdownItem)
                             viewModel.loadData()
                         },
                         label = {
-                            Text("Expense")
-                        },
-                        addNone = true,
+                            Text("Gatepass")
+                        }
                     )
                     SearchBox(
                         modifier = Modifier
@@ -145,8 +145,8 @@ fun SubExpensesBody(
                             viewModel.loadData()
                         },
                         items = state.list,
-                        onItemClick = { subExpense ->
-                            onAddButtonClick(subExpense.id!!, true, state.expense?.id ?: 0L)
+                        onItemClick = { packageItem ->
+                            onAddButtonClick(packageItem.id!!, true, state.gatepass.id)
                         }
                     )
                 }
@@ -157,10 +157,10 @@ fun SubExpensesBody(
                         .padding(8.dp)
                 ) {
                     HeadingMedium(
-                        text = "Total Sub-Expenses: ",
+                        text = "Total Gatepass Items: ",
                     )
                     LabelMedium(
-                        text = state.totalSubExpenses.toString(),
+                        text = state.totalGatepassItems.toString(),
                     )
                 }
             }
@@ -198,8 +198,8 @@ private fun BodyList(
     modifier: Modifier = Modifier,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
-    items: List<Accounts>,
-    onItemClick: (Accounts) -> Unit,
+    items: List<GatepassItems>,
+    onItemClick: (GatepassItems) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -217,12 +217,13 @@ private fun BodyList(
 @Composable
 private fun ListCard(
     modifier: Modifier = Modifier,
-    item: Accounts,
-    onItemClick: (Accounts) -> Unit
+    item: GatepassItems,
+    onItemClick: (GatepassItems) -> Unit
 ) {
     ListCard(
         modifier = modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .padding(vertical = ConstantPaddings.LIST_PADDING_VERTICAL),
         shape = RoundedCornerShape(6.dp),
         onClick = {
             onItemClick(item)
@@ -233,7 +234,25 @@ private fun ListCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            LabelLarge(item.subExpenseName.toString())
+            LabelLarge(item.itemname.toString())
+        }
+        Spacer(Modifier.height(2.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            HeadingMedium("Qty: ")
+            LabelMedium(HP.formatDecimal(item.qty))
+        }
+        if(HP.settings.saleCartons == true){
+            Spacer(Modifier.height(2.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                HeadingMedium("Crtn: ")
+                LabelMedium(item.crtn.toString())
+            }
         }
     }
 }

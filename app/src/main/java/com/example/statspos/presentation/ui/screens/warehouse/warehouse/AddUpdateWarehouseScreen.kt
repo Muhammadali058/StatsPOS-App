@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.warehouse
+package com.example.statspos.presentation.ui.screens.warehouse.warehouse
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -47,7 +47,7 @@ import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.warehouse.AddUpdateWarehouseViewModel
+import com.example.statspos.presentation.viewmodels.warehouse.warehouse.AddUpdateWarehouseViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent

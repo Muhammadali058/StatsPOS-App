@@ -1,11 +1,9 @@
-package com.example.statspos.presentation.viewmodels.accounts.banks
+package com.example.statspos.presentation.viewmodels.warehouse.warehouse
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.statspos.domain.models.DropdownItem
-import com.example.statspos.domain.models.accounts.Accounts
-import com.example.statspos.domain.repository.accounts.BanksRepository
-import com.example.statspos.utils.HP
+import com.example.statspos.domain.models.warehouse.Warehouses
+import com.example.statspos.domain.repository.warehouse.WarehousesRepository
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
@@ -21,17 +19,16 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SubBanksViewModel @Inject constructor(
-    private val api: BanksRepository
+class WarehousesViewModel @Inject constructor(
+    private val api: WarehousesRepository
 ) : ViewModel() {
 
     // region ScreenState
     data class ScreenState(
-        val list: List<Accounts> = emptyList(),
-        val totalSubBanks: Int = 0,
+        val list: List<Warehouses> = emptyList(),
+        val totalWarehouses: Int = 0,
 
         val search: String = "",
-        val bank: DropdownItem = HP.noneDropdownItem,
 
         val isLoading: Boolean = false,
         val error: String? = null,
@@ -96,12 +93,13 @@ class SubBanksViewModel @Inject constructor(
     }
     // endregion
 
+    init {
+        loadData()
+    }
+
     // region onChangeMethods
     fun onSearchChange(value: String) {
         state.update { it.copy(search = value) }
-    }
-    fun onBankSelected(value: DropdownItem) {
-        state.update { it.copy(bank = value) }
     }
     // endregion
 
@@ -114,24 +112,23 @@ class SubBanksViewModel @Inject constructor(
             beforeRequest()
 
             val params = JsonObject().apply {
-                addProperty("bankId", state.value.bank.id)
                 addProperty("text", state.value.search)
             }
 
-            when (val result = api.loadSubBanks(params)) {
+            when (val result = api.loadWarehouses(params)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
 
                     val resultTotal =
-                        result.data.get("total").asJsonObject.get("totalSubBanks").asInt
+                        result.data.get("total").asJsonObject.get("totalWarehouses").asInt
                     val resultList =
-                        Gson().getListOf<Accounts>(result.data.get("rows").asJsonArray)
+                        Gson().getListOf<Warehouses>(result.data.get("rows").asJsonArray)
                     state.update {
                         it.copy(
                             list = resultList,
-                            totalSubBanks = resultTotal,
+                            totalWarehouses = resultTotal,
                         )
                     }
                 }

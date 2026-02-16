@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
@@ -31,6 +32,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.TabLayout
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.viewmodels.SharedViewModel
@@ -118,7 +120,13 @@ private fun Home(
         pageCount = { tabs.size }
     )
 
+    val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
+        snackbarHost = {
+            AppSnackbarHost(
+                snackbarHostState = snackbarHostState,
+            )
+        },
         topBar = {
             TopAppBar(
                 onNavigationClick = {
@@ -155,6 +163,7 @@ private fun Home(
                     1 ->
                         SubCategoriesBody(
                             sharedViewModel = sharedViewModel,
+                            snackbarHostState = snackbarHostState,
                             onAddButtonClick = { updateId, isUpdated, categoryId ->
                                 addUpdateSubCategoryClick(updateId, isUpdated, categoryId)
                             },

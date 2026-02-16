@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.accounts.banks
+package com.example.statspos.presentation.ui.screens.warehouse.gatepass
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,13 +16,11 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.TabLayout
 import com.example.statspos.presentation.ui.components.TopAppBar
-import com.example.statspos.presentation.ui.screens.accounts.expenses.AddUpdateExpenseScreen
-import com.example.statspos.presentation.ui.screens.accounts.expenses.AddUpdateSubExpenseScreen
-import com.example.statspos.presentation.ui.screens.accounts.expenses.ExpensesBody
-import com.example.statspos.presentation.ui.screens.accounts.expenses.SubExpensesBody
+import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
+import com.example.statspos.presentation.ui.screens.items.packages.AddUpdatePackageItemScreen
+import com.example.statspos.presentation.ui.screens.items.packages.AddUpdatePackageScreen
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import kotlinx.serialization.Serializable
 
@@ -31,15 +29,17 @@ private sealed class Routes : NavKey {
     data object Home : Routes()
 
     @Serializable
-    data class AddUpdateBank(val updateId: Long, val isUpdate: Boolean) : Routes()
+    data class AddUpdateGatepass(val updateId: Long, val isUpdate: Boolean) : Routes()
 
     @Serializable
-    data class AddUpdateSubBank(val updateId: Long, val isUpdate: Boolean, val bankId: Long) :
-        Routes()
+    data class AddUpdateGatepassItem(val updateId: Long, val isUpdate: Boolean, val gatepassId: Long) : Routes()
+
+    @Serializable
+    data object SearchItem : Routes()
 }
 
 @Composable
-fun BanksScreen(
+fun GatepassScreen(
     sharedViewModel: SharedViewModel,
     onBack: () -> Unit,
 ) {
@@ -62,16 +62,16 @@ fun BanksScreen(
                     onBack = {
                         onBack()
                     },
-                    addUpdateBankClick = { updateId, isUpdated ->
-                        navigate(Routes.AddUpdateBank(updateId, isUpdated))
+                    addUpdatePackageClick = { updateId, isUpdated ->
+                        navigate(Routes.AddUpdateGatepass(updateId, isUpdated))
                     },
-                    addUpdateSubBankClick = { updateId, isUpdated, packageId ->
-                        navigate(Routes.AddUpdateSubBank(updateId, isUpdated, packageId))
+                    addUpdatePackageItemClick = { updateId, isUpdated, packageId ->
+                        navigate(Routes.AddUpdateGatepassItem(updateId, isUpdated, packageId))
                     }
                 )
             }
-            entry<Routes.AddUpdateBank> { key ->
-                AddUpdateBankScreen(
+            entry<Routes.AddUpdateGatepass> { key ->
+                AddUpdatePackageScreen(
                     sharedViewModel = sharedViewModel,
                     updateId = key.updateId,
                     isUpdate = key.isUpdate,
@@ -80,12 +80,23 @@ fun BanksScreen(
                     }
                 )
             }
-            entry<Routes.AddUpdateSubBank> { key ->
-                AddUpdateSubBankScreen(
+            entry<Routes.AddUpdateGatepassItem> { key ->
+                AddUpdatePackageItemScreen(
                     sharedViewModel = sharedViewModel,
                     updateId = key.updateId,
                     isUpdate = key.isUpdate,
-                    bankId = key.bankId,
+                    packageId = key.gatepassId,
+                    onSearchItemClick = {
+                        navigate(Routes.SearchItem)
+                    },
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<Routes.SearchItem> { key ->
+                SearchItemsScreen(
+                    sharedViewModel = sharedViewModel,
                     onBack = {
                         backStack.removeLastOrNull()
                     }
@@ -99,10 +110,10 @@ fun BanksScreen(
 private fun Home(
     sharedViewModel: SharedViewModel,
     onBack: () -> Unit,
-    addUpdateBankClick: (Long, Boolean) -> Unit,
-    addUpdateSubBankClick: (Long, Boolean, Long) -> Unit,
+    addUpdatePackageClick: (Long, Boolean) -> Unit,
+    addUpdatePackageItemClick: (Long, Boolean, Long) -> Unit,
 ) {
-    val tabs = listOf("Banks", "Bank Accounts")
+    val tabs = listOf("Gatepass", "Gatepass Items")
     val pagerState = rememberPagerState(
         initialPage = 0,
         pageCount = { tabs.size }
@@ -110,17 +121,12 @@ private fun Home(
 
     val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
-        snackbarHost = {
-            AppSnackbarHost(
-                snackbarHostState = snackbarHostState,
-            )
-        },
         topBar = {
             TopAppBar(
                 onNavigationClick = {
                     onBack()
                 },
-                title = "Banks",
+                title = "Gatepass",
             )
         }
     ) { innerPadding ->
@@ -141,19 +147,19 @@ private fun Home(
             ) { page ->
                 when (page) {
                     0 ->
-                        BanksBody(
+                        GatepassBody(
                             sharedViewModel = sharedViewModel,
                             onAddButtonClick = { updateId, isUpdated ->
-                                addUpdateBankClick(updateId, isUpdated)
+                                addUpdatePackageClick(updateId, isUpdated)
                             },
                         )
 
                     1 ->
-                        SubBanksBody(
+                        GatepassItemsBody(
                             sharedViewModel = sharedViewModel,
                             snackbarHostState = snackbarHostState,
-                            onAddButtonClick = { updateId, isUpdated, bankId ->
-                                addUpdateSubBankClick(updateId, isUpdated, bankId)
+                            onAddButtonClick = { updateId, isUpdated, packageId ->
+                                addUpdatePackageItemClick(updateId, isUpdated, packageId)
                             },
                         )
                 }

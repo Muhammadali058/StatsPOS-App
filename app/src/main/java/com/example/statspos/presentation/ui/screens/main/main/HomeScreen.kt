@@ -117,8 +117,8 @@ private val entries = listOf(
 )
 private val warehouse = listOf(
     TopItem("Warehouses", TopRoutes.Warehouses),
-    TopItem("Transfer Stock", TopRoutes.Categories),
-    TopItem("Gatepass", TopRoutes.Categories),
+    TopItem("Transfer Stock", TopRoutes.TransferStock),
+    TopItem("Gatepass", TopRoutes.Gatepass),
 )
 
 @Composable

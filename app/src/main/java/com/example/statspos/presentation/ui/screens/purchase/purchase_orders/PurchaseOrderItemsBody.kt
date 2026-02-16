@@ -50,13 +50,13 @@ import com.example.statspos.utils.checkEvent
 @Composable
 fun PurchaseOrderItemsBody(
     sharedViewModel: SharedViewModel,
+    snackbarHostState: SnackbarHostState,
     onAddButtonClick: (Long, Boolean, Long) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel = hiltViewModel<PurchaseOrderItemsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
-    val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
     LaunchedEffect(event) {
         checkEvent(
@@ -87,11 +87,6 @@ fun PurchaseOrderItemsBody(
     }
 
     Scaffold(
-        snackbarHost = {
-            AppSnackbarHost(
-                snackbarHostState = snackbarHostState,
-            )
-        },
         floatingActionButton = {
             AppFloatingActionButton {
                 if (state.purchaseOrderId == 0L) {

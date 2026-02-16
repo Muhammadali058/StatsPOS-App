@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.warehouse
+package com.example.statspos.presentation.ui.screens.warehouse.gatepass
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -8,13 +8,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -28,15 +28,13 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
-import androidx.navigation3.ui.NavDisplay
-import com.example.statspos.domain.models.warehouse.Warehouses
+import com.example.statspos.domain.models.DropdownItem
+import com.example.statspos.domain.models.items.Packages
+import com.example.statspos.domain.models.warehouse.Gatepasses
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
+import com.example.statspos.presentation.ui.components.ComboBox
+import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
@@ -44,75 +42,22 @@ import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchTextbox
-import com.example.statspos.presentation.ui.components.TopAppBar
-import com.example.statspos.presentation.ui.screens.utilities.users.AddUpdateUserScreen
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.warehouse.WarehousesViewModel
+import com.example.statspos.presentation.viewmodels.items.packages.PackagesViewModel
+import com.example.statspos.presentation.viewmodels.warehouse.gatepass.GatepassViewModel
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
-import kotlinx.serialization.Serializable
-
-private sealed class Routes : NavKey {
-    @Serializable
-    data object Home : Routes()
-
-    @Serializable
-    data class AddUpdateWarehouse(val updateId: Long, val isUpdate: Boolean) : Routes()
-}
+import java.time.LocalDate
 
 @Composable
-fun WarehousesScreen(
-    sharedViewModel: SharedViewModel,
-    onBack: () -> Unit,
-) {
-    val backStack = rememberNavBackStack(Routes.Home)
-    fun navigate(key: NavKey) {
-        if (backStack.lastOrNull() != key) {
-            backStack.add(key)
-        }
-    }
-    NavDisplay(
-        backStack = backStack,
-        entryDecorators = listOf(
-            rememberSaveableStateHolderNavEntryDecorator(),
-            rememberViewModelStoreNavEntryDecorator()
-        ),
-        entryProvider = entryProvider {
-            entry<Routes.Home> {
-                Home(
-                    sharedViewModel = sharedViewModel,
-                    onAddButtonClick = { updateId, isUpdate ->
-                        navigate(Routes.AddUpdateWarehouse(updateId, isUpdate))
-                    },
-                    onBack = {
-                        onBack()
-                    },
-                )
-            }
-            entry<Routes.AddUpdateWarehouse> { key ->
-                AddUpdateWarehouseScreen(
-                    sharedViewModel = sharedViewModel,
-                    updateId = key.updateId,
-                    isUpdate = key.isUpdate,
-                    onBack = {
-                        backStack.removeLastOrNull()
-                    },
-                )
-            }
-        }
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun Home(
+fun GatepassBody(
     sharedViewModel: SharedViewModel,
     onAddButtonClick: (Long, Boolean) -> Unit,
-    onBack: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<WarehousesViewModel>()
+    val viewModel = hiltViewModel<GatepassViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -152,26 +97,16 @@ private fun Home(
             )
         },
         floatingActionButton = {
-            AppFloatingActionButton(
-                modifier = Modifier
-                    .navigationBarsPadding()
-            ) {
+            AppFloatingActionButton {
                 onAddButtonClick(0L, false)
             }
         },
-        topBar = {
-            TopAppBar(
-                onNavigationClick = {
-                    onBack()
-                },
-                title = "Warehouses",
-            )
-        }
     ) { innerPadding ->
+        Box(Modifier.padding(innerPadding))
+
         Box(
             Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
             Column(
@@ -193,9 +128,13 @@ private fun Home(
                             viewModel.loadData()
                             keyboardController?.hide()
                         },
-                        onEndIconClick = {
-                            viewModel.onSearchChange("")
+                        warehouse = state.warehouse,
+                        onWaerhouseSelected = { warehouse ->
+                            viewModel.onWarehouseSelected(warehouse)
+                            viewModel.loadData()
                         },
+                        date = state.date,
+                        onDateChange = viewModel::onDateChange,
                     )
                     BodyList(
                         modifier = Modifier
@@ -205,8 +144,8 @@ private fun Home(
                             viewModel.loadData()
                         },
                         items = state.list,
-                        onItemClick = { item ->
-                            onAddButtonClick(item.id!!, true)
+                        onItemClick = { packages ->
+                            onAddButtonClick(packages.id!!, true)
                         }
                     )
                 }
@@ -217,10 +156,10 @@ private fun Home(
                         .padding(8.dp)
                 ) {
                     HeadingMedium(
-                        text = "Total Warehouses: ",
+                        text = "Total Gatepass: ",
                     )
                     LabelMedium(
-                        text = state.totalWarehouses.toString(),
+                        text = state.totalGatepasses.toString(),
                     )
                 }
             }
@@ -234,19 +173,41 @@ private fun SearchBox(
     value: String,
     onValueChange: (String) -> Unit,
     onSearchClick: (String) -> Unit,
-    onEndIconClick: (String) -> Unit,
+    warehouse: DropdownItem?,
+    onWaerhouseSelected: (DropdownItem) -> Unit,
+    date: LocalDate,
+    onDateChange: (LocalDate) -> Unit,
 ) {
-    Row(
+    Column (
         modifier = modifier
             .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
     ) {
+        ComboBox(
+            modifier = Modifier
+                .fillMaxWidth(),
+            selectedItem = warehouse,
+            items = HP.warehouses,
+            onItemSelected = onWaerhouseSelected,
+            label = {
+                Text("Warehouse")
+            },
+            addNone = true,
+        )
+        DateTextbox(
+            modifier = Modifier
+                .fillMaxWidth(),
+            date = date,
+            onDateChange = onDateChange,
+            label = "Date"
+        )
         SearchTextbox(
             modifier = Modifier
-                .weight(1f),
+                .fillMaxWidth(),
             value = value,
             onValueChange = onValueChange,
-            onEndIconClick = onEndIconClick,
+            onEndIconClick = {
+                onValueChange("")
+            },
             onSearchClick = onSearchClick,
         )
     }
@@ -257,8 +218,8 @@ private fun BodyList(
     modifier: Modifier = Modifier,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
-    items: List<Warehouses>,
-    onItemClick: (Warehouses) -> Unit,
+    items: List<Gatepasses>,
+    onItemClick: (Gatepasses) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -276,25 +237,43 @@ private fun BodyList(
 @Composable
 private fun ListCard(
     modifier: Modifier = Modifier,
-    item: Warehouses,
-    onItemClick: (Warehouses) -> Unit
+    item: Gatepasses,
+    onItemClick: (Gatepasses) -> Unit
 ) {
     ListCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = ConstantPaddings.LIST_PADDING_VERTICAL),
+        shape = RoundedCornerShape(6.dp),
         onClick = {
             onItemClick(item)
         }
     ) {
-        LabelLarge(item.warehouseName.toString())
-        Spacer(Modifier.height(2.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            HeadingMedium("Remarks: ")
-            LabelMedium(item.remarks.toString())
+            Column{
+                LabelLarge(item.gatepassName.toString())
+                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    HeadingMedium("Date: ")
+                    LabelMedium(item.date.toString())
+                }
+                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    HeadingMedium("Remarks: ")
+                    LabelMedium(item.remarks.toString())
+                }
+            }
         }
     }
 }
+

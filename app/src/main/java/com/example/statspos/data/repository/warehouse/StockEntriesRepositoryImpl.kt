@@ -75,7 +75,10 @@ class StockEntriesRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun loadWarehouseEntryItems(body: JsonObject): Resource<JsonObject> {
+    override suspend fun loadWarehouseEntryItems(warehouseEntryId: Long): Resource<JsonObject> {
+        val body = JsonObject().apply {
+            addProperty("warehouseEntryId", warehouseEntryId)
+        }
         return safeApiCall {
             api.loadWarehouseEntryItems(
                 DB.addParams(body)

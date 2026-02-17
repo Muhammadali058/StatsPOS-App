@@ -32,7 +32,8 @@ fun LabelMedium(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onPrimaryContainer,
-    style: TextStyle = MaterialTheme.typography.labelMedium,
+    textAlign: TextAlign = TextAlign.Start,
+    style: TextStyle = MaterialTheme.typography.labelMedium.copy(textAlign = textAlign),
 ) {
     Text(
         modifier = modifier,
@@ -63,7 +64,8 @@ fun HeadingMedium(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onPrimaryContainer,
-    style: TextStyle = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+    textAlign: TextAlign = TextAlign.Start,
+    style: TextStyle = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, textAlign = textAlign),
 ) {
     Text(
         modifier = modifier,

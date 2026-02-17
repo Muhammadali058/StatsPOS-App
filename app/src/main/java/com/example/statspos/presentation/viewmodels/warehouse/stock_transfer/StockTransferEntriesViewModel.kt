@@ -1,10 +1,10 @@
-package com.example.statspos.presentation.viewmodels.warehouse.gatepass
+package com.example.statspos.presentation.viewmodels.warehouse.stock_transfer
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
-import com.example.statspos.domain.models.warehouse.Gatepasses
-import com.example.statspos.domain.repository.warehouse.GatepassesRepository
+import com.example.statspos.domain.models.warehouse.StockEntries
+import com.example.statspos.domain.repository.warehouse.StockEntriesRepository
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
@@ -18,21 +18,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
-class GatepassViewModel @Inject constructor(
-    private val api: GatepassesRepository
+class StockTransferEntriesViewModel @Inject constructor(
+    private val api: StockEntriesRepository
 ) : ViewModel() {
 
     // region ScreenState
     data class ScreenState(
-        val list: List<Gatepasses> = emptyList(),
-        val totalGatepasses: Int = 0,
+        val list: List<StockEntries> = emptyList(),
+        val totalStockEntries: Int = 0,
 
-        val search: String = "",
-        val date: LocalDate = LocalDate.now(),
         val warehouse: DropdownItem = HP.noneDropdownItem,
 
         val isLoading: Boolean = false,
@@ -99,14 +96,6 @@ class GatepassViewModel @Inject constructor(
     // endregion
 
     // region onChangeMethods
-    fun onSearchChange(value: String) {
-        state.update { it.copy(search = value) }
-    }
-
-    fun onDateChange(value: LocalDate) {
-        state.update { it.copy(date = value) }
-    }
-
     fun onWarehouseSelected(value: DropdownItem) {
         state.update { it.copy(warehouse = value) }
     }
@@ -122,33 +111,87 @@ class GatepassViewModel @Inject constructor(
 
             val params = JsonObject().apply {
                 addProperty("warehouseId", state.value.warehouse.id)
-                addProperty("date", HP.getZonedDate(state.value.date))
-                addProperty("text", state.value.search)
             }
 
-            when (val result = api.loadGatepasses(params)) {
+            when (val result = api.loadStockEntries(params)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
 
                     val resultTotal =
-                        result.data.get("total").asJsonObject.get("totalGatepasses").asInt
+                        result.data.get("total").asJsonObject.get("totalStockEntries").asInt
                     val resultList =
-                        Gson().getListOf<Gatepasses>(result.data.get("rows").asJsonArray)
+                        Gson().getListOf<StockEntries>(result.data.get("rows").asJsonArray)
                     state.update {
                         it.copy(
                             list = resultList,
-                            totalGatepasses = resultTotal,
+                            totalStockEntries = resultTotal,
                         )
-                    }
-
-                    HP.gatepasses = resultList.map {
-                        DropdownItem(it.id!!, it.gatepassName!!)
                     }
                 }
             }
         }
+    }
+
+    fun transferStock(onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if (!isValid())
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.stockTransferToWarehouse(state.value.warehouse.id)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+                    onSuccess()
+                    loadData()
+                }
+            }
+        }
+    }
+
+    fun receiveStock(onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if (!isValid())
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.stockReceiveFromWarehouse(state.value.warehouse.id)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+                    onSuccess()
+                    loadData()
+                }
+            }
+        }
+    }
+    // endregion
+
+    // region Methods
+    private fun isValid(): Boolean {
+        if (state.value.warehouse.id == 0L) {
+            showMessage("Please select warehouse")
+            return false
+        }
+
+        if (state.value.list.isEmpty()) {
+            showMessage("Please enter items to transfer")
+            return false
+        }
+
+        return true
     }
     // endregion
 

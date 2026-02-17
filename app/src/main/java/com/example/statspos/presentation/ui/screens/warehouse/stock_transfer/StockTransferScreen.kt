@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.warehouse.gatepass
+package com.example.statspos.presentation.ui.screens.warehouse.stock_transfer
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,28 +20,31 @@ import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.TabLayout
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
-import com.example.statspos.presentation.ui.screens.items.packages.AddUpdatePackageItemScreen
-import com.example.statspos.presentation.ui.screens.items.packages.AddUpdatePackageScreen
+import com.example.statspos.presentation.ui.screens.warehouse.gatepass.AddUpdateGatepassScreen
+import com.example.statspos.presentation.ui.screens.warehouse.gatepass.GatepassItemsBody
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import kotlinx.serialization.Serializable
-import java.time.LocalDate
 
 private sealed class Routes : NavKey {
     @Serializable
     data object Home : Routes()
 
     @Serializable
-    data class AddUpdateGatepass(val updateId: Long, val isUpdate: Boolean, val warehouseId: Long, val date: String) : Routes()
+    data class AddUpdateStockTransferItem(
+        val updateId: Long,
+        val isUpdate: Boolean,
+        val warehouseId: Long
+    ) : Routes()
 
     @Serializable
-    data class AddUpdateGatepassItem(val updateId: Long, val isUpdate: Boolean, val gatepassId: Long) : Routes()
+    data class WarehouseEntryItems(val warehouseEntryId: Long) : Routes()
 
     @Serializable
     data object SearchItem : Routes()
 }
 
 @Composable
-fun GatepassScreen(
+fun StockTransferScreen(
     sharedViewModel: SharedViewModel,
     onBack: () -> Unit,
 ) {
@@ -64,35 +67,37 @@ fun GatepassScreen(
                     onBack = {
                         onBack()
                     },
-                    addUpdateGatepassClick = { updateId, isUpdated, warehouseId, date ->
-                        navigate(Routes.AddUpdateGatepass(updateId, isUpdated, warehouseId, date))
+                    addUpdateStockTransferItemClick = { updateId, isUpdated, warehouseId ->
+                        navigate(
+                            Routes.AddUpdateStockTransferItem(
+                                updateId,
+                                isUpdated,
+                                warehouseId
+                            )
+                        )
                     },
-                    addUpdateGatepassItemClick = { updateId, isUpdated, packageId ->
-                        navigate(Routes.AddUpdateGatepassItem(updateId, isUpdated, packageId))
+                    onWarehouseEntryClick = { warehouseEntryId ->
+                        navigate(Routes.WarehouseEntryItems(warehouseEntryId))
                     }
                 )
             }
-            entry<Routes.AddUpdateGatepass> { key ->
-                AddUpdateGatepassScreen(
+            entry<Routes.AddUpdateStockTransferItem> { key ->
+                AddUpdateStockTransferItemScreen(
                     sharedViewModel = sharedViewModel,
                     updateId = key.updateId,
                     isUpdate = key.isUpdate,
-                    date = key.date,
                     warehouseId = key.warehouseId,
+                    onSearchItemClick = {
+                        navigate(Routes.SearchItem)
+                    },
                     onBack = {
                         backStack.removeLastOrNull()
                     }
                 )
             }
-            entry<Routes.AddUpdateGatepassItem> { key ->
-                AddUpdateGatepassItemScreen(
-                    sharedViewModel = sharedViewModel,
-                    updateId = key.updateId,
-                    isUpdate = key.isUpdate,
-                    gatepassId = key.gatepassId,
-                    onSearchItemClick = {
-                        navigate(Routes.SearchItem)
-                    },
+            entry<Routes.WarehouseEntryItems> { key ->
+                WarehouseEntryItemsBody(
+                    warehouseEntryId = key.warehouseEntryId,
                     onBack = {
                         backStack.removeLastOrNull()
                     }
@@ -114,10 +119,10 @@ fun GatepassScreen(
 private fun Home(
     sharedViewModel: SharedViewModel,
     onBack: () -> Unit,
-    addUpdateGatepassClick: (Long, Boolean, Long, String) -> Unit,
-    addUpdateGatepassItemClick: (Long, Boolean, Long) -> Unit,
+    addUpdateStockTransferItemClick: (Long, Boolean, Long) -> Unit,
+    onWarehouseEntryClick: (Long) -> Unit,
 ) {
-    val tabs = listOf("Gatepass", "Gatepass Items")
+    val tabs = listOf("Transfer Entry", "Posted Entries")
     val pagerState = rememberPagerState(
         initialPage = 0,
         pageCount = { tabs.size }
@@ -135,7 +140,7 @@ private fun Home(
                 onNavigationClick = {
                     onBack()
                 },
-                title = "Gatepass",
+                title = "Stock Transfer",
             )
         }
     ) { innerPadding ->
@@ -156,20 +161,20 @@ private fun Home(
             ) { page ->
                 when (page) {
                     0 ->
-                        GatepassBody(
+                        NewStockTransferEntryBody(
                             sharedViewModel = sharedViewModel,
                             snackbarHostState = snackbarHostState,
-                            onAddButtonClick = { updateId, isUpdated, warehouseId, date ->
-                                addUpdateGatepassClick(updateId, isUpdated, warehouseId, date)
+                            onAddButtonClick = { updateId, isUpdated, warehouseId ->
+                                addUpdateStockTransferItemClick(updateId, isUpdated, warehouseId)
                             },
                         )
 
                     1 ->
-                        GatepassItemsBody(
+                        WarehouseEntriesBody(
                             sharedViewModel = sharedViewModel,
                             snackbarHostState = snackbarHostState,
-                            onAddButtonClick = { updateId, isUpdated, packageId ->
-                                addUpdateGatepassItemClick(updateId, isUpdated, packageId)
+                            onClick = { warehouseEntryId ->
+                                onWarehouseEntryClick(warehouseEntryId)
                             },
                         )
                 }

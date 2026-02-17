@@ -12,6 +12,7 @@ data class StockEntries(
 
     // Extras not part of database
     var itemname: String? = null,
+    var imageUrl: String? = null,
     var stockPcs: Double? = null,
     var stockCrtn: Long? = null,
     var wStockPcs: Double? = null,

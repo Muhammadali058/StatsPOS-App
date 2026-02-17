@@ -1,14 +1,21 @@
-package com.example.statspos.presentation.ui.screens.warehouse.gatepass
+package com.example.statspos.presentation.ui.screens.warehouse.stock_transfer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -29,36 +36,32 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.DropdownItem
-import com.example.statspos.domain.models.items.Packages
-import com.example.statspos.domain.models.warehouse.Gatepasses
+import com.example.statspos.domain.models.warehouse.StockEntries
+import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
-import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.ComboBox
-import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListImageView
 import com.example.statspos.presentation.ui.components.PullToRefreshList
-import com.example.statspos.presentation.ui.components.SearchTextbox
+import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.items.packages.PackagesViewModel
-import com.example.statspos.presentation.viewmodels.warehouse.gatepass.GatepassViewModel
+import com.example.statspos.presentation.viewmodels.warehouse.stock_transfer.StockTransferEntriesViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
-import java.time.LocalDate
 
 @Composable
-fun GatepassBody(
+fun NewStockTransferEntryBody(
     sharedViewModel: SharedViewModel,
     snackbarHostState: SnackbarHostState,
-    onAddButtonClick: (Long, Boolean, Long, String) -> Unit,
+    onAddButtonClick: (Long, Boolean, Long) -> Unit,
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<GatepassViewModel>()
+    val viewModel = hiltViewModel<StockTransferEntriesViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     var showErrorDialog by remember { mutableStateOf(false) }
@@ -96,7 +99,7 @@ fun GatepassBody(
                 if (state.warehouse.id == 0L) {
                     viewModel.onEvent(UiEvent.ShowSnackbar("Please select warehouse"))
                 } else {
-                    onAddButtonClick(0L, false, state.warehouse.id, HP.getZonedDate(state.date))
+                    onAddButtonClick(0L, false, state.warehouse.id)
                 }
             }
         },
@@ -121,20 +124,9 @@ fun GatepassBody(
                     SearchBox(
                         modifier = Modifier
                             .padding(bottom = 4.dp),
-                        value = state.search,
-                        onValueChange = viewModel::onSearchChange,
-                        onSearchClick = {
-                            viewModel.loadData()
-                            keyboardController?.hide()
-                        },
                         warehouse = state.warehouse,
                         onWaerhouseSelected = { warehouse ->
                             viewModel.onWarehouseSelected(warehouse)
-                            viewModel.loadData()
-                        },
-                        date = state.date,
-                        onDateChange = { date->
-                            viewModel.onDateChange(date)
                             viewModel.loadData()
                         },
                     )
@@ -147,22 +139,51 @@ fun GatepassBody(
                         },
                         items = state.list,
                         onItemClick = { packages ->
-                            onAddButtonClick(packages.id!!, true, state.warehouse.id, HP.getZonedDate(state.date))
+                            onAddButtonClick(
+                                packages.id!!,
+                                true,
+                                state.warehouse.id
+                            )
                         }
                     )
                 }
 
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp)
                 ) {
-                    HeadingMedium(
-                        text = "Total Gatepass: ",
-                    )
-                    LabelMedium(
-                        text = state.totalGatepasses.toString(),
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        HeadingMedium(
+                            text = "Total Items: ",
+                        )
+                        LabelMedium(
+                            text = state.totalStockEntries.toString(),
+                        )
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    SaveButton(
+                        modifier = Modifier
+                            .fillMaxWidth(0.7f),
+                        text = "Transfer to Warehouse"
+                    ) {
+                        viewModel.transferStock {
+                            sharedViewModel.notifyDataChanged()
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    SaveButton(
+                        modifier = Modifier
+                            .fillMaxWidth(0.7f),
+                        text = "Receive from Warehouse"
+                    ) {
+                        viewModel.receiveStock {
+                            sharedViewModel.notifyDataChanged()
+                        }
+                    }
                 }
             }
         }
@@ -172,15 +193,10 @@ fun GatepassBody(
 @Composable
 private fun SearchBox(
     modifier: Modifier = Modifier,
-    value: String,
-    onValueChange: (String) -> Unit,
-    onSearchClick: (String) -> Unit,
     warehouse: DropdownItem?,
     onWaerhouseSelected: (DropdownItem) -> Unit,
-    date: LocalDate,
-    onDateChange: (LocalDate) -> Unit,
 ) {
-    Column (
+    Column(
         modifier = modifier
             .fillMaxWidth(),
     ) {
@@ -195,23 +211,6 @@ private fun SearchBox(
             },
             addNone = true,
         )
-        DateTextbox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            date = date,
-            onDateChange = onDateChange,
-            label = "Date"
-        )
-        SearchTextbox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            value = value,
-            onValueChange = onValueChange,
-            onEndIconClick = {
-                onValueChange("")
-            },
-            onSearchClick = onSearchClick,
-        )
     }
 }
 
@@ -220,8 +219,8 @@ private fun BodyList(
     modifier: Modifier = Modifier,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
-    items: List<Gatepasses>,
-    onItemClick: (Gatepasses) -> Unit,
+    items: List<StockEntries>,
+    onItemClick: (StockEntries) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -239,8 +238,8 @@ private fun BodyList(
 @Composable
 private fun ListCard(
     modifier: Modifier = Modifier,
-    item: Gatepasses,
-    onItemClick: (Gatepasses) -> Unit
+    item: StockEntries,
+    onItemClick: (StockEntries) -> Unit
 ) {
     ListCard(
         modifier = modifier
@@ -256,24 +255,38 @@ private fun ListCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column{
-                LabelLarge(item.gatepassName.toString())
+            // Image
+            ListImageView(
+                imageUrl = item.imageUrl,
+                modifier = Modifier
+                    .size(60.dp),
+            ) {
+                Spacer(Modifier.width(8.dp))
+            }
+
+            Column(
+                modifier = Modifier
+                    .weight(1f),
+            ) {
+                LabelLarge(item.itemname.toString())
                 Spacer(Modifier.height(2.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    HeadingMedium("Date: ")
-                    LabelMedium(item.date.toString())
+                    HeadingMedium("Qty", Modifier.weight(1f))
+                    if (HP.settings.saleCartons == true)
+                        HeadingMedium("Crtn", Modifier.weight(1f))
                 }
-                Spacer(Modifier.height(2.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    HeadingMedium("Remarks: ")
-                    LabelMedium(item.remarks.toString())
+                    LabelMedium(HP.formatDecimal(item.qty), Modifier.weight(1f))
+                    if (HP.settings.saleCartons == true)
+                        LabelMedium(item.crtn.toString(), Modifier.weight(1f))
                 }
+
             }
         }
     }

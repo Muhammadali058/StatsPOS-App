@@ -10,4 +10,8 @@ data class WarehouseEntryItems(
 
     val clientId:Int? = null,
     val branchId:Int? = null,
+
+    // Extras not part of database
+    var itemname: String? = null,
+    var imageUrl: String? = null,
 )

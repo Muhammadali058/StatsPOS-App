@@ -17,7 +17,7 @@ interface StockEntriesRepository {
 
     suspend fun loadWarehouseEntries(body: JsonObject): Resource<JsonObject>
 
-    suspend fun loadWarehouseEntryItems(body: JsonObject): Resource<JsonObject>
+    suspend fun loadWarehouseEntryItems(warehouseEntryId: Long): Resource<JsonObject>
 
     suspend fun stockTransferToWarehouse(warehouseId: Long): Resource<JsonObject>
 

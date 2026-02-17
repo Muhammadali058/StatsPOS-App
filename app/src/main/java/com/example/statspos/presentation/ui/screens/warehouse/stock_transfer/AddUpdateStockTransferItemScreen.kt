@@ -1,7 +1,7 @@
-package com.example.statspos.presentation.ui.screens.items.packages
+package com.example.statspos.presentation.ui.screens.warehouse.stock_transfer
 
-import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
@@ -42,39 +43,43 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.R
-import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
+import com.example.statspos.presentation.ui.components.AppText
 import com.example.statspos.presentation.ui.components.AutoCompleteItemsTextbox
 import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
 import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
+import com.example.statspos.presentation.ui.components.HeadingMedium
+import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.items.packages.AddUpdatePackageItemViewModel
+import com.example.statspos.presentation.viewmodels.warehouse.gatepass.AddUpdateGatepassItemViewModel
+import com.example.statspos.presentation.viewmodels.warehouse.stock_transfer.AddUpdateStockTransferItemViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import com.example.statspos.utils.showToast
 
 @Composable
-fun AddUpdatePackageItemScreen(
+fun AddUpdateStockTransferItemScreen(
     sharedViewModel: SharedViewModel,
     updateId: Long = 0,
     isUpdate: Boolean = false,
-    packageId: Long = 0,
+    warehouseId: Long = 0,
     onSearchItemClick: () -> Unit,
     onBack: () -> Unit,
 ) {
@@ -86,7 +91,7 @@ fun AddUpdatePackageItemScreen(
     }
 
     val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<AddUpdatePackageItemViewModel>()
+    val viewModel = hiltViewModel<AddUpdateStockTransferItemViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -112,7 +117,7 @@ fun AddUpdatePackageItemScreen(
         viewModel.updateInitialState(
             isUpdate = isUpdate,
             updateId = updateId,
-            packageId = packageId,
+            warehouseId = warehouseId,
         )
 
         if (isUpdate && !hasLoadedOnce) {
@@ -144,14 +149,14 @@ fun AddUpdatePackageItemScreen(
 
     if (showDeleteDialog) {
         ConfirmDialog(
-            text = "Are you sure to delete this package item",
+            text = "Are you sure to delete this item",
             onDismiss = {
                 showDeleteDialog = false
             },
             onConfirm = {
                 showDeleteDialog = false
                 viewModel.deleteData(updateId) {
-                    context.showToast("Package item deleted successfully")
+                    context.showToast("Item deleted successfully")
                     goBackWithResult()
                 }
             }
@@ -183,7 +188,7 @@ fun AddUpdatePackageItemScreen(
                 onNavigationClick = {
                     onBack()
                 },
-                title = if (isUpdate) "Update Package Item" else "Add Package Item",
+                title = if (isUpdate) "Update Item" else "Add Item",
                 actions = {
                     Row {
                         if (isUpdate && HP.userRights.deleteAnything == true) {
@@ -208,7 +213,7 @@ fun AddUpdatePackageItemScreen(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(ConstantPaddings.BODY_HORIZONTAL)
                 .padding(vertical = 16.dp)
-        ){
+        ) {
             Column(
                 Modifier
                     .fillMaxSize()
@@ -223,14 +228,14 @@ fun AddUpdatePackageItemScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Dropdown(
-                        value = state.packageName,
-                        onValueChange = viewModel::onPackageNameChange,
-                        items = HP.packages,
+                        value = state.warehouseName,
+                        onValueChange = viewModel::onWarehouseNameChange,
+                        items = HP.warehouses,
                         onItemSelected = { dropdownItem ->
-                            viewModel.onPackageIdChange(dropdownItem.id)
+                            viewModel.onWarehouseIdChange(dropdownItem.id)
                         },
                         label = {
-                            Text("Package")
+                            Text("Warehouse")
                         },
                         enabled = false,
                     )
@@ -254,11 +259,14 @@ fun AddUpdatePackageItemScreen(
                         onSearchItemClick = onSearchItemClick
                     )
                     Body(
+                        stockPcs = state.stockPcs,
+                        stockCrtn = state.stockCrtn,
+                        wStockPcs = state.wStockPcs,
+                        wStockCrtn = state.wStockCrtn,
                         qty = state.qty,
-                        rate = state.rate,
-                        total = state.total,
+                        crtn = state.crtn,
                         onQtyChange = viewModel::onQtyChange,
-                        onRateChange = viewModel::onRateChange,
+                        onCrtnChange = viewModel::onCrtnChange,
                     )
                 }
 
@@ -268,7 +276,7 @@ fun AddUpdatePackageItemScreen(
                             WindowInsets.navigationBars
                                 .union(WindowInsets.ime)
                         )
-                ){
+                ) {
                     if (state.isSaving) {
                         AppCircularProgressIndicator()
                     } else {
@@ -354,13 +362,97 @@ private fun ItemnameBox(
 
 @Composable
 private fun Body(
+    stockPcs: Double,
+    stockCrtn: Long,
+    wStockPcs: Double,
+    wStockCrtn: Long,
     qty: String,
-    rate: String,
-    total: String,
+    crtn: String,
     onQtyChange: (String) -> Unit,
-    onRateChange: (String) -> Unit,
+    onCrtnChange: (String) -> Unit,
 ) {
-    Row{
+    Text(
+        modifier = Modifier
+            .fillMaxWidth(),
+        text = "Stock Here",
+        textAlign = TextAlign.Center,
+        style = MaterialTheme.typography.titleMedium.copy(
+            color = MaterialTheme.colorScheme.primary,
+        ),
+    )
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            HeadingMedium("Stock Pcs", Modifier.fillMaxWidth(.5f), textAlign = TextAlign.Center)
+            HeadingMedium("Stock Crtn", Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            LabelMedium(
+                HP.formatDecimal(stockPcs),
+                Modifier.fillMaxWidth(.5f),
+                textAlign = TextAlign.Center
+            )
+            LabelMedium(
+                stockCrtn.toString(),
+                Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+
+    Spacer(Modifier.height(8.dp))
+    Text(
+        modifier = Modifier
+            .fillMaxWidth(),
+        text = "Stock in Warehouse",
+        textAlign = TextAlign.Center,
+        style = MaterialTheme.typography.titleMedium.copy(
+            color = MaterialTheme.colorScheme.primary,
+        ),
+    )
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            HeadingMedium("Stock Pcs", Modifier.fillMaxWidth(.5f), textAlign = TextAlign.Center)
+            HeadingMedium("Stock Crtn", Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            LabelMedium(
+                HP.formatDecimal(wStockPcs),
+                Modifier.fillMaxWidth(.5f),
+                textAlign = TextAlign.Center
+            )
+            LabelMedium(
+                wStockCrtn.toString(),
+                Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+    Spacer(Modifier.height(8.dp))
+    Row {
         Textbox(
             value = qty,
             onValueChange = onQtyChange,
@@ -373,28 +465,39 @@ private fun Body(
                 keyboardType = KeyboardType.Decimal
             ),
         )
-        Spacer(Modifier.width(8.dp))
-        Textbox(
-            value = rate,
-            onValueChange = onRateChange,
-            modifier = Modifier
-                .weight(1f),
-            label = {
-                Text("Rate")
-            },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Decimal
-            ),
+        if (HP.settings.saleCartons == true) {
+            Spacer(Modifier.width(8.dp))
+            Textbox(
+                value = crtn,
+                onValueChange = onCrtnChange,
+                modifier = Modifier
+                    .weight(1f),
+                label = {
+                    Text("Crtn")
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal
+                ),
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun Prev() {
+    Column(
+        Modifier.fillMaxSize()
+    ) {
+        Body(
+            0.0,
+            0L,
+            0.0,
+            0L,
+            "",
+            "",
+            {},
+            {},
         )
     }
-    Textbox(
-        value = total,
-        onValueChange = { },
-        modifier = Modifier
-            .fillMaxWidth(),
-        label = {
-            Text("Total")
-        },
-        readOnly = true,
-    )
 }

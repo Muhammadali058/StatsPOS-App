@@ -89,6 +89,7 @@ object HP {
         DropdownItem(7, "By Carton Rate"),
         DropdownItem(8, "By Carton Size"),
     )
+    var gatepasses = emptyList<DropdownItem>()
 
     fun setDropdowns(jsonObject: JsonObject) {
         settings = Gson().get<Settings>(jsonObject.get("settings").asJsonObject)

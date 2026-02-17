@@ -1,6 +1,5 @@
-package com.example.statspos.presentation.ui.screens.items.packages
+package com.example.statspos.presentation.ui.screens.warehouse.gatepass
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,12 +41,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.R
-import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppIconButton
@@ -63,18 +60,18 @@ import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.items.packages.AddUpdatePackageItemViewModel
+import com.example.statspos.presentation.viewmodels.warehouse.gatepass.AddUpdateGatepassItemViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import com.example.statspos.utils.showToast
 
 @Composable
-fun AddUpdatePackageItemScreen(
+fun AddUpdateGatepassItemScreen(
     sharedViewModel: SharedViewModel,
     updateId: Long = 0,
     isUpdate: Boolean = false,
-    packageId: Long = 0,
+    gatepassId: Long = 0,
     onSearchItemClick: () -> Unit,
     onBack: () -> Unit,
 ) {
@@ -86,7 +83,7 @@ fun AddUpdatePackageItemScreen(
     }
 
     val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<AddUpdatePackageItemViewModel>()
+    val viewModel = hiltViewModel<AddUpdateGatepassItemViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -112,7 +109,7 @@ fun AddUpdatePackageItemScreen(
         viewModel.updateInitialState(
             isUpdate = isUpdate,
             updateId = updateId,
-            packageId = packageId,
+            gatepassId = gatepassId,
         )
 
         if (isUpdate && !hasLoadedOnce) {
@@ -144,14 +141,14 @@ fun AddUpdatePackageItemScreen(
 
     if (showDeleteDialog) {
         ConfirmDialog(
-            text = "Are you sure to delete this package item",
+            text = "Are you sure to delete this gatepass item",
             onDismiss = {
                 showDeleteDialog = false
             },
             onConfirm = {
                 showDeleteDialog = false
                 viewModel.deleteData(updateId) {
-                    context.showToast("Package item deleted successfully")
+                    context.showToast("Gatepass item deleted successfully")
                     goBackWithResult()
                 }
             }
@@ -183,7 +180,7 @@ fun AddUpdatePackageItemScreen(
                 onNavigationClick = {
                     onBack()
                 },
-                title = if (isUpdate) "Update Package Item" else "Add Package Item",
+                title = if (isUpdate) "Update Gatepass Item" else "Add Gatepass Item",
                 actions = {
                     Row {
                         if (isUpdate && HP.userRights.deleteAnything == true) {
@@ -223,14 +220,14 @@ fun AddUpdatePackageItemScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Dropdown(
-                        value = state.packageName,
-                        onValueChange = viewModel::onPackageNameChange,
-                        items = HP.packages,
+                        value = state.gatepassName,
+                        onValueChange = viewModel::onGatepassNameChange,
+                        items = HP.gatepasses,
                         onItemSelected = { dropdownItem ->
-                            viewModel.onPackageIdChange(dropdownItem.id)
+                            viewModel.onGatepassIdChange(dropdownItem.id)
                         },
                         label = {
-                            Text("Package")
+                            Text("Gatepass")
                         },
                         enabled = false,
                     )
@@ -255,10 +252,9 @@ fun AddUpdatePackageItemScreen(
                     )
                     Body(
                         qty = state.qty,
-                        rate = state.rate,
-                        total = state.total,
+                        crtn = state.crtn,
                         onQtyChange = viewModel::onQtyChange,
-                        onRateChange = viewModel::onRateChange,
+                        onCrtnChange = viewModel::onCrtnChange,
                     )
                 }
 
@@ -355,10 +351,9 @@ private fun ItemnameBox(
 @Composable
 private fun Body(
     qty: String,
-    rate: String,
-    total: String,
+    crtn: String,
     onQtyChange: (String) -> Unit,
-    onRateChange: (String) -> Unit,
+    onCrtnChange: (String) -> Unit,
 ) {
     Row{
         Textbox(
@@ -373,28 +368,20 @@ private fun Body(
                 keyboardType = KeyboardType.Decimal
             ),
         )
-        Spacer(Modifier.width(8.dp))
-        Textbox(
-            value = rate,
-            onValueChange = onRateChange,
-            modifier = Modifier
-                .weight(1f),
-            label = {
-                Text("Rate")
-            },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Decimal
-            ),
-        )
+        if(HP.settings.saleCartons == true){
+            Spacer(Modifier.width(8.dp))
+            Textbox(
+                value = crtn,
+                onValueChange = onCrtnChange,
+                modifier = Modifier
+                    .weight(1f),
+                label = {
+                    Text("Crtn")
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal
+                ),
+            )
+        }
     }
-    Textbox(
-        value = total,
-        onValueChange = { },
-        modifier = Modifier
-            .fillMaxWidth(),
-        label = {
-            Text("Total")
-        },
-        readOnly = true,
-    )
 }

@@ -41,6 +41,7 @@ import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.ui.screens.utilities.users.UsersScreen
 import com.example.statspos.presentation.ui.screens.warehouse.warehouse.WarehousesScreen
 import com.example.statspos.presentation.ui.screens.warehouse.gatepass.GatepassScreen
+import com.example.statspos.presentation.ui.screens.warehouse.stock_transfer.StockTransferScreen
 
 @Composable
 fun MainScreen() {
@@ -227,6 +228,14 @@ fun MainScreen() {
 //            Warehouses
             entry<TopRoutes.Warehouses> {
                 WarehousesScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<TopRoutes.TransferStock> {
+                StockTransferScreen(
                     sharedViewModel = sharedViewModel,
                     onBack = {
                         backStack.removeLastOrNull()

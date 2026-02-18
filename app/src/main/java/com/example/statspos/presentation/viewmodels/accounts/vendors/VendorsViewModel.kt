@@ -2,7 +2,6 @@ package com.example.statspos.presentation.viewmodels.accounts.vendors
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.accounts.Accounts
 import com.example.statspos.domain.repository.accounts.VendorsRepository
 import com.example.statspos.utils.HP

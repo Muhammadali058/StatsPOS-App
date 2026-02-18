@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
@@ -20,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -199,10 +201,11 @@ fun ExpensePostedEntriesBody(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
-                    .windowInsetsPadding(
-                        WindowInsets.navigationBars
-                            .union(WindowInsets.ime)
-                    )
+                    .navigationBarsPadding()
+//                    .windowInsetsPadding(
+//                        WindowInsets.navigationBars
+//                            .union(WindowInsets.ime)
+//                    )
             ) {
                 HeadingMedium(
                     text = "Total Entries: ",

@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.accounts.customers
+package com.example.statspos.presentation.ui.screens.sales
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -8,11 +8,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,102 +35,43 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
-import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.domain.models.DropdownItem
-import com.example.statspos.domain.models.accounts.Accounts
+import com.example.statspos.domain.models.sales.SalesBills
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.BottomSheet
 import com.example.statspos.presentation.ui.components.ComboBox
+import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
-import com.example.statspos.presentation.ui.components.ListImageView
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchTextbox
-import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.accounts.customers.CustomersViewModel
+import com.example.statspos.presentation.viewmodels.sales.PostedBillsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
-
-private sealed class Routes : NavKey {
-    @Serializable
-    data object Home : Routes()
-
-    @Serializable
-    data class AddUpdateCustomer(val updateId: Long, val isUpdate: Boolean) : Routes()
-}
-
-@Composable
-fun CustomersScreen(
-    sharedViewModel: SharedViewModel,
-    onBack: () -> Unit,
-) {
-    val backStack = rememberNavBackStack(Routes.Home)
-    fun navigate(key: NavKey) {
-        if (backStack.lastOrNull() != key) {
-            backStack.add(key)
-        }
-    }
-    NavDisplay(
-        backStack = backStack,
-        entryDecorators = listOf(
-            rememberSaveableStateHolderNavEntryDecorator(),
-            rememberViewModelStoreNavEntryDecorator()
-        ),
-        entryProvider = entryProvider {
-            entry<Routes.Home> {
-                Home(
-                    sharedViewModel = sharedViewModel,
-                    onAddButtonClick = { updateId, isUpdate ->
-                        navigate(Routes.AddUpdateCustomer(updateId, isUpdate))
-                    },
-                    onBack = {
-                        onBack()
-                    },
-                )
-            }
-            entry<Routes.AddUpdateCustomer> { key ->
-                AddUpdateCustomerScreen(
-                    sharedViewModel = sharedViewModel,
-                    updateId = key.updateId,
-                    isUpdate = key.isUpdate,
-                    onBack = {
-                        backStack.removeLastOrNull()
-                    },
-                )
-            }
-        }
-    )
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Home(
+fun PostedBillsBody(
     sharedViewModel: SharedViewModel,
+    onItemClick: (SalesBills) -> Unit,
     onAddButtonClick: (Long, Boolean) -> Unit,
-    onBack: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBottomSheet by remember { mutableStateOf(false) }
 
-    val viewModel = hiltViewModel<CustomersViewModel>()
+    val viewModel = hiltViewModel<PostedBillsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -169,23 +110,9 @@ private fun Home(
                 snackbarHostState = snackbarHostState,
             )
         },
-        floatingActionButton = {
-            AppFloatingActionButton(
-                modifier = Modifier
-                    .navigationBarsPadding()
-            ) {
-                onAddButtonClick(0L, false)
-            }
-        },
-        topBar = {
-            TopAppBar(
-                onNavigationClick = {
-                    onBack()
-                },
-                title = "Customers",
-            )
-        }
     ) { innerPadding ->
+        Box(Modifier.padding(innerPadding))
+
         // Bottom Sheet
         if (showBottomSheet) {
             BottomSheet(
@@ -194,35 +121,86 @@ private fun Home(
                     showBottomSheet = false
                 },
             ) {
-                Dropdown(
-                    value = state.categoryName,
-                    onValueChange = viewModel::onCategoryNameChange,
-                    items = HP.accountCategories,
-                    onItemSelected = { dropdownItem ->
-                        viewModel.onCategoryIdChange(dropdownItem.id)
-                    },
-                    label = {
-                        Text(text = "Category")
-                    }
-                )
-
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    DateTextbox(
+                        modifier = Modifier
+                            .weight(1f),
+                        date = state.fromDate,
+                        onDateChange = viewModel::onFromDateChange,
+                        label = "From Date"
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    DateTextbox(
+                        modifier = Modifier
+                            .weight(1f),
+                        date = state.toDate,
+                        onDateChange = viewModel::onToDateChange,
+                        label = "To Date"
+                    )
+                }
                 ComboBox(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    items = listOf(
-                        DropdownItem(1, "Retail"),
-                        DropdownItem(2, "Wholesale"),
-                    ),
-                    selectedItem = state.selectedSearchType,
+                    items = HP.salesPostedBillsSearchBy,
+                    selectedItem = state.searchBy,
                     onItemSelected = { item ->
-                        viewModel.onSelectedSearchTypeChange(item)
+                        viewModel.onSearchByChange(item)
+                    },
+                    label = {
+                        Text(text = "Search By")
+                    },
+                )
+                ComboBox(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    items = HP.salesType,
+                    selectedItem = state.salesType,
+                    onItemSelected = { item ->
+                        viewModel.onSalesTypeChange(item)
+                    },
+                    label = {
+                        Text(text = "Sales Type")
+                    },
+                )
+                ComboBox(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    items = HP.salesOn,
+                    selectedItem = state.salesOn,
+                    onItemSelected = { item ->
+                        viewModel.onSalesOnChange(item)
+                    },
+                    label = {
+                        Text(text = "Sales On")
+                    },
+                )
+                ComboBox(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    items = HP.salesMop,
+                    selectedItem = state.salesMop,
+                    onItemSelected = { item ->
+                        viewModel.onSalesMOPChange(item)
+                    },
+                    label = {
+                        Text(text = "M.O.P")
+                    },
+                )
+                ComboBox(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    items = HP.salesRetailType,
+                    selectedItem = state.salesRetailType,
+                    onItemSelected = { item ->
+                        viewModel.onSalesRetailTypeChange(item)
                     },
                     label = {
                         Text(text = "Type")
                     },
-                    addNone = true,
                 )
-
                 Button(onClick = {
                     viewModel.loadData()
                     scope.launch { sheetState.hide() }.invokeOnCompletion {
@@ -239,7 +217,6 @@ private fun Home(
         Box(
             Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
             Column(
@@ -261,9 +238,6 @@ private fun Home(
                             viewModel.loadData()
                             keyboardController?.hide()
                         },
-                        onEndIconClick = {
-                            viewModel.onSearchChange("")
-                        },
                         onFilterClick = {
                             showBottomSheet = true
                         }
@@ -281,8 +255,11 @@ private fun Home(
                             viewModel.loadNextItems()
                         },
                         items = state.list,
-                        onItemClick = { item ->
-                            onAddButtonClick(item.id!!, true)
+                        onItemClick = { salesBill ->
+                            onItemClick(salesBill)
+                        },
+                        onEditButtonClick = { salesBill ->
+                            onAddButtonClick(salesBill.id!!, true)
                         }
                     )
                 }
@@ -293,10 +270,10 @@ private fun Home(
                         .padding(8.dp)
                 ) {
                     HeadingMedium(
-                        text = "Total Customers: ",
+                        text = "Total Bills: ",
                     )
                     LabelMedium(
-                        text = state.totalCustomers.toString(),
+                        text = state.totalBills.toString(),
                     )
                 }
             }
@@ -310,7 +287,6 @@ private fun SearchBox(
     value: String,
     onValueChange: (String) -> Unit,
     onSearchClick: (String) -> Unit,
-    onEndIconClick: (String) -> Unit,
     onFilterClick: () -> Unit,
 ) {
     Row(
@@ -323,7 +299,9 @@ private fun SearchBox(
                 .weight(1f),
             value = value,
             onValueChange = onValueChange,
-            onEndIconClick = onEndIconClick,
+            onEndIconClick = {
+                onValueChange("")
+            },
             onSearchClick = onSearchClick,
         )
         Spacer(Modifier.width(4.dp))
@@ -346,8 +324,9 @@ private fun BodyList(
     isLoadingNextPage: Boolean,
     endReached: Boolean,
     loadNextItems: () -> Unit,
-    items: List<Accounts>,
-    onItemClick: (Accounts) -> Unit,
+    items: List<SalesBills>,
+    onItemClick: (SalesBills) -> Unit,
+    onEditButtonClick: (SalesBills) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -366,9 +345,11 @@ private fun BodyList(
                 loadNextItems()
             }
 
-            ListCard(item = item) {
-                onItemClick(it)
-            }
+            ListCard(
+                item = item,
+                onItemClick = onItemClick,
+                onEditButtonClick = onEditButtonClick
+            )
         }
     }
 }
@@ -376,13 +357,15 @@ private fun BodyList(
 @Composable
 private fun ListCard(
     modifier: Modifier = Modifier,
-    item: Accounts,
-    onItemClick: (Accounts) -> Unit
+    item: SalesBills,
+    onItemClick: (SalesBills) -> Unit,
+    onEditButtonClick: (SalesBills) -> Unit,
 ) {
     ListCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = ConstantPaddings.LIST_PADDING_VERTICAL),
+        shape = RoundedCornerShape(6.dp),
         onClick = {
             onItemClick(item)
         }
@@ -392,65 +375,80 @@ private fun ListCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Image
-            ListImageView(
-                imageUrl = item.imageUrl,
-                modifier = Modifier
-                    .size(60.dp),
-                showIfNull = true,
-            ) {
-                Spacer(Modifier.width(8.dp))
-            }
-
             Column(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                LabelLarge(item.customerName.toString())
-
-                // Contact
-                item.contact?.let {
-                    if (it.isNotEmpty()) {
-                        Spacer(Modifier.height(2.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            HeadingMedium("Contact: ")
-                            LabelMedium(item.contact.toString())
-                        }
+                if(item.customerName!!.isNotEmpty()){
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        LabelLarge(item.customerName.toString())
                     }
                 }
-
-                // City
-                item.city?.let {
-                    if (it.isNotEmpty()) {
-                        Spacer(Modifier.height(2.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            HeadingMedium("City: ")
-                            LabelMedium(item.city.toString())
-                        }
-                    }
-                }
-            }
-        }
-
-        // Category
-        item.categoryName?.let {
-            if (it.isNotEmpty()) {
                 Spacer(Modifier.height(2.dp))
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    HeadingMedium("Category: ")
-                    LabelMedium(item.categoryName.toString())
+                    HeadingMedium("Sr. ")
+                    LabelMedium(item.id.toString())
+                    Spacer(Modifier.width(16.dp))
+                    HeadingMedium("Inv No. ")
+                    LabelMedium(item.invoiceNo.toString())
+                }
+                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    HeadingMedium("Date: ")
+                    LabelLarge(item.date.toString())
+                }
+                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    HeadingMedium("User: ")
+                    LabelLarge(item.username.toString())
                 }
             }
-        }
 
+            Spacer(Modifier.width(8.dp))
+            AppIconButton(
+                icon = Icons.Default.Edit,
+                onClick = {
+                    onEditButtonClick(item)
+                }
+            )
+        }
+        Spacer(Modifier.height(2.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            HeadingMedium("Total", Modifier.weight(1f))
+            HeadingMedium("On", Modifier.weight(.5f))
+            HeadingMedium("Type", Modifier.weight(.5f))
+            HeadingMedium("MOP", Modifier.weight(.5f))
+            HeadingMedium("R/W", Modifier.weight(.5f))
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            LabelMedium(HP.formatDecimal(item.total), Modifier.weight(1f))
+            LabelMedium(item.salesOn.toString(), Modifier.weight(.5f))
+            LabelMedium(item.salesType.toString(), Modifier.weight(.5f))
+            LabelMedium(item.mop.toString(), Modifier.weight(.5f))
+            LabelMedium(item.type.toString(), Modifier.weight(.5f))
+        }
     }
 }
+

@@ -26,7 +26,10 @@ object HP {
     var localClient: LocalClients? = null
 
     const val itemsPerPage = 10
+
+    // region Dropdowns
     val noneDropdownItem = DropdownItem(0L, "None")
+
     val mop = listOf(
         DropdownItem(0L, "Cash"),
         DropdownItem(1L, "Bank"),
@@ -39,7 +42,32 @@ object HP {
         DropdownItem(0L, "Rs."),
         DropdownItem(1L, "Percent"),
     )
-
+    val salesPostedBillsSearchBy = listOf(
+        DropdownItem(0L, "By Name"),
+        DropdownItem(1L, "By Sr."),
+        DropdownItem(2L, "By Invoice No."),
+    )
+    val salesOn = listOf(
+        DropdownItem(0L, "Both"),
+        DropdownItem(1L, "Cash"),
+        DropdownItem(2L, "Credit"),
+    )
+    val salesType = listOf(
+        DropdownItem(0L, "Both"),
+        DropdownItem(1L, "Sales"),
+        DropdownItem(2L, "Return"),
+    )
+    val salesMop = listOf(
+        DropdownItem(0L, "Both"),
+        DropdownItem(1L, "Cash"),
+        DropdownItem(2L, "Bank"),
+    )
+    val salesRetailType = listOf(
+        DropdownItem(0L, "Both"),
+        DropdownItem(1L, "Retail"),
+        DropdownItem(2L, "Wholesale"),
+    )
+    // endregion
 
     var clientId: Int = 1
     var branchId: Int = 1
@@ -259,6 +287,32 @@ object HP {
         val zonedDateTime = ZonedDateTime.of(
             localDate,
             LocalTime.now(),
+            ZoneId.systemDefault()
+        )
+
+        val isoString = zonedDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+        return isoString
+    }
+
+    fun getZonedDateWithFromTime(localDate: LocalDate = LocalDate.now()): String {
+        val time = LocalTime.of(0, 0, 0)
+
+        val zonedDateTime = ZonedDateTime.of(
+            localDate,
+            time,
+            ZoneId.systemDefault()
+        )
+
+        val isoString = zonedDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+        return isoString
+    }
+
+    fun getZonedDateWithToTime(localDate: LocalDate = LocalDate.now()): String {
+        val time = LocalTime.of(23, 59, 59)
+
+        val zonedDateTime = ZonedDateTime.of(
+            localDate,
+            time,
             ZoneId.systemDefault()
         )
 

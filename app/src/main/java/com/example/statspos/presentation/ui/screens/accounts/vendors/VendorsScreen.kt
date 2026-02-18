@@ -56,7 +56,6 @@ import com.example.statspos.presentation.ui.components.ListImageView
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.components.TopAppBar
-import com.example.statspos.presentation.ui.screens.accounts.customers.AddUpdateCustomerScreen
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.accounts.vendors.VendorsViewModel

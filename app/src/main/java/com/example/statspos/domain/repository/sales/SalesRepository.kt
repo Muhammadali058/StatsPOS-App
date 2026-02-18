@@ -19,7 +19,7 @@ interface SalesRepository {
 
     suspend fun getBill(body: JsonObject): Resource<JsonObject>
 
-    suspend fun loadPendingBills(): Resource<JsonObject>
+    suspend fun loadPendingBills(body: JsonObject): Resource<JsonObject>
 
     suspend fun loadPendingBillItems(salesId: Long): Resource<JsonObject>
 

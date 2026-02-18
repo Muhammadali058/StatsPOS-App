@@ -93,10 +93,9 @@ class SalesRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun loadPendingBills(): Resource<JsonObject> {
-        val body = JsonObject().apply {
-            addProperty("userId", HP.user.id)
-        }
+    override suspend fun loadPendingBills(body: JsonObject): Resource<JsonObject> {
+        body.addProperty("userId", HP.user.id)
+
         return safeApiCall {
             api.loadPendingBills(
                 DB.addParams(body)

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
@@ -188,10 +189,11 @@ fun JournalPostedEntriesBody(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
-                    .windowInsetsPadding(
-                        WindowInsets.navigationBars
-                            .union(WindowInsets.ime)
-                    )
+                    .navigationBarsPadding()
+//                    .windowInsetsPadding(
+//                        WindowInsets.navigationBars
+//                            .union(WindowInsets.ime)
+//                    )
             ) {
                 HeadingMedium(
                     text = "Total Entries: ",

@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.accounts.suppliers
+package com.example.statspos.presentation.ui.screens.sales
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -8,11 +8,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -29,91 +31,32 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
-import androidx.navigation3.ui.NavDisplay
-import com.example.statspos.domain.models.accounts.Accounts
+import com.example.statspos.domain.models.sales.SalesBills
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
+import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
-import com.example.statspos.presentation.ui.components.ListImageView
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchTextbox
-import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.accounts.suppliers.SuppliersViewModel
+import com.example.statspos.presentation.viewmodels.sales.PendingBillsViewModel
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
-import kotlinx.serialization.Serializable
-
-private sealed class Routes : NavKey {
-    @Serializable
-    data object Home : Routes()
-
-    @Serializable
-    data class AddUpdateSupplier(val updateId: Long, val isUpdate: Boolean) : Routes()
-}
 
 @Composable
-fun SuppliersScreen(
+fun PendingBillsBody(
     sharedViewModel: SharedViewModel,
-    onBack: () -> Unit,
-) {
-    val backStack = rememberNavBackStack(Routes.Home)
-    fun navigate(key: NavKey) {
-        if (backStack.lastOrNull() != key) {
-            backStack.add(key)
-        }
-    }
-    NavDisplay(
-        backStack = backStack,
-        entryDecorators = listOf(
-            rememberSaveableStateHolderNavEntryDecorator(),
-            rememberViewModelStoreNavEntryDecorator()
-        ),
-        entryProvider = entryProvider {
-            entry<Routes.Home> {
-                Home(
-                    sharedViewModel = sharedViewModel,
-                    onAddButtonClick = { updateId, isUpdate ->
-                        navigate(Routes.AddUpdateSupplier(updateId, isUpdate))
-                    },
-                    onBack = {
-                        onBack()
-                    },
-                )
-            }
-            entry<Routes.AddUpdateSupplier> { key ->
-                AddUpdateSupplierScreen(
-                    sharedViewModel = sharedViewModel,
-                    updateId = key.updateId,
-                    isUpdate = key.isUpdate,
-                    onBack = {
-                        backStack.removeLastOrNull()
-                    },
-                )
-            }
-        }
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun Home(
-    sharedViewModel: SharedViewModel,
+    onItemClick: (SalesBills) -> Unit,
     onAddButtonClick: (Long, Boolean) -> Unit,
-    onBack: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<SuppliersViewModel>()
+    val viewModel = hiltViewModel<PendingBillsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -153,26 +96,16 @@ private fun Home(
             )
         },
         floatingActionButton = {
-            AppFloatingActionButton(
-                modifier = Modifier
-                    .navigationBarsPadding()
-            ) {
+            AppFloatingActionButton {
                 onAddButtonClick(0L, false)
             }
         },
-        topBar = {
-            TopAppBar(
-                onNavigationClick = {
-                    onBack()
-                },
-                title = "Suppliers",
-            )
-        }
     ) { innerPadding ->
+        Box(Modifier.padding(innerPadding))
+
         Box(
             Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
             Column(
@@ -194,9 +127,6 @@ private fun Home(
                             viewModel.loadData()
                             keyboardController?.hide()
                         },
-                        onEndIconClick = {
-                            viewModel.onSearchChange("")
-                        },
                     )
                     BodyList(
                         modifier = Modifier
@@ -205,14 +135,10 @@ private fun Home(
                         onRefresh = {
                             viewModel.loadData()
                         },
-                        isLoadingNextPage = state.isLoadingNextPage,
-                        endReached = state.endReached,
-                        loadNextItems = {
-                            viewModel.loadNextItems()
-                        },
                         items = state.list,
-                        onItemClick = { item ->
-                            onAddButtonClick(item.id!!, true)
+                        onItemClick = onItemClick,
+                        onEditButtonClick = { packages ->
+                            onAddButtonClick(packages.id!!, true)
                         }
                     )
                 }
@@ -223,10 +149,10 @@ private fun Home(
                         .padding(8.dp)
                 ) {
                     HeadingMedium(
-                        text = "Total Suppliers: ",
+                        text = "Total Bills: ",
                     )
                     LabelMedium(
-                        text = state.totalSuppliers.toString(),
+                        text = state.totalBills.toString(),
                     )
                 }
             }
@@ -240,7 +166,6 @@ private fun SearchBox(
     value: String,
     onValueChange: (String) -> Unit,
     onSearchClick: (String) -> Unit,
-    onEndIconClick: (String) -> Unit,
 ) {
     Row(
         modifier = modifier
@@ -249,10 +174,12 @@ private fun SearchBox(
     ) {
         SearchTextbox(
             modifier = Modifier
-                .weight(1f),
+                .fillMaxWidth(),
             value = value,
             onValueChange = onValueChange,
-            onEndIconClick = onEndIconClick,
+            onEndIconClick = {
+                onValueChange("")
+            },
             onSearchClick = onSearchClick,
         )
     }
@@ -263,32 +190,21 @@ private fun BodyList(
     modifier: Modifier = Modifier,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
-    isLoadingNextPage: Boolean,
-    endReached: Boolean,
-    loadNextItems: () -> Unit,
-    items: List<Accounts>,
-    onItemClick: (Accounts) -> Unit,
+    items: List<SalesBills>,
+    onItemClick: (SalesBills) -> Unit,
+    onEditButtonClick: (SalesBills) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
-        isLoadingNextPage = isLoadingNextPage,
     ) {
-        items(items.size) { i ->
-            val item = items[i]
-
-            if (
-                i == items.lastIndex &&
-                !endReached &&
-                !isLoadingNextPage
-            ) {
-                loadNextItems()
-            }
-
-            ListCard(item = item) {
-                onItemClick(it)
-            }
+        items(items) { item ->
+            ListCard(
+                item = item,
+                onItemClick = onItemClick,
+                onEditButtonClick = onEditButtonClick
+            )
         }
     }
 }
@@ -296,13 +212,15 @@ private fun BodyList(
 @Composable
 private fun ListCard(
     modifier: Modifier = Modifier,
-    item: Accounts,
-    onItemClick: (Accounts) -> Unit
+    item: SalesBills,
+    onItemClick: (SalesBills) -> Unit,
+    onEditButtonClick: (SalesBills) -> Unit,
 ) {
     ListCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = ConstantPaddings.LIST_PADDING_VERTICAL),
+        shape = RoundedCornerShape(6.dp),
         onClick = {
             onItemClick(item)
         }
@@ -312,50 +230,60 @@ private fun ListCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Image
-            ListImageView(
-                imageUrl = item.imageUrl,
-                modifier = Modifier
-                    .size(60.dp),
-                showIfNull = true,
-            ) {
-                Spacer(Modifier.width(8.dp))
-            }
-
             Column(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                LabelLarge(item.supplierName.toString())
-
-                // Contact
-                item.contact?.let {
-                    if (it.isNotEmpty()) {
-                        Spacer(Modifier.height(2.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            HeadingMedium("Contact: ")
-                            LabelMedium(item.contact.toString())
-                        }
-                    }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    HeadingMedium("Bill No. ")
+                    LabelMedium(item.id.toString())
+                    Spacer(Modifier.width(8.dp))
+                    LabelLarge(item.customerName.toString())
                 }
-
-                // City
-                item.city?.let {
-                    if (it.isNotEmpty()) {
-                        Spacer(Modifier.height(2.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            HeadingMedium("City: ")
-                            LabelMedium(item.city.toString())
-                        }
-                    }
+                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    HeadingMedium("Date: ")
+                    LabelLarge(item.date.toString())
                 }
             }
+
+            Spacer(Modifier.width(8.dp))
+            AppIconButton(
+                icon = Icons.Default.Edit,
+                onClick = {
+                    onEditButtonClick(item)
+                }
+            )
+        }
+        Spacer(Modifier.height(2.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            HeadingMedium("Total", Modifier.weight(1f))
+            HeadingMedium("On", Modifier.weight(.5f))
+            HeadingMedium("Type", Modifier.weight(.5f))
+            HeadingMedium("MOP", Modifier.weight(.5f))
+            HeadingMedium("R/W", Modifier.weight(.5f))
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            LabelMedium(HP.formatDecimal(item.total), Modifier.weight(1f))
+            LabelMedium(item.salesOn.toString(), Modifier.weight(.5f))
+            LabelMedium(item.salesType.toString(), Modifier.weight(.5f))
+            LabelMedium(item.mop.toString(), Modifier.weight(.5f))
+            LabelMedium(item.type.toString(), Modifier.weight(.5f))
         }
     }
 }
+

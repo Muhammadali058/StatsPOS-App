@@ -1,9 +1,10 @@
-package com.example.statspos.presentation.viewmodels.accounts.suppliers
+package com.example.statspos.presentation.viewmodels.sales
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.statspos.domain.models.accounts.Accounts
-import com.example.statspos.domain.repository.accounts.SuppliersRepository
+import com.example.statspos.domain.models.DropdownItem
+import com.example.statspos.domain.models.sales.SalesBills
+import com.example.statspos.domain.repository.sales.SalesRepository
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
@@ -17,21 +18,29 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
-class SuppliersViewModel @Inject constructor(
-    private val api: SuppliersRepository
+class PostedBillsViewModel @Inject constructor(
+    private val api: SalesRepository
 ) : ViewModel() {
 
     // region ScreenState
     data class ScreenState(
-        val list: List<Accounts> = emptyList(),
-        val totalSuppliers: Int = 0,
+        val list: List<SalesBills> = emptyList(),
+        val totalBills: Int = 0,
         val page: Int = 1,
         val endReached: Boolean = false,
 
         val search: String = "",
+        val searchBy: DropdownItem = HP.salesPostedBillsSearchBy[0],
+        val fromDate: LocalDate = LocalDate.now(),
+        val toDate: LocalDate = LocalDate.now(),
+        val salesType: DropdownItem = HP.salesType[0],
+        val salesOn: DropdownItem = HP.salesOn[0],
+        val salesMop: DropdownItem = HP.salesMop[0],
+        val salesRetailType: DropdownItem = HP.salesRetailType[0],
 
         val isLoading: Boolean = false,
         val isLoadingNextPage: Boolean = false,
@@ -106,6 +115,27 @@ class SuppliersViewModel @Inject constructor(
     fun onSearchChange(value: String) {
         state.update { it.copy(search = value) }
     }
+    fun onFromDateChange(value: LocalDate) {
+        state.update { it.copy(fromDate = value) }
+    }
+    fun onToDateChange(value: LocalDate) {
+        state.update { it.copy(toDate = value) }
+    }
+    fun onSearchByChange(value: DropdownItem) {
+        state.update { it.copy(searchBy = value) }
+    }
+    fun onSalesTypeChange(value: DropdownItem) {
+        state.update { it.copy(salesType = value) }
+    }
+    fun onSalesOnChange(value: DropdownItem) {
+        state.update { it.copy(salesOn = value) }
+    }
+    fun onSalesMOPChange(value: DropdownItem) {
+        state.update { it.copy(salesMop = value) }
+    }
+    fun onSalesRetailTypeChange(value: DropdownItem) {
+        state.update { it.copy(salesRetailType = value) }
+    }
     // endregion
 
     // region Network calls
@@ -128,18 +158,18 @@ class SuppliersViewModel @Inject constructor(
 
             val params = getSearchParams(1)
 
-            when (val result = api.loadSuppliers(params)) {
+            when (val result = api.loadPostedBills(params)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
 
-                    val resultTotal = result.data.get("total").asJsonObject.get("totalSuppliers").asInt
-                    val resultList = Gson().getListOf<Accounts>(result.data.get("rows").asJsonArray)
+                    val resultTotal = result.data.get("total").asJsonObject.get("totalBills").asInt
+                    val resultList = Gson().getListOf<SalesBills>(result.data.get("rows").asJsonArray)
                     state.update {
                         it.copy(
                             list = resultList,
-                            totalSuppliers = resultTotal,
+                            totalBills = resultTotal,
                         )
                     }
                 }
@@ -168,7 +198,7 @@ class SuppliersViewModel @Inject constructor(
 
             val params = getSearchParams(state.value.page)
 
-            when (val result = api.loadSuppliers(params)) {
+            when (val result = api.loadPostedBills(params)) {
                 is Resource.Error -> {
                     state.update { it.copy(isLoadingNextPage = false, error = result.error) }
                     result.error?.let { onEvent(UiEvent.ShowError(result.error)) }
@@ -182,12 +212,12 @@ class SuppliersViewModel @Inject constructor(
                 is Resource.Success -> {
                     state.update { it.copy(isLoadingNextPage = false, error = null) }
 
-                    val resultTotal = result.data.get("total").asJsonObject.get("totalSuppliers").asInt
-                    val resultList = Gson().getListOf<Accounts>(result.data.get("rows").asJsonArray)
+                    val resultTotal = result.data.get("total").asJsonObject.get("totalBills").asInt
+                    val resultList = Gson().getListOf<SalesBills>(result.data.get("rows").asJsonArray)
                     state.update {
                         it.copy(
                             list = state.value.list + resultList,
-                            totalSuppliers = resultTotal,
+                            totalBills = resultTotal,
                             endReached = resultList.isEmpty(),
                         )
                     }
@@ -215,6 +245,15 @@ class SuppliersViewModel @Inject constructor(
     private fun getSearchParams(page: Int): JsonObject = JsonObject().apply {
         addProperty("page", page)
         addProperty("itemsPerPage", HP.itemsPerPage)
+        addProperty("fromDate", HP.getZonedDateWithFromTime(state.value.fromDate))
+        addProperty("toDate", HP.getZonedDateWithToTime(state.value.toDate))
+        addProperty("salesOn", state.value.salesOn.id)
+        addProperty("salesType", state.value.salesType.id)
+        addProperty("mop", state.value.salesMop.id)
+        addProperty("type", state.value.salesRetailType.id)
+        addProperty("itemId", 0)
+        addProperty("userId", 0)
+        addProperty("searchBy", state.value.searchBy.id)
         addProperty("text", state.value.search)
     }
 

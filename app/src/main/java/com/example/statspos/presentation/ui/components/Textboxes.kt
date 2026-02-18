@@ -228,6 +228,7 @@ fun AutoCompleteItemsTextbox(
     onItemSelected: (String) -> Unit,
     onEndIconClick: (String) -> Unit,
     onSearchClick: (String) -> Unit,
+    suggestions: Boolean = true,
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit) = {
@@ -275,7 +276,8 @@ fun AutoCompleteItemsTextbox(
             value = value,
             onValueChange = {
                 onValueChange(it)
-                expanded = it.isNotEmpty()
+                if (suggestions)
+                    expanded = it.isNotEmpty()
             },
             height = height,
             label = label,
@@ -285,17 +287,20 @@ fun AutoCompleteItemsTextbox(
             enabled = enabled,
             readOnly = readOnly,
             singleLine = singleLine,
-            leadingIcon = {
-                IconButton(
-                    onClick = {
-                        expanded = !expanded
+            leadingIcon = if (suggestions) {
+                {
+                    IconButton(
+                        onClick = {
+                            expanded = !expanded
+                        }
+                    ) {
+                        AppIcon(
+                            icon = Icons.Default.ArrowDropDown
+                        )
                     }
-                ) {
-                    AppIcon(
-                        icon = Icons.Default.ArrowDropDown
-                    )
+
                 }
-            },
+            } else null,
             trailingIcon = trailingIcon,
             keyboardOptions = keyboardOptions,
             keyboardActions = KeyboardActions(
@@ -372,11 +377,11 @@ fun DiscountTextbox(
                 DropdownItem(1L, "%"),
             )
         }
-        var selectedItem by remember { mutableStateOf(if(isDiscRsPer) items[0] else items[1]) }
+        var selectedItem by remember { mutableStateOf(if (isDiscRsPer) items[0] else items[1]) }
         var expanded by remember { mutableStateOf(false) }
 
         LaunchedEffect(isDiscRsPer) {
-            selectedItem = if(isDiscRsPer)
+            selectedItem = if (isDiscRsPer)
                 items[0]
             else
                 items[1]

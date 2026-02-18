@@ -303,6 +303,7 @@ private fun SearchBox(
             onItemSelected = onItemSelected,
             onEndIconClick = onEndIconClick,
             onSearchClick = onSearchClick,
+            suggestions = false,
             label = {
                 Text(
                     text = "Search"

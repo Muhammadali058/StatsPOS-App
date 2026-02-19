@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -53,7 +52,7 @@ import com.example.statspos.utils.checkEvent
 fun PendingBillsBody(
     sharedViewModel: SharedViewModel,
     onItemClick: (SalesBills) -> Unit,
-    onAddButtonClick: (Long, Boolean) -> Unit,
+    onAddUpdateButtonClick: (Long, Boolean, SalesBills?) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel = hiltViewModel<PendingBillsViewModel>()
@@ -97,7 +96,7 @@ fun PendingBillsBody(
         },
         floatingActionButton = {
             AppFloatingActionButton {
-                onAddButtonClick(0L, false)
+                onAddUpdateButtonClick(0L, false, null)
             }
         },
     ) { innerPadding ->
@@ -137,8 +136,8 @@ fun PendingBillsBody(
                         },
                         items = state.list,
                         onItemClick = onItemClick,
-                        onEditButtonClick = { packages ->
-                            onAddButtonClick(packages.id!!, true)
+                        onEditButtonClick = { salesBill ->
+                            onAddUpdateButtonClick(salesBill.id!!, true, salesBill)
                         }
                     )
                 }
@@ -278,7 +277,7 @@ private fun ListCard(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            LabelMedium(HP.formatDecimal(item.total), Modifier.weight(1f))
+            LabelMedium(HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)), Modifier.weight(1f))
             LabelMedium(item.salesOn.toString(), Modifier.weight(.5f))
             LabelMedium(item.salesType.toString(), Modifier.weight(.5f))
             LabelMedium(item.mop.toString(), Modifier.weight(.5f))

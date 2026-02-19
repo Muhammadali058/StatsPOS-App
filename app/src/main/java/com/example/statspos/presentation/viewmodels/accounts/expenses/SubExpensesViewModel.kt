@@ -32,7 +32,7 @@ class SubExpensesViewModel @Inject constructor(
 
         val search: String = "",
         val expenseName: String = "",
-        val expense: DropdownItem = HP.noneDropdownItem,
+        val expense: DropdownItem = HP.getNoneDropdownItem(),
 
         val isLoading: Boolean = false,
         val error: String? = null,

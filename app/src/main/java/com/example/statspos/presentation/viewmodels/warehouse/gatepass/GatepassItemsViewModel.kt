@@ -31,7 +31,7 @@ class GatepassItemsViewModel @Inject constructor(
         val totalGatepassItems: Int = 0,
 
         val search: String = "",
-        val gatepass: DropdownItem = HP.noneDropdownItem,
+        val gatepass: DropdownItem = HP.getNoneDropdownItem(),
 
         val isLoading: Boolean = false,
         val error: String? = null,

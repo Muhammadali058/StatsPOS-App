@@ -31,7 +31,7 @@ class WarehouseEntriesViewModel @Inject constructor(
         val list: List<WarehouseEntries> = emptyList(),
         val totalWarehouseEntries: Int = 0,
 
-        val warehouse: DropdownItem = HP.noneDropdownItem,
+        val warehouse: DropdownItem = HP.getNoneDropdownItem(),
         val fromDate: LocalDate = LocalDate.now(),
         val toDate: LocalDate = LocalDate.now(),
 

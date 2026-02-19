@@ -30,7 +30,7 @@ class StockTransferEntriesViewModel @Inject constructor(
         val list: List<StockEntries> = emptyList(),
         val totalStockEntries: Int = 0,
 
-        val warehouse: DropdownItem = HP.noneDropdownItem,
+        val warehouse: DropdownItem = HP.getNoneDropdownItem(),
 
         val isLoading: Boolean = false,
         val error: String? = null,

@@ -367,6 +367,7 @@ fun DiscountTextbox(
     onValueChange: (String) -> Unit,
     isDiscRsPer: Boolean,
     onIsDiscRsPerChange: (Boolean) -> Unit,
+    padding: PaddingValues = ConstantPaddings.CUSTOM_TEXTBOX_OUTSIDE,
 ) {
     Box(
         modifier = modifier,
@@ -397,7 +398,8 @@ fun DiscountTextbox(
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal,
-            )
+            ),
+            padding = padding,
         )
 
         ExposedDropdownMenuBox(
@@ -437,6 +439,7 @@ fun DiscountTextbox(
                         )
                     }
                 },
+                padding = padding,
             )
 
             ExposedDropdownMenu(

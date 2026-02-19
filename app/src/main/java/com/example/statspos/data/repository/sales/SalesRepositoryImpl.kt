@@ -135,6 +135,8 @@ class SalesRepositoryImpl @Inject constructor(
     }
 
     override suspend fun changeBillType(body: JsonObject): Resource<JsonObject> {
+        body.addProperty("userId", HP.user.id)
+
         return safeApiCall {
             api.changeBillType(
                 DB.addParams(body)

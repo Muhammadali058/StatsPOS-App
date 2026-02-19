@@ -1,6 +1,7 @@
 package com.example.statspos.presentation.ui.screens
 
 import androidx.navigation3.runtime.NavKey
+import com.example.statspos.domain.models.sales.SalesBills
 import kotlinx.serialization.Serializable
 
 sealed class BottomRoutes : NavKey{
@@ -22,6 +23,7 @@ sealed class TopRoutes : NavKey{
     @Serializable
     data object Home : TopRoutes()
 
+    // region Top
     @Serializable
     data object SearchItem : BottomRoutes()
 
@@ -45,11 +47,14 @@ sealed class TopRoutes : NavKey{
 
     @Serializable
     data object Settings : TopRoutes()
-
+    // endregion
+    // region Sales
     @Serializable
-    data object AddSales : BottomRoutes()
-
-//    Accounts
+    data class AddUpdateSales(val updateId:Long, val isPendingBill: Boolean, val isPostedBill: Boolean, val salesBill: SalesBills?) : TopRoutes()
+    @Serializable
+    data object AddUpdateSalesItem : TopRoutes()
+    // endregion
+    // region Accounts
     @Serializable
     data object Customers : TopRoutes()
 
@@ -67,8 +72,8 @@ sealed class TopRoutes : NavKey{
 
     @Serializable
     data object AccountCategories : TopRoutes()
-
-//    Entries
+    // endregion
+    // region Entries
     @Serializable
     data object ReceiptEntry : TopRoutes()
 
@@ -83,9 +88,8 @@ sealed class TopRoutes : NavKey{
 
     @Serializable
     data object StockEntry : TopRoutes()
-
-
-//    Warehouse
+    // endregion
+    // region Warehouse
     @Serializable
     data object Warehouses : TopRoutes()
 
@@ -94,5 +98,5 @@ sealed class TopRoutes : NavKey{
 
     @Serializable
     data object Gatepass : TopRoutes()
-
+    // endregion
 }

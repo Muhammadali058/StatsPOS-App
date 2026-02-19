@@ -243,6 +243,9 @@ fun HomeScreen(
                         entry<BottomRoutes.Sales> {
                             SalesScreen(
                                 sharedViewModel = sharedViewModel,
+                                onAddUpdateButtonClick = { updateId, isPendingBill, isPostedBill, salesBill ->
+                                    onTopRouteClick(TopRoutes.AddUpdateSales(updateId, isPendingBill, isPostedBill, salesBill))
+                                }
                             )
                         }
                         entry<BottomRoutes.Reports> {

@@ -3,14 +3,7 @@ package com.example.statspos.presentation.ui.screens.main.main
 import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
@@ -36,6 +29,7 @@ import com.example.statspos.presentation.ui.screens.items.categories.CategoriesS
 import com.example.statspos.presentation.ui.screens.items.packages.PackagesScreen
 import com.example.statspos.presentation.ui.screens.purchase.PurchaseScreen
 import com.example.statspos.presentation.ui.screens.purchase.purchase_orders.PurchaseOrdersScreen
+import com.example.statspos.presentation.ui.screens.sales.AddUpdateSalesScreen
 import com.example.statspos.presentation.ui.screens.utilities.SettingsScreen
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.ui.screens.utilities.users.UsersScreen
@@ -136,7 +130,21 @@ fun MainScreen() {
                 PurchaseScreen()
             }
 
-//            Accounts
+            // region Sales
+            entry<TopRoutes.AddUpdateSales> { key ->
+                AddUpdateSalesScreen(
+                    sharedViewModel = sharedViewModel,
+                    invoiceId = key.updateId,
+                    isPendingBill = key.isPendingBill,
+                    isPostedBill = key.isPostedBill,
+                    salesBill = key.salesBill,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            // endregion
+            // region Accounts
             entry<TopRoutes.Customers> {
                 CustomersScreen(
                     sharedViewModel = sharedViewModel,
@@ -185,7 +193,8 @@ fun MainScreen() {
                     }
                 )
             }
-//            Entries
+            // endregion
+            // region Entries
             entry<TopRoutes.ReceiptEntry> {
                 ReceiptEntryScreen(
                     onBack = {
@@ -225,7 +234,8 @@ fun MainScreen() {
                     }
                 )
             }
-//            Warehouses
+            // endregion
+            // region Warehouse
             entry<TopRoutes.Warehouses> {
                 WarehousesScreen(
                     sharedViewModel = sharedViewModel,
@@ -250,16 +260,7 @@ fun MainScreen() {
                     }
                 )
             }
-            entry<TopRoutes.AddSales> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Blue),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("Add Sales")
-                }
-            }
+            // endregion
         }
     )
 }

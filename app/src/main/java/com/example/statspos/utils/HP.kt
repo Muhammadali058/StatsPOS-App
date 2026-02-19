@@ -28,7 +28,7 @@ object HP {
     const val itemsPerPage = 10
 
     // region Dropdowns
-    val noneDropdownItem = DropdownItem(0L, "None")
+//    val noneDropdownItem = DropdownItem(0L, "None")
 
     val mop = listOf(
         DropdownItem(0L, "Cash"),
@@ -48,22 +48,18 @@ object HP {
         DropdownItem(2L, "By Invoice No."),
     )
     val salesOn = listOf(
-        DropdownItem(0L, "Both"),
         DropdownItem(1L, "Cash"),
         DropdownItem(2L, "Credit"),
     )
     val salesType = listOf(
-        DropdownItem(0L, "Both"),
         DropdownItem(1L, "Sales"),
         DropdownItem(2L, "Return"),
     )
     val salesMop = listOf(
-        DropdownItem(0L, "Both"),
         DropdownItem(1L, "Cash"),
         DropdownItem(2L, "Bank"),
     )
     val salesRetailType = listOf(
-        DropdownItem(0L, "Both"),
         DropdownItem(1L, "Retail"),
         DropdownItem(2L, "Wholesale"),
     )
@@ -195,6 +191,14 @@ object HP {
         return df.format(rate)
     }
 
+    fun getNoneDropdownItem(noneText:String = ""): DropdownItem {
+        return DropdownItem(0L, noneText)
+    }
+
+    fun addNoneToList(list: List<DropdownItem>, noneText: String = "None"): List<DropdownItem> {
+        return listOf(DropdownItem(0L, noneText)) + list
+    }
+
     fun getDoubleValue(value: String): Double {
         return try {
             value.toDouble()
@@ -235,21 +239,12 @@ object HP {
         }
     }
 
-    fun getDropdownNameByIdPerformance(
-        id: Long,
-        list: List<DropdownItem>,
-        defaultValue: String = ""
-    ): String {
-        val dropdownMap = list.associateBy({ it.id }, { it.name })
-        return dropdownMap[id] ?: defaultValue
-    }
-
     fun getDropdownNameById(id: Long, list: List<DropdownItem>, defaultValue: String = ""): String {
         return list.firstOrNull { it.id == id }?.name ?: defaultValue
     }
 
-    fun getDropdownById(id: Long, list: List<DropdownItem>): DropdownItem? {
-        return list.firstOrNull { it.id == id }
+    fun getDropdownById(id: Long, list: List<DropdownItem>): DropdownItem {
+        return list.firstOrNull { it.id == id } ?: getNoneDropdownItem()
     }
 
     fun getBalanceWithLabel(balance: Double): String {
@@ -283,10 +278,27 @@ object HP {
             .toLocalDate()
     }
 
+    fun toLocalTime(isoDateString: String): LocalTime {
+        return Instant.parse(isoDateString)
+            .atZone(ZoneId.systemDefault())
+            .toLocalTime()
+    }
+
     fun getZonedDate(localDate: LocalDate = LocalDate.now()): String {
         val zonedDateTime = ZonedDateTime.of(
             localDate,
             LocalTime.now(),
+            ZoneId.systemDefault()
+        )
+
+        val isoString = zonedDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+        return isoString
+    }
+
+    fun getZonedDateWithTime(localDate: LocalDate = LocalDate.now(), localTime: LocalTime): String {
+        val zonedDateTime = ZonedDateTime.of(
+            localDate,
+            localTime,
             ZoneId.systemDefault()
         )
 

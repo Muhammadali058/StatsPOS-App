@@ -116,6 +116,8 @@ fun PostedBillsBody(
         // Bottom Sheet
         if (showBottomSheet) {
             BottomSheet(
+                modifier = Modifier
+                    .fillMaxWidth(),
                 sheetState = sheetState,
                 onDismissRequest = {
                     showBottomSheet = false
@@ -153,54 +155,75 @@ fun PostedBillsBody(
                         Text(text = "Search By")
                     },
                 )
-                ComboBox(
+                Row(
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    items = HP.salesType,
-                    selectedItem = state.salesType,
-                    onItemSelected = { item ->
-                        viewModel.onSalesTypeChange(item)
-                    },
-                    label = {
-                        Text(text = "Sales Type")
-                    },
-                )
-                ComboBox(
+                        .fillMaxWidth()
+                ) {
+                    ComboBox(
+                        modifier = Modifier
+                            .fillMaxWidth(0.5f),
+                        items = HP.salesType,
+                        selectedItem = state.salesType,
+                        onItemSelected = { item ->
+                            viewModel.onSalesTypeChange(item)
+                        },
+                        label = {
+                            Text(text = "Sales Type")
+                        },
+                        addNone = true,
+                        noneText = "Both",
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    ComboBox(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        items = HP.salesOn,
+                        selectedItem = state.salesOn,
+                        onItemSelected = { item ->
+                            viewModel.onSalesOnChange(item)
+                        },
+                        label = {
+                            Text(text = "Sales On")
+                        },
+                        addNone = true,
+                        noneText = "Both",
+                    )
+                }
+
+                Row(
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    items = HP.salesOn,
-                    selectedItem = state.salesOn,
-                    onItemSelected = { item ->
-                        viewModel.onSalesOnChange(item)
-                    },
-                    label = {
-                        Text(text = "Sales On")
-                    },
-                )
-                ComboBox(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    items = HP.salesMop,
-                    selectedItem = state.salesMop,
-                    onItemSelected = { item ->
-                        viewModel.onSalesMOPChange(item)
-                    },
-                    label = {
-                        Text(text = "M.O.P")
-                    },
-                )
-                ComboBox(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    items = HP.salesRetailType,
-                    selectedItem = state.salesRetailType,
-                    onItemSelected = { item ->
-                        viewModel.onSalesRetailTypeChange(item)
-                    },
-                    label = {
-                        Text(text = "Type")
-                    },
-                )
+                        .fillMaxWidth()
+                ) {
+                    ComboBox(
+                        modifier = Modifier
+                            .fillMaxWidth(0.5f),
+                        items = HP.salesMop,
+                        selectedItem = state.salesMop,
+                        onItemSelected = { item ->
+                            viewModel.onSalesMOPChange(item)
+                        },
+                        label = {
+                            Text(text = "M.O.P")
+                        },
+                        addNone = true,
+                        noneText = "Both",
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    ComboBox(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        items = HP.salesRetailType,
+                        selectedItem = state.salesRetailType,
+                        onItemSelected = { item ->
+                            viewModel.onSalesRetailTypeChange(item)
+                        },
+                        label = {
+                            Text(text = "Type")
+                        },
+                        addNone = true,
+                        noneText = "Both",
+                    )
+                }
                 Button(onClick = {
                     viewModel.loadData()
                     scope.launch { sheetState.hide() }.invokeOnCompletion {
@@ -379,7 +402,7 @@ private fun ListCard(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                if(item.customerName!!.isNotEmpty()){
+                if (item.customerName!!.isNotEmpty()) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
@@ -443,7 +466,10 @@ private fun ListCard(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            LabelMedium(HP.formatDecimal(item.total), Modifier.weight(1f))
+            LabelMedium(
+                HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)),
+                Modifier.weight(1f)
+            )
             LabelMedium(item.salesOn.toString(), Modifier.weight(.5f))
             LabelMedium(item.salesType.toString(), Modifier.weight(.5f))
             LabelMedium(item.mop.toString(), Modifier.weight(.5f))

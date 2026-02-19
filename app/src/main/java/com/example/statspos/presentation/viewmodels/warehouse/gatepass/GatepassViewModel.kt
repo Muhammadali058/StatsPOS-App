@@ -33,7 +33,7 @@ class GatepassViewModel @Inject constructor(
 
         val search: String = "",
         val date: LocalDate = LocalDate.now(),
-        val warehouse: DropdownItem = HP.noneDropdownItem,
+        val warehouse: DropdownItem = HP.getNoneDropdownItem(),
 
         val isLoading: Boolean = false,
         val error: String? = null,

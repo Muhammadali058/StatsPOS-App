@@ -31,7 +31,7 @@ class SubBanksViewModel @Inject constructor(
         val totalSubBanks: Int = 0,
 
         val search: String = "",
-        val bank: DropdownItem = HP.noneDropdownItem,
+        val bank: DropdownItem = HP.getNoneDropdownItem(),
 
         val isLoading: Boolean = false,
         val error: String? = null,

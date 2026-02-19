@@ -31,6 +31,7 @@ data class Sales(
     var isRetail: Boolean? = null,
     var isPaid: Boolean? = null,
     var isDelivered: Boolean? = null,
+    var isEstimatedBill: Boolean? = null,
 
     var oldBalance: Double? = null,
     var newBalance: Double? = null,

@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.statspos.domain.models.sales.Sales
 import com.example.statspos.domain.models.sales.SalesBills
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppIconButton
@@ -51,7 +52,7 @@ import com.example.statspos.utils.checkEvent
 @Composable
 fun PendingBillsBody(
     sharedViewModel: SharedViewModel,
-    onItemClick: (SalesBills) -> Unit,
+    onItemClick: (Sales) -> Unit,
     onAddUpdateButtonClick: (Long, Boolean, SalesBills?) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -135,7 +136,11 @@ fun PendingBillsBody(
                             viewModel.loadData()
                         },
                         items = state.list,
-                        onItemClick = onItemClick,
+                        onItemClick = { salesBills ->
+                            viewModel.getSales(salesBills.id!!){ sales ->
+                                onItemClick(sales)
+                            }
+                        },
                         onEditButtonClick = { salesBill ->
                             onAddUpdateButtonClick(salesBill.id!!, true, salesBill)
                         }

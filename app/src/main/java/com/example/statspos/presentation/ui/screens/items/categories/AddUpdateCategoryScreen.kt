@@ -93,14 +93,17 @@ fun AddUpdateCategoryScreen(
     // Edit data when update
     var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        viewModel.updateInitialState(
-            isUpdate = isUpdate,
-            updateId = updateId,
-        )
+        if (!hasLoadedOnce) {
+            viewModel.updateInitialState(
+                isUpdate = isUpdate,
+                updateId = updateId,
+            )
 
-        if (isUpdate && !hasLoadedOnce) {
+            if (isUpdate) {
+                viewModel.editData(updateId)
+            }
+
             hasLoadedOnce = true
-            viewModel.editData(updateId)
         }
     }
 
@@ -166,7 +169,7 @@ fun AddUpdateCategoryScreen(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(ConstantPaddings.BODY_HORIZONTAL)
                 .padding(vertical = 16.dp)
-        ){
+        ) {
             Column(
                 Modifier
                     .fillMaxSize(),
@@ -197,7 +200,7 @@ fun AddUpdateCategoryScreen(
                             WindowInsets.navigationBars
                                 .union(WindowInsets.ime)
                         )
-                ){
+                ) {
                     if (state.isSaving) {
                         AppCircularProgressIndicator()
                     } else {
@@ -271,7 +274,7 @@ private fun Prev() {
     Column(
         Modifier
             .fillMaxSize(),
-    ){
+    ) {
         Body(
             categoryName = "",
             remarks = "",

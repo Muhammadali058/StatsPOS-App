@@ -113,14 +113,14 @@ fun AddUpdateSalesScreen(
     // Edit data when update
     var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        viewModel.updateInitialState(
-            invoiceId = invoiceId,
-            isPendingBill = isPendingBill,
-            isPostedBill = isPostedBill,
-            salesBill = salesBill,
-        )
-
         if (!hasLoadedOnce) {
+            viewModel.updateInitialState(
+                invoiceId = invoiceId,
+                isPendingBill = isPendingBill,
+                isPostedBill = isPostedBill,
+                salesBill = salesBill,
+            )
+
             if ((isPendingBill || isPostedBill)) {
                 viewModel.editData(invoiceId)
             } else {
@@ -279,8 +279,10 @@ fun AddUpdateSalesScreen(
                         remarks = state.remarks,
                         onIsRetailChange = { value ->
                             viewModel.onIsRetailChange(value)
-                            viewModel.onRetailChange(value){
-                                goBackWithResult()
+                            if(isPendingBill || isPostedBill){
+                                viewModel.changeBillType(value){
+                                    goBackWithResult()
+                                }
                             }
                         },
                         onSupplierSelected = viewModel::onSupplierSelected,

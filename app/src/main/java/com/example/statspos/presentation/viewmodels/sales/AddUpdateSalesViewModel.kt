@@ -393,7 +393,7 @@ class AddUpdateSalesViewModel @Inject constructor(
         }
     }
 
-    fun onRetailChange(isRetail: Boolean, onSuccess: () -> Unit) {
+    fun changeBillType(isRetail: Boolean, onSuccess: () -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -420,7 +420,6 @@ class AddUpdateSalesViewModel @Inject constructor(
             }
         }
     }
-
     // endregion
 
     // region Methods
@@ -673,6 +672,5 @@ class AddUpdateSalesViewModel @Inject constructor(
             return totalDisc
         }
     }
-
     // endregion
 }

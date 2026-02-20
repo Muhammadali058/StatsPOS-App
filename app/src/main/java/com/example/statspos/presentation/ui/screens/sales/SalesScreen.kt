@@ -11,6 +11,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import com.example.statspos.domain.models.sales.Sales
 import com.example.statspos.domain.models.sales.SalesBills
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.TabLayout
@@ -19,6 +20,7 @@ import com.example.statspos.presentation.viewmodels.SharedViewModel
 @Composable
 fun SalesScreen(
     sharedViewModel: SharedViewModel,
+    onItemClick: (Boolean, Sales) -> Unit,
     onAddUpdateButtonClick: (Long, Boolean, Boolean, SalesBills?) -> Unit,
 ) {
     val tabs = listOf("Pending Bills", "Posted Bills")
@@ -55,8 +57,8 @@ fun SalesScreen(
                     0 ->
                         PendingBillsBody(
                             sharedViewModel = sharedViewModel,
-                            onItemClick = { salesBill ->
-
+                            onItemClick = { sales ->
+                                onItemClick(false, sales)
                             },
                             onAddUpdateButtonClick = { invoiceId, isPendingBill, salesBill ->
                                 onAddUpdateButtonClick(invoiceId, isPendingBill, false, salesBill)
@@ -66,8 +68,8 @@ fun SalesScreen(
                     1 ->
                         PostedBillsBody(
                             sharedViewModel = sharedViewModel,
-                            onItemClick = { salesBill ->
-
+                            onItemClick = { sales ->
+                                onItemClick(true, sales)
                             },
                             onAddButtonClick = { invoiceId, isPostedBill ->
                                 onAddUpdateButtonClick(invoiceId, false, isPostedBill, null)

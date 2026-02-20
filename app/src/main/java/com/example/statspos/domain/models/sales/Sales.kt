@@ -1,5 +1,8 @@
 package com.example.statspos.domain.models.sales
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Sales(
     var id: Long? = null,
     var invoiceNo: Int? = null,

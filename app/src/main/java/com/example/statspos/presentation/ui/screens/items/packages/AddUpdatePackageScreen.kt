@@ -94,14 +94,17 @@ fun AddUpdatePackageScreen(
     // Edit data when update
     var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        viewModel.updateInitialState(
-            isUpdate = isUpdate,
-            updateId = updateId,
-        )
+        if (!hasLoadedOnce) {
+            viewModel.updateInitialState(
+                isUpdate = isUpdate,
+                updateId = updateId,
+            )
 
-        if (isUpdate && !hasLoadedOnce) {
+            if (isUpdate) {
+                viewModel.editData(updateId)
+            }
+
             hasLoadedOnce = true
-            viewModel.editData(updateId)
         }
     }
 

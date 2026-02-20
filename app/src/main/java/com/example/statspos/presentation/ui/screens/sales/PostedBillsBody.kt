@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.DropdownItem
+import com.example.statspos.domain.models.sales.Sales
 import com.example.statspos.domain.models.sales.SalesBills
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppIconButton
@@ -63,7 +64,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun PostedBillsBody(
     sharedViewModel: SharedViewModel,
-    onItemClick: (SalesBills) -> Unit,
+    onItemClick: (Sales) -> Unit,
     onAddButtonClick: (Long, Boolean) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -278,8 +279,10 @@ fun PostedBillsBody(
                             viewModel.loadNextItems()
                         },
                         items = state.list,
-                        onItemClick = { salesBill ->
-                            onItemClick(salesBill)
+                        onItemClick = { salesBills ->
+                            viewModel.getSales(salesBills.id!!){ sales ->
+                                onItemClick(sales)
+                            }
                         },
                         onEditButtonClick = { salesBill ->
                             onAddButtonClick(salesBill.id!!, true)

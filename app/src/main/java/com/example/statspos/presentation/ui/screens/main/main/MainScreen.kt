@@ -30,6 +30,7 @@ import com.example.statspos.presentation.ui.screens.items.packages.PackagesScree
 import com.example.statspos.presentation.ui.screens.purchase.PurchaseScreen
 import com.example.statspos.presentation.ui.screens.purchase.purchase_orders.PurchaseOrdersScreen
 import com.example.statspos.presentation.ui.screens.sales.AddUpdateSalesScreen
+import com.example.statspos.presentation.ui.screens.sales.SalesItemsScreen
 import com.example.statspos.presentation.ui.screens.utilities.SettingsScreen
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.ui.screens.utilities.users.UsersScreen
@@ -138,6 +139,16 @@ fun MainScreen() {
                     isPendingBill = key.isPendingBill,
                     isPostedBill = key.isPostedBill,
                     salesBill = key.salesBill,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<TopRoutes.SalesItem> { key ->
+                SalesItemsScreen(
+                    sharedViewModel = sharedViewModel,
+                    isPostedBill = key.isPostedBill,
+                    sales = key.sales,
                     onBack = {
                         backStack.removeLastOrNull()
                     }

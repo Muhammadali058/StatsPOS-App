@@ -229,7 +229,8 @@ fun BottomBar(
 @Composable
 fun AppSnackbarHost(
     snackbarHostState: SnackbarHostState,
-    currentSnackbarType: SnackbarType = SnackbarType.INFORMATION
+    currentSnackbarType: SnackbarType = SnackbarType.INFORMATION,
+    modifier: Modifier? = null,
 ) {
     SnackbarHost(
         hostState = snackbarHostState,
@@ -243,11 +244,16 @@ fun AppSnackbarHost(
             SnackbarType.ERROR -> Color.Red
         }
 
+        val customModifier = modifier ?: Modifier
+            .statusBarsPadding()
+            .padding(top = 60.dp)
+
         Snackbar(
             snackbarData = data,
-            modifier = Modifier
-                .statusBarsPadding()
-                .padding(top = 60.dp),
+            modifier = customModifier,
+//            modifier = Modifier
+//                .statusBarsPadding()
+//                .padding(top = 60.dp),
             containerColor = backgroundColor,
             contentColor = MaterialTheme.colorScheme.onPrimary,
             shape = RoundedCornerShape(8.dp),
@@ -283,7 +289,7 @@ fun BottomSheet(
         shape = shape,
 //        scrimColor = MaterialTheme.colorScheme.surfaceVariant,
         dragHandle = dragHandle,
-    ){
+    ) {
         val systemUiController = rememberSystemUiController()
         SideEffect {
             systemUiController.setStatusBarColor(

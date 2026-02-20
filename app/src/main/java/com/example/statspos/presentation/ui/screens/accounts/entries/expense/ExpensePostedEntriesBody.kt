@@ -66,7 +66,7 @@ import java.time.LocalDate
 @Composable
 fun ExpensePostedEntriesBody(
     sharedViewModel: SharedViewModel,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
 ) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current

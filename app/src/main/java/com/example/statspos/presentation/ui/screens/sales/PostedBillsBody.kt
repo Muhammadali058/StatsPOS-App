@@ -59,13 +59,14 @@ import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PostedBillsBody(
     sharedViewModel: SharedViewModel,
     onItemClick: (Sales) -> Unit,
-    onAddButtonClick: (Long, Boolean) -> Unit,
+    onAddUpdateButtonClick: (Long, Boolean, SalesBills?) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
@@ -89,10 +90,14 @@ fun PostedBillsBody(
     }
 
     val sharedViewModelState by sharedViewModel.state.collectAsStateWithLifecycle()
-    LaunchedEffect(sharedViewModelState.dataChanged) {
+    LaunchedEffect(sharedViewModelState.dataChanged, sharedViewModelState.billPosted) {
         if (sharedViewModelState.dataChanged) {
             viewModel.loadData()
             sharedViewModel.consumeDataChanged()
+        }
+        if (sharedViewModelState.billPosted) {
+            viewModel.loadData()
+            sharedViewModel.consumeBillPosted()
         }
     }
 
@@ -124,26 +129,6 @@ fun PostedBillsBody(
                     showBottomSheet = false
                 },
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    DateTextbox(
-                        modifier = Modifier
-                            .weight(1f),
-                        date = state.fromDate,
-                        onDateChange = viewModel::onFromDateChange,
-                        label = "From Date"
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    DateTextbox(
-                        modifier = Modifier
-                            .weight(1f),
-                        date = state.toDate,
-                        onDateChange = viewModel::onToDateChange,
-                        label = "To Date"
-                    )
-                }
                 ComboBox(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -264,7 +249,17 @@ fun PostedBillsBody(
                         },
                         onFilterClick = {
                             showBottomSheet = true
-                        }
+                        },
+                        fromDate = state.fromDate,
+                        toDate = state.toDate,
+                        onFromDateChange = { date ->
+                            viewModel.onFromDateChange(date)
+                            viewModel.loadData()
+                        },
+                        onToDateChange = { date ->
+                            viewModel.onToDateChange(date)
+                            viewModel.loadData()
+                        },
                     )
                     BodyList(
                         modifier = Modifier
@@ -280,12 +275,19 @@ fun PostedBillsBody(
                         },
                         items = state.list,
                         onItemClick = { salesBills ->
-                            viewModel.getSales(salesBills.id!!){ sales ->
+                            viewModel.getSales(salesBills.id!!) { sales ->
                                 onItemClick(sales)
                             }
                         },
                         onEditButtonClick = { salesBill ->
-                            onAddButtonClick(salesBill.id!!, true)
+                            onAddUpdateButtonClick(salesBill.id!!, true, salesBill)
+//                            if (HP.userRights.editSaleBill == true) {
+//                                if (salesBill.salesOn == "Credit" && HP.userRights.editCreditBill == true) {
+//                                    onAddUpdateButtonClick(salesBill.id!!, true, salesBill)
+//                                } else {
+//                                    onAddUpdateButtonClick(salesBill.id!!, true, salesBill)
+//                                }
+//                            }
                         }
                     )
                 }
@@ -314,6 +316,10 @@ private fun SearchBox(
     onValueChange: (String) -> Unit,
     onSearchClick: (String) -> Unit,
     onFilterClick: () -> Unit,
+    fromDate: LocalDate,
+    toDate: LocalDate,
+    onFromDateChange: (LocalDate) -> Unit,
+    onToDateChange: (LocalDate) -> Unit,
 ) {
     Row(
         modifier = modifier
@@ -338,6 +344,26 @@ private fun SearchBox(
             icon = Icons.Default.FilterList,
             buttonSize = 32.dp,
             size = 26.dp
+        )
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(),
+    ) {
+        DateTextbox(
+            modifier = Modifier
+                .weight(1f),
+            date = fromDate,
+            onDateChange = onFromDateChange,
+            label = "From Date"
+        )
+        Spacer(Modifier.width(8.dp))
+        DateTextbox(
+            modifier = Modifier
+                .weight(1f),
+            date = toDate,
+            onDateChange = onToDateChange,
+            label = "To Date"
         )
     }
 }
@@ -446,14 +472,28 @@ private fun ListCard(
                 }
             }
 
-            Spacer(Modifier.width(8.dp))
-            AppIconButton(
-                icon = Icons.Default.Edit,
-                onClick = {
-                    onEditButtonClick(item)
+            // Edit Icon
+            var editIcon = false
+            if (HP.userRights.editSaleBill == true) {
+                if (item.salesOn == "Credit") {
+                    if (HP.userRights.editCreditBill == true) {
+                        editIcon = true
+                    }
+                } else {
+                    editIcon = true
                 }
-            )
+            }
+            if(editIcon){
+                Spacer(Modifier.width(8.dp))
+                AppIconButton(
+                    icon = Icons.Default.Edit,
+                    onClick = {
+                        onEditButtonClick(item)
+                    }
+                )
+            }
         }
+
         Spacer(Modifier.height(2.dp))
         Row(
             modifier = Modifier

@@ -1,5 +1,6 @@
 package com.example.statspos.presentation.viewmodels.sales
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
@@ -65,7 +66,7 @@ class AddUpdateSalesViewModel @Inject constructor(
         // Extras
         var totalBill: Double = 0.0,
         var totalCost: Double = 0.0,
-        var localTime: LocalTime = LocalTime.now(),
+        var localTime: String = "",
         val bankEnabled: Boolean = false,
         val subBankEnabled: Boolean = false,
         val paymentEnabled: Boolean = false,
@@ -452,7 +453,8 @@ class AddUpdateSalesViewModel @Inject constructor(
         )
 
         if (state.value.isPostedBill) {
-            sale.date = HP.getZonedDateWithTime(state.value.date, state.value.localTime)
+            val localTime = HP.toLocalTime(state.value.localTime)
+            sale.date = HP.getZonedDateWithTime(state.value.date, localTime)
         } else {
             sale.currentShiftId = HP.user.currentShiftId
         }
@@ -628,7 +630,7 @@ class AddUpdateSalesViewModel @Inject constructor(
                     disc = disc.toString(),
                     totalDisc = totalDisc,
 
-                    localTime = HP.toLocalTime(localDate.toString())
+                    localTime = localDate.toString()
                 )
             }
         }

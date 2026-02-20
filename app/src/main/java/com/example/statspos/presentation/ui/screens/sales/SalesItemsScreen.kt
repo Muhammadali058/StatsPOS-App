@@ -5,18 +5,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -145,6 +140,7 @@ private fun Home(
     val context = LocalContext.current
 
     fun goBackWithResult() {
+        mainSharedViewModel.notifyBillPosted()
         mainSharedViewModel.notifyDataChanged()
         onBack()
     }
@@ -239,12 +235,29 @@ private fun Home(
 //            )
 //        },
         floatingActionButton = {
-            AppFloatingActionButton(
-                modifier = Modifier
-                    .navigationBarsPadding()
-                    .padding(bottom = 32.dp)
-            ) {
-                onAddButtonClick(0L, false)
+            var showFloatingActionButton = false
+            if (isPostedBill) {
+                if (HP.userRights.editSaleBill == true) {
+                    if (sales.salesOn == 2) {
+                        if (HP.userRights.editCreditBill == true) {
+                            showFloatingActionButton = true
+                        }
+                    } else {
+                        showFloatingActionButton = true
+                    }
+                }
+            } else {
+                showFloatingActionButton = true
+            }
+
+            if (showFloatingActionButton) {
+                AppFloatingActionButton(
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .padding(bottom = 32.dp)
+                ) {
+                    onAddButtonClick(0L, false)
+                }
             }
         },
         topBar = {
@@ -340,7 +353,7 @@ private fun Home(
                         Spacer(Modifier.width(8.dp))
                         HeadingMedium(text = "Qty: ")
                         LabelMedium(text = HP.formatDecimal(state.totalQty))
-                        if(HP.settings.saleCartons == true) {
+                        if (HP.settings.saleCartons == true) {
                             Spacer(Modifier.width(8.dp))
                             HeadingMedium(text = "Crtn: ")
                             LabelMedium(text = state.totalCrtn.toString())
@@ -349,19 +362,38 @@ private fun Home(
                         HeadingMedium(text = "Disc: ")
                         LabelMedium(text = HP.formatDecimal(state.totalItemDisc))
                     }
-                    Box(
-                        Modifier
-                            .padding(ConstantPaddings.BODY_HORIZONTAL)
-                            .padding(bottom = 16.dp)
-                    ) {
-                        if (state.isPosting) {
-                            AppCircularProgressIndicator()
-                        } else {
-                            SaveButton(
-                                text = "Post Bill"
-                            ) {
-                                viewModel.postBill {
-                                    goBackWithResult()
+
+                    // Post Button
+                    var showPostButton = false
+                    if (isPostedBill) {
+                        if (HP.userRights.editSaleBill == true) {
+                            if (sales.salesOn == 2) {
+                                if (HP.userRights.editCreditBill == true) {
+                                    showPostButton = true
+                                }
+                            } else {
+                                showPostButton = true
+                            }
+                        }
+                    } else {
+                        if(state.list.isNotEmpty())
+                            showPostButton = true
+                    }
+                    if (showPostButton) {
+                        Box(
+                            Modifier
+                                .padding(ConstantPaddings.BODY_HORIZONTAL)
+                                .padding(bottom = 16.dp)
+                        ) {
+                            if (state.isPosting) {
+                                AppCircularProgressIndicator()
+                            } else {
+                                SaveButton(
+                                    text = "Post Bill"
+                                ) {
+                                    viewModel.postBill {
+                                        goBackWithResult()
+                                    }
                                 }
                             }
                         }

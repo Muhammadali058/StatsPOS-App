@@ -71,8 +71,8 @@ fun SalesScreen(
                             onItemClick = { sales ->
                                 onItemClick(true, sales)
                             },
-                            onAddButtonClick = { invoiceId, isPostedBill ->
-                                onAddUpdateButtonClick(invoiceId, false, isPostedBill, null)
+                            onAddUpdateButtonClick = { invoiceId, isPostedBill, salesBill ->
+                                onAddUpdateButtonClick(invoiceId, false, isPostedBill, salesBill)
                             },
                         )
                 }

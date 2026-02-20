@@ -1,5 +1,6 @@
 package com.example.statspos.presentation.viewmodels.sales
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.sales.Sales
@@ -243,6 +244,11 @@ class SalesItemsViewModel @Inject constructor(
 
     // region Methods
     private fun getFormData(): Sales {
+        val localDate = HP.toLocalDate(state.value.sales!!.date.toString())
+        val localDueDate = HP.toLocalDate(state.value.sales!!.dueDate.toString())
+        val date = HP.getZonedDate(localDate)
+        val dueDate = HP.getZonedDate(localDueDate)
+
         val sale = Sales(
             total = state.value.total,
             cost = state.value.cost,
@@ -264,12 +270,11 @@ class SalesItemsViewModel @Inject constructor(
             supplierId = state.value.sales!!.supplierId,
 
             isRetail = state.value.sales!!.isRetail,
-            date = state.value.sales!!.date.toString(),
-            dueDate = state.value.sales!!.dueDate.toString(),
+            date = date,
+            dueDate = dueDate,
             isEstimatedBill = state.value.sales!!.isEstimatedBill,
             remarks = state.value.sales!!.remarks,
         )
-
 
         if (state.value.isPostedBill) {
             val localDate = HP.toLocalDate(state.value.sales!!.date.toString())

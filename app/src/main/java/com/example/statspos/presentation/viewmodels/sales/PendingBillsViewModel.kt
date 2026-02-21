@@ -1,15 +1,14 @@
 package com.example.statspos.presentation.viewmodels.sales
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.sales.Sales
 import com.example.statspos.domain.models.sales.SalesBills
 import com.example.statspos.domain.repository.sales.SalesRepository
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
-import com.example.statspos.utils.get
 import com.example.statspos.utils.getListOf
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -19,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -139,21 +139,49 @@ class PendingBillsViewModel @Inject constructor(
         }
     }
 
-    fun getSales(id: Long, onSuccess: (Sales) -> Unit) {
+    fun makeNewBill(onSuccess: (Long) -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
 
             beforeRequest()
 
-            when (val result = api.getSales(id, false)) {
+            when (val result = api.getInvoiceId()) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
 
-                    val sales = Gson().get<Sales>(result.data.asJsonObject)
-                    onSuccess(sales)
+                    val invoiceId = result.data.get("invoiceId").asLong
+                    tempClose(invoiceId) {
+                        onSuccess(invoiceId)
+                    }
+                }
+            }
+        }
+    }
+
+    fun tempClose(invoiceId: Long, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            beforeRequest()
+
+            val sale = Sales(
+                salesId = invoiceId,
+
+                date = HP.getZonedDate(LocalDate.now()),
+                isDiscRsPer = HP.settings.isDefaultDiscRs == true,
+                isRetail = HP.settings.isDefaultRateRetail == true,
+            )
+
+            when (val result = api.tempClose(sale)) {
+                is Resource.Error -> showError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+                    onSuccess()
                 }
             }
         }

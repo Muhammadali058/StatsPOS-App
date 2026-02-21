@@ -1,6 +1,5 @@
 package com.example.statspos.presentation.viewmodels.sales
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
@@ -23,7 +22,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.LocalTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -78,6 +76,7 @@ class AddUpdateSalesViewModel @Inject constructor(
 
         val isLoading: Boolean = false,
         val isSaving: Boolean = false,
+        val isPosting: Boolean = false,
         val message: String? = null,
         val error: String? = null,
     )
@@ -156,12 +155,12 @@ class AddUpdateSalesViewModel @Inject constructor(
 
     fun onDiscChange(value: String) {
         state.update { it.copy(disc = value) }
-        updateTotal()
+        updateTotal(state.value.totalBill, state.value.totalCost)
     }
 
     fun onIsDiscRsPerChange(value: Boolean) {
         state.update { it.copy(isDiscRsPer = value) }
-        updateTotal()
+        updateTotal(state.value.totalBill, state.value.totalCost)
     }
 
     fun onSalesOnChange(value: DropdownItem) {
@@ -220,12 +219,54 @@ class AddUpdateSalesViewModel @Inject constructor(
     // endregion
 
     // region Network calls
-    fun insertOrUpdateData(onSuccess: () -> Unit) {
+    fun postBill(onSuccess: () -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
 
             if (state.value.isSaving)
+                return@launch
+
+            if (state.value.isPosting)
+                return@launch
+
+            if (!isValid())
+                return@launch
+
+            state.update { it.copy(isPosting = true) }
+
+            val sale = getFormData()
+
+            val result = if (state.value.isPostedBill) {
+                sale.salesId = state.value.invoiceId
+                api.updateSales(sale)
+            } else {
+                sale.salesId = state.value.invoiceId
+                api.insertSales(sale)
+            }
+
+            state.update { it.copy(isPosting = false) }
+
+            when (result) {
+                is Resource.Error -> showError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    clearTextboxes()
+                    onSuccess()
+                }
+            }
+        }
+    }
+
+    fun tempClose(onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if (state.value.isSaving)
+                return@launch
+
+            if (state.value.isPosting)
                 return@launch
 
             if (!isValid())
@@ -235,10 +276,7 @@ class AddUpdateSalesViewModel @Inject constructor(
 
             val sale = getFormData()
 
-            val result = if (state.value.isPostedBill) {
-                sale.salesId = state.value.invoiceId
-                api.updateSales(sale)
-            } else if (state.value.isPendingBill) {
+            val result = if (state.value.isPendingBill) {
                 sale.salesId = state.value.invoiceId
                 sale.isPendingBill = state.value.isPendingBill
                 api.tempClose(sale)
@@ -253,7 +291,6 @@ class AddUpdateSalesViewModel @Inject constructor(
                 is Resource.Error -> showError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
-                    clearTextboxes()
                     onSuccess()
                 }
             }
@@ -266,6 +303,9 @@ class AddUpdateSalesViewModel @Inject constructor(
                 return@launch
 
             if (state.value.isSaving)
+                return@launch
+
+            if (state.value.isPosting)
                 return@launch
 
             beforeRequest()
@@ -302,30 +342,6 @@ class AddUpdateSalesViewModel @Inject constructor(
         }
     }
 
-    fun getInvoiceId() {
-        viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
-
-            beforeRequest()
-
-            when (val result = api.getInvoiceId()) {
-                is Resource.Error -> resultError(result.error)
-                is Resource.Information -> resultInformation(result.message)
-                is Resource.Success -> {
-                    resultSuccess()
-
-                    val invoiceId = result.data.get("invoiceId").asLong
-                    state.update {
-                        it.copy(
-                            invoiceId = invoiceId,
-                        )
-                    }
-                }
-            }
-        }
-    }
-
     private fun getBalance(accountId: Long) {
         viewModelScope.launch {
             if (accountId != 0L) {
@@ -356,7 +372,11 @@ class AddUpdateSalesViewModel @Inject constructor(
 
                         // Due Days
                         if (account.dueDays!! > 0) {
-                            state.update { it.copy(dueDate = LocalDate.now().plusDays(account.dueDays.toLong())) }
+                            state.update {
+                                it.copy(
+                                    dueDate = LocalDate.now().plusDays(account.dueDays.toLong())
+                                )
+                            }
                         } else {
 //                            state.update { it.copy(dueDate = LocalDate.now().plusDays(7)) }
                         }
@@ -402,6 +422,9 @@ class AddUpdateSalesViewModel @Inject constructor(
             if (state.value.isSaving)
                 return@launch
 
+            if (state.value.isPosting)
+                return@launch
+
             beforeRequest()
 
             val body = JsonObject().apply {
@@ -414,9 +437,7 @@ class AddUpdateSalesViewModel @Inject constructor(
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
-                    insertOrUpdateData {
-                        onSuccess()
-                    }
+                    onSuccess()
                 }
             }
         }
@@ -482,7 +503,7 @@ class AddUpdateSalesViewModel @Inject constructor(
                 isRetail = sale.isRetail!!,
                 isEstimatedBill = sale.isEstimatedBill!!,
 
-                date = HP.toLocalDate(sale.date!!),
+                date = if (state.value.isPostedBill) HP.toLocalDate(sale.date!!) else LocalDate.now(),
                 dueDate = HP.toLocalDate(sale.dueDate!!),
 
                 paymentEnabled = !(state.value.isPostedBill && sale.salesOn!! == 2),
@@ -492,7 +513,7 @@ class AddUpdateSalesViewModel @Inject constructor(
             )
         }
 
-        if(sale.customerId!! != 0L)
+        if (sale.customerId!! != 0L)
             getBalance(sale.customerId!!)
     }
 
@@ -630,21 +651,22 @@ class AddUpdateSalesViewModel @Inject constructor(
                     disc = disc.toString(),
                     totalDisc = totalDisc,
 
-                    localTime = localDate.toString()
+//                    localTime = localDate.toString()
                 )
             }
         }
     }
 
-    private fun updateTotal() {
-        val totalBill = state.value.totalBill
-        val totalCost = state.value.totalCost
-        val totalDisc = getTotalDisc()
+    fun updateTotal(totalBill: Double, totalCost: Double) {
+        val totalDisc = getTotalDisc(totalBill)
         val total = totalBill - totalDisc
         val profit = total - totalCost
 
         state.update {
             it.copy(
+                totalBill = totalBill,
+                totalCost = totalCost,
+
                 total = total,
                 cost = totalCost,
                 profit = profit,
@@ -654,18 +676,16 @@ class AddUpdateSalesViewModel @Inject constructor(
         }
     }
 
-    private fun getTotalDisc(): Double {
+    private fun getTotalDisc(totalBill: Double): Double {
         if (!state.value.isPendingBill && !state.value.isPostedBill) {
             return 0.0
         } else {
-            val total = state.value.totalBill
-
-            val totalDisc = if (total > 0.0) {
+            val totalDisc = if (totalBill > 0.0) {
                 if (state.value.isDiscRsPer)
                     HP.getDoubleValue(state.value.disc)
                 else {
                     val disc = HP.getDoubleValue(state.value.disc)
-                    val totalDisc = (disc / 100) * total
+                    val totalDisc = (disc / 100) * totalBill
                     totalDisc
                 }
             } else

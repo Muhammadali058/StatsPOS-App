@@ -29,14 +29,13 @@ import com.example.statspos.presentation.ui.screens.items.categories.CategoriesS
 import com.example.statspos.presentation.ui.screens.items.packages.PackagesScreen
 import com.example.statspos.presentation.ui.screens.purchase.PurchaseScreen
 import com.example.statspos.presentation.ui.screens.purchase.purchase_orders.PurchaseOrdersScreen
-import com.example.statspos.presentation.ui.screens.sales.AddUpdateSalesScreen
-import com.example.statspos.presentation.ui.screens.sales.SalesItemsScreen
+import com.example.statspos.presentation.ui.screens.sales.sales_bill.SalesBillScreen
 import com.example.statspos.presentation.ui.screens.utilities.SettingsScreen
-import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.ui.screens.utilities.users.UsersScreen
-import com.example.statspos.presentation.ui.screens.warehouse.warehouse.WarehousesScreen
 import com.example.statspos.presentation.ui.screens.warehouse.gatepass.GatepassScreen
 import com.example.statspos.presentation.ui.screens.warehouse.stock_transfer.StockTransferScreen
+import com.example.statspos.presentation.ui.screens.warehouse.warehouse.WarehousesScreen
+import com.example.statspos.presentation.viewmodels.SharedViewModel
 
 @Composable
 fun MainScreen() {
@@ -133,22 +132,12 @@ fun MainScreen() {
 
             // region Sales
             entry<TopRoutes.AddUpdateSales> { key ->
-                AddUpdateSalesScreen(
+                SalesBillScreen(
                     sharedViewModel = sharedViewModel,
                     invoiceId = key.updateId,
                     isPendingBill = key.isPendingBill,
                     isPostedBill = key.isPostedBill,
                     salesBill = key.salesBill,
-                    onBack = {
-                        backStack.removeLastOrNull()
-                    }
-                )
-            }
-            entry<TopRoutes.SalesItem> { key ->
-                SalesItemsScreen(
-                    sharedViewModel = sharedViewModel,
-                    isPostedBill = key.isPostedBill,
-                    sales = key.sales,
                     onBack = {
                         backStack.removeLastOrNull()
                     }

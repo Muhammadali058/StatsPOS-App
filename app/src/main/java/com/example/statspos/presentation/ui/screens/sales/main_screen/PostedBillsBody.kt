@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.sales
+package com.example.statspos.presentation.ui.screens.sales.main_screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,16 +34,12 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.statspos.domain.models.DropdownItem
-import com.example.statspos.domain.models.sales.Sales
 import com.example.statspos.domain.models.sales.SalesBills
-import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.BottomSheet
 import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.DateTextbox
-import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
@@ -65,7 +60,6 @@ import java.time.LocalDate
 @Composable
 fun PostedBillsBody(
     sharedViewModel: SharedViewModel,
-    onItemClick: (Sales) -> Unit,
     onAddUpdateButtonClick: (Long, Boolean, SalesBills?) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -90,11 +84,7 @@ fun PostedBillsBody(
     }
 
     val sharedViewModelState by sharedViewModel.state.collectAsStateWithLifecycle()
-    LaunchedEffect(sharedViewModelState.dataChanged, sharedViewModelState.billPosted) {
-        if (sharedViewModelState.dataChanged) {
-            viewModel.loadData()
-            sharedViewModel.consumeDataChanged()
-        }
+    LaunchedEffect( sharedViewModelState.billPosted) {
         if (sharedViewModelState.billPosted) {
             viewModel.loadData()
             sharedViewModel.consumeBillPosted()
@@ -275,20 +265,8 @@ fun PostedBillsBody(
                         },
                         items = state.list,
                         onItemClick = { salesBills ->
-                            viewModel.getSales(salesBills.id!!) { sales ->
-                                onItemClick(sales)
-                            }
+                            onAddUpdateButtonClick(salesBills.id!!, true, salesBills)
                         },
-                        onEditButtonClick = { salesBill ->
-                            onAddUpdateButtonClick(salesBill.id!!, true, salesBill)
-//                            if (HP.userRights.editSaleBill == true) {
-//                                if (salesBill.salesOn == "Credit" && HP.userRights.editCreditBill == true) {
-//                                    onAddUpdateButtonClick(salesBill.id!!, true, salesBill)
-//                                } else {
-//                                    onAddUpdateButtonClick(salesBill.id!!, true, salesBill)
-//                                }
-//                            }
-                        }
                     )
                 }
 
@@ -378,7 +356,6 @@ private fun BodyList(
     loadNextItems: () -> Unit,
     items: List<SalesBills>,
     onItemClick: (SalesBills) -> Unit,
-    onEditButtonClick: (SalesBills) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -400,7 +377,6 @@ private fun BodyList(
             ListCard(
                 item = item,
                 onItemClick = onItemClick,
-                onEditButtonClick = onEditButtonClick
             )
         }
     }
@@ -411,7 +387,6 @@ private fun ListCard(
     modifier: Modifier = Modifier,
     item: SalesBills,
     onItemClick: (SalesBills) -> Unit,
-    onEditButtonClick: (SalesBills) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -422,78 +397,48 @@ private fun ListCard(
             onItemClick(item)
         }
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(
+            Row(
                 modifier = Modifier
-                    .weight(1f),
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (item.customerName!!.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        LabelLarge(item.customerName.toString())
-                    }
-                }
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    HeadingMedium("Sr. ")
-                    LabelMedium(item.id.toString())
-                    Spacer(Modifier.width(16.dp))
-                    HeadingMedium("Inv No. ")
-                    LabelMedium(item.invoiceNo.toString())
-                }
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    HeadingMedium("Date: ")
-                    LabelLarge(item.date.toString())
-                }
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    HeadingMedium("User: ")
-                    LabelLarge(item.username.toString())
-                }
+                LabelLarge(item.customerName.toString().ifEmpty { "Walk-in Customer" })
             }
-
-            // Edit Icon
-            var editIcon = false
-            if (HP.userRights.editSaleBill == true) {
-                if (item.salesOn == "Credit") {
-                    if (HP.userRights.editCreditBill == true) {
-                        editIcon = true
-                    }
-                } else {
-                    editIcon = true
-                }
+            Spacer(Modifier.height(2.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                HeadingMedium("Sr. ")
+                LabelMedium(item.id.toString())
+                Spacer(Modifier.width(16.dp))
+                HeadingMedium("Inv No. ")
+                LabelMedium(item.invoiceNo.toString())
             }
-            if(editIcon){
-                Spacer(Modifier.width(8.dp))
-                AppIconButton(
-                    icon = Icons.Default.Edit,
-                    onClick = {
-                        onEditButtonClick(item)
-                    }
-                )
+            Spacer(Modifier.height(2.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                HeadingMedium("Date: ")
+                LabelLarge(item.date.toString())
+            }
+            Spacer(Modifier.height(2.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                HeadingMedium("User: ")
+                LabelLarge(item.username.toString())
             }
         }
-
         Spacer(Modifier.height(2.dp))
         Row(
             modifier = Modifier

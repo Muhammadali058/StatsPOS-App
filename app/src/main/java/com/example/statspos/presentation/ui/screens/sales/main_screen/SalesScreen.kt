@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.sales
+package com.example.statspos.presentation.ui.screens.sales.main_screen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +11,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.example.statspos.domain.models.sales.Sales
 import com.example.statspos.domain.models.sales.SalesBills
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.TabLayout
@@ -20,7 +19,6 @@ import com.example.statspos.presentation.viewmodels.SharedViewModel
 @Composable
 fun SalesScreen(
     sharedViewModel: SharedViewModel,
-    onItemClick: (Boolean, Sales) -> Unit,
     onAddUpdateButtonClick: (Long, Boolean, Boolean, SalesBills?) -> Unit,
 ) {
     val tabs = listOf("Pending Bills", "Posted Bills")
@@ -57,22 +55,16 @@ fun SalesScreen(
                     0 ->
                         PendingBillsBody(
                             sharedViewModel = sharedViewModel,
-                            onItemClick = { sales ->
-                                onItemClick(false, sales)
-                            },
-                            onAddUpdateButtonClick = { invoiceId, isPendingBill, salesBill ->
-                                onAddUpdateButtonClick(invoiceId, isPendingBill, false, salesBill)
+                            onAddUpdateButtonClick = { invoiceId, isPendingBill, salesBills ->
+                                onAddUpdateButtonClick(invoiceId, isPendingBill, false, salesBills)
                             },
                         )
 
                     1 ->
                         PostedBillsBody(
                             sharedViewModel = sharedViewModel,
-                            onItemClick = { sales ->
-                                onItemClick(true, sales)
-                            },
-                            onAddUpdateButtonClick = { invoiceId, isPostedBill, salesBill ->
-                                onAddUpdateButtonClick(invoiceId, false, isPostedBill, salesBill)
+                            onAddUpdateButtonClick = { invoiceId, isPostedBill, salesBills ->
+                                onAddUpdateButtonClick(invoiceId, false, isPostedBill, salesBills)
                             },
                         )
                 }

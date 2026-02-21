@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.sales
+package com.example.statspos.presentation.ui.screens.sales.sales_bill
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -7,25 +7,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,65 +29,47 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.sales.SalesBills
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
-import com.example.statspos.presentation.ui.components.AppIcon
-import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.AppSwitch
 import com.example.statspos.presentation.ui.components.BalanceBox
 import com.example.statspos.presentation.ui.components.ComboBox
-import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.DiscountTextbox
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.ExpandableSection
-import com.example.statspos.presentation.ui.components.PasswordDialog
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.SubComboBox
 import com.example.statspos.presentation.ui.components.Textbox
-import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.sales.AddUpdateSalesViewModel
 import com.example.statspos.utils.HP
-import com.example.statspos.utils.PasswordFor
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
-import com.example.statspos.utils.showToast
 import java.time.LocalDate
 
 @Composable
-fun AddUpdateSalesScreen(
+fun SalesBillBody(
     sharedViewModel: SharedViewModel,
-    invoiceId: Long = 0L,
-    isPendingBill: Boolean = false,
-    isPostedBill: Boolean = false,
-    salesBill: SalesBills? = null,
+    viewModel: AddUpdateSalesViewModel,
+    snackbarHostState: SnackbarHostState,
+    invoiceId: Long,
+    isPendingBill: Boolean,
+    isPostedBill: Boolean,
+    salesBill: SalesBills?,
     onBack: () -> Unit,
 ) {
-    val context = LocalContext.current
-
-    fun goBackWithResult() {
-        sharedViewModel.notifyDataChanged()
-        onBack()
-    }
-
-    val viewModel = hiltViewModel<AddUpdateSalesViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
-    val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
-    var showPasswordDialog by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
     LaunchedEffect(event) {
@@ -121,10 +94,8 @@ fun AddUpdateSalesScreen(
                 salesBill = salesBill,
             )
 
-            if ((isPendingBill || isPostedBill)) {
+            if (isPendingBill || isPostedBill) {
                 viewModel.editData(invoiceId)
-            } else {
-                viewModel.getInvoiceId()
             }
 
             hasLoadedOnce = true
@@ -140,184 +111,129 @@ fun AddUpdateSalesScreen(
         )
     }
 
-    if (showDeleteDialog) {
-        ConfirmDialog(
-            text = "Are you sure to delete this bill",
-            onDismiss = {
-                showDeleteDialog = false
-            },
-            onConfirm = {
-                showDeleteDialog = false
-                viewModel.deleteData(invoiceId) {
-                    context.showToast("Bill deleted successfully")
-                    goBackWithResult()
-                }
-            }
-        )
-    }
-
-    if (showPasswordDialog) {
-        PasswordDialog(
-            passwordFor = PasswordFor.DELETE_SALES_BILL,
-            onDismiss = {
-                showPasswordDialog = false
-            },
-            onConfirm = {
-                showPasswordDialog = false
-                viewModel.deleteData(invoiceId) {
-                    context.showToast("Bill deleted successfully")
-                    goBackWithResult()
-                }
-            }
-        )
-    }
-
-    Scaffold(
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        snackbarHost = {
-            AppSnackbarHost(
-                snackbarHostState = snackbarHostState,
-            )
-        },
-        topBar = {
-            TopAppBar(
-                onNavigationClick = {
-                    onBack()
-                },
-                title = "Total: ${state.total}",
-                actions = {
-                    Row {
-                        if (isPendingBill) {
-                            IconButton(onClick = {
-                                showDeleteDialog = true
-                            }) {
-                                AppIcon(
-                                    icon = Icons.Default.Delete,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        } else if (isPostedBill) {
-                            if (HP.userRights.deleteAnything == true) {
-                                IconButton(onClick = {
-                                    if (HP.passwords.useDeleteSalesBill == true) {
-                                        showPasswordDialog = true
-                                    } else {
-                                        showDeleteDialog = true
-                                    }
-                                }) {
-                                    AppIcon(
-                                        icon = Icons.Default.Delete,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            )
-        }
-    ) { innerPadding ->
-        Box(
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(vertical = 16.dp)
+    ) {
+        Column(
             Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .background(MaterialTheme.colorScheme.background)
-                .padding(vertical = 16.dp)
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Column(
                 Modifier
-                    .fillMaxSize(),
+                    .weight(1f)
+                    .verticalScroll(scrollState)
+                    .imePadding(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Column(
-                    Modifier
-                        .weight(1f)
-                        .verticalScroll(scrollState)
-                        .imePadding(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Basic(
-                        customerId = state.customerId,
-                        customerName = state.customerName,
-                        selectedCustomerName = state.selectedCustomerName,
-                        balance = state.balance,
-                        isDiscRsPer = state.isDiscRsPer,
-                        disc = state.disc,
-                        totalDisc = state.totalDisc,
-                        date = state.date,
-                        dueDate = state.dueDate,
-                        salesOn = state.salesOn,
-                        salesType = state.salesType,
-                        onCustomerNameChange = viewModel::onCustomerNameChange,
-                        onSelectedCustomerNameChange = viewModel::onSelectedCustomerNameChange,
-                        onCustomerSelected = { customer ->
-                            viewModel.onCustomerIdChange(customer.id)
-                        },
-                        onDiscChange = viewModel::onDiscChange,
-                        onIsDiscRsPerChange = viewModel::onIsDiscRsPerChange,
-                        onSalesOnChange = viewModel::onSalesOnChange,
-                        onSalesTypeChange = viewModel::onSalesTypeChange,
-                        onDateChange = viewModel::onDateChange,
-                        onDueDateChange = viewModel::onDueDateChange,
-                    )
-                    MOP(
-                        mop = state.mop,
-                        bank = state.bank,
-                        subBank = state.subBank,
-                        bankEnabled = state.bankEnabled,
-                        subBankEnabled = state.subBankEnabled,
-                        onMOPChange = viewModel::onMOPChange,
-                        onBankSelected = viewModel::onBankSelected,
-                        onSubBankSelected = viewModel::onSubBankSelected,
-                    )
-                    Others(
-                        isRetail = state.isRetail,
-                        supplier = state.supplier,
-                        payment = state.payment,
-                        paymentEnabled = state.paymentEnabled,
-                        change = state.change,
-                        remarks = state.remarks,
-                        onIsRetailChange = { value ->
-                            viewModel.onIsRetailChange(value)
-                            if(isPendingBill || isPostedBill){
-                                viewModel.changeBillType(value){
-                                    goBackWithResult()
+                Basic(
+                    customerId = state.customerId,
+                    customerName = state.customerName,
+                    selectedCustomerName = state.selectedCustomerName,
+                    balance = state.balance,
+                    isDiscRsPer = state.isDiscRsPer,
+                    disc = state.disc,
+                    totalDisc = state.totalDisc,
+                    date = state.date,
+                    dueDate = state.dueDate,
+                    salesOn = state.salesOn,
+                    salesType = state.salesType,
+                    onCustomerNameChange = viewModel::onCustomerNameChange,
+                    onSelectedCustomerNameChange = viewModel::onSelectedCustomerNameChange,
+                    onCustomerSelected = { customer ->
+                        viewModel.onCustomerIdChange(customer.id)
+                    },
+                    onDiscChange = viewModel::onDiscChange,
+                    onIsDiscRsPerChange = viewModel::onIsDiscRsPerChange,
+                    onSalesOnChange = viewModel::onSalesOnChange,
+                    onSalesTypeChange = viewModel::onSalesTypeChange,
+                    onDateChange = viewModel::onDateChange,
+                    onDueDateChange = viewModel::onDueDateChange,
+                )
+                MOP(
+                    mop = state.mop,
+                    bank = state.bank,
+                    subBank = state.subBank,
+                    bankEnabled = state.bankEnabled,
+                    subBankEnabled = state.subBankEnabled,
+                    onMOPChange = viewModel::onMOPChange,
+                    onBankSelected = viewModel::onBankSelected,
+                    onSubBankSelected = viewModel::onSubBankSelected,
+                )
+                Others(
+                    isRetail = state.isRetail,
+                    supplier = state.supplier,
+                    payment = state.payment,
+                    paymentEnabled = state.paymentEnabled,
+                    change = state.change,
+                    remarks = state.remarks,
+                    onIsRetailChange = { value ->
+                        viewModel.onIsRetailChange(value)
+                        if (isPendingBill || isPostedBill) {
+                            viewModel.changeBillType(value) {
+                                sharedViewModel.notifyDataChanged()
+                                sharedViewModel.notifyBillSaved()
+                                sharedViewModel.notifyBillPosted()
+                            }
+                        }
+                    },
+                    onSupplierSelected = viewModel::onSupplierSelected,
+                    onPaymentChange = viewModel::onPaymentChange,
+                    onChangeChange = viewModel::onChangeChange,
+                    onRemarksChange = viewModel::onRemarksChange,
+                )
+                Spacer(Modifier.height(8.dp))
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(ConstantPaddings.BODY_HORIZONTAL)
+            ) {
+                if (!isPostedBill) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.5f),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (state.isSaving) {
+                            AppCircularProgressIndicator()
+                        } else {
+                            SaveButton(text = "Save") {
+                                viewModel.tempClose {
+                                    sharedViewModel.notifyBillSaved()
+                                    onBack()
                                 }
                             }
-                        },
-                        onSupplierSelected = viewModel::onSupplierSelected,
-                        onPaymentChange = viewModel::onPaymentChange,
-                        onChangeChange = viewModel::onChangeChange,
-                        onRemarksChange = viewModel::onRemarksChange,
-                    )
-                    Spacer(Modifier.height(8.dp))
+                        }
+                    }
+                    Spacer(Modifier.width(8.dp))
                 }
-
                 Box(
-                    Modifier
-                        .padding(ConstantPaddings.BODY_HORIZONTAL)
-                        .windowInsetsPadding(
-                            WindowInsets.navigationBars
-                                .union(WindowInsets.ime)
-                        )
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    if (state.isSaving) {
+                    if (state.isPosting) {
                         AppCircularProgressIndicator()
                     } else {
-                        SaveButton {
-                            viewModel.insertOrUpdateData {
-                                goBackWithResult()
+                        SaveButton(text = "Post") {
+                            viewModel.postBill {
+                                sharedViewModel.notifyBillPosted()
+                                onBack()
                             }
                         }
                     }
                 }
             }
-
-            if (state.isLoading) {
-                ProgressBarLayout()
-            }
         }
 
+        if (state.isLoading) {
+            ProgressBarLayout()
+        }
     }
 }
 
@@ -379,7 +295,7 @@ private fun Basic(
             },
             enabled = customerId == 0L,
         )
-        if(HP.userRights.discount == true) {
+        if (HP.userRights.discount == true) {
             DiscountTextbox(
                 value = if (HP.getDoubleValue(disc) > 0.0) disc else "",
                 onValueChange = onDiscChange,
@@ -523,7 +439,7 @@ private fun Others(
         title = "Others",
         initiallyExpanded = false,
     ) {
-        if(HP.settings.fourRateSystem == false) {
+        if (HP.settings.fourRateSystem == false) {
             Spacer(Modifier.height(8.dp))
             AppSwitch(
                 modifier = Modifier,

@@ -7,7 +7,6 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -81,7 +80,7 @@ import com.example.statspos.presentation.ui.screens.BottomRoutes
 import com.example.statspos.presentation.ui.screens.TopRoutes
 import com.example.statspos.presentation.ui.screens.items.ItemsScreen
 import com.example.statspos.presentation.ui.screens.reports.ReportsScreen
-import com.example.statspos.presentation.ui.screens.sales.SalesScreen
+import com.example.statspos.presentation.ui.screens.sales.main_screen.SalesScreen
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
@@ -243,9 +242,6 @@ fun HomeScreen(
                         entry<BottomRoutes.Sales> {
                             SalesScreen(
                                 sharedViewModel = sharedViewModel,
-                                onItemClick = { isPostedBill, sales ->
-                                    onTopRouteClick(TopRoutes.SalesItem(isPostedBill, sales))
-                                },
                                 onAddUpdateButtonClick = { updateId, isPendingBill, isPostedBill, salesBill ->
                                     onTopRouteClick(TopRoutes.AddUpdateSales(updateId, isPendingBill, isPostedBill, salesBill))
                                 }

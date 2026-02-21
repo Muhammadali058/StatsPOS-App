@@ -49,14 +49,14 @@ fun SmallButton(
 
 @Composable
 fun SaveButton(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
+        .fillMaxWidth(),
     text: String = "Save",
     onClick: () -> Unit
 ) {
     Button(
         onClick = onClick,
         modifier = modifier
-            .fillMaxWidth()
             .height(52.dp),
         shape = RoundedCornerShape(8.dp),
     ) {
@@ -70,7 +70,7 @@ fun SaveButton(
 @Composable
 fun AppFloatingActionButton(
     modifier: Modifier = Modifier,
-    onClick:() -> Unit
+    onClick: () -> Unit
 ) {
     FloatingActionButton(
         modifier = modifier,

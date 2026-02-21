@@ -1,6 +1,5 @@
 package com.example.statspos.presentation.viewmodels.sales
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem

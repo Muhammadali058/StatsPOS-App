@@ -12,6 +12,7 @@ class SharedViewModel @Inject constructor() : ViewModel() {
 
     data class ScreenState(
         val dataChanged: Boolean = false,
+        val billSaved: Boolean = false,
         val billPosted: Boolean = false,
         val item: Items? = null,
     )
@@ -31,6 +32,10 @@ class SharedViewModel @Inject constructor() : ViewModel() {
         state.update { it.copy(billPosted = true) }
     }
 
+    fun notifyBillSaved() {
+        state.update { it.copy(billSaved = true) }
+    }
+
     fun consumeDataChanged() {
         state.update { it.copy(
             dataChanged = false,
@@ -41,6 +46,12 @@ class SharedViewModel @Inject constructor() : ViewModel() {
     fun consumeBillPosted() {
         state.update { it.copy(
             billPosted = false,
+        ) }
+    }
+
+    fun consumeBillSaved() {
+        state.update { it.copy(
+           billSaved = false,
         ) }
     }
 }

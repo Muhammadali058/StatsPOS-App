@@ -134,7 +134,7 @@ class AddUpdateBankViewModel @Inject constructor(
                 is Resource.Information -> showMessage(result.message)
                 is Resource.Success -> {
                     HP.banks = Gson().getListOf<DropdownItem>(result.data.get("banks").asJsonArray)
-                    clearTextboxes()
+//                    clearTextboxes()
                     onSuccess()
                 }
             }

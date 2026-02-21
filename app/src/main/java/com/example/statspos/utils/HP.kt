@@ -177,7 +177,7 @@ object HP {
         return DB.HOST + clientId.toString() + "/images/" + imageUrl
     }
 
-    fun formatDecimal(rate: Double?, numberOfDecimals: Int = 2): String {
+    fun formatDecimal(rate: Double?, numberOfDecimals: Int = 2, mustDecimals: Int = 0): String {
         if (rate == null) {
             return ""
         }
@@ -189,10 +189,19 @@ object HP {
         }
 
         val df = DecimalFormat(pattern)
-        return df.format(rate)
+        val value =  df.format(rate)
+
+        if(value.contains('.'))
+            return value
+        else {
+            return if (mustDecimals > 0)
+                value + "." + "0".repeat(mustDecimals)
+            else
+                value
+        }
     }
 
-    fun getNoneDropdownItem(noneText:String = ""): DropdownItem {
+    fun getNoneDropdownItem(noneText: String = ""): DropdownItem {
         return DropdownItem(0L, noneText)
     }
 

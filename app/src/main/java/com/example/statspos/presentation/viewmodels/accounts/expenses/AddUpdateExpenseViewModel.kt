@@ -134,7 +134,7 @@ class AddUpdateExpenseViewModel @Inject constructor(
                 is Resource.Information -> showMessage(result.message)
                 is Resource.Success -> {
                     HP.expenses = Gson().getListOf<DropdownItem>(result.data.get("expenses").asJsonArray)
-                    clearTextboxes()
+//                    clearTextboxes()
                     onSuccess()
                 }
             }

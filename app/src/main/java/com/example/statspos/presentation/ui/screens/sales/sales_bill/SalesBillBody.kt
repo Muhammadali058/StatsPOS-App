@@ -50,7 +50,8 @@ import com.example.statspos.presentation.ui.components.SubComboBox
 import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.sales.AddUpdateSalesViewModel
+import com.example.statspos.presentation.viewmodels.sales.sales_bill.AddUpdateSalesViewModel
+import com.example.statspos.presentation.viewmodels.sales.sales_bill.SalesItemsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
@@ -59,7 +60,8 @@ import java.time.LocalDate
 @Composable
 fun SalesBillBody(
     sharedViewModel: SharedViewModel,
-    viewModel: AddUpdateSalesViewModel,
+    salesViewModel: AddUpdateSalesViewModel,
+    salesItemsViewModel: SalesItemsViewModel,
     snackbarHostState: SnackbarHostState,
     invoiceId: Long,
     isPendingBill: Boolean,
@@ -67,8 +69,8 @@ fun SalesBillBody(
     salesBill: SalesBills?,
     onBack: () -> Unit,
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-    val event by viewModel.event.collectAsState(UiEvent.Idle)
+    val state by salesViewModel.state.collectAsStateWithLifecycle()
+    val event by salesViewModel.event.collectAsState(UiEvent.Idle)
     var showErrorDialog by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
@@ -76,7 +78,7 @@ fun SalesBillBody(
         checkEvent(
             event = event,
             snackbarHostState = snackbarHostState,
-            viewModelIdleEvent = viewModel::onEvent,
+            viewModelIdleEvent = salesViewModel::onEvent,
             onError = {
                 showErrorDialog = true
             }
@@ -87,15 +89,8 @@ fun SalesBillBody(
     var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         if (!hasLoadedOnce) {
-            viewModel.updateInitialState(
-                invoiceId = invoiceId,
-                isPendingBill = isPendingBill,
-                isPostedBill = isPostedBill,
-                salesBill = salesBill,
-            )
-
             if (isPendingBill || isPostedBill) {
-                viewModel.editData(invoiceId)
+                salesViewModel.editData(invoiceId)
             }
 
             hasLoadedOnce = true
@@ -141,17 +136,17 @@ fun SalesBillBody(
                     dueDate = state.dueDate,
                     salesOn = state.salesOn,
                     salesType = state.salesType,
-                    onCustomerNameChange = viewModel::onCustomerNameChange,
-                    onSelectedCustomerNameChange = viewModel::onSelectedCustomerNameChange,
+                    onCustomerNameChange = salesViewModel::onCustomerNameChange,
+                    onSelectedCustomerNameChange = salesViewModel::onSelectedCustomerNameChange,
                     onCustomerSelected = { customer ->
-                        viewModel.onCustomerIdChange(customer.id)
+                        salesViewModel.onCustomerIdChange(customer.id)
                     },
-                    onDiscChange = viewModel::onDiscChange,
-                    onIsDiscRsPerChange = viewModel::onIsDiscRsPerChange,
-                    onSalesOnChange = viewModel::onSalesOnChange,
-                    onSalesTypeChange = viewModel::onSalesTypeChange,
-                    onDateChange = viewModel::onDateChange,
-                    onDueDateChange = viewModel::onDueDateChange,
+                    onDiscChange = salesViewModel::onDiscChange,
+                    onIsDiscRsPerChange = salesViewModel::onIsDiscRsPerChange,
+                    onSalesOnChange = salesViewModel::onSalesOnChange,
+                    onSalesTypeChange = salesViewModel::onSalesTypeChange,
+                    onDateChange = salesViewModel::onDateChange,
+                    onDueDateChange = salesViewModel::onDueDateChange,
                 )
                 MOP(
                     mop = state.mop,
@@ -159,9 +154,9 @@ fun SalesBillBody(
                     subBank = state.subBank,
                     bankEnabled = state.bankEnabled,
                     subBankEnabled = state.subBankEnabled,
-                    onMOPChange = viewModel::onMOPChange,
-                    onBankSelected = viewModel::onBankSelected,
-                    onSubBankSelected = viewModel::onSubBankSelected,
+                    onMOPChange = salesViewModel::onMOPChange,
+                    onBankSelected = salesViewModel::onBankSelected,
+                    onSubBankSelected = salesViewModel::onSubBankSelected,
                 )
                 Others(
                     isRetail = state.isRetail,
@@ -171,19 +166,29 @@ fun SalesBillBody(
                     change = state.change,
                     remarks = state.remarks,
                     onIsRetailChange = { value ->
-                        viewModel.onIsRetailChange(value)
+                        salesViewModel.onIsRetailChange(value)
                         if (isPendingBill || isPostedBill) {
-                            viewModel.changeBillType(value) {
-                                sharedViewModel.notifyDataChanged()
-                                sharedViewModel.notifyBillSaved()
-                                sharedViewModel.notifyBillPosted()
+                            salesViewModel.changeBillType(value) {
+                                salesItemsViewModel.loadData(salesViewModel::updateTotal)
+
+                                if(isPendingBill){
+                                    salesViewModel.tempClose {
+                                        sharedViewModel.notifyBillSaved()
+                                    }
+                                }
+
+                                if(isPostedBill){
+                                    salesViewModel.postBill {
+                                        sharedViewModel.notifyBillPosted()
+                                    }
+                                }
                             }
                         }
                     },
-                    onSupplierSelected = viewModel::onSupplierSelected,
-                    onPaymentChange = viewModel::onPaymentChange,
-                    onChangeChange = viewModel::onChangeChange,
-                    onRemarksChange = viewModel::onRemarksChange,
+                    onSupplierSelected = salesViewModel::onSupplierSelected,
+                    onPaymentChange = salesViewModel::onPaymentChange,
+                    onChangeChange = salesViewModel::onChangeChange,
+                    onRemarksChange = salesViewModel::onRemarksChange,
                 )
                 Spacer(Modifier.height(8.dp))
             }
@@ -203,7 +208,7 @@ fun SalesBillBody(
                             AppCircularProgressIndicator()
                         } else {
                             SaveButton(text = "Save") {
-                                viewModel.tempClose {
+                                salesViewModel.tempClose {
                                     sharedViewModel.notifyBillSaved()
                                     onBack()
                                 }
@@ -221,7 +226,7 @@ fun SalesBillBody(
                         AppCircularProgressIndicator()
                     } else {
                         SaveButton(text = "Post") {
-                            viewModel.postBill {
+                            salesViewModel.postBill {
                                 sharedViewModel.notifyBillPosted()
                                 onBack()
                             }

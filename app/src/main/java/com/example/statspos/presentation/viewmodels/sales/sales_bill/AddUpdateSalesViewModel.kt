@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.viewmodels.sales
+package com.example.statspos.presentation.viewmodels.sales.sales_bill
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -33,6 +33,7 @@ class AddUpdateSalesViewModel @Inject constructor(
     data class ScreenState(
         val id: Long = 0L,
         val invoiceId: Long = 0L,
+        val invoiceNo: Int = 0,
 
         var total: Double = 0.0,
         var cost: Double = 0.0,
@@ -69,7 +70,6 @@ class AddUpdateSalesViewModel @Inject constructor(
         val subBankEnabled: Boolean = false,
         val paymentEnabled: Boolean = false,
 
-//        val updateId: Long = 0L,
         val isPendingBill: Boolean = false,
         val isPostedBill: Boolean = false,
         val salesBill: SalesBills? = null,
@@ -251,7 +251,7 @@ class AddUpdateSalesViewModel @Inject constructor(
                 is Resource.Error -> showError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
-                    clearTextboxes()
+//                    clearTextboxes()
                     onSuccess()
                 }
             }
@@ -445,7 +445,7 @@ class AddUpdateSalesViewModel @Inject constructor(
     // endregion
 
     // region Methods
-    private fun getFormData(): Sales {
+    fun getFormData(): Sales {
         val sale = Sales(
             total = state.value.total,
             cost = state.value.cost,
@@ -486,6 +486,8 @@ class AddUpdateSalesViewModel @Inject constructor(
     private fun setFormData(sale: Sales) {
         state.update {
             it.copy(
+                invoiceNo = sale.invoiceNo!!,
+
                 customerId = sale.customerId!!,
                 selectedCustomerName = HP.getDropdownNameById(sale.customerId!!, HP.customers),
                 customerName = sale.customerName.toString(),
@@ -510,6 +512,9 @@ class AddUpdateSalesViewModel @Inject constructor(
 
                 bankEnabled = !sale.isMopCashBank!!,
                 subBankEnabled = !sale.isMopCashBank!!,
+
+                // Extras
+                localTime = sale.date.toString()
             )
         }
 
@@ -547,6 +552,8 @@ class AddUpdateSalesViewModel @Inject constructor(
                 isPendingBill = false,
                 isPostedBill = false,
                 invoiceId = 0L,
+
+                localTime = "",
             )
         }
     }

@@ -138,7 +138,7 @@ class AddUpdateSubBarcodeViewModel @Inject constructor(
                     }
                 }
                 is Resource.Success -> {
-                    clearTextboxes()
+//                    clearTextboxes()
                     onSuccess()
                 }
             }

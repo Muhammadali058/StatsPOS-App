@@ -242,17 +242,22 @@ private fun ListCard(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            HeadingMedium("Qty: ")
-            LabelMedium(HP.formatDecimal(item.qty))
-        }
-        if(HP.settings.saleCartons == true){
-            Spacer(Modifier.height(2.dp))
             Row(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .weight(1f),
             ) {
-                HeadingMedium("Crtn: ")
-                LabelMedium(item.crtn.toString())
+                HeadingMedium("Qty: ")
+                LabelMedium(HP.formatDecimal(item.qty))
+            }
+            if (HP.settings.saleCartons == true) {
+                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .weight(1f),
+                ) {
+                    HeadingMedium("Crtn: ")
+                    LabelMedium(item.crtn.toString())
+                }
             }
         }
     }

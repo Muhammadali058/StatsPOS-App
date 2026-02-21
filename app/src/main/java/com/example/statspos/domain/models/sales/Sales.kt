@@ -49,4 +49,5 @@ data class Sales(
     var salesId: Long? = null,
     var currentShiftId: Long? = null,
     var isPendingBill: Boolean? = null,
+    var isPostedBill: Boolean? = null,
 )

@@ -29,15 +29,15 @@ data class SalesItems(
     var totalCost: Double? = null,
     var profit: Double? = null,
 
-    val itemNo:Int? = null,
-    val isRetail: Boolean? = null,
-    val userId:Long? = null,
+    var itemNo:Int? = null,
+    var isRetail: Boolean? = null,
+    var userId:Long? = null,
 
-    val clientId:Int? = null,
-    val branchId:Int? = null,
+    var clientId:Int? = null,
+    var branchId:Int? = null,
 
     // Extras not part of database
     var isPostedBill: Boolean? = null,
     var salesType: Int? = null,
-    var isEstimated: Boolean? = null,
+    var isEstimatedBill: Boolean? = null,
 )

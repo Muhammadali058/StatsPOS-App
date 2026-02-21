@@ -143,7 +143,7 @@ class AddUpdateSubCategoryViewModel @Inject constructor(
                 is Resource.Information -> showMessage(result.message)
                 is Resource.Success -> {
                     HP.subCategories = Gson().getListOf<DropdownItem>(result.data.get("subCategories").asJsonArray)
-                    clearTextboxes()
+//                    clearTextboxes()
                     onSuccess()
                 }
             }

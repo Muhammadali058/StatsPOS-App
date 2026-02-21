@@ -1,16 +1,14 @@
-package com.example.statspos.presentation.viewmodels.sales
+package com.example.statspos.presentation.viewmodels.sales.main_screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
-import com.example.statspos.domain.models.sales.Sales
 import com.example.statspos.domain.models.sales.SalesBills
 import com.example.statspos.domain.repository.sales.SalesRepository
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
-import com.example.statspos.utils.get
 import com.example.statspos.utils.getListOf
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -39,6 +37,7 @@ class PostedBillsViewModel @Inject constructor(
         val searchBy: DropdownItem = HP.salesPostedBillsSearchBy[0],
         val fromDate: LocalDate = LocalDate.now(),
         val toDate: LocalDate = LocalDate.now(),
+        val user: DropdownItem = HP.getNoneDropdownItem(),
         val salesType: DropdownItem = HP.getNoneDropdownItem("Both"),
         val salesOn: DropdownItem = HP.getNoneDropdownItem("Both"),
         val salesMop: DropdownItem = HP.getNoneDropdownItem("Both"),
@@ -122,6 +121,9 @@ class PostedBillsViewModel @Inject constructor(
     }
     fun onToDateChange(value: LocalDate) {
         state.update { it.copy(toDate = value) }
+    }
+    fun onUserChange(value: DropdownItem) {
+        state.update { it.copy(user = value) }
     }
     fun onSearchByChange(value: DropdownItem) {
         state.update { it.copy(searchBy = value) }
@@ -227,27 +229,6 @@ class PostedBillsViewModel @Inject constructor(
             }
         }
     }
-
-    fun getSales(id: Long, onSuccess: (Sales) -> Unit) {
-        viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
-
-            beforeRequest()
-
-            when (val result = api.getSales(id, true)) {
-                is Resource.Error -> resultError(result.error)
-                is Resource.Information -> resultInformation(result.message)
-                is Resource.Success -> {
-                    resultSuccess()
-
-                    val sales = Gson().get<Sales>(result.data.asJsonObject)
-                    onSuccess(sales)
-                }
-            }
-        }
-    }
-
     // endregion
 
     // region Others
@@ -275,7 +256,7 @@ class PostedBillsViewModel @Inject constructor(
         addProperty("mop", state.value.salesMop.id)
         addProperty("type", state.value.salesRetailType.id)
         addProperty("itemId", 0)
-        addProperty("userId", 0)
+        addProperty("userId", state.value.user.id)
         addProperty("searchBy", state.value.searchBy.id)
         addProperty("text", state.value.search)
     }

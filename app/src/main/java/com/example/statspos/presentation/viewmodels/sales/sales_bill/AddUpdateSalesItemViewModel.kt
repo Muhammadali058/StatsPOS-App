@@ -1,17 +1,18 @@
-package com.example.statspos.presentation.viewmodels.purchase.purchase_orders
+package com.example.statspos.presentation.viewmodels.sales.sales_bill
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.items.Items
-import com.example.statspos.domain.models.purchase.PurchaseOrderItems
-import com.example.statspos.domain.repository.items.ItemsRepository
-import com.example.statspos.domain.repository.purchase.PurchaseOrderItemsRepository
+import com.example.statspos.domain.models.sales.Sales
+import com.example.statspos.domain.models.sales.SalesItems
+import com.example.statspos.domain.repository.sales.SalesItemsRepository
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.get
 import com.google.gson.Gson
+import com.google.gson.JsonObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,28 +22,45 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AddUpdatePurchaseOrderItemViewModel @Inject constructor(
-    private val api: PurchaseOrderItemsRepository,
-    private val itemsRepo: ItemsRepository,
+class AddUpdateSalesItemViewModel @Inject constructor(
+    private val api: SalesItemsRepository,
 ) : ViewModel() {
     // region ScreenState
     data class ScreenState(
         val id: Long = 0L,
-        val purchaseOrderId: Long = 0L,
+        val invoiceId: Long = 0L,
         val itemId: Long = 0L,
+        val itemname: String = "",
+        val urduname: String = "",
 
         val qty: String = "",
         val crtn: String = "",
-        val cost: String = "",
-        val total: String = "",
+        val cost: Double = 0.0,
+        val rate: String = "",
+        val crtnRate: String = "",
+        val retail: Double = 0.0,
+        val wholesale: Double = 0.0,
+        val rate3: Double = 0.0,
+        val rate4: Double = 0.0,
+        val crtnSize: Int = 0,
+        val itemNo: Int = 0,
+
+        var isDiscRsPer: Boolean = HP.settings.isDefaultDiscRs == true,
+        val disc: String = "",
+        var calculatedDisc: Double = 0.0,
+        var totalDisc: Double = 0.0,
+        val isRetail: Boolean = false,
+
+        var total: Double = 0.0,
+        var totalCost: Double = 0.0,
+        var profit: Double = 0.0,
+
 
         // Extra
-        val purchaseOrderName: String = "",
-        val itemname: String = "",
-        val crtnSize: Int = 0,
-
+        val isPostedBill: Boolean = false,
         val isUpdate: Boolean = false,
         val updateId: Long = 0L,
+        val sales: Sales = Sales(),
 
         val isLoading: Boolean = false,
         val isSaving: Boolean = false,
@@ -115,14 +133,6 @@ class AddUpdatePurchaseOrderItemViewModel @Inject constructor(
         }
     }
 
-    fun onPurchaseOrderNameChange(value: String) {
-        state.update { it.copy(purchaseOrderName = value) }
-    }
-
-    fun onPurchaseOrderIdChange(value: Long) {
-        state.update { it.copy(purchaseOrderId = value) }
-    }
-
     fun onQtyChange(value: String) {
         state.update { it.copy(qty = value) }
         updateTotal()
@@ -133,10 +143,26 @@ class AddUpdatePurchaseOrderItemViewModel @Inject constructor(
         updateTotal()
     }
 
-    fun onCostChange(value: String) {
-        state.update { it.copy(cost = value) }
+    fun onRateChange(value: String) {
+        state.update { it.copy(rate = value) }
         updateTotal()
     }
+
+    fun onCrtnRateChange(value: String) {
+        state.update { it.copy(crtnRate = value) }
+        updateTotal()
+    }
+
+    fun onDiscChange(value: String) {
+        state.update { it.copy(disc = value) }
+        updateTotal()
+    }
+
+    fun onIsDiscRsPerChange(value: Boolean) {
+        state.update { it.copy(isDiscRsPer = value) }
+        updateTotal()
+    }
+
     // endregion
 
     // region Network calls
@@ -153,13 +179,16 @@ class AddUpdatePurchaseOrderItemViewModel @Inject constructor(
 
             state.update { it.copy(isSaving = true) }
 
-            val purchaseOrderItem = getFormData()
+            val salesItem = getFormData()
+            salesItem.isPostedBill = state.value.isPostedBill
+            salesItem.salesType = state.value.sales.salesType!!
+            salesItem.isEstimatedBill = state.value.sales.isEstimatedBill!!
 
             val result = if (state.value.isUpdate) {
-                purchaseOrderItem.id = state.value.updateId
-                api.updatePurchaseOrderItem(purchaseOrderItem)
+                salesItem.id = state.value.updateId
+                api.updateSalesItem(salesItem)
             } else {
-                api.insertPurchaseOrderItem(purchaseOrderItem)
+                api.insertSalesItem(salesItem)
             }
 
             state.update { it.copy(isSaving = false) }
@@ -168,7 +197,7 @@ class AddUpdatePurchaseOrderItemViewModel @Inject constructor(
                 is Resource.Error -> showError(result.error)
                 is Resource.Information -> showMessage(result.message)
                 is Resource.Success -> {
-//                    clearTextboxes()
+                    clearTextboxes()
                     onSuccess()
                 }
             }
@@ -185,12 +214,11 @@ class AddUpdatePurchaseOrderItemViewModel @Inject constructor(
 
             beforeRequest()
 
-            when (val result = api.deletePurchaseOrderItem(id)) {
+            when (val result = api.deleteSalesItem(id, state.value.isPostedBill)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
-
                     onSuccess()
                 }
             }
@@ -204,13 +232,13 @@ class AddUpdatePurchaseOrderItemViewModel @Inject constructor(
 
             beforeRequest()
 
-            when (val result = api.getPurchaseOrderItem(id)) {
+            when (val result = api.getSalesItem(id, state.value.isPostedBill)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
-                    val purchaseOrderItem = Gson().get<PurchaseOrderItems>(result.data.asJsonObject)
-                    setFormData(purchaseOrderItem)
+                    val salesItem = Gson().get<SalesItems>(result.data.asJsonObject)
+                    setFormData(salesItem)
                     updateTotal()
                 }
             }
@@ -226,7 +254,16 @@ class AddUpdatePurchaseOrderItemViewModel @Inject constructor(
                 return@launch
 
 //            beforeRequest()
-            when (val result = itemsRepo.isBarcodeExists(value)) {
+
+            val body = JsonObject().apply {
+                addProperty("barcode", value)
+                addProperty("salesId", state.value.invoiceId)
+                addProperty("isPostedBill", state.value.isPostedBill)
+                addProperty("customerId", state.value.sales.customerId!!)
+                addProperty("isEstimatedBill", state.value.sales.isEstimatedBill!!)
+                addProperty("salesType", state.value.sales.salesType!!)
+            }
+            when (val result = api.isBarcodeExists(body)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
@@ -235,14 +272,7 @@ class AddUpdatePurchaseOrderItemViewModel @Inject constructor(
                     val isExists = result.data.get("isExists").asBoolean
                     if (isExists) {
                         val item = Gson().get<Items>(result.data.get("data").asJsonObject)
-                        state.update {
-                            it.copy(
-                                itemname = item.itemname!!,
-                                itemId = item.id!!,
-                                cost = if (item.lastCost == 0.0) item.cost.toString() else item.lastCost.toString(),
-                                crtnSize = item.crtnSize!!,
-                            )
-                        }
+                        showDataIntoTextboxes(item)
                     } else {
                         state.update {
                             it.copy(
@@ -258,30 +288,68 @@ class AddUpdatePurchaseOrderItemViewModel @Inject constructor(
     // endregion
 
     // region Methods
-    private fun getFormData(): PurchaseOrderItems {
-        return PurchaseOrderItems(
-            purchaseOrderId = state.value.purchaseOrderId,
-            itemId = state.value.itemId,
-
-            qty = HP.getDoubleValue(state.value.qty),
-            crtn = HP.getIntValue(state.value.crtn),
-            cost = HP.getDoubleValue(state.value.cost),
-            total = HP.getDoubleValue(state.value.total),
-        )
-    }
-
-    private fun setFormData(purchaseOrderItem: PurchaseOrderItems) {
+    private fun showDataIntoTextboxes(item: Items) {
         state.update {
             it.copy(
-                itemname = purchaseOrderItem.itemname!!,
-                itemId = purchaseOrderItem.itemId!!,
+                itemname = item.itemname!!,
+                itemId = item.id!!,
+                cost = item.cost!!,
+                rate = item.retail.toString(),
+            )
+        }
+    }
 
-                qty = purchaseOrderItem.qty.toString(),
-                crtn = purchaseOrderItem.crtn.toString(),
-                cost = purchaseOrderItem.cost.toString(),
-                total = purchaseOrderItem.total.toString(),
+    private fun getFormData(): SalesItems {
+        val qty = HP.getDoubleValue(state.value.qty)
+        val crtn = HP.getIntValue(state.value.crtn)
+        val cost = state.value.cost
+        val crtnSize = state.value.crtnSize
+        val total = state.value.total
+        val totalCost = cost * (qty + (crtn * crtnSize))
+        val profit = total - totalCost
 
-                crtnSize = purchaseOrderItem.crtnSize!!,
+        val salesItem = SalesItems(
+            salesId = state.value.invoiceId,
+            invoiceNo = state.value.sales.invoiceNo,
+            itemId = state.value.itemId,
+            itemname = state.value.itemname,
+            urduname = state.value.urduname,
+
+            qty = qty,
+            crtn = crtn,
+            rate = HP.getDoubleValue(state.value.rate),
+            retail = state.value.retail,
+            wholesale = state.value.wholesale,
+            rate3 = state.value.rate3,
+            rate4 = state.value.rate4,
+            crtnRate = HP.getDoubleValue(state.value.crtnRate),
+            crtnSize = state.value.crtnSize,
+
+            isDiscRsPer = state.value.isDiscRsPer,
+            disc = HP.getDoubleValue(state.value.disc),
+            calculatedDisc = state.value.calculatedDisc,
+            totalDisc = state.value.totalDisc,
+            isRetail = state.value.isRetail,
+
+            total = total,
+            totalCost = totalCost,
+            profit = profit,
+        )
+
+        if(!state.value.isUpdate){
+            salesItem.itemNo = state.value.sales.totalItems!! + 1
+        }
+
+        return salesItem
+    }
+
+    private fun setFormData(salesItem: SalesItems) {
+        state.update {
+            it.copy(
+                itemname = salesItem.itemname!!,
+                itemId = salesItem.itemId!!,
+                qty = salesItem.qty.toString(),
+                rate = salesItem.rate.toString(),
             )
         }
     }
@@ -292,9 +360,7 @@ class AddUpdatePurchaseOrderItemViewModel @Inject constructor(
                 itemname = "",
                 itemId = 0L,
                 qty = "",
-                crtn = "",
-                cost = "",
-                total = "",
+                rate = "",
 
                 isUpdate = false,
                 updateId = 0L,
@@ -308,13 +374,13 @@ class AddUpdatePurchaseOrderItemViewModel @Inject constructor(
             return false
         }
 
-        if (HP.getDoubleValue(state.value.qty) == 0.0 && HP.getIntValue(state.value.crtn) == 0) {
+        if (HP.getDoubleValue(state.value.qty) == 0.0) {
             showMessage("Please enter quantity")
             return false
         }
 
-        if (HP.getDoubleValue(state.value.cost) == 0.0) {
-            showMessage("Please enter cost")
+        if (HP.getDoubleValue(state.value.rate) == 0.0) {
+            showMessage("Please enter rate")
             return false
         }
 
@@ -337,29 +403,31 @@ class AddUpdatePurchaseOrderItemViewModel @Inject constructor(
         state.update { it.copy(isLoading = false) }
     }
 
-    fun updateInitialState(isUpdate: Boolean, updateId: Long, purchaseOrderId: Long) {
+    fun updateInitialState(
+        isUpdate: Boolean,
+        updateId: Long,
+        sales:Sales,
+    ) {
         state.update {
             it.copy(
                 isUpdate = isUpdate,
                 updateId = updateId,
-                purchaseOrderId = purchaseOrderId,
-                purchaseOrderName = if (purchaseOrderId == 0L) "" else HP.getDropdownNameById(
-                    purchaseOrderId,
-                    HP.purchaseOrders
-                )
+
+                sales = sales,
+                invoiceId = sales.id!!,
+                isPostedBill = sales.isPostedBill!!,
+                isRetail = sales.isRetail!!,
             )
         }
     }
 
     private fun updateTotal() {
         val qty = HP.getDoubleValue(state.value.qty)
-        val crtn = HP.getIntValue(state.value.crtn)
-        val cost = HP.getDoubleValue(state.value.cost)
+        val rate = HP.getDoubleValue(state.value.rate)
 
-        val total = cost * (qty + (crtn * state.value.crtnSize))
         state.update {
             it.copy(
-                total = total.toString()
+                total = (qty * rate)
             )
         }
     }

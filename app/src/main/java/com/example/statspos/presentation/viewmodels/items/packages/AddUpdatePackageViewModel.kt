@@ -134,7 +134,7 @@ class AddUpdatePackageViewModel @Inject constructor(
                 is Resource.Information -> showMessage(result.message)
                 is Resource.Success -> {
                     HP.packages = Gson().getListOf<DropdownItem>(result.data.get("packages").asJsonArray)
-                    clearTextboxes()
+//                    clearTextboxes()
                     onSuccess()
                 }
             }

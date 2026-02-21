@@ -13,7 +13,6 @@ data class SalesBills(
     var isDiscRsPer: Boolean? = null,
     var disc: Double? = null,
     var totalDisc: Double? = null,
-    var localDate: String? = null,
 
     var date: String? = null,
     var salesOn: String? = null,

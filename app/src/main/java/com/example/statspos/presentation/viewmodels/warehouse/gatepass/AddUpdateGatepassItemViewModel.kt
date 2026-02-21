@@ -156,7 +156,7 @@ class AddUpdateGatepassItemViewModel @Inject constructor(
                 is Resource.Error -> showError(result.error)
                 is Resource.Information -> showMessage(result.message)
                 is Resource.Success -> {
-                    clearTextboxes()
+//                    clearTextboxes()
                     onSuccess()
                 }
             }

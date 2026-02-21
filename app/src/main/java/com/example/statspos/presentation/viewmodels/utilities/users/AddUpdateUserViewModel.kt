@@ -396,7 +396,7 @@ class AddUpdateUserViewModel @Inject constructor(
                 is Resource.Success -> {
                     HP.users =
                         Gson().getListOf<DropdownItem>(result.data.get("users").asJsonArray)
-                    clearTextboxes()
+//                    clearTextboxes()
                     onSuccess()
                 }
             }

@@ -136,7 +136,7 @@ class AddUpdateAccountCategoryViewModel @Inject constructor(
                 is Resource.Success -> {
                     HP.accountCategories =
                         Gson().getListOf<DropdownItem>(result.data.get("accountCategories").asJsonArray)
-                    clearTextboxes()
+//                    clearTextboxes()
                     onSuccess()
                 }
             }

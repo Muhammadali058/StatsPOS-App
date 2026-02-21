@@ -134,7 +134,7 @@ class AddUpdateWarehouseViewModel @Inject constructor(
                 is Resource.Information -> showMessage(result.message)
                 is Resource.Success -> {
                     HP.warehouses = Gson().getListOf<DropdownItem>(result.data.get("warehouses").asJsonArray)
-                    clearTextboxes()
+//                    clearTextboxes()
                     onSuccess()
                 }
             }

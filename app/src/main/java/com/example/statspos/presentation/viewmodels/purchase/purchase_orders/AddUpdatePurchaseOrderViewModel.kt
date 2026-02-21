@@ -134,7 +134,7 @@ class AddUpdatePurchaseOrderViewModel @Inject constructor(
                 is Resource.Information -> showMessage(result.message)
                 is Resource.Success -> {
                     HP.purchaseOrders = Gson().getListOf<DropdownItem>(result.data.get("purchaseOrders").asJsonArray)
-                    clearTextboxes()
+//                    clearTextboxes()
                     onSuccess()
                 }
             }

@@ -49,7 +49,7 @@ import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.sales.PostedBillsViewModel
+import com.example.statspos.presentation.viewmodels.sales.main_screen.PostedBillsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
@@ -124,12 +124,21 @@ fun PostedBillsBody(
                         .fillMaxWidth(),
                     items = HP.salesPostedBillsSearchBy,
                     selectedItem = state.searchBy,
-                    onItemSelected = { item ->
-                        viewModel.onSearchByChange(item)
-                    },
+                    onItemSelected = viewModel::onSearchByChange,
                     label = {
                         Text(text = "Search By")
                     },
+                )
+                ComboBox(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    items = HP.users,
+                    selectedItem = state.user,
+                    onItemSelected = viewModel::onUserChange,
+                    label = {
+                        Text(text = "User")
+                    },
+                    addNone = true,
                 )
                 Row(
                     modifier = Modifier

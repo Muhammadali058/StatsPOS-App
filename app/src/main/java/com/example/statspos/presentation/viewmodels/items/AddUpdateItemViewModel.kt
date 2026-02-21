@@ -352,7 +352,7 @@ class AddUpdateItemViewModel @Inject constructor(
                     if(!HP.autoCompleteItems.contains(item.itemname))
                         HP.autoCompleteItems = (HP.autoCompleteItems + listOf(item.itemname)) as List<String>
 
-                    clearTextboxes()
+//                    clearTextboxes()
                     onSuccess()
                 }
             }

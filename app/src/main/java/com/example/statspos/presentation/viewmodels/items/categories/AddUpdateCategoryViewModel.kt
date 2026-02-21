@@ -139,7 +139,7 @@ class AddUpdateCategoryViewModel @Inject constructor(
                 is Resource.Information -> showMessage(result.message)
                 is Resource.Success -> {
                     HP.categories = Gson().getListOf<DropdownItem>(result.data.get("categories").asJsonArray)
-                    clearTextboxes()
+//                    clearTextboxes()
                     onSuccess()
                 }
             }

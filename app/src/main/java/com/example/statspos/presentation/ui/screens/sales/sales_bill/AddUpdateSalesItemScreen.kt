@@ -493,6 +493,7 @@ private fun Body(
                     keyboardType = KeyboardType.Decimal
                 ),
                 enabled = crtnRateEnabled,
+                readOnly = HP.userRights.changeRates == false,
             )
         }
     }

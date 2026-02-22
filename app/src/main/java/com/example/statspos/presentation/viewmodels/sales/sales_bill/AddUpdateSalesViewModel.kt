@@ -206,6 +206,7 @@ class AddUpdateSalesViewModel @Inject constructor(
 
     fun onPaymentChange(value: String) {
         state.update { it.copy(payment = value) }
+        updatePayment()
     }
 
     fun onChangeChange(value: String) {
@@ -365,8 +366,6 @@ class AddUpdateSalesViewModel @Inject constructor(
                         } else {
                             if (account.isCredit!! && HP.userRights.creditBill!!) {
                                 state.update { it.copy(salesOn = HP.salesOn[1]) }
-                            } else {
-//                                state.update { it.copy(salesOn = HP.salesOn[0]) }
                             }
                         }
 
@@ -377,8 +376,6 @@ class AddUpdateSalesViewModel @Inject constructor(
                                     dueDate = LocalDate.now().plusDays(account.dueDays.toLong())
                                 )
                             }
-                        } else {
-//                            state.update { it.copy(dueDate = LocalDate.now().plusDays(7)) }
                         }
 
                         // Select Supplier
@@ -681,6 +678,18 @@ class AddUpdateSalesViewModel @Inject constructor(
                 totalDisc = totalDisc,
             )
         }
+
+        updatePayment()
+    }
+
+    fun updatePayment() {
+        val payment = HP.getIntValue(state.value.payment)
+        val change = if (payment != 0) {
+            (payment - state.value.total.toInt())
+        } else
+            0
+
+        state.update { it.copy(change = change.toString()) }
     }
 
     private fun getTotalDisc(totalBill: Double): Double {

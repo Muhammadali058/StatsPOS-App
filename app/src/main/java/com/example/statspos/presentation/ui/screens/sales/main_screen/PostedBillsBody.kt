@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.ViewHeadline
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -45,12 +47,14 @@ import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.PasswordDialog
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.sales.main_screen.PostedBillsViewModel
 import com.example.statspos.utils.HP
+import com.example.statspos.utils.PasswordFor
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import kotlinx.coroutines.launch
@@ -60,6 +64,7 @@ import java.time.LocalDate
 @Composable
 fun PostedBillsBody(
     sharedViewModel: SharedViewModel,
+    onViewClick: (SalesBills) -> Unit,
     onAddUpdateButtonClick: (Long, Boolean, SalesBills?) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -72,6 +77,8 @@ fun PostedBillsBody(
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
+    var showPasswordDialog by remember { mutableStateOf(false) }
+    var salesBill by remember { mutableStateOf<SalesBills?>(null) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
@@ -84,7 +91,7 @@ fun PostedBillsBody(
     }
 
     val sharedViewModelState by sharedViewModel.state.collectAsStateWithLifecycle()
-    LaunchedEffect( sharedViewModelState.billPosted) {
+    LaunchedEffect(sharedViewModelState.billPosted) {
         if (sharedViewModelState.billPosted) {
             viewModel.loadData()
             sharedViewModel.consumeBillPosted()
@@ -98,6 +105,25 @@ fun PostedBillsBody(
                 showErrorDialog = false
             },
         )
+    }
+
+    if (showPasswordDialog) {
+        PasswordDialog(
+            passwordFor = PasswordFor.EDIT_SALES_BILL,
+            onDismiss = {
+                showPasswordDialog = false
+            },
+            onConfirm = {
+                showPasswordDialog = false
+                salesBill?.run {
+                    onAddUpdateButtonClick(id!!, true, this)
+                }
+            }
+        )
+    }
+
+    fun editBill(salesBills: SalesBills) {
+        onAddUpdateButtonClick(salesBills.id!!, true, salesBills)
     }
 
     Scaffold(
@@ -274,8 +300,56 @@ fun PostedBillsBody(
                         },
                         items = state.list,
                         onItemClick = { salesBills ->
-                            onAddUpdateButtonClick(salesBills.id!!, true, salesBills)
+                            // If bill type is sale not return
+                            if (salesBills.salesType == "Sales") {
+                                // if user has access to edit bill
+                                if (HP.userRights.editSaleBill == true) {
+                                    val today = LocalDate.now()
+                                    val billDate = HP.toLocalDate(salesBills.localDate!!)
+                                    val isToday = billDate.isEqual(today)
+
+                                    // if bill on credit
+                                    if (salesBills.salesOn == "Credit") {
+                                        if (HP.userRights.editCreditBill == true) {
+
+                                            if (isToday && HP.settings.sameDateBillEdit == true) {
+                                                editBill(salesBills)
+                                            } else if (isToday) {
+                                                if (HP.passwords.useEditSalesBill == true) {
+                                                    salesBill = salesBills
+                                                    showPasswordDialog = true
+                                                } else {
+                                                    editBill(salesBills)
+                                                }
+                                            } else {
+                                                if (HP.settings.editOldCreditBill == true) {
+                                                    if (HP.passwords.useEditSalesBill == true) {
+                                                        salesBill = salesBills
+                                                        showPasswordDialog = true
+                                                    } else {
+                                                        editBill(salesBills)
+                                                    }
+                                                }
+                                            }
+
+                                        }
+                                    } else {
+                                        // if bill on cash
+                                        if (isToday && HP.settings.sameDateBillEdit == true) {
+                                            editBill(salesBills)
+                                        } else {
+                                            if (HP.passwords.useEditSalesBill == true) {
+                                                salesBill = salesBills
+                                                showPasswordDialog = true
+                                            } else {
+                                                editBill(salesBills)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         },
+                        onViewClick = onViewClick
                     )
                 }
 
@@ -365,6 +439,7 @@ private fun BodyList(
     loadNextItems: () -> Unit,
     items: List<SalesBills>,
     onItemClick: (SalesBills) -> Unit,
+    onViewClick: (SalesBills) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -386,6 +461,7 @@ private fun BodyList(
             ListCard(
                 item = item,
                 onItemClick = onItemClick,
+                onViewClick = onViewClick,
             )
         }
     }
@@ -396,6 +472,7 @@ private fun ListCard(
     modifier: Modifier = Modifier,
     item: SalesBills,
     onItemClick: (SalesBills) -> Unit,
+    onViewClick: (SalesBills) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -406,47 +483,59 @@ private fun ListCard(
             onItemClick(item)
         }
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            Row(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
+                    .weight(1f),
             ) {
-                LabelLarge(item.customerName.toString().ifEmpty { "Walk-in Customer" })
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    LabelLarge(item.customerName.toString().ifEmpty { "Walk-in Customer" })
+                }
+                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    HeadingMedium("Sr. ")
+                    LabelMedium(item.id.toString())
+                    Spacer(Modifier.width(16.dp))
+                    HeadingMedium("Inv No. ")
+                    LabelMedium(item.invoiceNo.toString())
+                }
+                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    HeadingMedium("Date: ")
+                    LabelLarge(item.date.toString())
+                }
+                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    HeadingMedium("User: ")
+                    LabelLarge(item.username.toString())
+                }
             }
-            Spacer(Modifier.height(2.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                HeadingMedium("Sr. ")
-                LabelMedium(item.id.toString())
-                Spacer(Modifier.width(16.dp))
-                HeadingMedium("Inv No. ")
-                LabelMedium(item.invoiceNo.toString())
-            }
-            Spacer(Modifier.height(2.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                HeadingMedium("Date: ")
-                LabelLarge(item.date.toString())
-            }
-            Spacer(Modifier.height(2.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                HeadingMedium("User: ")
-                LabelLarge(item.username.toString())
-            }
+            Spacer(Modifier.width(8.dp))
+            AppIconButton(
+                onClick = {
+                    onViewClick(item)
+                },
+                icon = Icons.Default.List
+            )
         }
         Spacer(Modifier.height(2.dp))
         Row(

@@ -19,6 +19,7 @@ import com.example.statspos.presentation.viewmodels.SharedViewModel
 @Composable
 fun SalesScreen(
     sharedViewModel: SharedViewModel,
+    onViewClick:(SalesBills) -> Unit,
     onAddUpdateButtonClick: (Long, Boolean, Boolean, SalesBills?) -> Unit,
 ) {
     val tabs = listOf("Pending Bills", "Posted Bills")
@@ -63,6 +64,7 @@ fun SalesScreen(
                     1 ->
                         PostedBillsBody(
                             sharedViewModel = sharedViewModel,
+                            onViewClick = onViewClick,
                             onAddUpdateButtonClick = { invoiceId, isPostedBill, salesBills ->
                                 onAddUpdateButtonClick(invoiceId, false, isPostedBill, salesBills)
                             },

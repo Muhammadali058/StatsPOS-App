@@ -2,8 +2,11 @@ package com.example.statspos.presentation.ui.screens.sales.sales_bill
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -137,7 +140,6 @@ fun SalesBillScreen(
                     invoiceId = invoiceId,
                     isPendingBill = isPendingBill,
                     isPostedBill = isPostedBill,
-                    salesBill = salesBill,
                     onAddUpdateSalesItem = { updateId, isUpdate, sales ->
                         navigate(Routes.AddUpdateSalesItem(updateId, isUpdate, sales))
                     },
@@ -181,7 +183,6 @@ private fun Home(
     invoiceId: Long = 0L,
     isPendingBill: Boolean = false,
     isPostedBill: Boolean = false,
-    salesBill: SalesBills?,
     onAddUpdateSalesItem: (Long, Boolean, Sales) -> Unit,
     onBack: () -> Unit,
     goBackWithResult: () -> Unit,
@@ -264,6 +265,7 @@ private fun Home(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = {
             AppSnackbarHost(
                 snackbarHostState = snackbarHostState,
@@ -332,7 +334,6 @@ private fun Home(
                             invoiceId = invoiceId,
                             isPendingBill = isPendingBill,
                             isPostedBill = isPostedBill,
-                            salesBill = salesBill,
                             onBack = onBack,
                         )
 

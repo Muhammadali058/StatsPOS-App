@@ -30,6 +30,7 @@ import com.example.statspos.presentation.ui.screens.items.packages.PackagesScree
 import com.example.statspos.presentation.ui.screens.purchase.PurchaseScreen
 import com.example.statspos.presentation.ui.screens.purchase.purchase_orders.PurchaseOrdersScreen
 import com.example.statspos.presentation.ui.screens.sales.sales_bill.SalesBillScreen
+import com.example.statspos.presentation.ui.screens.sales.sales_bill.ViewSalesBillItemsScreen
 import com.example.statspos.presentation.ui.screens.utilities.SettingsScreen
 import com.example.statspos.presentation.ui.screens.utilities.users.UsersScreen
 import com.example.statspos.presentation.ui.screens.warehouse.gatepass.GatepassScreen
@@ -138,6 +139,15 @@ fun MainScreen() {
                     isPendingBill = key.isPendingBill,
                     isPostedBill = key.isPostedBill,
                     salesBill = key.salesBill,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<TopRoutes.ViewBillItems> { key ->
+                ViewSalesBillItemsScreen(
+                    invoiceId = key.salesBill.id!!,
+                    isPostedBill = true,
                     onBack = {
                         backStack.removeLastOrNull()
                     }

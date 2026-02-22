@@ -21,4 +21,5 @@ data class SalesBills(
     var type: String? = null,
 
     var username: String? = null,
+    var localDate: String? = null,
 )

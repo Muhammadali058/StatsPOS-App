@@ -90,12 +90,14 @@ val BOTTOM_DESTINATIONS = mapOf(
 
 @Composable
 fun TopAppBar(
+    modifier: Modifier = Modifier,
     title: String = "StatsPOS",
     navigationIcon: ImageVector = Icons.Default.ArrowBack,
     actions: @Composable RowScope.() -> Unit = {},
     onNavigationClick: () -> Unit
 ) {
     TopAppBar(
+        modifier = modifier,
         title = {
             Text(title)
         },

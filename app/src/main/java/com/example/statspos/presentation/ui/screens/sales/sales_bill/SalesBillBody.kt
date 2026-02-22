@@ -66,7 +66,6 @@ fun SalesBillBody(
     invoiceId: Long,
     isPendingBill: Boolean,
     isPostedBill: Boolean,
-    salesBill: SalesBills?,
     onBack: () -> Unit,
 ) {
     val state by salesViewModel.state.collectAsStateWithLifecycle()
@@ -198,6 +197,7 @@ fun SalesBillBody(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(ConstantPaddings.BODY_HORIZONTAL)
+                    .padding(top = 8.dp)
             ) {
                 if (!isPostedBill) {
                     Box(

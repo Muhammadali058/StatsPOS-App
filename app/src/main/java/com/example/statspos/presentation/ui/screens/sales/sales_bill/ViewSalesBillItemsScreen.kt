@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.sales.Sales
 import com.example.statspos.domain.models.sales.SalesBillItems
@@ -47,8 +48,10 @@ import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.ListImageView
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchTextbox
+import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
+import com.example.statspos.presentation.viewmodels.accounts.banks.BanksViewModel
 import com.example.statspos.presentation.viewmodels.sales.sales_bill.AddUpdateSalesViewModel
 import com.example.statspos.presentation.viewmodels.sales.sales_bill.SalesItemsViewModel
 import com.example.statspos.utils.HP
@@ -56,43 +59,41 @@ import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
 @Composable
-fun SalesBillItemsBody(
-    sharedViewModel: SharedViewModel,
-    salesViewModel: AddUpdateSalesViewModel,
-    salesItemsViewModel: SalesItemsViewModel,
-    snackbarHostState: SnackbarHostState,
-    onAddButtonClick: (Long, Boolean, Sales) -> Unit,
+fun ViewSalesBillItemsScreen(
+    invoiceId: Long,
+    isPostedBill: Boolean,
+    onBack: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val salesState by salesViewModel.state.collectAsStateWithLifecycle()
-    val state by salesItemsViewModel.state.collectAsStateWithLifecycle()
-    val event by salesItemsViewModel.event.collectAsState(UiEvent.Idle)
+    val viewModel = hiltViewModel<SalesItemsViewModel>()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val event by viewModel.event.collectAsState(UiEvent.Idle)
+    val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
             snackbarHostState = snackbarHostState,
-            viewModelIdleEvent = salesItemsViewModel::onEvent,
+            viewModelIdleEvent = viewModel::onEvent,
             onError = {
                 showErrorDialog = true
             }
         )
     }
 
+    fun loadData() {
+        viewModel.loadData { a, b ->
+
+        }
+    }
+
     // Edit data when update
     var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         if (!hasLoadedOnce) {
-            salesItemsViewModel.loadData(salesViewModel::updateTotal)
+            viewModel.updateInitialState(invoiceId, isPostedBill)
+            loadData()
             hasLoadedOnce = true
-        }
-    }
-
-    val sharedViewModelState by sharedViewModel.state.collectAsStateWithLifecycle()
-    LaunchedEffect(sharedViewModelState.dataChanged) {
-        if (sharedViewModelState.dataChanged) {
-            salesItemsViewModel.loadData(salesViewModel::updateTotal)
-            sharedViewModel.consumeDataChanged()
         }
     }
 
@@ -105,27 +106,20 @@ fun SalesBillItemsBody(
         )
     }
 
-    fun getSalesObject(): Sales {
-        val sales = salesViewModel.getFormData()
-        sales.id = salesState.invoiceId
-        sales.isPostedBill = salesState.isPostedBill
-        sales.invoiceNo = salesState.invoiceNo
-        sales.totalItems = state.list.size
-        return sales
-    }
-
     Scaffold(
-        floatingActionButton = {
-            AppFloatingActionButton {
-                onAddButtonClick(0L, false, getSalesObject())
-            }
+        topBar = {
+            TopAppBar(
+                onNavigationClick = {
+                    onBack()
+                },
+                title = "Bill Items",
+            )
         },
     ) { innerPadding ->
-        Box(Modifier.padding(innerPadding))
-
         Box(
             Modifier
                 .fillMaxSize()
+                .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
             Column(
@@ -142,9 +136,9 @@ fun SalesBillItemsBody(
                         modifier = Modifier
                             .padding(bottom = 4.dp),
                         value = state.search,
-                        onValueChange = salesItemsViewModel::onSearchChange,
+                        onValueChange = viewModel::onSearchChange,
                         onSearchClick = {
-                            salesItemsViewModel.loadData(salesViewModel::updateTotal)
+                            loadData()
                             keyboardController?.hide()
                         },
                     )
@@ -153,11 +147,11 @@ fun SalesBillItemsBody(
                             .weight(1f),
                         isRefreshing = state.isLoading,
                         onRefresh = {
-                            salesItemsViewModel.loadData(salesViewModel::updateTotal)
+                            loadData()
                         },
                         items = state.list,
                         onItemClick = { salesBillItem ->
-                            onAddButtonClick(salesBillItem.id!!, true, getSalesObject())
+
                         }
                     )
                 }

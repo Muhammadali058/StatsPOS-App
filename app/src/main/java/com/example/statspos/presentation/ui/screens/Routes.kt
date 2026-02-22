@@ -5,7 +5,7 @@ import com.example.statspos.domain.models.sales.Sales
 import com.example.statspos.domain.models.sales.SalesBills
 import kotlinx.serialization.Serializable
 
-sealed class BottomRoutes : NavKey{
+sealed class BottomRoutes : NavKey {
     @Serializable
     data object Home : BottomRoutes()
 
@@ -20,7 +20,7 @@ sealed class BottomRoutes : NavKey{
 
 }
 
-sealed class TopRoutes : NavKey{
+sealed class TopRoutes : NavKey {
     @Serializable
     data object Home : TopRoutes()
 
@@ -48,14 +48,20 @@ sealed class TopRoutes : NavKey{
 
     @Serializable
     data object Settings : TopRoutes()
+
     // endregion
     // region Sales
     @Serializable
-    data class AddUpdateSales(val updateId:Long, val isPendingBill: Boolean, val isPostedBill: Boolean, val salesBill: SalesBills?) : TopRoutes()
+    data class AddUpdateSales(
+        val updateId: Long,
+        val isPendingBill: Boolean,
+        val isPostedBill: Boolean,
+        val salesBill: SalesBills?
+    ) : TopRoutes()
+
     @Serializable
-    data class SalesItem(val isPostedBill: Boolean, val sales: Sales) : TopRoutes()
-    @Serializable
-    data class AddUpdateSalesItem(val isPostedBill: Boolean, val salesBill: SalesBills?) : TopRoutes()
+    data class ViewBillItems(val salesBill: SalesBills) : TopRoutes()
+
     // endregion
     // region Accounts
     @Serializable
@@ -75,6 +81,7 @@ sealed class TopRoutes : NavKey{
 
     @Serializable
     data object AccountCategories : TopRoutes()
+
     // endregion
     // region Entries
     @Serializable
@@ -91,6 +98,7 @@ sealed class TopRoutes : NavKey{
 
     @Serializable
     data object StockEntry : TopRoutes()
+
     // endregion
     // region Warehouse
     @Serializable

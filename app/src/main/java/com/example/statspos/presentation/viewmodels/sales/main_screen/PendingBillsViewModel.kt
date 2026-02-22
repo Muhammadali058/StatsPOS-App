@@ -172,6 +172,7 @@ class PendingBillsViewModel @Inject constructor(
                 salesId = invoiceId,
 
                 date = HP.getZonedDate(LocalDate.now()),
+                dueDate = HP.getZonedDate(LocalDate.now().plusDays(7)),
                 isDiscRsPer = HP.settings.isDefaultDiscRs == true,
                 isRetail = HP.settings.isDefaultRateRetail == true,
             )

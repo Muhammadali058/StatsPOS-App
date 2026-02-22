@@ -40,4 +40,8 @@ data class SalesItems(
     var isPostedBill: Boolean? = null,
     var salesType: Int? = null,
     var isEstimatedBill: Boolean? = null,
+    var stockPcs: Double? = null,
+    var stockCrtn: Long? = null,
+    var lockPcs: Boolean? = null,
+    var lockCrtn: Boolean? = null,
 )

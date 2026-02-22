@@ -77,6 +77,7 @@ sealed class UiEvent {
 
     data class ShowMessage(val message: String) : UiEvent()
     data class ShowError(val error: String) : UiEvent()
+    data class ShowConfirmDialog(val message: String, val type: Int) : UiEvent()
 }
 
 enum class SnackbarType { INFORMATION, ERROR }
@@ -86,6 +87,7 @@ suspend fun checkEvent(
     snackbarHostState: SnackbarHostState,
     onError: (String) -> Unit,
     onMessage: (String) -> Unit = {},
+    onConfirm: (String, Int) -> Unit = { message, type -> },
     viewModelIdleEvent: (event: UiEvent) -> Unit,
 //    changeSnackbarType: (SnackbarType) -> Unit
 ) {
@@ -114,6 +116,12 @@ suspend fun checkEvent(
 
         is UiEvent.ShowError -> {
             onError(event.error)
+            viewModelIdleEvent(UiEvent.Idle)
+//            viewModel.onEvent(UiEvent.Idle)
+        }
+
+        is UiEvent.ShowConfirmDialog -> {
+            onConfirm(event.message, event.type)
             viewModelIdleEvent(UiEvent.Idle)
 //            viewModel.onEvent(UiEvent.Idle)
         }

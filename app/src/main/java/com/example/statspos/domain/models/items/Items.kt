@@ -89,4 +89,6 @@ data class Items(
 
     var lastRate: Double? = null, // these will be used in sales to show customer last rates
     var lastCrtnRate: Double? = null,
+    var customerIsDiscRsPer: Boolean? = null,
+    var customerDisc: Double? = null,
 )

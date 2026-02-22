@@ -62,9 +62,11 @@ import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.DiscountTextbox
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
+import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.Textbox
+import com.example.statspos.presentation.ui.components.TextboxCB
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
@@ -97,8 +99,18 @@ fun AddUpdateSalesItemScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var confirmDialogText by remember { mutableStateOf("") }
+    var confirmDialogType by remember { mutableStateOf(0) }
+    var showConfirmDialog by remember { mutableStateOf(false) }
     var showBarcodeScanner by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
+
+    fun onSaveButtonClick() {
+        viewModel.insertOrUpdateData {
+            sharedViewModel.notifyDataChanged()
+//            goBackWithResult()
+        }
+    }
 
     LaunchedEffect(event) {
         checkEvent(
@@ -107,6 +119,13 @@ fun AddUpdateSalesItemScreen(
             viewModelIdleEvent = viewModel::onEvent,
             onError = {
                 showErrorDialog = true
+            },
+            onConfirm = { text, type ->
+                keyboardController?.hide()
+
+                confirmDialogText = text
+                confirmDialogType = type
+                showConfirmDialog = true
             }
         )
     }
@@ -166,6 +185,26 @@ fun AddUpdateSalesItemScreen(
         )
     }
 
+    if (showConfirmDialog) {
+        ConfirmDialog(
+            text = confirmDialogText,
+            onDismiss = {
+                showConfirmDialog = false
+            },
+            onConfirm = {
+                showConfirmDialog = false
+                if (confirmDialogType == 1) {
+                    viewModel.setIsExistsResult(true)
+                    onSaveButtonClick()
+                }
+                if (confirmDialogType == 2) {
+                    viewModel.setExpirableResult(true)
+                    onSaveButtonClick()
+                }
+            }
+        )
+    }
+
     if (showBarcodeScanner) {
         BarcodeScannerDialog(
             onDismiss = {
@@ -194,13 +233,15 @@ fun AddUpdateSalesItemScreen(
                 title = "Total: ${HP.formatDecimal(state.total, mustDecimals = 1)}",
                 actions = {
                     Row {
-                        IconButton(onClick = {
-                            showDeleteDialog = true
-                        }) {
-                            AppIcon(
-                                icon = Icons.Default.Delete,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
+                        if (isUpdate) {
+                            IconButton(onClick = {
+                                showDeleteDialog = true
+                            }) {
+                                AppIcon(
+                                    icon = Icons.Default.Delete,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
                         }
                     }
                 }
@@ -252,6 +293,18 @@ fun AddUpdateSalesItemScreen(
                         crtn = state.crtn,
                         rate = state.rate,
                         crtnRate = state.crtnRate,
+                        qtyEnabled = state.qtyEnabled,
+                        crtnEnabled = state.crtnEnabled,
+                        rateEnabled = state.rateEnabled,
+                        crtnRateEnabled = state.crtnRateEnabled,
+                        customerId = state.sales.customerId ?: 0L,
+                        lastRate = state.lastRate,
+                        lastCrtnRate = state.lastCrtnRate,
+                        stockPcs = state.stockPcs,
+                        stockCrtn = state.stockCrtn,
+                        cost = state.cost,
+                        crtnSize = state.crtnSize,
+                        rates = state.rates,
                         isDiscRsPer = state.isDiscRsPer,
                         disc = state.disc,
                         totalDisc = state.totalDisc,
@@ -275,9 +328,7 @@ fun AddUpdateSalesItemScreen(
                         AppCircularProgressIndicator()
                     } else {
                         SaveButton {
-                            viewModel.insertOrUpdateData {
-                                goBackWithResult()
-                            }
+                            onSaveButtonClick()
                         }
                     }
                 }
@@ -360,6 +411,18 @@ private fun Body(
     crtn: String,
     rate: String,
     crtnRate: String,
+    qtyEnabled: Boolean,
+    crtnEnabled: Boolean,
+    rateEnabled: Boolean,
+    crtnRateEnabled: Boolean,
+    customerId: Long,
+    lastRate: Double,
+    lastCrtnRate: Double,
+    stockPcs: Double,
+    stockCrtn: Long,
+    cost: Double,
+    crtnSize: Int,
+    rates: List<String>,
     disc: String,
     isDiscRsPer: Boolean,
     totalDisc: Double,
@@ -382,9 +445,10 @@ private fun Body(
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal
             ),
+            enabled = qtyEnabled,
         )
         Spacer(Modifier.width(8.dp))
-        Textbox(
+        TextboxCB(
             value = rate,
             onValueChange = onRateChange,
             modifier = Modifier
@@ -392,12 +456,15 @@ private fun Body(
             label = {
                 Text("Rate")
             },
+            items = rates,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal
             ),
+            enabled = rateEnabled,
+            readOnly = HP.userRights.changeRates == false,
         )
     }
-    if(HP.settings.saleCartons == true) {
+    if (HP.settings.saleCartons == true) {
         Row {
             Textbox(
                 value = if (HP.getIntValue(crtn) > 0) crtn else "",
@@ -410,6 +477,8 @@ private fun Body(
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal
                 ),
+                enabled = crtnEnabled,
+                readOnly = HP.userRights.changeRates == false,
             )
             Spacer(Modifier.width(8.dp))
             Textbox(
@@ -423,6 +492,7 @@ private fun Body(
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal
                 ),
+                enabled = crtnRateEnabled,
             )
         }
     }
@@ -447,6 +517,78 @@ private fun Body(
         }
         Spacer(Modifier.height(8.dp))
     }
+    if (HP.settings.showItemStock == true) {
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(if (HP.settings.saleCartons == true) 0.5f else 1f),
+            ) {
+                HeadingMedium("Stock Pcs: ")
+                LabelMedium(HP.formatDecimal(stockPcs))
+            }
+            if (HP.settings.saleCartons == true) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    HeadingMedium("Stock Crtn: ")
+                    LabelMedium(stockCrtn.toString())
+                }
+            }
+        }
+    }
+    if (HP.settings.showCustomerLastRate == true && customerId != 0L) {
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(if (HP.settings.saleCartons == true) 0.5f else 1f),
+            ) {
+                HeadingMedium("Last Rate: ")
+                LabelMedium(HP.formatDecimal(lastRate))
+            }
+            if (HP.settings.saleCartons == true) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    HeadingMedium("Last Crtn Rate: ")
+                    LabelMedium(HP.formatDecimal(lastCrtnRate))
+                }
+            }
+        }
+    }
+    if (HP.userRights.seeCost == true) {
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(if (HP.settings.saleCartons == true) 0.5f else 1f),
+            ) {
+                HeadingMedium("Cost: ")
+                LabelMedium(HP.formatDecimal(cost))
+            }
+            if (HP.settings.saleCartons == true) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    HeadingMedium("Cost Crtn: ")
+                    LabelMedium(HP.formatDecimal(cost * crtnSize))
+                }
+            }
+        }
+    }
 }
 
 @Preview(showBackground = true)
@@ -462,6 +604,18 @@ private fun Prev() {
             "",
             "",
             "",
+            true,
+            true,
+            true,
+            true,
+            0L,
+            0.0,
+            0.0,
+            0.0,
+            0L,
+            0.0,
+            0,
+            emptyList(),
             "",
             true,
             0.0,

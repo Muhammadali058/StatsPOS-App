@@ -554,3 +554,108 @@ fun DateTextbox(
         },
     )
 }
+
+@Composable
+fun TextboxCB(
+    modifier: Modifier = Modifier,
+    value: String,
+    onValueChange: (String) -> Unit,
+    items: List<String>,
+    onItemSelected: (String) -> Unit = {},
+    label: @Composable (() -> Unit)? = null,
+    placeholder: @Composable (() -> Unit)? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    height: Dp = ConstantSize.DEFAULT_TEXTBOX_HEIGHT,
+    shape: Shape = OutlinedTextFieldDefaults.shape,
+    textStyle: TextStyle = TextStyle(),
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    singleLine: Boolean = true,
+    contentPadding: PaddingValues = ConstantPaddings.CUSTOM_TEXTBOX_INSIDE,
+    padding: PaddingValues = ConstantPaddings.CUSTOM_TEXTBOX_OUTSIDE,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    var textFieldSize by remember { mutableStateOf(IntSize.Zero) }
+
+    Box(
+        modifier = modifier
+    ) {
+        Textbox(
+            modifier = Modifier
+                .fillMaxWidth()
+                .onGloballyPositioned { coordinates ->
+                    textFieldSize = coordinates.size
+                },
+            value = value,
+            onValueChange = onValueChange,
+            height = height,
+            label = label,
+            placeholder = placeholder,
+            shape = shape,
+            textStyle = textStyle,
+            enabled = enabled,
+            readOnly = readOnly,
+            singleLine = singleLine,
+            trailingIcon = {
+                IconButton(
+                    onClick = {
+                        if(enabled)
+                            expanded = !expanded
+                    }
+                ) {
+                    AppIcon(
+                        icon = Icons.Default.ArrowDropDown
+                    )
+                }
+            },
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            contentPadding = contentPadding,
+            padding = padding,
+        )
+
+        if (expanded && items.isNotEmpty()) {
+            Popup(
+                offset = IntOffset(
+                    x = 0,
+                    y = textFieldSize.height - 6
+                ),
+                onDismissRequest = { expanded = false }
+            ) {
+                Card(
+                    modifier = Modifier
+                        .width(with(LocalDensity.current) {
+                            textFieldSize.width.toDp()
+                        }),
+                    elevation = CardDefaults.cardElevation(2.dp),
+                    shape = RectangleShape,
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    LazyColumn(
+                        modifier = Modifier.heightIn(max = 200.dp)
+                    ) {
+                        items(items) { item ->
+                            Text(
+                                text = item,
+                                style = TextStyle(
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        onValueChange(item)
+                                        expanded = false
+                                        onItemSelected(item)
+                                    }
+                                    .padding(8.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

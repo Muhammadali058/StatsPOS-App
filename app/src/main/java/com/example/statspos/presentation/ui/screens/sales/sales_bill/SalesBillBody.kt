@@ -121,7 +121,8 @@ fun SalesBillBody(
                 Modifier
                     .weight(1f)
                     .verticalScroll(scrollState)
-                    .imePadding(),
+//                    .imePadding()
+                ,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Basic(
@@ -171,13 +172,13 @@ fun SalesBillBody(
                             salesViewModel.changeBillType(value) {
                                 salesItemsViewModel.loadData(salesViewModel::updateTotal)
 
-                                if(isPendingBill){
+                                if (isPendingBill) {
                                     salesViewModel.tempClose {
                                         sharedViewModel.notifyBillSaved()
                                     }
                                 }
 
-                                if(isPostedBill){
+                                if (isPostedBill) {
                                     salesViewModel.postBill {
                                         sharedViewModel.notifyBillPosted()
                                     }
@@ -494,6 +495,7 @@ private fun Others(
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal
                 ),
+                readOnly = true,
             )
         }
         Textbox(

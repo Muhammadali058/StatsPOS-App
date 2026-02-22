@@ -19,7 +19,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
+import kotlin.Double
 
 @HiltViewModel
 class AddUpdateSalesItemViewModel @Inject constructor(
@@ -38,6 +41,7 @@ class AddUpdateSalesItemViewModel @Inject constructor(
         val cost: Double = 0.0,
         val rate: String = "",
         val crtnRate: String = "",
+        val rates: List<String> = emptyList(),
         val retail: Double = 0.0,
         val wholesale: Double = 0.0,
         val rate3: Double = 0.0,
@@ -57,6 +61,24 @@ class AddUpdateSalesItemViewModel @Inject constructor(
 
 
         // Extra
+        val stockPcs: Double = 0.0,
+        val stockCrtn: Long = 0L,
+        val lastRate: Double = 0.0,
+        val lastCrtnRate: Double = 0.0,
+        val lockPcs: Boolean = false,
+        val lockCrtn: Boolean = false,
+        val qtyEnabled: Boolean = true,
+        val crtnEnabled: Boolean = true,
+        val rateEnabled: Boolean = true,
+        val crtnRateEnabled: Boolean = true,
+
+        val isExists: Boolean = false,
+        val isExistsResult: Boolean = false,
+        val expirable: Boolean = false,
+        val expiry: LocalDate = LocalDate.now(),
+        val expirableResult: Boolean = false,
+
+
         val isPostedBill: Boolean = false,
         val isUpdate: Boolean = false,
         val updateId: Long = 0L,
@@ -97,6 +119,12 @@ class AddUpdateSalesItemViewModel @Inject constructor(
                 }
             }
 
+            is UiEvent.ShowConfirmDialog -> {
+                viewModelScope.launch {
+                    _event.send(UiEvent.ShowConfirmDialog(event.message, event.type))
+                }
+            }
+
             else -> {
                 viewModelScope.launch {
                     _event.send(UiEvent.Idle)
@@ -121,6 +149,10 @@ class AddUpdateSalesItemViewModel @Inject constructor(
         onEvent(UiEvent.ShowError(error ?: ""))
     }
 
+    fun showConfirmDialog(message: String, type: Int) {
+        onEvent(UiEvent.ShowConfirmDialog(message, type))
+    }
+
     // endregion
 
     // region onChangeMethods
@@ -131,6 +163,9 @@ class AddUpdateSalesItemViewModel @Inject constructor(
                 itemId = 0L,
             )
         }
+
+        if (value.isEmpty())
+            clearTextboxes()
     }
 
     fun onQtyChange(value: String) {
@@ -291,12 +326,68 @@ class AddUpdateSalesItemViewModel @Inject constructor(
     private fun showDataIntoTextboxes(item: Items) {
         state.update {
             it.copy(
+                isUpdate = false,
+                updateId = 0L,
+
                 itemname = item.itemname!!,
+                urduname = item.urduname!!,
                 itemId = item.id!!,
+
                 cost = item.cost!!,
-                rate = item.retail.toString(),
+                rate = if (state.value.isRetail) item.retail.toString() else item.wholesale.toString(),
+                retail = item.retail!!,
+                wholesale = item.wholesale!!,
+                rate3 = item.rate3!!,
+                rate4 = item.rate4!!,
+                crtnRate = item.crtnRate.toString(),
+                crtnSize = item.crtnSize!!,
+
+//                isDiscRsPer = item.isDiscRsPer!!,
+//                disc = item.disc.toString(),
+
+                // Extras
+                stockPcs = if (HP.settings.showItemStock == true) item.stockPcs!! else 0.0,
+                stockCrtn = if (HP.settings.showItemStock == true) item.stockCrtn!! else 0,
+                lastRate = if (HP.settings.showCustomerLastRate == true && state.value.sales.customerId != 0L) item.lastRate!! else 0.0,
+                lastCrtnRate = if (HP.settings.showCustomerLastRate == true && state.value.sales.customerId != 0L) item.lastCrtnRate!! else 0.0,
+                lockPcs = item.lockPcs!!,
+                lockCrtn = item.lockCrtn!!,
+                isExists = item.isExists!!,
+                expirable = item.expirable!!,
+                expiry = HP.toLocalDate(item.expiry!!),
             )
         }
+
+        // Customer Discount
+        if (state.value.sales.customerId != 0L) {
+            val disc = HP.getDoubleValue(item.customerDisc.toString())
+
+            if (disc > 0) {
+                state.update {
+                    it.copy(
+                        isDiscRsPer = item.customerIsDiscRsPer!!,
+                        disc = item.customerDisc.toString(),
+                    )
+                }
+            } else {
+                state.update {
+                    it.copy(
+                        isDiscRsPer = item.isDiscRsPer!!,
+                        disc = item.disc.toString(),
+                    )
+                }
+            }
+        } else {
+            state.update {
+                it.copy(
+                    isDiscRsPer = item.isDiscRsPer!!,
+                    disc = item.disc.toString(),
+                )
+            }
+        }
+
+        showSellingRatesIntoTextboxes()
+        updateTotal()
     }
 
     private fun getFormData(): SalesItems {
@@ -315,6 +406,7 @@ class AddUpdateSalesItemViewModel @Inject constructor(
             itemname = state.value.itemname,
             urduname = state.value.urduname,
 
+            cost = state.value.cost,
             qty = qty,
             crtn = crtn,
             rate = HP.getDoubleValue(state.value.rate),
@@ -336,9 +428,9 @@ class AddUpdateSalesItemViewModel @Inject constructor(
             profit = profit,
         )
 
-        if(!state.value.isUpdate){
-            salesItem.itemNo = state.value.sales.totalItems!! + 1
-        }
+//        if (!state.value.isUpdate) {
+//            salesItem.itemNo = state.value.sales.totalItems!! + 1
+//        }
 
         return salesItem
     }
@@ -347,23 +439,89 @@ class AddUpdateSalesItemViewModel @Inject constructor(
         state.update {
             it.copy(
                 itemname = salesItem.itemname!!,
+                urduname = salesItem.urduname!!,
                 itemId = salesItem.itemId!!,
-                qty = salesItem.qty.toString(),
+
+                cost = salesItem.cost!!,
+                qty = HP.formatDecimal(salesItem.qty),
+                crtn = salesItem.crtn.toString(),
                 rate = salesItem.rate.toString(),
+                retail = salesItem.retail!!,
+                wholesale = salesItem.wholesale!!,
+                rate3 = salesItem.rate3!!,
+                rate4 = salesItem.rate4!!,
+                crtnRate = salesItem.crtnRate.toString(),
+                crtnSize = salesItem.crtnSize!!,
+
+                isDiscRsPer = salesItem.isDiscRsPer!!,
+                disc = salesItem.disc.toString(),
+                calculatedDisc = salesItem.calculatedDisc!!,
+                totalDisc = salesItem.totalDisc!!,
+                isRetail = salesItem.isRetail!!,
+
+                total = salesItem.total!!,
+                totalCost = salesItem.totalCost!!,
+                profit = salesItem.profit!!,
+
+                // Extras
+                stockPcs = if (HP.settings.showItemStock == true) salesItem.stockPcs!! else 0.0,
+                stockCrtn = if (HP.settings.showItemStock == true) salesItem.stockCrtn!! else 0,
+                lockPcs = salesItem.lockPcs!!,
+                lockCrtn = salesItem.lockCrtn!!,
             )
         }
+
+        showSellingRatesIntoTextboxes()
     }
 
     private fun clearTextboxes() {
         state.update {
             it.copy(
                 itemname = "",
+                urduname = "",
                 itemId = 0L,
-                qty = "",
-                rate = "",
 
+                cost = 0.0,
+                qty = "",
+                crtn = "",
+                rate = "",
+                retail = 0.0,
+                wholesale = 0.0,
+                rate3 = 0.0,
+                rate4 = 0.0,
+                crtnRate = "",
+                crtnSize = 0,
+
+                isDiscRsPer = HP.settings.isDefaultDiscRs == true,
+                disc = "",
+                calculatedDisc = 0.0,
+                totalDisc = 0.0,
+                isRetail = state.value.sales.isRetail!!,
+
+                total = 0.0,
+                totalCost = 0.0,
+                profit = 0.0,
+
+                // Extras
                 isUpdate = false,
                 updateId = 0L,
+
+                stockPcs = 0.0,
+                stockCrtn = 0L,
+                lastRate = 0.0,
+                lastCrtnRate = 0.0,
+                lockPcs = false,
+                lockCrtn = false,
+                qtyEnabled = true,
+                crtnEnabled = true,
+                rateEnabled = true,
+                crtnRateEnabled = true,
+
+                isExists = false,
+                isExistsResult = false,
+                expirable = false,
+                expiry = LocalDate.now(),
+                expirableResult = false,
             )
         }
     }
@@ -374,18 +532,92 @@ class AddUpdateSalesItemViewModel @Inject constructor(
             return false
         }
 
-        if (HP.getDoubleValue(state.value.qty) == 0.0) {
-            showMessage("Please enter quantity")
+        if (state.value.total == 0.0) {
+            showMessage("Please enter quantity or rate")
             return false
         }
 
-        if (HP.getDoubleValue(state.value.rate) == 0.0) {
-            showMessage("Please enter rate")
-            return false
+        if (!state.value.isUpdate && HP.settings.itemExistsInSalesWarning == true) {
+            if (state.value.isExists) {
+                if (!state.value.isExistsResult) {
+                    showConfirmDialog("Item already exists. You want to add?", 1)
+                    return false
+                }
+            }
+        }
+
+        if (!state.value.isUpdate && state.value.expirable) {
+            val today = LocalDate.now()
+            val date = state.value.expiry
+
+            val days = ChronoUnit.DAYS.between(today, date)
+            if (days <= 0) {
+                if (!state.value.expirableResult) {
+                    showConfirmDialog("Item expired. You want to add?", 2)
+                    return false
+                }
+            }
         }
 
         return true
     }
+
+    private fun showSellingRatesIntoTextboxes() {
+        val list = if (HP.settings.fourRateSystem == true) {
+            listOf(
+                state.value.retail.toString(),
+                state.value.wholesale.toString(),
+                state.value.rate3.toString(),
+                state.value.rate4.toString(),
+            )
+        } else {
+            listOf(
+                state.value.retail.toString(),
+                state.value.wholesale.toString(),
+            )
+        }
+
+        state.update {
+            it.copy(
+                rates = list,
+            )
+        }
+
+        if (state.value.lockPcs) {
+            state.update {
+                it.copy(
+                    qty = "",
+                    qtyEnabled = false,
+                    rateEnabled = false,
+                )
+            }
+        } else {
+            state.update {
+                it.copy(
+                    qtyEnabled = true,
+                    rateEnabled = true,
+                )
+            }
+        }
+
+        if (state.value.lockCrtn) {
+            state.update {
+                it.copy(
+                    crtn = "",
+                    crtnEnabled = false,
+                    crtnRateEnabled = false,
+                )
+            }
+        } else {
+            state.update {
+                it.copy(
+                    crtnEnabled = true,
+                    crtnRateEnabled = true,
+                )
+            }
+        }
+    }
+
     // endregion
 
     // region Others
@@ -406,7 +638,7 @@ class AddUpdateSalesItemViewModel @Inject constructor(
     fun updateInitialState(
         isUpdate: Boolean,
         updateId: Long,
-        sales:Sales,
+        sales: Sales,
     ) {
         state.update {
             it.copy(
@@ -423,13 +655,57 @@ class AddUpdateSalesItemViewModel @Inject constructor(
 
     private fun updateTotal() {
         val qty = HP.getDoubleValue(state.value.qty)
+        val crtn = HP.getIntValue(state.value.crtn)
+//        val cost = state.value.cost
+//        val crtnSize = state.value.crtnSize
         val rate = HP.getDoubleValue(state.value.rate)
+        val crtnRate = HP.getDoubleValue(state.value.crtnRate)
+
+        var total = qty * rate
+        total += crtn * crtnRate
+
+        val totalDisc = getDiscount()
+        total -= totalDisc
+
+//        val totalCost = cost * (qty + (crtn * crtnSize))
+//        val profit = total - totalCost
 
         state.update {
             it.copy(
-                total = (qty * rate)
+                total = total,
+                totalDisc = totalDisc,
+//                totalCost = totalCost,
+//                profit = profit,
             )
         }
+    }
+
+    private fun getDiscount(): Double {
+        if (state.value.itemId == 0L)
+            return 0.0
+        else {
+            val disc = HP.getDoubleValue(state.value.disc)
+            val qty = HP.getDoubleValue(state.value.qty)
+            if (state.value.isDiscRsPer) {
+                val totalDisc = qty * disc
+                state.update { it.copy(calculatedDisc = disc) }
+                return totalDisc
+            } else {
+                val rate = HP.getDoubleValue(state.value.rate)
+                val totalDisc = (disc / 100) * rate
+                state.update { it.copy(calculatedDisc = totalDisc) }
+
+                return totalDisc * qty
+            }
+        }
+    }
+
+    fun setIsExistsResult(value: Boolean) {
+        state.update { it.copy(isExistsResult = value) }
+    }
+
+    fun setExpirableResult(value: Boolean) {
+        state.update { it.copy(expirableResult = value) }
     }
     // endregion
 }

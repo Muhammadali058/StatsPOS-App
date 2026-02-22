@@ -214,10 +214,31 @@ class SettingsViewModel @Inject constructor(
 
     fun onSaleCartonsChange(value: Boolean) {
         state.update { it.copy(saleCartons = value) }
+
+        if (value) {
+            if (state.value.fourRateSystem)
+                state.update { it.copy(fourRateSystem = false) }
+
+            state.update { it.copy(defaultRate = HP.defaultRate[1]) }
+        } else {
+            state.update { it.copy(defaultRate = HP.defaultRate[0]) }
+        }
     }
 
     fun onFourRateSystemChange(value: Boolean) {
         state.update { it.copy(fourRateSystem = value) }
+
+        if (value) {
+            if (state.value.saleCartons)
+                state.update { it.copy(saleCartons = false) }
+
+            state.update { it.copy(defaultRate = HP.defaultRate[0]) }
+        } else {
+            if (state.value.saleCartons)
+                state.update { it.copy(defaultRate = HP.defaultRate[1]) }
+            else
+                state.update { it.copy(defaultRate = HP.defaultRate[0]) }
+        }
     }
 
     fun onSameDateBillEditChange(value: Boolean) {

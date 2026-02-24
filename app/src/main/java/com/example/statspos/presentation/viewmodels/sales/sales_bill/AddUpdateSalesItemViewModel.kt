@@ -1,5 +1,6 @@
 package com.example.statspos.presentation.viewmodels.sales.sales_bill
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.items.Items
@@ -12,6 +13,7 @@ import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.get
 import com.google.gson.Gson
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -63,6 +65,7 @@ class AddUpdateSalesItemViewModel @Inject constructor(
         // Extra
         val stockPcs: Double = 0.0,
         val stockCrtn: Long = 0L,
+        val warehouseStock: String = "",
         val lastRate: Double = 0.0,
         val lastCrtnRate: Double = 0.0,
         val lockPcs: Boolean = false,
@@ -280,7 +283,7 @@ class AddUpdateSalesItemViewModel @Inject constructor(
         }
     }
 
-    fun getItem(value: String) {
+    fun getItem(value: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -308,6 +311,7 @@ class AddUpdateSalesItemViewModel @Inject constructor(
                     if (isExists) {
                         val item = Gson().get<Items>(result.data.get("data").asJsonObject)
                         showDataIntoTextboxes(item)
+                        onSuccess()
                     } else {
                         state.update {
                             it.copy(
@@ -387,6 +391,7 @@ class AddUpdateSalesItemViewModel @Inject constructor(
         }
 
         showSellingRatesIntoTextboxes()
+        showWarehouseStock(item.warehouseStock.toString())
         updateTotal()
     }
 
@@ -472,6 +477,7 @@ class AddUpdateSalesItemViewModel @Inject constructor(
         }
 
         showSellingRatesIntoTextboxes()
+        showWarehouseStock(salesItem.warehouseStock.toString())
     }
 
     private fun clearTextboxes() {
@@ -508,6 +514,7 @@ class AddUpdateSalesItemViewModel @Inject constructor(
 
                 stockPcs = 0.0,
                 stockCrtn = 0L,
+                warehouseStock = "",
                 lastRate = 0.0,
                 lastCrtnRate = 0.0,
                 lockPcs = false,
@@ -618,6 +625,17 @@ class AddUpdateSalesItemViewModel @Inject constructor(
         }
     }
 
+    private fun showWarehouseStock(warehouseStock:String){
+        val stock = Gson().get<JsonArray>(warehouseStock).map {
+            it.toString()
+        }
+        val formattedText = stock
+            .joinToString("\n")
+            .replace("\"", "")
+            .replace(" \\n", ":")
+
+        state.update { it.copy(warehouseStock = formattedText) }
+    }
     // endregion
 
     // region Others

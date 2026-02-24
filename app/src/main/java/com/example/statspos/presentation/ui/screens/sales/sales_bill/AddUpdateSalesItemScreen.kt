@@ -40,12 +40,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -104,10 +103,13 @@ fun AddUpdateSalesItemScreen(
     var showConfirmDialog by remember { mutableStateOf(false) }
     var showBarcodeScanner by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
+    val itemFocusRequester = remember { FocusRequester() }
+    val qtyFocusRequester = remember { FocusRequester() }
 
     fun onSaveButtonClick() {
         viewModel.insertOrUpdateData {
             sharedViewModel.notifyDataChanged()
+            itemFocusRequester.requestFocus()
 //            goBackWithResult()
         }
     }
@@ -148,13 +150,16 @@ fun AddUpdateSalesItemScreen(
         }
     }
 
+    // For search item
     val sharedViewModelState by sharedViewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(sharedViewModelState.dataChanged) {
         if (sharedViewModelState.dataChanged) {
             val item = sharedViewModelState.item
             item?.run {
                 viewModel.onItemnameChange(itemname!!)
-                viewModel.getItem(itemname!!)
+                viewModel.getItem(itemname!!){
+                    qtyFocusRequester.requestFocus()
+                }
                 sharedViewModel.consumeDataChanged()
             }
         }
@@ -212,7 +217,10 @@ fun AddUpdateSalesItemScreen(
             },
             onScanned = {
                 viewModel.onItemnameChange(it)
-                viewModel.getItem(it)
+                viewModel.getItem(it){
+                    qtyFocusRequester.requestFocus()
+                }
+
                 showBarcodeScanner = false
             }
         )
@@ -270,15 +278,20 @@ fun AddUpdateSalesItemScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     ItemnameBox(
+                        itemFocusRequester = itemFocusRequester,
                         value = state.itemname,
                         onValueChange = viewModel::onItemnameChange,
                         onItemSelected = {
-                            viewModel.getItem(it)
-                            keyboardController?.hide()
+                            viewModel.getItem(it){
+                                qtyFocusRequester.requestFocus()
+                            }
+//                            keyboardController?.hide()
                         },
                         onSearchClick = {
-                            viewModel.getItem(it)
-                            keyboardController?.hide()
+                            viewModel.getItem(it){
+                                qtyFocusRequester.requestFocus()
+                            }
+//                            keyboardController?.hide()
                         },
                         onEndIconClick = {
                             viewModel.onItemnameChange("")
@@ -286,9 +299,10 @@ fun AddUpdateSalesItemScreen(
                         onBarcodeClick = {
                             showBarcodeScanner = true
                         },
-                        onSearchItemClick = onSearchItemClick
+                        onSearchItemClick = onSearchItemClick,
                     )
                     Body(
+                        qtyFocusRequester = qtyFocusRequester,
                         qty = state.qty,
                         crtn = state.crtn,
                         rate = state.rate,
@@ -302,6 +316,7 @@ fun AddUpdateSalesItemScreen(
                         lastCrtnRate = state.lastCrtnRate,
                         stockPcs = state.stockPcs,
                         stockCrtn = state.stockCrtn,
+                        warehouseStock = state.warehouseStock,
                         cost = state.cost,
                         crtnSize = state.crtnSize,
                         rates = state.rates,
@@ -344,6 +359,7 @@ fun AddUpdateSalesItemScreen(
 
 @Composable
 private fun ItemnameBox(
+    itemFocusRequester: FocusRequester? = null,
     value: String,
     onValueChange: (String) -> Unit,
     onItemSelected: (String) -> Unit,
@@ -382,7 +398,8 @@ private fun ItemnameBox(
             },
             keyboardOptions = KeyboardOptions(
                 imeAction = ImeAction.Go
-            )
+            ),
+            focusRequester = itemFocusRequester,
         )
         Spacer(Modifier.width(4.dp))
         AppIconButton(
@@ -407,6 +424,7 @@ private fun ItemnameBox(
 
 @Composable
 private fun Body(
+    qtyFocusRequester: FocusRequester? = null,
     qty: String,
     crtn: String,
     rate: String,
@@ -420,6 +438,7 @@ private fun Body(
     lastCrtnRate: Double,
     stockPcs: Double,
     stockCrtn: Long,
+    warehouseStock: String,
     cost: Double,
     crtnSize: Int,
     rates: List<String>,
@@ -446,10 +465,11 @@ private fun Body(
                 keyboardType = KeyboardType.Decimal
             ),
             enabled = qtyEnabled,
+            focusRequester = qtyFocusRequester,
         )
         Spacer(Modifier.width(8.dp))
         TextboxCB(
-            value = rate,
+            value = if (HP.getDoubleValue(rate) > 0.0) rate else "",
             onValueChange = onRateChange,
             modifier = Modifier
                 .weight(1f),
@@ -482,7 +502,7 @@ private fun Body(
             )
             Spacer(Modifier.width(8.dp))
             Textbox(
-                value = crtnRate,
+                value = if (HP.getDoubleValue(crtnRate) > 0.0) crtnRate else "",
                 onValueChange = onCrtnRateChange,
                 modifier = Modifier
                     .weight(1f),
@@ -590,42 +610,15 @@ private fun Body(
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun Prev() {
-    Column(
-        Modifier
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Body(
-            "",
-            "",
-            "",
-            "",
-            true,
-            true,
-            true,
-            true,
-            0L,
-            0.0,
-            0.0,
-            0.0,
-            0L,
-            0.0,
-            0,
-            emptyList(),
-            "",
-            true,
-            0.0,
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-        )
+    if (warehouseStock.isNotEmpty()) {
+        Spacer(Modifier.height(8.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            HeadingMedium("Stock in warehouse: ")
+            Spacer(Modifier.height(2.dp))
+            LabelMedium(warehouseStock)
+        }
     }
 }

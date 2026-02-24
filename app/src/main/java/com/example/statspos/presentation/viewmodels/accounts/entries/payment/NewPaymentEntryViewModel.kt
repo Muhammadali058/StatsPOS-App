@@ -38,8 +38,8 @@ class NewPaymentEntryViewModel @Inject constructor(
         val remarks: String = "",
         val date: LocalDate = LocalDate.now(),
         val mop: DropdownItem = HP.mop[0],
-        val bank: DropdownItem? = null,
-        val subBank: DropdownItem? = null,
+        val bank: DropdownItem = HP.getNoneDropdownItem(),
+        val subBank: DropdownItem = HP.getNoneDropdownItem(),
 
         val isCustomer: Boolean = false,
         val customerId: Long = 0L,
@@ -49,9 +49,6 @@ class NewPaymentEntryViewModel @Inject constructor(
         val balance: String = "Balance: 0 (P)",
 
 //        Extras
-        val bankEnabled: Boolean = false,
-        val subBankEnabled: Boolean = false,
-
         val isLoading: Boolean = false,
         val isSaving: Boolean = false,
         val message: String? = null,
@@ -148,10 +145,8 @@ class NewPaymentEntryViewModel @Inject constructor(
         state.update {
             it.copy(
                 mop = value,
-                bankEnabled = value.id != 0L,
-                subBankEnabled = value.id != 0L,
-                bank = null,
-                subBank = null,
+                bank = HP.getNoneDropdownItem(),
+                subBank = HP.getNoneDropdownItem(),
             )
         }
         changeNaration()
@@ -250,13 +245,13 @@ class NewPaymentEntryViewModel @Inject constructor(
     private fun getFormData(): Entries {
         return Entries(
             debitAccountId = if (state.value.isCustomer) state.value.customerId else state.value.vendorId,
-            creditAccountId = if (state.value.mop.id == 0L) getFixedAccount(FixedAccounts.CASH) else state.value.subBank?.id,
+            creditAccountId = if (state.value.mop.id == 1L) getFixedAccount(FixedAccounts.CASH) else state.value.subBank.id,
             amount = HP.getDoubleValue(state.value.amount),
             naration = state.value.naration,
             date = HP.getZonedDate(state.value.date),
             entryType = getEntryType(EntryType.PAYMENT),
             currentShiftId = HP.user.currentShiftId,
-            isMopCashBank = state.value.mop.id == 0L
+            isMopCashBank = state.value.mop.id == 1L
         )
     }
 
@@ -273,10 +268,8 @@ class NewPaymentEntryViewModel @Inject constructor(
                 date = LocalDate.now(),
                 naration = "",
                 mop = HP.mop[0],
-                bank = null,
-                subBank = null,
-                bankEnabled = false,
-                subBankEnabled = false,
+                bank = HP.getNoneDropdownItem(),
+                subBank = HP.getNoneDropdownItem(),
             )
         }
     }
@@ -299,12 +292,12 @@ class NewPaymentEntryViewModel @Inject constructor(
             return false
         }
 
-        if (state.value.mop.id == 1L) {
-            if (state.value.bank?.id == 0L) {
+        if (state.value.mop.id == 2L) {
+            if (state.value.bank.id == 0L) {
                 showMessage("Please select bank")
                 return false
             } else {
-                if (state.value.subBank?.id == 0L) {
+                if (state.value.subBank.id == 0L) {
                     showMessage("Please select bank account")
                     return false
                 } else
@@ -356,9 +349,9 @@ class NewPaymentEntryViewModel @Inject constructor(
                 ""
         }
 
-        if (state.value.mop.id == 1L) {
-            state.value.subBank?.run {
-                naration = (naration + " from " + state.value.subBank?.name)
+        if (state.value.mop.id == 2L) {
+            state.value.subBank.run {
+                naration = (naration + " from " + state.value.subBank.name)
             }
         }
 

@@ -39,6 +39,8 @@ class AddUpdateGatepassItemViewModel @Inject constructor(
         val isUpdate: Boolean = false,
         val updateId: Long = 0L,
 
+        val hasLoadedOnce: Boolean = false,
+
         val isLoading: Boolean = false,
         val isSaving: Boolean = false,
         val message: String? = null,
@@ -125,6 +127,10 @@ class AddUpdateGatepassItemViewModel @Inject constructor(
     fun onCrtnChange(value: String) {
         state.update { it.copy(crtn = value) }
     }
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
+    }
+
     // endregion
 
     // region Network calls

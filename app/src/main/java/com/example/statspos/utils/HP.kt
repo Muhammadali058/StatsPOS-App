@@ -32,8 +32,8 @@ object HP {
 //    val noneDropdownItem = DropdownItem(0L, "None")
 
     val mop = listOf(
-        DropdownItem(0L, "Cash"),
-        DropdownItem(1L, "Bank"),
+        DropdownItem(1L, "Cash"),
+        DropdownItem(2L, "Bank"),
     )
     val defaultRate = listOf(
         DropdownItem(0L, "Retail"),

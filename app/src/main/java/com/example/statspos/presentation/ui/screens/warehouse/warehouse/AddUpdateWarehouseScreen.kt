@@ -87,16 +87,17 @@ fun AddUpdateWarehouseScreen(
     }
 
     // Edit data when update
-    var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        viewModel.updateInitialState(
-            isUpdate = isUpdate,
-            updateId = updateId,
-        )
+        if (!state.hasLoadedOnce) {
+            viewModel.updateInitialState(
+                isUpdate = isUpdate,
+                updateId = updateId,
+            )
 
-        if (isUpdate && !hasLoadedOnce) {
-            hasLoadedOnce = true
-            viewModel.editData(updateId)
+            if (isUpdate) {
+                viewModel.editData(updateId)
+            }
+            viewModel.setHasLoadedOnce(true)
         }
     }
 
@@ -162,7 +163,7 @@ fun AddUpdateWarehouseScreen(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(ConstantPaddings.BODY_HORIZONTAL)
                 .padding(vertical = 16.dp)
-        ){
+        ) {
             Column(
                 Modifier
                     .fillMaxSize(),
@@ -188,7 +189,7 @@ fun AddUpdateWarehouseScreen(
                             WindowInsets.navigationBars
                                 .union(WindowInsets.ime)
                         )
-                ){
+                ) {
                     if (state.isSaving) {
                         AppCircularProgressIndicator()
                     } else {

@@ -259,9 +259,8 @@ private fun Home(
     }
 
     // Edit data when update
-    var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        if (!hasLoadedOnce) {
+        if (!state.hasLoadedOnce) {
             viewModel.updateInitialState(
                 isUpdate = isUpdate,
                 updateId = updateId
@@ -271,7 +270,7 @@ private fun Home(
                 viewModel.editData(updateId)
             }
 
-            hasLoadedOnce = true
+            viewModel.setHasLoadedOnce(true)
         }
     }
 

@@ -139,8 +139,6 @@ fun NewReceiptEntryBody(
                     mop = state.mop,
                     bank = state.bank,
                     subBank = state.subBank,
-                    bankEnabled = state.bankEnabled,
-                    subBankEnabled = state.subBankEnabled,
                     onMOPChange = viewModel::onMOPChange,
                     onBankSelected = viewModel::onBankSelected,
                     onSubBankSelected = viewModel::onSubBankSelected,
@@ -296,10 +294,8 @@ private fun Body(
 @Composable
 private fun MOP(
     mop: DropdownItem,
-    bank: DropdownItem?,
-    subBank: DropdownItem?,
-    bankEnabled: Boolean,
-    subBankEnabled: Boolean,
+    bank: DropdownItem,
+    subBank: DropdownItem,
     onMOPChange: (DropdownItem) -> Unit,
     onBankSelected: (DropdownItem) -> Unit,
     onSubBankSelected: (DropdownItem) -> Unit,
@@ -328,7 +324,7 @@ private fun MOP(
                 Text("Bank")
             },
             addNone = true,
-            enabled = bankEnabled,
+            enabled = mop.id == 2L,
         )
         SubComboBox(
             modifier = Modifier
@@ -340,8 +336,8 @@ private fun MOP(
                 Text("Bank Account")
             },
             addNone = true,
-            enabled = subBankEnabled,
-            mainId = bank?.id ?: 0L
+            enabled = mop.id == 2L,
+            mainId = bank.id
         )
     }
 }
@@ -373,10 +369,8 @@ private fun Prev() {
         )
         MOP(
             mop = HP.mop[0],
-            bank = null,
-            subBank = null,
-            bankEnabled = true,
-            subBankEnabled = true,
+            bank = HP.getNoneDropdownItem(),
+            subBank = HP.getNoneDropdownItem(),
             onMOPChange = {},
             onBankSelected = {},
             onSubBankSelected = {},

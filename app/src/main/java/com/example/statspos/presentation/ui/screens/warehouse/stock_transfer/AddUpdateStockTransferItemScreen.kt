@@ -112,17 +112,19 @@ fun AddUpdateStockTransferItemScreen(
     }
 
     // Edit data when update
-    var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        viewModel.updateInitialState(
-            isUpdate = isUpdate,
-            updateId = updateId,
-            warehouseId = warehouseId,
-        )
+        if (!state.hasLoadedOnce) {
+            viewModel.updateInitialState(
+                isUpdate = isUpdate,
+                updateId = updateId,
+                warehouseId = warehouseId,
+            )
 
-        if (isUpdate && !hasLoadedOnce) {
-            hasLoadedOnce = true
-            viewModel.editData(updateId)
+            if (isUpdate) {
+                viewModel.editData(updateId)
+            }
+
+            viewModel.setHasLoadedOnce(true)
         }
     }
 

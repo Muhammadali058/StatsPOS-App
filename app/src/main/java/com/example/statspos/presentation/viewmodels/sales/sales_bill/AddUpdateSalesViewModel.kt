@@ -66,13 +66,13 @@ class AddUpdateSalesViewModel @Inject constructor(
         var totalBill: Double = 0.0,
         var totalCost: Double = 0.0,
         var localTime: String = "",
-        val bankEnabled: Boolean = false,
-        val subBankEnabled: Boolean = false,
         val paymentEnabled: Boolean = false,
 
         val isPendingBill: Boolean = false,
         val isPostedBill: Boolean = false,
         val salesBill: SalesBills? = null,
+
+        val hasLoadedOnce: Boolean = false,
 
         val isLoading: Boolean = false,
         val isSaving: Boolean = false,
@@ -195,9 +195,7 @@ class AddUpdateSalesViewModel @Inject constructor(
         state.update {
             it.copy(
                 mop = value,
-                isMopCashBank = value.id == 0L,
-                bankEnabled = value.id != 0L,
-                subBankEnabled = value.id != 0L,
+                isMopCashBank = value.id == 1L,
                 bank = HP.getNoneDropdownItem(),
                 subBank = HP.getNoneDropdownItem(),
             )
@@ -215,6 +213,10 @@ class AddUpdateSalesViewModel @Inject constructor(
 
     fun onRemarksChange(value: String) {
         state.update { it.copy(remarks = value) }
+    }
+
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
     }
 
     // endregion
@@ -455,7 +457,7 @@ class AddUpdateSalesViewModel @Inject constructor(
             change = HP.getIntValue(state.value.change),
             salesOn = state.value.salesOn.id.toInt(),
             salesType = state.value.salesType.id.toInt(),
-            isMopCashBank = state.value.mop.id == 0L,
+            isMopCashBank = state.value.mop.id == 1L,
 
             customerId = state.value.customerId,
             customerName = state.value.customerName,
@@ -506,9 +508,6 @@ class AddUpdateSalesViewModel @Inject constructor(
                 dueDate = HP.toLocalDate(sale.dueDate!!),
 
                 paymentEnabled = !(state.value.isPostedBill && sale.salesOn!! == 2),
-
-                bankEnabled = !sale.isMopCashBank!!,
-                subBankEnabled = !sale.isMopCashBank!!,
 
                 // Extras
                 localTime = sale.date.toString()
@@ -568,7 +567,7 @@ class AddUpdateSalesViewModel @Inject constructor(
             }
         }
 
-        if (state.value.mop.id == 1L) {
+        if (state.value.mop.id == 2L) {
             if (state.value.bank.id == 0L) {
                 showMessage("Please select bank")
                 return false

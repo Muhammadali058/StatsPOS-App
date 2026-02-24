@@ -93,11 +93,10 @@ fun SettingsScreen(
     }
 
     // Edit data when update
-    var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        if (!hasLoadedOnce) {
-            hasLoadedOnce = true
+        if (!state.hasLoadedOnce) {
             viewModel.editData()
+            viewModel.setHasLoadedOnce(true)
         }
     }
 
@@ -144,7 +143,7 @@ fun SettingsScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Spacer(Modifier.height(16.dp))
-                    
+
                     Basic(
                         defaultRate = state.defaultRate,
                         defaultDiscount = state.defaultDiscount,

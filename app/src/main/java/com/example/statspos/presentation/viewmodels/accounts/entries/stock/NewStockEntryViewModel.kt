@@ -45,16 +45,13 @@ class NewStockEntryViewModel @Inject constructor(
         val naration: String = "",
         val date: LocalDate = LocalDate.now(),
         val mop: DropdownItem = HP.mop[0],
-        val bank: DropdownItem? = null,
-        val subBank: DropdownItem? = null,
+        val bank: DropdownItem = HP.getNoneDropdownItem(),
+        val subBank: DropdownItem = HP.getNoneDropdownItem(),
 
-        val expense: DropdownItem? = null,
-        val subExpense: DropdownItem? = null,
+        val expense: DropdownItem = HP.getNoneDropdownItem(),
+        val subExpense: DropdownItem = HP.getNoneDropdownItem(),
 
 //        Extras
-        val bankEnabled: Boolean = false,
-        val subBankEnabled: Boolean = false,
-
         val isLoading: Boolean = false,
         val isSaving: Boolean = false,
         val message: String? = null,
@@ -163,10 +160,8 @@ class NewStockEntryViewModel @Inject constructor(
         state.update {
             it.copy(
                 mop = value,
-                bankEnabled = value.id != 0L,
-                subBankEnabled = value.id != 0L,
-                bank = null,
-                subBank = null,
+                bank = HP.getNoneDropdownItem(),
+                subBank = HP.getNoneDropdownItem(),
             )
         }
         changeNaration()
@@ -263,14 +258,14 @@ class NewStockEntryViewModel @Inject constructor(
         val stock = ((qty + (crtn * state.value.crtnSize)) * -1)
 
         return Entries(
-            debitAccountId = state.value.subExpense?.id,
-            creditAccountId = if (state.value.mop.id == 0L) getFixedAccount(FixedAccounts.CASH) else state.value.subBank?.id,
+            debitAccountId = state.value.subExpense.id,
+            creditAccountId = if (state.value.mop.id == 1L) getFixedAccount(FixedAccounts.CASH) else state.value.subBank.id,
             amount = HP.getDoubleValue(state.value.amount),
             naration = state.value.naration,
             date = HP.getZonedDate(state.value.date),
             entryType = getEntryType(EntryType.STOCK),
             currentShiftId = HP.user.currentShiftId,
-            isMopCashBank = state.value.mop.id == 0L,
+            isMopCashBank = state.value.mop.id == 1L,
 
             itemId = state.value.itemId,
             stock = stock,
@@ -287,16 +282,14 @@ class NewStockEntryViewModel @Inject constructor(
                 cost = 0.0,
                 crtnSize = 0,
 
-                expense = null,
-                subExpense = null,
+                expense = HP.getNoneDropdownItem(),
+                subExpense = HP.getNoneDropdownItem(),
                 amount = "",
                 date = LocalDate.now(),
                 naration = "",
                 mop = HP.mop[0],
-                bank = null,
-                subBank = null,
-                bankEnabled = false,
-                subBankEnabled = false,
+                bank = HP.getNoneDropdownItem(),
+                subBank = HP.getNoneDropdownItem(),
             )
         }
     }
@@ -316,12 +309,12 @@ class NewStockEntryViewModel @Inject constructor(
             return false
         }
 
-        if (state.value.expense?.id == 0L) {
+        if (state.value.expense.id == 0L) {
             showMessage("Please select expense")
             return false
         }
 
-        if (state.value.subExpense?.id == 0L) {
+        if (state.value.subExpense.id == 0L) {
             showMessage("Please select sub-expense")
             return false
         }
@@ -331,12 +324,12 @@ class NewStockEntryViewModel @Inject constructor(
             return false
         }
 
-        if (state.value.mop.id == 1L) {
-            if (state.value.bank?.id == 0L) {
+        if (state.value.mop.id == 2L) {
+            if (state.value.bank.id == 0L) {
                 showMessage("Please select bank")
                 return false
             } else {
-                if (state.value.subBank?.id == 0L) {
+                if (state.value.subBank.id == 0L) {
                     showMessage("Please select bank account")
                     return false
                 } else
@@ -389,17 +382,17 @@ class NewStockEntryViewModel @Inject constructor(
         val crtn = HP.getIntValue(state.value.crtn)
         val stock = qty + (crtn * state.value.crtnSize)
 
-        var naration = if (state.value.subExpense?.id != 0L)
-            "Loss of " + state.value.itemname + " (" + stock + ") " + state.value.subExpense?.name + " Expense"
+        var naration = if (state.value.subExpense.id != 0L)
+            "Loss of " + state.value.itemname + " (" + stock + ") " + state.value.subExpense.name + " Expense"
         else
             ""
 
-        if (state.value.mop.id == 1L) {
-            state.value.subBank?.run {
-                naration = (naration + " from " + state.value.subBank?.name)
+        if (state.value.mop.id == 2L) {
+            state.value.subBank.run {
+                naration = (naration + " from " + state.value.subBank.name)
             }
         } else {
-            naration = (naration + " in Cash")
+            naration = "$naration in Cash"
         }
 
         state.update { it.copy(naration = naration) }

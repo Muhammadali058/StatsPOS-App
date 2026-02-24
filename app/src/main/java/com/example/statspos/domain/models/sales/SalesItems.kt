@@ -44,4 +44,5 @@ data class SalesItems(
     var stockCrtn: Long? = null,
     var lockPcs: Boolean? = null,
     var lockCrtn: Boolean? = null,
+    var warehouseStock: String? = null,
 )

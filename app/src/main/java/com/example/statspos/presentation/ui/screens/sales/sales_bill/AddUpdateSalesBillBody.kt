@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -34,7 +33,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.DropdownItem
-import com.example.statspos.domain.models.sales.SalesBills
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.components.AppSwitch
 import com.example.statspos.presentation.ui.components.BalanceBox
@@ -58,7 +56,7 @@ import com.example.statspos.utils.checkEvent
 import java.time.LocalDate
 
 @Composable
-fun SalesBillBody(
+fun AddUpdateSalesBillBody(
     sharedViewModel: SharedViewModel,
     salesViewModel: AddUpdateSalesViewModel,
     salesItemsViewModel: SalesItemsViewModel,
@@ -85,14 +83,13 @@ fun SalesBillBody(
     }
 
     // Edit data when update
-    var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        if (!hasLoadedOnce) {
+        if (!state.hasLoadedOnce) {
             if (isPendingBill || isPostedBill) {
                 salesViewModel.editData(invoiceId)
             }
 
-            hasLoadedOnce = true
+            salesViewModel.setHasLoadedOnce(true)
         }
     }
 
@@ -152,8 +149,6 @@ fun SalesBillBody(
                     mop = state.mop,
                     bank = state.bank,
                     subBank = state.subBank,
-                    bankEnabled = state.bankEnabled,
-                    subBankEnabled = state.subBankEnabled,
                     onMOPChange = salesViewModel::onMOPChange,
                     onBankSelected = salesViewModel::onBankSelected,
                     onSubBankSelected = salesViewModel::onSubBankSelected,
@@ -378,8 +373,6 @@ private fun MOP(
     mop: DropdownItem,
     bank: DropdownItem,
     subBank: DropdownItem,
-    bankEnabled: Boolean,
-    subBankEnabled: Boolean,
     onMOPChange: (DropdownItem) -> Unit,
     onBankSelected: (DropdownItem) -> Unit,
     onSubBankSelected: (DropdownItem) -> Unit,
@@ -408,7 +401,7 @@ private fun MOP(
                 Text("Bank")
             },
             addNone = true,
-            enabled = bankEnabled,
+            enabled = mop.id == 2L,
         )
         SubComboBox(
             modifier = Modifier
@@ -420,7 +413,7 @@ private fun MOP(
                 Text("Bank Account")
             },
             addNone = true,
-            enabled = subBankEnabled,
+            enabled = mop.id == 2L,
             mainId = bank.id
         )
     }
@@ -568,8 +561,6 @@ private fun BodyPrev() {
                 mop = HP.mop[0],
                 bank = HP.getNoneDropdownItem(),
                 subBank = HP.getNoneDropdownItem(),
-                bankEnabled = true,
-                subBankEnabled = true,
                 onMOPChange = {},
                 onBankSelected = {},
                 onSubBankSelected = {},

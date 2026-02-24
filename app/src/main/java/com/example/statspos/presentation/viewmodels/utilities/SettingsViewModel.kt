@@ -82,6 +82,9 @@ class SettingsViewModel @Inject constructor(
         val useDeletePurchaseBill: Boolean = false,
         val useDeleteEntry: Boolean = false,
 
+        // Extras
+        val hasLoadedOnce: Boolean = false,
+
         val isLoading: Boolean = false,
         val message: String? = null,
         val error: String? = null,
@@ -328,6 +331,10 @@ class SettingsViewModel @Inject constructor(
 
     fun onUseDeleteEntryChange(value: Boolean) {
         state.update { it.copy(useDeleteEntry = value) }
+    }
+
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
     }
 
     // endregion

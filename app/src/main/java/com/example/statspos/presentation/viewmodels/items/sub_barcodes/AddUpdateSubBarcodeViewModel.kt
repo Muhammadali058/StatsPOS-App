@@ -32,6 +32,8 @@ class AddUpdateSubBarcodeViewModel @Inject constructor(
         val isUpdate: Boolean = false,
         val updateId: Long = 0L,
 
+        val hasLoadedOnce: Boolean = false,
+
         val isLoading: Boolean = false,
         val isSaving: Boolean = false,
         val message: String? = null,
@@ -100,6 +102,10 @@ class AddUpdateSubBarcodeViewModel @Inject constructor(
     fun onIsCrtnChange(value: Boolean) {
         state.update { it.copy(isCrtn = value) }
     }
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
+    }
+
     // endregion
 
     // region Network calls

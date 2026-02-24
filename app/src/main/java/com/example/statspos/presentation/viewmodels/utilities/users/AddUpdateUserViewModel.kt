@@ -93,6 +93,8 @@ class AddUpdateUserViewModel @Inject constructor(
         val isUpdate: Boolean = false,
         val updateId: Long = 0L,
 
+        val hasLoadedOnce: Boolean = false,
+
         val isLoading: Boolean = false,
         val isSaving: Boolean = false,
         val isUploadingImage: Boolean = false,
@@ -358,6 +360,10 @@ class AddUpdateUserViewModel @Inject constructor(
 
     fun onFbrInvoiceChange(value: Boolean) {
         state.update { it.copy(fbrInvoice = value) }
+    }
+
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
     }
 
     // endregion

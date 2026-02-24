@@ -38,6 +38,8 @@ class AddUpdateCategoryViewModel @Inject constructor(
         val isUpdate: Boolean = false,
         val updateId: Long = 0L,
 
+        val hasLoadedOnce: Boolean = false,
+
         val isLoading: Boolean = false,
         val isSaving: Boolean = false,
         val isUploadingImage: Boolean = false,
@@ -107,6 +109,11 @@ class AddUpdateCategoryViewModel @Inject constructor(
     fun onRemarksChange(value: String) {
         state.update { it.copy(remarks = value) }
     }
+
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
+    }
+
     // endregion
 
     // region Network calls

@@ -135,3 +135,6 @@ inline fun <reified T> Gson.getListOf(jsonArray: JsonArray): List<T> =
 
 inline fun <reified T> Gson.get(jsonObject: JsonObject): T =
     fromJson(jsonObject, object : TypeToken<T>() {}.type)
+
+inline fun <reified T> Gson.get(jsonObject: String): T =
+    fromJson(jsonObject, object : TypeToken<T>() {}.type)

@@ -55,6 +55,8 @@ class AddUpdateVendorViewModel @Inject constructor(
         val updateId: Long = 0L,
         val openingBalanceTBEnabled: Boolean = true,
 
+        val hasLoadedOnce: Boolean = false,
+
         val isLoading: Boolean = false,
         val isSaving: Boolean = false,
         val isUploadingImage: Boolean = false,
@@ -168,6 +170,10 @@ class AddUpdateVendorViewModel @Inject constructor(
 
     fun onIsCreditChange(value: Boolean) {
         state.update { it.copy(isCredit = value) }
+    }
+
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
     }
 
     // endregion

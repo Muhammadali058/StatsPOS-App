@@ -88,6 +88,8 @@ class AddUpdateItemViewModel @Inject constructor(
         val openingStockPcsTBEnabled: Boolean = true,
         val openingStockCrtnTBEnabled: Boolean = true,
 
+        val hasLoadedOnce: Boolean = false,
+
         val isLoading: Boolean = false,
         val isSaving: Boolean = false,
         val isUploadingImage: Boolean = false,
@@ -305,6 +307,10 @@ class AddUpdateItemViewModel @Inject constructor(
 
     fun onSaleUnderStockChange(value: Boolean) {
         state.update { it.copy(saleUnderStock = value) }
+    }
+
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
     }
 
     // endregion

@@ -104,17 +104,19 @@ fun AddUpdateGatepassItemScreen(
     }
 
     // Edit data when update
-    var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        viewModel.updateInitialState(
-            isUpdate = isUpdate,
-            updateId = updateId,
-            gatepassId = gatepassId,
-        )
+        if (!state.hasLoadedOnce) {
+            viewModel.updateInitialState(
+                isUpdate = isUpdate,
+                updateId = updateId,
+                gatepassId = gatepassId,
+            )
 
-        if (isUpdate && !hasLoadedOnce) {
-            hasLoadedOnce = true
-            viewModel.editData(updateId)
+            if (isUpdate) {
+                viewModel.editData(updateId)
+            }
+
+            viewModel.setHasLoadedOnce(true)
         }
     }
 
@@ -205,7 +207,7 @@ fun AddUpdateGatepassItemScreen(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(ConstantPaddings.BODY_HORIZONTAL)
                 .padding(vertical = 16.dp)
-        ){
+        ) {
             Column(
                 Modifier
                     .fillMaxSize()
@@ -264,7 +266,7 @@ fun AddUpdateGatepassItemScreen(
                             WindowInsets.navigationBars
                                 .union(WindowInsets.ime)
                         )
-                ){
+                ) {
                     if (state.isSaving) {
                         AppCircularProgressIndicator()
                     } else {
@@ -355,7 +357,7 @@ private fun Body(
     onQtyChange: (String) -> Unit,
     onCrtnChange: (String) -> Unit,
 ) {
-    Row{
+    Row {
         Textbox(
             value = qty,
             onValueChange = onQtyChange,
@@ -368,7 +370,7 @@ private fun Body(
                 keyboardType = KeyboardType.Decimal
             ),
         )
-        if(HP.settings.saleCartons == true){
+        if (HP.settings.saleCartons == true) {
             Spacer(Modifier.width(8.dp))
             Textbox(
                 value = crtn,

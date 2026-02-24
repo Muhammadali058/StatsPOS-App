@@ -36,6 +36,8 @@ class AddUpdateSubBankViewModel @Inject constructor(
         val isUpdate: Boolean = false,
         val updateId: Long = 0L,
 
+        val hasLoadedOnce: Boolean = false,
+
         val isLoading: Boolean = false,
         val isSaving: Boolean = false,
         val message: String? = null,
@@ -117,6 +119,11 @@ class AddUpdateSubBankViewModel @Inject constructor(
     fun onBranchAddressChange(value: String) {
         state.update { it.copy(branchAddress = value) }
     }
+
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
+    }
+
     // endregion
 
     // region Network calls

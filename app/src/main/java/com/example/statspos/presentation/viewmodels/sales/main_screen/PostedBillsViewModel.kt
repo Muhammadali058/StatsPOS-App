@@ -37,7 +37,7 @@ class PostedBillsViewModel @Inject constructor(
         val searchBy: DropdownItem = HP.salesPostedBillsSearchBy[0],
         val fromDate: LocalDate = LocalDate.now(),
         val toDate: LocalDate = LocalDate.now(),
-        val user: DropdownItem = HP.getNoneDropdownItem(),
+        val user: DropdownItem = HP.getDropdownById(HP.user.id!!, HP.users),
         val salesType: DropdownItem = HP.getNoneDropdownItem("Both"),
         val salesOn: DropdownItem = HP.getNoneDropdownItem("Both"),
         val salesMop: DropdownItem = HP.getNoneDropdownItem("Both"),

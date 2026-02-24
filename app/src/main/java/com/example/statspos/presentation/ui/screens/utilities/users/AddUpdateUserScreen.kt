@@ -94,13 +94,18 @@ fun AddUpdateUserScreen(
     }
 
     // Edit data when update
-    var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        viewModel.updateInitialState(isUpdate = isUpdate, updateId = updateId)
+        if (!state.hasLoadedOnce) {
+            viewModel.updateInitialState(
+                isUpdate = isUpdate,
+                updateId = updateId
+            )
 
-        if (isUpdate && !hasLoadedOnce) {
-            hasLoadedOnce = true
-            viewModel.editData(updateId)
+            if (isUpdate) {
+                viewModel.editData(updateId)
+            }
+
+            viewModel.setHasLoadedOnce(true)
         }
     }
 
@@ -760,7 +765,7 @@ private fun UserRights(
                 onCheckedChange = onSearchItemsChange,
                 label = "Search Items"
             )
-            if(HP.branch.fbrIntegrated == true){
+            if (HP.branch.fbrIntegrated == true) {
                 AppSwitch(
                     modifier = Modifier.weight(1f),
                     checked = fbrInvoice,

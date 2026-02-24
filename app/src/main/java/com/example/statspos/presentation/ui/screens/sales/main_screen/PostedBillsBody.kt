@@ -155,17 +155,19 @@ fun PostedBillsBody(
                         Text(text = "Search By")
                     },
                 )
-                ComboBox(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    items = HP.users,
-                    selectedItem = state.user,
-                    onItemSelected = viewModel::onUserChange,
-                    label = {
-                        Text(text = "User")
-                    },
-                    addNone = true,
-                )
+                if(HP.user.userType == 1) {
+                    ComboBox(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        items = HP.users,
+                        selectedItem = state.user,
+                        onItemSelected = viewModel::onUserChange,
+                        label = {
+                            Text(text = "User")
+                        },
+                        addNone = true,
+                    )
+                }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

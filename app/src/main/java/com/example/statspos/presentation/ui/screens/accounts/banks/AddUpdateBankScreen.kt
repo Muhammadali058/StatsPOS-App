@@ -91,9 +91,8 @@ fun AddUpdateBankScreen(
     }
 
     // Edit data when update
-    var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        if(!hasLoadedOnce) {
+        if (!state.hasLoadedOnce) {
             viewModel.updateInitialState(
                 isUpdate = isUpdate,
                 updateId = updateId,
@@ -103,7 +102,7 @@ fun AddUpdateBankScreen(
                 viewModel.editData(updateId)
             }
 
-            hasLoadedOnce = true
+            viewModel.setHasLoadedOnce(true)
         }
     }
 

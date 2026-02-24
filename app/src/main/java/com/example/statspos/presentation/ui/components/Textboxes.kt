@@ -97,6 +97,7 @@ fun Textbox(
     enabled: Boolean = true,
     readOnly: Boolean = false,
     singleLine: Boolean = true,
+    focusRequester: FocusRequester? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
@@ -106,20 +107,20 @@ fun Textbox(
     padding: PaddingValues = ConstantPaddings.CUSTOM_TEXTBOX_OUTSIDE,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val focusRequester = remember { FocusRequester() }
+    val internalFocusRequester = focusRequester ?: remember { FocusRequester() }
 
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier
-            .focusRequester(focusRequester)
-            .focusable()
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null
-            ) {
-                focusRequester.requestFocus()
-            }
+            .focusRequester(internalFocusRequester)
+//            .focusable()
+//            .clickable(
+//                interactionSource = interactionSource,
+//                indication = null
+//            ) {
+//                internalFocusRequester.requestFocus()
+//            }
             .padding(padding)
             .height(height),
         singleLine = singleLine,
@@ -250,6 +251,7 @@ fun AutoCompleteItemsTextbox(
     enabled: Boolean = true,
     readOnly: Boolean = false,
     singleLine: Boolean = true,
+    focusRequester: FocusRequester? = null,
     contentPadding: PaddingValues = ConstantPaddings.CUSTOM_TEXTBOX_INSIDE,
     padding: PaddingValues = ConstantPaddings.CUSTOM_TEXTBOX_OUTSIDE,
 ) {
@@ -311,6 +313,7 @@ fun AutoCompleteItemsTextbox(
                     onSearchClick(value)
                 }
             ),
+            focusRequester = focusRequester,
             contentPadding = contentPadding,
             padding = padding,
         )

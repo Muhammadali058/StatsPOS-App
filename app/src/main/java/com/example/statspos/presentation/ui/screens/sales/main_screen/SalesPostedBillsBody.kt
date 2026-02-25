@@ -14,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.ViewHeadline
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +42,7 @@ import com.example.statspos.presentation.ui.components.BottomSheet
 import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.ErrorDialog
+import com.example.statspos.presentation.ui.components.HeadingLarge
 import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
@@ -52,7 +52,7 @@ import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.sales.main_screen.PostedBillsViewModel
+import com.example.statspos.presentation.viewmodels.sales.main_screen.SalesPostedBillsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.PasswordFor
 import com.example.statspos.utils.UiEvent
@@ -62,7 +62,7 @@ import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PostedBillsBody(
+fun SalesPostedBillsBody(
     sharedViewModel: SharedViewModel,
     onViewClick: (SalesBills) -> Unit,
     onAddUpdateButtonClick: (Long, Boolean, SalesBills?) -> Unit,
@@ -72,7 +72,7 @@ fun PostedBillsBody(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showBottomSheet by remember { mutableStateOf(false) }
 
-    val viewModel = hiltViewModel<PostedBillsViewModel>()
+    val viewModel = hiltViewModel<SalesPostedBillsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -210,10 +210,10 @@ fun PostedBillsBody(
                     ComboBox(
                         modifier = Modifier
                             .fillMaxWidth(0.5f),
-                        items = HP.salesMop,
-                        selectedItem = state.salesMop,
+                        items = HP.mop,
+                        selectedItem = state.mop,
                         onItemSelected = { item ->
-                            viewModel.onSalesMOPChange(item)
+                            viewModel.onMOPChange(item)
                         },
                         label = {
                             Text(text = "M.O.P")
@@ -544,7 +544,7 @@ private fun ListCard(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            HeadingMedium("Total", Modifier.weight(1f))
+            HeadingLarge("Total", Modifier.weight(1f))
             HeadingMedium("On", Modifier.weight(.5f))
             HeadingMedium("Type", Modifier.weight(.5f))
             HeadingMedium("MOP", Modifier.weight(.5f))
@@ -554,10 +554,7 @@ private fun ListCard(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            LabelMedium(
-                HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)),
-                Modifier.weight(1f)
-            )
+            LabelLarge(HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)), Modifier.weight(1f))
             LabelMedium(item.salesOn.toString(), Modifier.weight(.5f))
             LabelMedium(item.salesType.toString(), Modifier.weight(.5f))
             LabelMedium(item.mop.toString(), Modifier.weight(.5f))

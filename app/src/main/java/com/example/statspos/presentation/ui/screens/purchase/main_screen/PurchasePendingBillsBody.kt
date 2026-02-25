@@ -1,22 +1,14 @@
-package com.example.statspos.presentation.ui.screens.sales.sales_bill
+package com.example.statspos.presentation.ui.screens.purchase.main_screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContent
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,71 +21,60 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.statspos.domain.models.sales.Sales
-import com.example.statspos.domain.models.sales.SalesBillItems
+import com.example.statspos.domain.models.purchase.PurchaseBills
+import com.example.statspos.domain.models.sales.SalesBills
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
+import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingLarge
 import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
-import com.example.statspos.presentation.ui.components.ListImageView
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.sales.sales_bill.AddUpdateSalesViewModel
-import com.example.statspos.presentation.viewmodels.sales.sales_bill.SalesItemsViewModel
+import com.example.statspos.presentation.viewmodels.purchase.main_screen.PurchasePendingBillsViewModel
+import com.example.statspos.presentation.viewmodels.sales.main_screen.SalesPendingBillsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
 @Composable
-fun SalesBillItemsBody(
+fun PurchasePendingBillsBody(
     sharedViewModel: SharedViewModel,
-    salesViewModel: AddUpdateSalesViewModel,
-    salesItemsViewModel: SalesItemsViewModel,
-    snackbarHostState: SnackbarHostState,
-    onAddButtonClick: (Long, Boolean, Sales) -> Unit,
+    onAddUpdateButtonClick: (Long, Boolean, PurchaseBills?) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val salesState by salesViewModel.state.collectAsStateWithLifecycle()
-    val state by salesItemsViewModel.state.collectAsStateWithLifecycle()
-    val event by salesItemsViewModel.event.collectAsState(UiEvent.Idle)
+    val viewModel = hiltViewModel<PurchasePendingBillsViewModel>()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val event by viewModel.event.collectAsState(UiEvent.Idle)
+    val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
             snackbarHostState = snackbarHostState,
-            viewModelIdleEvent = salesItemsViewModel::onEvent,
+            viewModelIdleEvent = viewModel::onEvent,
             onError = {
                 showErrorDialog = true
             }
         )
     }
 
-    // Edit data when update
-    var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        if (!hasLoadedOnce) {
-            salesItemsViewModel.loadData(salesViewModel::updateTotal)
-            hasLoadedOnce = true
-        }
-    }
-
     val sharedViewModelState by sharedViewModel.state.collectAsStateWithLifecycle()
-    LaunchedEffect(sharedViewModelState.dataChanged) {
-        if (sharedViewModelState.dataChanged) {
-            salesItemsViewModel.loadData(salesViewModel::updateTotal)
-            sharedViewModel.consumeDataChanged()
+    LaunchedEffect(sharedViewModelState.billSaved, sharedViewModelState.billPosted) {
+        if (sharedViewModelState.billSaved || sharedViewModelState.billPosted) {
+            viewModel.loadData()
+            sharedViewModel.consumeBillSaved()
         }
     }
 
@@ -106,19 +87,18 @@ fun SalesBillItemsBody(
         )
     }
 
-    fun getSalesObject(): Sales {
-        val sales = salesViewModel.getFormData()
-        sales.id = salesState.invoiceId
-        sales.isPostedBill = salesState.isPostedBill
-        sales.invoiceNo = salesState.invoiceNo
-        sales.totalItems = state.list.size
-        return sales
-    }
-
     Scaffold(
+        snackbarHost = {
+            AppSnackbarHost(
+                snackbarHostState = snackbarHostState,
+            )
+        },
         floatingActionButton = {
             AppFloatingActionButton {
-                onAddButtonClick(0L, false, getSalesObject())
+                viewModel.makeNewBill { invoiceId ->
+                    sharedViewModel.notifyBillSaved()
+                    onAddUpdateButtonClick(invoiceId, true, null)
+                }
             }
         },
     ) { innerPadding ->
@@ -143,9 +123,9 @@ fun SalesBillItemsBody(
                         modifier = Modifier
                             .padding(bottom = 4.dp),
                         value = state.search,
-                        onValueChange = salesItemsViewModel::onSearchChange,
+                        onValueChange = viewModel::onSearchChange,
                         onSearchClick = {
-                            salesItemsViewModel.loadData(salesViewModel::updateTotal)
+                            viewModel.loadData()
                             keyboardController?.hide()
                         },
                     )
@@ -154,12 +134,12 @@ fun SalesBillItemsBody(
                             .weight(1f),
                         isRefreshing = state.isLoading,
                         onRefresh = {
-                            salesItemsViewModel.loadData(salesViewModel::updateTotal)
+                            viewModel.loadData()
                         },
                         items = state.list,
-                        onItemClick = { salesBillItem ->
-                            onAddButtonClick(salesBillItem.id!!, true, getSalesObject())
-                        }
+                        onItemClick = { purchaseBill ->
+                            onAddUpdateButtonClick(purchaseBill.id!!, true, purchaseBill)
+                        },
                     )
                 }
 
@@ -168,19 +148,12 @@ fun SalesBillItemsBody(
                         .fillMaxWidth()
                         .padding(8.dp)
                 ) {
-                    HeadingMedium(text = "Items: ")
-                    LabelMedium(text = state.totalItems.toString())
-                    Spacer(Modifier.width(8.dp))
-                    HeadingMedium(text = "Qty: ")
-                    LabelMedium(text = HP.formatDecimal(state.totalQty))
-                    if (HP.settings.saleCartons == true) {
-                        Spacer(Modifier.width(8.dp))
-                        HeadingMedium(text = "Crtn: ")
-                        LabelMedium(text = state.totalCrtn.toString())
-                    }
-                    Spacer(Modifier.width(8.dp))
-                    HeadingMedium(text = "Disc: ")
-                    LabelMedium(text = HP.formatDecimal(state.totalItemDisc))
+                    HeadingMedium(
+                        text = "Total Bills: ",
+                    )
+                    LabelMedium(
+                        text = state.totalBills.toString(),
+                    )
                 }
             }
         }
@@ -217,8 +190,8 @@ private fun BodyList(
     modifier: Modifier = Modifier,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
-    items: List<SalesBillItems>,
-    onItemClick: (SalesBillItems) -> Unit,
+    items: List<PurchaseBills>,
+    onItemClick: (PurchaseBills) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -226,9 +199,10 @@ private fun BodyList(
         onRefresh = onRefresh,
     ) {
         items(items) { item ->
-            ListCard(item = item) {
-                onItemClick(it)
-            }
+            ListCard(
+                item = item,
+                onItemClick = onItemClick,
+            )
         }
     }
 }
@@ -236,8 +210,8 @@ private fun BodyList(
 @Composable
 private fun ListCard(
     modifier: Modifier = Modifier,
-    item: SalesBillItems,
-    onItemClick: (SalesBillItems) -> Unit
+    item: PurchaseBills,
+    onItemClick: (PurchaseBills) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -253,85 +227,60 @@ private fun ListCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Image
-            ListImageView(
-                imageUrl = item.imageUrl,
-                modifier = Modifier
-                    .size(60.dp),
-                showIfNull = true,
-            ) {
-                Spacer(Modifier.width(8.dp))
-            }
-
             Column(
                 modifier = Modifier
-                    .weight(1f),
+                    .fillMaxWidth(),
             ) {
-                // Itemname
-                LabelLarge(item.itemname.toString())
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    HeadingMedium("Bill No. ")
+                    LabelMedium(item.id.toString())
+                    Spacer(Modifier.width(8.dp))
+                    LabelLarge(item.vendorName.toString().ifEmpty { "Vendor not selected" })
+                }
                 Spacer(Modifier.height(2.dp))
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .weight(.7f)
-                    ) {
-                        HeadingMedium(text = "Qty: ")
-                        LabelMedium(text = HP.formatDecimal(item.qty))
-                    }
-                    Row(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        HeadingMedium(text = "Rate: ")
-                        LabelMedium(text = HP.formatDecimal(item.rate))
-                    }
+                    HeadingMedium("Date: ")
+                    LabelLarge(item.date.toString())
                 }
-                if (HP.settings.saleCartons == true) {
+                if(item.warehouseName.toString().isNotEmpty()) {
                     Spacer(Modifier.height(2.dp))
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .weight(.7f)
-                        ) {
-                            HeadingMedium(text = "Crtn: ")
-                            LabelMedium(text = item.crtn.toString())
-                        }
-                        Row(
-                            modifier = Modifier
-                                .weight(1f)
-                        ) {
-                            HeadingMedium(text = "Crtn Rate: ")
-                            LabelMedium(text = HP.formatDecimal(item.crtnRate))
-                        }
-                    }
-                }
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .weight(.7f)
-                    ) {
-                        HeadingMedium(text = "Disc: ")
-                        LabelMedium(text = HP.formatDecimal(item.disc))
-                    }
-                    Row(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        HeadingLarge(text = "Total: ")
-                        LabelLarge(text = HP.formatDecimal(item.total))
+                        HeadingMedium("Warehouse: ")
+                        LabelLarge(item.warehouseName.toString())
                     }
                 }
             }
+        }
+        Spacer(Modifier.height(2.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            HeadingLarge("Total", Modifier.weight(1f))
+            HeadingMedium("On", Modifier.weight(.5f))
+            HeadingMedium("Type", Modifier.weight(.5f))
+            HeadingMedium("MOP", Modifier.weight(.5f))
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            LabelLarge(HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)), Modifier.weight(1f))
+            LabelMedium(item.purchaseOn.toString(), Modifier.weight(.5f))
+            LabelMedium(item.purchaseType.toString(), Modifier.weight(.5f))
+            LabelMedium(item.mop.toString(), Modifier.weight(.5f))
         }
     }
 }

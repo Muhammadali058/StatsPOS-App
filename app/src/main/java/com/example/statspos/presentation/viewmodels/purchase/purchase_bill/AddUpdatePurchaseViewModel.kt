@@ -1,20 +1,19 @@
-package com.example.statspos.presentation.viewmodels.sales.sales_bill
+package com.example.statspos.presentation.viewmodels.purchase.purchase_bill
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.accounts.Accounts
-import com.example.statspos.domain.models.sales.Sales
-import com.example.statspos.domain.models.sales.SalesBills
+import com.example.statspos.domain.models.purchase.Purchase
+import com.example.statspos.domain.models.purchase.PurchaseBills
 import com.example.statspos.domain.repository.accounts.AccountsRepository
-import com.example.statspos.domain.repository.sales.SalesRepository
+import com.example.statspos.domain.repository.purchase.PurchaseRepository
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.get
 import com.google.gson.Gson
-import com.google.gson.JsonObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,8 +24,8 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
-class AddUpdateSalesViewModel @Inject constructor(
-    private val api: SalesRepository,
+class AddUpdatePurchaseViewModel @Inject constructor(
+    private val api: PurchaseRepository,
     private val accountsRepo: AccountsRepository,
 ) : ViewModel() {
     // region ScreenState
@@ -34,43 +33,40 @@ class AddUpdateSalesViewModel @Inject constructor(
         val id: Long = 0L,
         val invoiceId: Long = 0L,
         val invoiceNo: Int = 0,
+        var updateVendor: Boolean = false,
 
         var total: Double = 0.0,
-        var cost: Double = 0.0,
-        var profit: Double = 0.0,
         var isDiscRsPer: Boolean = HP.settings.isDefaultDiscRs == true,
         val disc: String = "",
         var totalDisc: Double = 0.0,
-        var payment: String = "",
-        var change: String = "",
-        var salesOn: DropdownItem = HP.salesOn[0],
-        var salesType: DropdownItem = HP.salesType[0],
-        var customerId: Long = 0L,
-        val selectedCustomerName: String = "",
-        val customerName: String = "",
-        val balance: String = "Balance: 0 (R)",
+
+        var purchaseOn: DropdownItem = HP.purchaseOn[0],
+        var purchaseType: DropdownItem = HP.purchaseType[0],
+        var vendorId: Long = 0L,
+        val vendorName: String = "",
+        val balance: String = "Balance: 0 (P)",
+
+        val expense: String = "",
+        val refInvoiceNo: String = "",
+        val remarks: String = "",
+        val vendorDiscount: String = "",
 
         val mop: DropdownItem = HP.mop[0],
         var bank: DropdownItem = HP.getNoneDropdownItem(),
         var subBank: DropdownItem = HP.getNoneDropdownItem(),
         var supplier: DropdownItem = HP.getNoneDropdownItem(),
+        var warehouse: DropdownItem = HP.getNoneDropdownItem(),
 
         var isMopCashBank: Boolean = true,
         var isRetail: Boolean = HP.settings.isDefaultRateRetail == true,
         val date: LocalDate = LocalDate.now(),
-        val dueDate: LocalDate = LocalDate.now().plusDays(7),
-        var isEstimatedBill: Boolean = false,
-        val remarks: String = "",
 
         // Extras
         var totalBill: Double = 0.0,
-        var totalCost: Double = 0.0,
-        var localTime: String = "",
-        val paymentEnabled: Boolean = false,
 
         val isPendingBill: Boolean = false,
         val isPostedBill: Boolean = false,
-        val salesBill: SalesBills? = null,
+        val purchaseBill: PurchaseBills? = null,
 
         val hasLoadedOnce: Boolean = false,
 
@@ -136,47 +132,51 @@ class AddUpdateSalesViewModel @Inject constructor(
     // endregion
 
     // region onChangeMethods
-    fun onCustomerIdChange(value: Long) {
-        state.update { it.copy(customerId = value) }
+    fun onUpdateVendorChange(value: Boolean) {
+        state.update { it.copy(updateVendor = value) }
+    }
+
+    fun onVendorIdChange(value: Long) {
+        state.update { it.copy(vendorId = value) }
         getBalance(value)
     }
 
-    fun onSelectedCustomerNameChange(value: String) {
-        state.update { it.copy(selectedCustomerName = value) }
-    }
-
-    fun onCustomerNameChange(value: String) {
-        state.update { it.copy(customerName = value) }
-    }
-
-    fun onIsRetailChange(value: Boolean) {
-        state.update { it.copy(isRetail = value) }
+    fun onVendorNameChange(value: String) {
+        state.update { it.copy(vendorName = value) }
     }
 
     fun onDiscChange(value: String) {
         state.update { it.copy(disc = value) }
-        updateTotal(state.value.totalBill, state.value.totalCost)
+        updateTotal(state.value.totalBill)
     }
 
     fun onIsDiscRsPerChange(value: Boolean) {
         state.update { it.copy(isDiscRsPer = value) }
-        updateTotal(state.value.totalBill, state.value.totalCost)
+        updateTotal(state.value.totalBill)
     }
 
-    fun onSalesOnChange(value: DropdownItem) {
-        state.update { it.copy(salesOn = value) }
+    fun onPurchaseOnChange(value: DropdownItem) {
+        state.update { it.copy(purchaseOn = value) }
     }
 
-    fun onSalesTypeChange(value: DropdownItem) {
-        state.update { it.copy(salesType = value) }
+    fun onPurchaseTypeChange(value: DropdownItem) {
+        state.update { it.copy(purchaseType = value) }
     }
 
     fun onDateChange(value: LocalDate) {
         state.update { it.copy(date = value) }
     }
 
-    fun onDueDateChange(value: LocalDate) {
-        state.update { it.copy(dueDate = value) }
+    fun onExpenseChange(value: String) {
+        state.update { it.copy(expense = value) }
+    }
+
+    fun onRefInvoiceNoChange(value: String) {
+        state.update { it.copy(refInvoiceNo = value) }
+    }
+
+    fun onRemarksChange(value: String) {
+        state.update { it.copy(remarks = value) }
     }
 
     fun onBankSelected(value: DropdownItem) {
@@ -191,6 +191,10 @@ class AddUpdateSalesViewModel @Inject constructor(
         state.update { it.copy(supplier = value) }
     }
 
+    fun onWarehouseSelected(value: DropdownItem) {
+        state.update { it.copy(warehouse = value) }
+    }
+
     fun onMOPChange(value: DropdownItem) {
         state.update {
             it.copy(
@@ -200,19 +204,6 @@ class AddUpdateSalesViewModel @Inject constructor(
                 subBank = HP.getNoneDropdownItem(),
             )
         }
-    }
-
-    fun onPaymentChange(value: String) {
-        state.update { it.copy(payment = value) }
-        updatePayment()
-    }
-
-    fun onChangeChange(value: String) {
-        state.update { it.copy(change = value) }
-    }
-
-    fun onRemarksChange(value: String) {
-        state.update { it.copy(remarks = value) }
     }
 
     fun setHasLoadedOnce(value: Boolean) {
@@ -238,14 +229,16 @@ class AddUpdateSalesViewModel @Inject constructor(
 
             state.update { it.copy(isPosting = true) }
 
-            val sale = getFormData()
+            val purchase = getFormData()
 
             val result = if (state.value.isPostedBill) {
-                sale.salesId = state.value.invoiceId
-                api.updateSales(sale)
+                purchase.purchaseId = state.value.invoiceId
+                purchase.updateVendor = state.value.updateVendor
+                api.updatePurchase(purchase)
             } else {
-                sale.salesId = state.value.invoiceId
-                api.insertSales(sale)
+                purchase.purchaseId = state.value.invoiceId
+                purchase.updateVendor = state.value.updateVendor
+                api.insertPurchase(purchase)
             }
 
             state.update { it.copy(isPosting = false) }
@@ -277,11 +270,11 @@ class AddUpdateSalesViewModel @Inject constructor(
 
             state.update { it.copy(isSaving = true) }
 
-            val sale = getFormData()
-            sale.salesId = state.value.invoiceId
-            sale.isPendingBill = state.value.isPendingBill
+            val purchase = getFormData()
+            purchase.purchaseId = state.value.invoiceId
+            purchase.isPendingBill = state.value.isPendingBill
 
-            val result = api.tempClose(sale)
+            val result = api.tempClose(purchase)
 
             state.update { it.copy(isSaving = false) }
 
@@ -308,7 +301,7 @@ class AddUpdateSalesViewModel @Inject constructor(
 
             beforeRequest()
 
-            when (val result = api.deleteSales(id, state.value.isPostedBill)) {
+            when (val result = api.deletePurchase(id, state.value.isPostedBill)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
@@ -327,14 +320,14 @@ class AddUpdateSalesViewModel @Inject constructor(
 
             beforeRequest()
 
-            when (val result = api.getSales(id, state.value.isPostedBill)) {
+            when (val result = api.getPurchase(id, state.value.isPostedBill)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
 
-                    val sales = Gson().get<Sales>(result.data.asJsonObject)
-                    setFormData(sales)
+                    val purchase = Gson().get<Purchase>(result.data.asJsonObject)
+                    setFormData(purchase)
                 }
             }
         }
@@ -353,44 +346,21 @@ class AddUpdateSalesViewModel @Inject constructor(
                         state.update {
                             it.copy(
                                 balance = balance,
-                                customerName = account.accountName.toString(),
+                                vendorName = account.accountName.toString(),
+                                remarks = account.remarks.toString(),
                             )
                         }
 
                         // Auto Credit Select
-                        if (HP.settings.autoCreditSelect!! && HP.userRights.creditBill!!) {
-                            state.update { it.copy(salesOn = HP.salesOn[1]) }
-                        } else {
-                            if (account.isCredit!! && HP.userRights.creditBill!!) {
-                                state.update { it.copy(salesOn = HP.salesOn[1]) }
-                            }
+                        if (account.isCredit!!) {
+                            state.update { it.copy(purchaseOn = HP.purchaseOn[1]) }
                         }
 
-                        // Due Days
-                        if (account.dueDays!! > 0) {
-                            state.update {
-                                it.copy(
-                                    dueDate = LocalDate.now().plusDays(account.dueDays.toLong())
-                                )
-                            }
-                        }
-
-                        // Select Supplier
-                        if (account.supplierId!! != 0L) {
-                            state.update {
-                                it.copy(
-                                    supplier = HP.getDropdownById(
-                                        account.supplierId!!,
-                                        HP.suppliers
-                                    )
-                                )
-                            }
-                        }
-
-                        // Select Retail
-                        if (HP.settings.fourRateSystem == false) {
-                            if (HP.settings.autoRetailChange!!) {
-                                state.update { it.copy(isRetail = account.isRetail!!) }
+                        if(HP.getDoubleValue(account.disc.toString()) > 0.0){
+                            if(account.isDiscRsPer!!){
+                                state.update { it.copy(vendorDiscount = "Rs.${account.disc}") }
+                            }else{
+                                state.update { it.copy(vendorDiscount = "${account.disc}%") }
                             }
                         }
                     }
@@ -398,153 +368,106 @@ class AddUpdateSalesViewModel @Inject constructor(
             } else {
                 state.update {
                     it.copy(
-                        balance = "Balance: 0 (R)",
-                        customerName = "",
-                        salesOn = HP.salesOn[0],
-                        dueDate = LocalDate.now().plusDays(7)
+                        balance = "Balance: 0 (P)",
+                        vendorName = "",
+                        purchaseOn = HP.purchaseOn[0],
                     )
                 }
             }
         }
     }
 
-    fun changeBillType(isRetail: Boolean, onSuccess: () -> Unit) {
-        viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
-
-            if (state.value.isSaving)
-                return@launch
-
-            if (state.value.isPosting)
-                return@launch
-
-            beforeRequest()
-
-            val body = JsonObject().apply {
-                addProperty("isRetail", isRetail)
-                addProperty("isPostedBill", state.value.isPostedBill)
-                addProperty("salesId", state.value.invoiceId)
-            }
-            when (val result = api.changeBillType(body)) {
-                is Resource.Error -> resultError(result.error)
-                is Resource.Information -> resultInformation(result.message)
-                is Resource.Success -> {
-                    resultSuccess()
-                    onSuccess()
-                }
-            }
-        }
-    }
     // endregion
 
     // region Methods
-    fun getFormData(): Sales {
-        val sale = Sales(
+    fun getFormData(): Purchase {
+        val purchase = Purchase(
             total = state.value.total,
-            cost = state.value.cost,
-            profit = state.value.profit,
             isDiscRsPer = state.value.isDiscRsPer,
             disc = HP.getDoubleValue(state.value.disc),
             totalDisc = state.value.totalDisc,
 
-            payment = HP.getIntValue(state.value.payment),
-            change = HP.getIntValue(state.value.change),
-            salesOn = state.value.salesOn.id.toInt(),
-            salesType = state.value.salesType.id.toInt(),
+            expenses = HP.getDoubleValue(state.value.expense),
+            refInvoiceNo = state.value.refInvoiceNo,
+
+            date = HP.getZonedDate(state.value.date),
+            purchaseOn = state.value.purchaseOn.id.toInt(),
+            purchaseType = state.value.purchaseType.id.toInt(),
             isMopCashBank = state.value.mop.id == 1L,
 
-            customerId = state.value.customerId,
-            customerName = state.value.customerName,
+            vendorId = state.value.vendorId,
             bankId = state.value.bank.id,
             subBankId = state.value.subBank.id,
             supplierId = state.value.supplier.id,
-
-            isRetail = state.value.isRetail,
-            date = HP.getZonedDate(state.value.date),
-            dueDate = HP.getZonedDate(state.value.dueDate),
-            isEstimatedBill = state.value.isEstimatedBill,
-            remarks = state.value.remarks,
+            warehouseId = state.value.warehouse.id,
         )
 
-        if (state.value.isPostedBill) {
-            val localTime = HP.toLocalTime(state.value.localTime)
-            sale.date = HP.getZonedDateWithTime(state.value.date, localTime)
-        } else {
-            sale.currentShiftId = HP.user.currentShiftId
+        if (!state.value.isPostedBill) {
+            purchase.currentShiftId = HP.user.currentShiftId
         }
 
-        return sale
+        return purchase
     }
 
-    private fun setFormData(sale: Sales) {
+    private fun setFormData(purchase: Purchase) {
         state.update {
             it.copy(
-                invoiceNo = sale.invoiceNo!!,
+                invoiceNo = purchase.invoiceNo!!,
 
-                customerId = sale.customerId!!,
-                selectedCustomerName = HP.getDropdownNameById(sale.customerId!!, HP.customers),
-                customerName = sale.customerName.toString(),
+                vendorId = purchase.vendorId!!,
+                vendorName = HP.getDropdownNameById(purchase.vendorId!!, HP.vendors),
 
-                payment = sale.payment.toString(),
-                change = sale.change.toString(),
-                mop = if (sale.isMopCashBank!!) HP.mop[0] else HP.mop[1],
-                bank = HP.getDropdownById(sale.bankId!!, HP.banks),
-                subBank = HP.getDropdownById(sale.subBankId!!, HP.subBanks),
-                supplier = HP.getDropdownById(sale.supplierId!!, HP.suppliers),
-                remarks = sale.remarks.toString(),
+                expense = purchase.expenses.toString(),
+                refInvoiceNo = purchase.refInvoiceNo.toString(),
 
-                salesOn = HP.getDropdownById(sale.salesOn!!.toLong(), HP.salesOn),
-                salesType = HP.getDropdownById(sale.salesType!!.toLong(), HP.salesType),
-                isRetail = sale.isRetail!!,
-                isEstimatedBill = sale.isEstimatedBill!!,
+                mop = if (purchase.isMopCashBank!!) HP.mop[0] else HP.mop[1],
+                bank = HP.getDropdownById(purchase.bankId!!, HP.banks),
+                subBank = HP.getDropdownById(purchase.subBankId!!, HP.subBanks),
+                supplier = HP.getDropdownById(purchase.supplierId!!, HP.suppliers),
+                warehouse = HP.getDropdownById(purchase.warehouseId!!, HP.warehouses),
 
-                date = if (state.value.isPostedBill) HP.toLocalDate(sale.date!!) else LocalDate.now(),
-                dueDate = HP.toLocalDate(sale.dueDate!!),
+                purchaseOn = HP.getDropdownById(purchase.purchaseOn!!.toLong(), HP.purchaseOn),
+                purchaseType = HP.getDropdownById(
+                    purchase.purchaseType!!.toLong(),
+                    HP.purchaseType
+                ),
 
-                paymentEnabled = !(state.value.isPostedBill && sale.salesOn!! == 2),
-
-                // Extras
-                localTime = sale.date.toString()
+                date = if (state.value.isPostedBill) HP.toLocalDate(purchase.date!!) else LocalDate.now(),
             )
         }
 
-        if (sale.customerId!! != 0L)
-            getBalance(sale.customerId!!)
+        if (purchase.vendorId!! != 0L)
+            getBalance(purchase.vendorId!!)
     }
 
     private fun clearTextboxes() {
         state.update {
             it.copy(
-                customerId = 0L,
-                selectedCustomerName = "",
-                customerName = "",
-                payment = "",
-                change = "",
+                vendorId = 0L,
+                vendorName = "",
+
+                expense = "",
+                refInvoiceNo = "",
                 remarks = "",
 
-                salesOn = HP.salesOn[0],
-                salesType = HP.salesType[0],
+                purchaseOn = HP.purchaseOn[0],
+                purchaseType = HP.purchaseType[0],
                 mop = HP.mop[0],
                 bank = HP.getNoneDropdownItem(),
                 subBank = HP.getNoneDropdownItem(),
                 supplier = HP.getNoneDropdownItem(),
+                warehouse = HP.getNoneDropdownItem(),
 
-                balance = "Balance: 0 (R)",
+                balance = "Balance: 0 (P)",
                 isDiscRsPer = HP.settings.isDefaultDiscRs!!,
                 disc = "",
                 totalDisc = 0.0,
                 date = LocalDate.now(),
-                dueDate = LocalDate.now(),
-                isRetail = HP.settings.isDefaultRateRetail!!,
-                isEstimatedBill = false,
 
                 // Extras
                 isPendingBill = false,
                 isPostedBill = false,
                 invoiceId = 0L,
-
-                localTime = "",
             )
         }
     }
@@ -555,9 +478,9 @@ class AddUpdateSalesViewModel @Inject constructor(
             return false
         }
 
-        if (state.value.salesOn.id == 2L) {
-            if (state.value.customerId == 0L) {
-                showMessage("Please select customer")
+        if (state.value.purchaseOn.id == 2L) {
+            if (state.value.vendorId == 0L) {
+                showMessage("Please select vendor")
                 return false
             }
         }
@@ -571,21 +494,6 @@ class AddUpdateSalesViewModel @Inject constructor(
                     showMessage("Please select bank account")
                     return false
                 }
-            }
-        }
-
-        if (HP.settings.isPaymentNecessary == true && state.value.salesOn.id == 1L) {
-            val payment = HP.getIntValue(state.value.payment)
-            val total = state.value.total
-
-            if (payment == 0) {
-                showMessage("Please enter payment")
-                return false
-            }
-
-            if (payment > 0 && payment < total) {
-                showMessage("Less payment entered")
-                return false
             }
         }
 
@@ -612,18 +520,18 @@ class AddUpdateSalesViewModel @Inject constructor(
         invoiceId: Long,
         isPendingBill: Boolean,
         isPostedBill: Boolean,
-        salesBill: SalesBills?
+        purchaseBill: PurchaseBills?
     ) {
         state.update {
             it.copy(
                 invoiceId = invoiceId,
                 isPendingBill = isPendingBill,
                 isPostedBill = isPostedBill,
-                salesBill = salesBill,
+                purchaseBill = purchaseBill,
             )
         }
 
-        salesBill?.run {
+        purchaseBill?.run {
             val totalDisc = if (grossTotal!! > 0.0) {
                 if (isDiscRsPer!!)
                     disc!!
@@ -635,55 +543,33 @@ class AddUpdateSalesViewModel @Inject constructor(
                 0.0
 
             val total = grossTotal!! - totalDisc
-            val profit = total - totalCost!!
+
             state.update {
                 it.copy(
                     totalBill = grossTotal!!,
-                    totalCost = totalCost!!,
-
                     total = total,
-                    cost = totalCost!!,
-                    profit = profit,
 
                     isDiscRsPer = isDiscRsPer!!,
                     disc = disc.toString(),
                     totalDisc = totalDisc,
-
-//                    localTime = localDate.toString()
                 )
             }
         }
     }
 
-    fun updateTotal(totalBill: Double, totalCost: Double) {
+    fun updateTotal(totalBill: Double) {
         val totalDisc = getTotalDisc(totalBill)
         val total = totalBill - totalDisc
-        val profit = total - totalCost
 
         state.update {
             it.copy(
                 totalBill = totalBill,
-                totalCost = totalCost,
-
                 total = total,
-                cost = totalCost,
-                profit = profit,
 
                 totalDisc = totalDisc,
             )
         }
 
-        updatePayment()
-    }
-
-    fun updatePayment() {
-        val payment = HP.getIntValue(state.value.payment)
-        val change = if (payment != 0) {
-            (payment - state.value.total.toInt())
-        } else
-            0
-
-        state.update { it.copy(change = change.toString()) }
     }
 
     private fun getTotalDisc(totalBill: Double): Double {

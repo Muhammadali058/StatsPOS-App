@@ -28,9 +28,6 @@ object HP {
 
     const val itemsPerPage = 10
 
-    // region Dropdowns
-//    val noneDropdownItem = DropdownItem(0L, "None")
-
     val mop = listOf(
         DropdownItem(1L, "Cash"),
         DropdownItem(2L, "Bank"),
@@ -43,6 +40,7 @@ object HP {
         DropdownItem(0L, "Rs."),
         DropdownItem(1L, "Percent"),
     )
+    // Sales
     val salesPostedBillsSearchBy = listOf(
         DropdownItem(0L, "By Name"),
         DropdownItem(1L, "By Sr."),
@@ -56,13 +54,25 @@ object HP {
         DropdownItem(1L, "Sales"),
         DropdownItem(2L, "Return"),
     )
-    val salesMop = listOf(
-        DropdownItem(1L, "Cash"),
-        DropdownItem(2L, "Bank"),
-    )
     val salesRetailType = listOf(
         DropdownItem(1L, "Retail"),
         DropdownItem(2L, "Wholesale"),
+    )
+
+    // Purchase
+    val purchasePostedBillsSearchBy = listOf(
+        DropdownItem(0L, "By Name"),
+        DropdownItem(1L, "By Sr."),
+        DropdownItem(2L, "By Invoice No."),
+        DropdownItem(3L, "By Ref. Invoice No."),
+    )
+    val purchaseOn = listOf(
+        DropdownItem(1L, "Cash"),
+        DropdownItem(2L, "Credit"),
+    )
+    val purchaseType = listOf(
+        DropdownItem(1L, "Purchase"),
+        DropdownItem(2L, "Return"),
     )
     // endregion
 
@@ -189,9 +199,9 @@ object HP {
         }
 
         val df = DecimalFormat(pattern)
-        val value =  df.format(rate)
+        val value = df.format(rate)
 
-        if(value.contains('.'))
+        if (value.contains('.'))
             return value
         else {
             return if (mustDecimals > 0)

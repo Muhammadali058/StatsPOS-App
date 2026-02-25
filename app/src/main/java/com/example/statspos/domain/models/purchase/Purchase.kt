@@ -36,5 +36,6 @@ data class Purchase(
     var purchaseId: Long? = null,
     var currentShiftId: Long? = null,
     var updateVendor: Boolean? = null,
+    var isPostedBill: Boolean? = null,
     var isPendingBill: Boolean? = null,
 )

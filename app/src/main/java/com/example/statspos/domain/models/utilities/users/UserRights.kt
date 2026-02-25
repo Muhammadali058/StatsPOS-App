@@ -55,6 +55,7 @@ data class UserRights(
     var printDuplicates: Boolean? = null,
     var deleteAnything: Boolean? = null,
     var entry: Boolean? = null,
+    var editPurchaseBill: Boolean? = null,
 
     var branchWisePurchase: Boolean? = null,
     var branchWiseReports: Boolean? = null,

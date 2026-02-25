@@ -22,7 +22,7 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
-class PendingBillsViewModel @Inject constructor(
+class SalesPendingBillsViewModel @Inject constructor(
     private val api: SalesRepository
 ) : ViewModel() {
 
@@ -175,6 +175,8 @@ class PendingBillsViewModel @Inject constructor(
                 dueDate = HP.getZonedDate(LocalDate.now().plusDays(7)),
                 isDiscRsPer = HP.settings.isDefaultDiscRs == true,
                 isRetail = HP.settings.isDefaultRateRetail == true,
+
+                isPendingBill = false,
             )
 
             when (val result = api.tempClose(sale)) {

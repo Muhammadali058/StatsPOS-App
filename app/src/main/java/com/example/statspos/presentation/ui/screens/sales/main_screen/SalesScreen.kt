@@ -54,7 +54,7 @@ fun SalesScreen(
             ) { page ->
                 when (page) {
                     0 ->
-                        PendingBillsBody(
+                        SalesPendingBillsBody(
                             sharedViewModel = sharedViewModel,
                             onAddUpdateButtonClick = { invoiceId, isPendingBill, salesBills ->
                                 onAddUpdateButtonClick(invoiceId, isPendingBill, false, salesBills)
@@ -62,7 +62,7 @@ fun SalesScreen(
                         )
 
                     1 ->
-                        PostedBillsBody(
+                        SalesPostedBillsBody(
                             sharedViewModel = sharedViewModel,
                             onViewClick = onViewClick,
                             onAddUpdateButtonClick = { invoiceId, isPostedBill, salesBills ->

@@ -1,10 +1,10 @@
-package com.example.statspos.presentation.viewmodels.sales.main_screen
+package com.example.statspos.presentation.viewmodels.purchase.main_screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
-import com.example.statspos.domain.models.sales.SalesBills
-import com.example.statspos.domain.repository.sales.SalesRepository
+import com.example.statspos.domain.models.purchase.PurchaseBills
+import com.example.statspos.domain.repository.purchase.PurchaseRepository
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
@@ -22,26 +22,25 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
-class PostedBillsViewModel @Inject constructor(
-    private val api: SalesRepository
+class PurchasePostedBillsViewModel @Inject constructor(
+    private val api: PurchaseRepository
 ) : ViewModel() {
 
     // region ScreenState
     data class ScreenState(
-        val list: List<SalesBills> = emptyList(),
+        val list: List<PurchaseBills> = emptyList(),
         val totalBills: Int = 0,
         val page: Int = 1,
         val endReached: Boolean = false,
 
         val search: String = "",
-        val searchBy: DropdownItem = HP.salesPostedBillsSearchBy[0],
+        val searchBy: DropdownItem = HP.purchasePostedBillsSearchBy[0],
         val fromDate: LocalDate = LocalDate.now(),
         val toDate: LocalDate = LocalDate.now(),
         val user: DropdownItem = HP.getDropdownById(HP.user.id!!, HP.users),
-        val salesType: DropdownItem = HP.getNoneDropdownItem("Both"),
-        val salesOn: DropdownItem = HP.getNoneDropdownItem("Both"),
-        val salesMop: DropdownItem = HP.getNoneDropdownItem("Both"),
-        val salesRetailType: DropdownItem = HP.getNoneDropdownItem("Both"),
+        val purchaseType: DropdownItem = HP.getNoneDropdownItem("Both"),
+        val purchaseOn: DropdownItem = HP.getNoneDropdownItem("Both"),
+        val mop: DropdownItem = HP.getNoneDropdownItem("Both"),
 
         val isLoading: Boolean = false,
         val isLoadingNextPage: Boolean = false,
@@ -128,17 +127,14 @@ class PostedBillsViewModel @Inject constructor(
     fun onSearchByChange(value: DropdownItem) {
         state.update { it.copy(searchBy = value) }
     }
-    fun onSalesTypeChange(value: DropdownItem) {
-        state.update { it.copy(salesType = value) }
+    fun onPurchaseTypeChange(value: DropdownItem) {
+        state.update { it.copy(purchaseType = value) }
     }
-    fun onSalesOnChange(value: DropdownItem) {
-        state.update { it.copy(salesOn = value) }
+    fun onPurchaseOnChange(value: DropdownItem) {
+        state.update { it.copy(purchaseOn = value) }
     }
-    fun onSalesMOPChange(value: DropdownItem) {
-        state.update { it.copy(salesMop = value) }
-    }
-    fun onSalesRetailTypeChange(value: DropdownItem) {
-        state.update { it.copy(salesRetailType = value) }
+    fun onMOPChange(value: DropdownItem) {
+        state.update { it.copy(mop = value) }
     }
     // endregion
 
@@ -169,7 +165,7 @@ class PostedBillsViewModel @Inject constructor(
                     resultSuccess()
 
                     val resultTotal = result.data.get("total").asJsonObject.get("totalBills").asInt
-                    val resultList = Gson().getListOf<SalesBills>(result.data.get("rows").asJsonArray)
+                    val resultList = Gson().getListOf<PurchaseBills>(result.data.get("rows").asJsonArray)
                     state.update {
                         it.copy(
                             list = resultList,
@@ -217,7 +213,7 @@ class PostedBillsViewModel @Inject constructor(
                     state.update { it.copy(isLoadingNextPage = false, error = null) }
 
                     val resultTotal = result.data.get("total").asJsonObject.get("totalBills").asInt
-                    val resultList = Gson().getListOf<SalesBills>(result.data.get("rows").asJsonArray)
+                    val resultList = Gson().getListOf<PurchaseBills>(result.data.get("rows").asJsonArray)
                     state.update {
                         it.copy(
                             list = state.value.list + resultList,
@@ -249,12 +245,11 @@ class PostedBillsViewModel @Inject constructor(
     private fun getSearchParams(page: Int): JsonObject = JsonObject().apply {
         addProperty("page", page)
         addProperty("itemsPerPage", HP.itemsPerPage)
-        addProperty("fromDate", HP.getZonedDateWithFromTime(state.value.fromDate))
-        addProperty("toDate", HP.getZonedDateWithToTime(state.value.toDate))
-        addProperty("salesOn", state.value.salesOn.id)
-        addProperty("salesType", state.value.salesType.id)
-        addProperty("mop", state.value.salesMop.id)
-        addProperty("type", state.value.salesRetailType.id)
+        addProperty("fromDate", HP.getZonedDate(state.value.fromDate))
+        addProperty("toDate", HP.getZonedDate(state.value.toDate))
+        addProperty("purchaseOn", state.value.purchaseOn.id)
+        addProperty("purchaseType", state.value.purchaseType.id)
+        addProperty("mop", state.value.mop.id)
         addProperty("itemId", 0)
         addProperty("userId", state.value.user.id)
         addProperty("searchBy", state.value.searchBy.id)

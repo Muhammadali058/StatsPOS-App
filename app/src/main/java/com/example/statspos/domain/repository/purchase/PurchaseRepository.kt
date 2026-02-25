@@ -23,7 +23,7 @@ interface PurchaseRepository {
 
     suspend fun generateBarcodeLabels(body: JsonObject): Resource<JsonObject>
 
-    suspend fun loadPendingBills(): Resource<JsonObject>
+    suspend fun loadPendingBills(body: JsonObject): Resource<JsonObject>
 
     suspend fun loadPendingBillItems(purchaseId: Long): Resource<JsonObject>
 

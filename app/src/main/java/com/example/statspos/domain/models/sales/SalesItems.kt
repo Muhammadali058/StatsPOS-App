@@ -1,5 +1,7 @@
 package com.example.statspos.domain.models.sales
 
+import com.example.statspos.domain.models.items.Items
+
 data class SalesItems(
     var id: Long? = null,
     var salesId: Long? = null,
@@ -45,4 +47,5 @@ data class SalesItems(
     var lockPcs: Boolean? = null,
     var lockCrtn: Boolean? = null,
     var warehouseStock: String? = null,
+    var item: Items? = null,
 )

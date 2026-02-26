@@ -75,13 +75,14 @@ class AddUpdateUserViewModel @Inject constructor(
         val printDuplicates: Boolean = true,
         val deleteAnything: Boolean = true,
         val entry: Boolean = true,
+        val creditBill: Boolean = true,
+        val editCreditBill: Boolean = true,
+        val editPurchaseBill: Boolean = true,
         // POS
         val changeRates: Boolean = true,
         val seeMargin: Boolean = true,
         val salesReturn: Boolean = true,
-        val creditBill: Boolean = true,
         val editSalesBill: Boolean = true,
-        val editCreditBill: Boolean = true,
         val dateWiseSales: Boolean = true,
         val payBill: Boolean = true,
         val discount: Boolean = true,
@@ -253,27 +254,6 @@ class AddUpdateUserViewModel @Inject constructor(
         onUtilitiesChange(checkUtilities())
     }
 
-    //    Others
-    fun onDateWiseEntryChange(value: Boolean) {
-        state.update { it.copy(dateWiseEntry = value) }
-    }
-
-    fun onDateWisePurchaseChange(value: Boolean) {
-        state.update { it.copy(dateWisePurchase = value) }
-    }
-
-    fun onPrintDuplicatesChange(value: Boolean) {
-        state.update { it.copy(printDuplicates = value) }
-    }
-
-    fun onDeleteAnythingChange(value: Boolean) {
-        state.update { it.copy(deleteAnything = value) }
-    }
-
-    fun onEntryChange(value: Boolean) {
-        state.update { it.copy(entry = value) }
-    }
-
     //    Reports
     fun onReportsChange(value: Boolean) {
         state.update { it.copy(reports = value) }
@@ -313,6 +293,39 @@ class AddUpdateUserViewModel @Inject constructor(
         onReportsChange(checkReports())
     }
 
+    //    Others
+    fun onDateWiseEntryChange(value: Boolean) {
+        state.update { it.copy(dateWiseEntry = value) }
+    }
+
+    fun onDateWisePurchaseChange(value: Boolean) {
+        state.update { it.copy(dateWisePurchase = value) }
+    }
+
+    fun onPrintDuplicatesChange(value: Boolean) {
+        state.update { it.copy(printDuplicates = value) }
+    }
+
+    fun onDeleteAnythingChange(value: Boolean) {
+        state.update { it.copy(deleteAnything = value) }
+    }
+
+    fun onEntryChange(value: Boolean) {
+        state.update { it.copy(entry = value) }
+    }
+
+    fun onCreditBillChange(value: Boolean) {
+        state.update { it.copy(creditBill = value) }
+    }
+
+    fun onEditCreditBillChange(value: Boolean) {
+        state.update { it.copy(editCreditBill = value) }
+    }
+
+    fun onEditPurchaseBillChange(value: Boolean) {
+        state.update { it.copy(editPurchaseBill = value) }
+    }
+
     //    POS
     fun onChangeRatesChange(value: Boolean) {
         state.update { it.copy(changeRates = value) }
@@ -326,16 +339,8 @@ class AddUpdateUserViewModel @Inject constructor(
         state.update { it.copy(salesReturn = value) }
     }
 
-    fun onCreditBillChange(value: Boolean) {
-        state.update { it.copy(creditBill = value) }
-    }
-
     fun onEditSalesBillChange(value: Boolean) {
         state.update { it.copy(editSalesBill = value) }
-    }
-
-    fun onEditCreditBillChange(value: Boolean) {
-        state.update { it.copy(editCreditBill = value) }
     }
 
     fun onDateWiseSalesChange(value: Boolean) {

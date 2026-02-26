@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.sales.sales_bill
+package com.example.statspos.presentation.ui.screens.purchase.purchase_bill
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -49,18 +49,25 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.R
+import com.example.statspos.domain.models.DropdownItem
+import com.example.statspos.domain.models.purchase.Purchase
 import com.example.statspos.domain.models.sales.Sales
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
+import com.example.statspos.presentation.ui.components.AppSwitch
 import com.example.statspos.presentation.ui.components.AutoCompleteItemsTextbox
 import com.example.statspos.presentation.ui.components.BalanceBox
 import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
 import com.example.statspos.presentation.ui.components.ConfirmDialog
+import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.DiscountTextbox
 import com.example.statspos.presentation.ui.components.ErrorDialog
+import com.example.statspos.presentation.ui.components.ExpandableSection
+import com.example.statspos.presentation.ui.components.HeadingLarge
 import com.example.statspos.presentation.ui.components.HeadingMedium
+import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
@@ -69,18 +76,20 @@ import com.example.statspos.presentation.ui.components.TextboxCB
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
+import com.example.statspos.presentation.viewmodels.purchase.purchase_bill.AddUpdatePurchaseItemViewModel
 import com.example.statspos.presentation.viewmodels.sales.sales_bill.AddUpdateSalesItemViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import com.example.statspos.utils.showToast
+import java.time.LocalDate
 
 @Composable
-fun AddUpdateSalesItemScreen(
+fun AddUpdatePurchaseItemScreen(
     sharedViewModel: SharedViewModel,
     updateId: Long,
     isUpdate: Boolean,
-    sales: Sales,
+    purchase: Purchase,
     onSearchItemClick: () -> Unit,
     onBack: () -> Unit,
 ) {
@@ -92,7 +101,7 @@ fun AddUpdateSalesItemScreen(
     }
 
     val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<AddUpdateSalesItemViewModel>()
+    val viewModel = hiltViewModel<AddUpdatePurchaseItemViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -139,7 +148,7 @@ fun AddUpdateSalesItemScreen(
             viewModel.updateInitialState(
                 isUpdate = isUpdate,
                 updateId = updateId,
-                sales = sales,
+                purchase = purchase,
             )
 
             if (isUpdate) {
@@ -157,7 +166,7 @@ fun AddUpdateSalesItemScreen(
             val item = sharedViewModelState.item
             item?.run {
                 viewModel.onItemnameChange(itemname!!)
-                viewModel.getItem(itemname!!){
+                viewModel.getItem(itemname!!) {
                     qtyFocusRequester.requestFocus()
                 }
                 sharedViewModel.consumeDataChanged()
@@ -203,7 +212,7 @@ fun AddUpdateSalesItemScreen(
                     onSaveButtonClick()
                 }
                 if (confirmDialogType == 2) {
-                    viewModel.setExpirableResult(true)
+                    viewModel.setStockWarningResult(true)
                     onSaveButtonClick()
                 }
             }
@@ -217,7 +226,7 @@ fun AddUpdateSalesItemScreen(
             },
             onScanned = {
                 viewModel.onItemnameChange(it)
-                viewModel.getItem(it){
+                viewModel.getItem(it) {
                     qtyFocusRequester.requestFocus()
                 }
 
@@ -261,7 +270,7 @@ fun AddUpdateSalesItemScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
-                .padding(ConstantPaddings.BODY_HORIZONTAL)
+//                .padding(ConstantPaddings.BODY_HORIZONTAL)
                 .padding(vertical = 16.dp)
         ) {
             Column(
@@ -282,13 +291,13 @@ fun AddUpdateSalesItemScreen(
                         value = state.itemname,
                         onValueChange = viewModel::onItemnameChange,
                         onItemSelected = {
-                            viewModel.getItem(it){
+                            viewModel.getItem(it) {
                                 qtyFocusRequester.requestFocus()
                             }
 //                            keyboardController?.hide()
                         },
                         onSearchClick = {
-                            viewModel.getItem(it){
+                            viewModel.getItem(it) {
                                 qtyFocusRequester.requestFocus()
                             }
 //                            keyboardController?.hide()
@@ -305,36 +314,68 @@ fun AddUpdateSalesItemScreen(
                     Body(
                         qtyFocusRequester = qtyFocusRequester,
                         qty = state.qty,
+                        cost = state.cost,
                         crtn = state.crtn,
-                        rate = state.rate,
-                        crtnRate = state.crtnRate,
+                        crtnSize = state.crtnSize,
                         qtyEnabled = state.qtyEnabled,
                         crtnEnabled = state.crtnEnabled,
-                        rateEnabled = state.rateEnabled,
-                        crtnRateEnabled = state.crtnRateEnabled,
-                        customerId = state.sales.customerId ?: 0L,
-                        lastRate = state.lastRate,
-                        lastCrtnRate = state.lastCrtnRate,
                         stockPcs = state.stockPcs,
                         stockCrtn = state.stockCrtn,
                         warehouseStock = state.warehouseStock,
-                        cost = state.cost,
-                        crtnSize = state.crtnSize,
-                        rates = state.rates,
+                        oldRates = state.oldRates,
                         isDiscRsPer = state.isDiscRsPer,
                         disc = state.disc,
+                        calculatedDisc = state.calculatedDisc,
+                        tax = state.tax,
                         totalDisc = state.totalDisc,
+                        totalTax = state.totalTax,
+                        finalCost = state.finalCost,
+                        costCrtn = state.costCrtn,
+                        grossTotal = state.grossTotal,
+                        calculatedTax = state.calculatedTax,
+                        freezeDisc = state.freezeDisc,
+                        freezeTax = state.freezeTax,
                         onQtyChange = viewModel::onQtyChange,
+                        onCostChange = viewModel::onCostChange,
                         onCrtnChange = viewModel::onCrtnChange,
-                        onRateChange = viewModel::onRateChange,
-                        onCrtnRateChange = viewModel::onCrtnRateChange,
                         onDiscChange = viewModel::onDiscChange,
                         onIsDiscRsPerChange = viewModel::onIsDiscRsPerChange,
+                        onTaxChange = viewModel::onTaxChange,
+                        onFreezeDiscChange = viewModel::onFreezeDiscChange,
+                        onFreezeTaxChange = viewModel::onFreezeTaxChange,
+                    )
+                    SaleRates(
+                        retail = state.retail,
+                        wholesale = state.wholesale,
+                        rate3 = state.rate3,
+                        rate4 = state.rate4,
+                        crtnRate = state.crtnRate,
+                        marketPrice = state.marketPrice,
+                        retailEnabled = state.retailEnabled,
+                        wholesaleEnabled = state.wholesaleEnabled,
+                        crtnRateEnabled = state.crtnRateEnabled,
+                        onRetailChange = viewModel::onRetailChange,
+                        onWholesaleChange = viewModel::onWholesaleChange,
+                        onRate3Change = viewModel::onRate3Change,
+                        onRate4Change = viewModel::onRate4Change,
+                        onCrtnRateChange = viewModel::onCrtnRateChange,
+                        onMarketPriceChange = viewModel::onMarketPriceChange,
+                    )
+                    Others(
+                        isNewStock = state.isNewStock,
+                        lockPcs = state.lockPcs,
+                        lockCrtn = state.lockCrtn,
+                        expiry = state.expiry,
+                        onIsNewStockChange = viewModel::onIsNewStockChange,
+                        onLockPcsChange = viewModel::onLockPcsChange,
+                        onLockCrtnChange = viewModel::onLockCrtnChange,
+                        onExpiryChange = viewModel::onExpiryChange,
                     )
                 }
 
                 Box(
                     modifier = Modifier
+                        .padding(ConstantPaddings.BODY_HORIZONTAL)
                         .windowInsetsPadding(
                             WindowInsets.navigationBars
                                 .union(WindowInsets.ime)
@@ -371,7 +412,8 @@ private fun ItemnameBox(
 ) {
     Row(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .padding(ConstantPaddings.BODY_HORIZONTAL),
         verticalAlignment = Alignment.CenterVertically
     ) {
         AutoCompleteItemsTextbox(
@@ -427,118 +469,227 @@ private fun ItemnameBox(
 private fun Body(
     qtyFocusRequester: FocusRequester? = null,
     qty: String,
+    cost: String,
     crtn: String,
-    rate: String,
-    crtnRate: String,
+    crtnSize: Int,
     qtyEnabled: Boolean,
     crtnEnabled: Boolean,
-    rateEnabled: Boolean,
-    crtnRateEnabled: Boolean,
-    customerId: Long,
-    lastRate: Double,
-    lastCrtnRate: Double,
     stockPcs: Double,
     stockCrtn: Long,
     warehouseStock: String,
-    cost: Double,
-    crtnSize: Int,
-    rates: List<String>,
+    oldRates: String,
     disc: String,
     isDiscRsPer: Boolean,
+    calculatedDisc: Double,
+    tax: String,
     totalDisc: Double,
+    totalTax: Double,
+    finalCost: Double,
+    costCrtn: Double,
+    grossTotal: Double,
+    calculatedTax: Double,
+    freezeDisc: Boolean,
+    freezeTax: Boolean,
     onQtyChange: (String) -> Unit,
+    onCostChange: (String) -> Unit,
     onCrtnChange: (String) -> Unit,
-    onRateChange: (String) -> Unit,
-    onCrtnRateChange: (String) -> Unit,
     onDiscChange: (String) -> Unit,
     onIsDiscRsPerChange: (Boolean) -> Unit,
+    onTaxChange: (String) -> Unit,
+    onFreezeDiscChange: (Boolean) -> Unit,
+    onFreezeTaxChange: (Boolean) -> Unit,
 ) {
-    Row {
-        Textbox(
-            value = qty,
-            onValueChange = onQtyChange,
-            modifier = Modifier
-                .weight(1f),
-            label = {
-                Text("Qty")
-            },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Decimal
-            ),
-            enabled = qtyEnabled,
-            focusRequester = qtyFocusRequester,
-        )
-        Spacer(Modifier.width(8.dp))
-        TextboxCB(
-            value = rate,
-            onValueChange = onRateChange,
-            modifier = Modifier
-                .weight(1f),
-            label = {
-                Text("Rate")
-            },
-            items = rates,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Decimal
-            ),
-            enabled = rateEnabled,
-            readOnly = HP.userRights.changeRates == false,
-        )
-    }
-    if (HP.settings.saleCartons == true) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(ConstantPaddings.BODY_HORIZONTAL),
+    ) {
         Row {
             Textbox(
-                value = if (HP.getIntValue(crtn) > 0) crtn else "",
-                onValueChange = onCrtnChange,
+                value = qty,
+                onValueChange = onQtyChange,
                 modifier = Modifier
                     .weight(1f),
                 label = {
-                    Text("Crtn")
+                    Text("Qty")
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal
                 ),
-                enabled = crtnEnabled,
+                enabled = qtyEnabled,
+                focusRequester = qtyFocusRequester,
             )
             Spacer(Modifier.width(8.dp))
             Textbox(
-                value = crtnRate,
-                onValueChange = onCrtnRateChange,
+                value = cost,
+                onValueChange = onCostChange,
                 modifier = Modifier
                     .weight(1f),
-                label = {
-                    Text("Crtn Rate")
+                trailingIcon = {
+                    AppIconButton(
+                        icon = R.drawable.calculate,
+                        onClick = {
+                            onCostChange(HP.evaluateExpression(cost))
+                        },
+                        size = 20.dp,
+                    )
                 },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Decimal
-                ),
-                enabled = crtnRateEnabled,
-                readOnly = HP.userRights.changeRates == false,
+                label = {
+                    Text("Cost")
+                },
             )
         }
-    }
-    if (HP.userRights.discount == true) {
-        DiscountTextbox(
-            value = disc,
-            onValueChange = onDiscChange,
-            isDiscRsPer = isDiscRsPer,
-            onIsDiscRsPerChange = onIsDiscRsPerChange,
-            modifier = Modifier
-                .fillMaxWidth(),
-            padding = PaddingValues(top = 4.dp)
-        )
+        if (HP.settings.saleCartons == true) {
+            Row {
+                Textbox(
+                    value = if (HP.getIntValue(crtn) > 0) crtn else "",
+                    onValueChange = onCrtnChange,
+                    modifier = Modifier
+                        .weight(1f),
+                    label = {
+                        Text("Crtn")
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal
+                    ),
+                    enabled = crtnEnabled,
+                )
+                Spacer(Modifier.width(8.dp))
+                Textbox(
+                    value = crtnSize.toString(),
+                    onValueChange = {},
+                    modifier = Modifier
+                        .weight(1f),
+                    label = {
+                        Text("PCS in Carton")
+                    },
+                    readOnly = true,
+                )
+            }
+        }
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
         ) {
-            BalanceBox(
-                text = "Rs. ${HP.formatDecimal(totalDisc)}"
+            Column(
+                modifier = Modifier
+                    .weight(1f),
+            ) {
+                DiscountTextbox(
+                    value = disc,
+                    onValueChange = onDiscChange,
+                    isDiscRsPer = isDiscRsPer,
+                    onIsDiscRsPerChange = onIsDiscRsPerChange,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    padding = PaddingValues(top = 4.dp)
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    BalanceBox(
+                        text = "Rs. ${HP.formatDecimal(calculatedDisc)}",
+                    )
+                }
+            }
+            Spacer(Modifier.width(8.dp))
+            AppSwitch(
+                modifier = Modifier.padding(top = 16.dp),
+                checked = freezeDisc,
+                onCheckedChange = onFreezeDiscChange,
+                label = ""
             )
         }
         Spacer(Modifier.height(8.dp))
-    }
-    if (HP.settings.showItemStock == true) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f),
+            ) {
+                Textbox(
+                    value = tax,
+                    onValueChange = onTaxChange,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    label = {
+                        Text("Tax")
+                    },
+                    padding = PaddingValues(top = 4.dp),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal
+                    ),
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    BalanceBox(
+                        text = "Rs. ${HP.formatDecimal(calculatedTax)}",
+                    )
+                }
+            }
+            Spacer(Modifier.width(8.dp))
+            AppSwitch(
+                modifier = Modifier.padding(top = 16.dp),
+                checked = freezeTax,
+                onCheckedChange = onFreezeTaxChange,
+                label = ""
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(0.5f),
+            ) {
+                HeadingMedium("Total Disc: ")
+                LabelMedium(HP.formatDecimal(totalDisc))
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                HeadingMedium("Total Tax: ")
+                LabelMedium(HP.formatDecimal(totalTax))
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(0.5f),
+            ) {
+                HeadingMedium("Final Cost: ")
+                LabelMedium(HP.formatDecimal(finalCost))
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                HeadingMedium("Cost Crtn: ")
+                LabelMedium(HP.formatDecimal(costCrtn))
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            HeadingLarge("Gross Total: ")
+            LabelLarge(HP.formatDecimal(grossTotal))
+        }
         Spacer(Modifier.height(8.dp))
         Row(
             modifier = Modifier
@@ -561,64 +712,193 @@ private fun Body(
                 }
             }
         }
-    }
-    if (HP.settings.showCustomerLastRate == true && customerId != 0L) {
-        Spacer(Modifier.height(8.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-        ) {
-            Row(
+        if (warehouseStock.isNotEmpty()) {
+            Spacer(Modifier.height(8.dp))
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth(if (HP.settings.saleCartons == true) 0.5f else 1f),
+                    .fillMaxWidth(),
             ) {
-                HeadingMedium("Last Rate: ")
-                LabelMedium(HP.formatDecimal(lastRate))
-            }
-            if (HP.settings.saleCartons == true) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    HeadingMedium("Last Crtn Rate: ")
-                    LabelMedium(HP.formatDecimal(lastCrtnRate))
-                }
+                HeadingMedium("Stock in warehouse: ")
+                Spacer(Modifier.height(2.dp))
+                LabelMedium(warehouseStock)
             }
         }
-    }
-    if (HP.userRights.seeCost == true) {
-        Spacer(Modifier.height(8.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-        ) {
-            Row(
+        if (oldRates.isNotEmpty()) {
+            Spacer(Modifier.height(8.dp))
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth(if (HP.settings.saleCartons == true) 0.5f else 1f),
+                    .fillMaxWidth(),
             ) {
-                HeadingMedium("Cost: ")
-                LabelMedium(HP.formatDecimal(cost))
-            }
-            if (HP.settings.saleCartons == true) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    HeadingMedium("Cost Crtn: ")
-                    LabelMedium(HP.formatDecimal(cost * crtnSize))
-                }
+                HeadingMedium("Last Purchases: ")
+                Spacer(Modifier.height(2.dp))
+                LabelMedium(oldRates)
             }
         }
     }
-    if (warehouseStock.isNotEmpty()) {
+}
+
+@Composable
+private fun SaleRates(
+    retail: String,
+    wholesale: String,
+    rate3: String,
+    rate4: String,
+    crtnRate: String,
+    marketPrice: String,
+    retailEnabled: Boolean,
+    wholesaleEnabled: Boolean,
+    crtnRateEnabled: Boolean,
+
+    onRetailChange: (String) -> Unit,
+    onWholesaleChange: (String) -> Unit,
+    onRate3Change: (String) -> Unit,
+    onRate4Change: (String) -> Unit,
+    onCrtnRateChange: (String) -> Unit,
+    onMarketPriceChange: (String) -> Unit,
+) {
+    ExpandableSection(
+        title = "Sale Rates",
+        initiallyExpanded = false,
+    ) {
         Spacer(Modifier.height(8.dp))
-        Column(
+        // Retail & Wholesale
+        Row {
+            Textbox(
+                value = retail,
+                onValueChange = onRetailChange,
+                modifier = Modifier.weight(1f),
+                label = {
+                    Text(
+                        text = if (HP.settings.fourRateSystem == true) "Rate 1" else "Retail"
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal
+                ),
+                enabled = retailEnabled,
+            )
+            Spacer(Modifier.width(8.dp))
+            Textbox(
+                value = wholesale,
+                onValueChange = onWholesaleChange,
+                modifier = Modifier.weight(1f),
+                label = {
+                    Text(
+                        text = if (HP.settings.fourRateSystem == true) "Rate 2" else "Wholesale"
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal
+                ),
+                enabled = wholesaleEnabled,
+            )
+        }
+
+        // Rate3 & Rate4
+        if (HP.settings.fourRateSystem == true) {
+            Row {
+                Textbox(
+                    value = rate3,
+                    onValueChange = onRate3Change,
+                    modifier = Modifier.weight(1f),
+                    label = {
+                        Text("Rate 3")
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal
+                    ),
+                )
+                Spacer(Modifier.width(8.dp))
+                Textbox(
+                    value = rate4,
+                    onValueChange = onRate4Change,
+                    modifier = Modifier.weight(1f),
+                    label = {
+                        Text("Rate 3")
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal
+                    ),
+                )
+            }
+        }
+
+        // Carton Rate & PCS in Carton
+        if (HP.settings.saleCartons == true) {
+            Row {
+                Textbox(
+                    value = crtnRate,
+                    onValueChange = onCrtnRateChange,
+                    modifier = Modifier.weight(1f),
+                    label = {
+                        Text("Crtn Rate")
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal
+                    ),
+                    enabled = crtnRateEnabled,
+                )
+                Spacer(Modifier.width(8.dp))
+                Textbox(
+                    value = marketPrice,
+                    onValueChange = onMarketPriceChange,
+                    modifier = Modifier.weight(1f),
+                    label = {
+                        Text("Market Price")
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal
+                    ),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun Others(
+    isNewStock: Boolean,
+    lockPcs: Boolean,
+    lockCrtn: Boolean,
+    expiry: LocalDate,
+    onIsNewStockChange: (Boolean) -> Unit,
+    onLockPcsChange: (Boolean) -> Unit,
+    onLockCrtnChange: (Boolean) -> Unit,
+    onExpiryChange: (LocalDate) -> Unit,
+) {
+    ExpandableSection(
+        title = "Others",
+        initiallyExpanded = false,
+    ) {
+        Spacer(Modifier.height(8.dp))
+        AppSwitch(
+            checked = isNewStock,
+            onCheckedChange = onIsNewStockChange,
+            label = "Sale current stock first"
+        )
+        Spacer(Modifier.height(16.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = lockPcs,
+                onCheckedChange = onLockPcsChange,
+                label = "Lock PCS"
+            )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = lockCrtn,
+                onCheckedChange = onLockCrtnChange,
+                label = "Lock CRTN"
+            )
+        }
+        Spacer(Modifier.height(16.dp))
+        DateTextbox(
             modifier = Modifier
                 .fillMaxWidth(),
-        ) {
-            HeadingMedium("Stock in warehouse: ")
-            Spacer(Modifier.height(2.dp))
-            LabelMedium(warehouseStock)
-        }
+            date = expiry,
+            onDateChange = onExpiryChange,
+            label = "Expiry"
+        )
+        Spacer(Modifier.height(8.dp))
     }
 }

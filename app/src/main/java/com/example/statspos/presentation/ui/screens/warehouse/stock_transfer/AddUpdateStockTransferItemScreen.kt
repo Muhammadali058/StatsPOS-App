@@ -39,6 +39,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
@@ -99,6 +100,8 @@ fun AddUpdateStockTransferItemScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showBarcodeScanner by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
+    val itemFocusRequester = remember { FocusRequester() }
+    val qtyFocusRequester = remember { FocusRequester() }
 
     LaunchedEffect(event) {
         checkEvent(
@@ -134,7 +137,9 @@ fun AddUpdateStockTransferItemScreen(
             val item = sharedViewModelState.item
             item?.run {
                 viewModel.onItemnameChange(itemname!!)
-                viewModel.getItem(itemname!!)
+                viewModel.getItem(itemname!!){
+                    qtyFocusRequester.requestFocus()
+                }
                 sharedViewModel.consumeDataChanged()
             }
         }
@@ -172,7 +177,9 @@ fun AddUpdateStockTransferItemScreen(
             },
             onScanned = {
                 viewModel.onItemnameChange(it)
-                viewModel.getItem(it)
+                viewModel.getItem(it){
+                    qtyFocusRequester.requestFocus()
+                }
                 showBarcodeScanner = false
             }
         )
@@ -242,18 +249,24 @@ fun AddUpdateStockTransferItemScreen(
                         enabled = false,
                     )
                     ItemnameBox(
+                        itemFocusRequester = itemFocusRequester,
                         value = state.itemname,
                         onValueChange = viewModel::onItemnameChange,
                         onItemSelected = {
-                            viewModel.getItem(it)
-                            keyboardController?.hide()
+                            viewModel.getItem(it){
+                                qtyFocusRequester.requestFocus()
+                            }
+//                            keyboardController?.hide()
                         },
                         onSearchClick = {
-                            viewModel.getItem(it)
-                            keyboardController?.hide()
+                            viewModel.getItem(it){
+                                qtyFocusRequester.requestFocus()
+                            }
+//                            keyboardController?.hide()
                         },
                         onEndIconClick = {
                             viewModel.onItemnameChange("")
+                            itemFocusRequester.requestFocus()
                         },
                         onBarcodeClick = {
                             showBarcodeScanner = true
@@ -261,12 +274,15 @@ fun AddUpdateStockTransferItemScreen(
                         onSearchItemClick = onSearchItemClick
                     )
                     Body(
+                        qtyFocusRequester = qtyFocusRequester,
                         stockPcs = state.stockPcs,
                         stockCrtn = state.stockCrtn,
                         wStockPcs = state.wStockPcs,
                         wStockCrtn = state.wStockCrtn,
                         qty = state.qty,
                         crtn = state.crtn,
+                        qtyEnabled = state.qtyEnabled,
+                        crtnEnabled = state.crtnEnabled,
                         onQtyChange = viewModel::onQtyChange,
                         onCrtnChange = viewModel::onCrtnChange,
                     )
@@ -284,7 +300,9 @@ fun AddUpdateStockTransferItemScreen(
                     } else {
                         SaveButton {
                             viewModel.insertOrUpdateData {
-                                goBackWithResult()
+                                sharedViewModel.notifyDataChanged()
+                                itemFocusRequester.requestFocus()
+//                                goBackWithResult()
                             }
                         }
                     }
@@ -301,6 +319,7 @@ fun AddUpdateStockTransferItemScreen(
 
 @Composable
 private fun ItemnameBox(
+    itemFocusRequester: FocusRequester? = null,
     value: String,
     onValueChange: (String) -> Unit,
     onItemSelected: (String) -> Unit,
@@ -339,7 +358,8 @@ private fun ItemnameBox(
             },
             keyboardOptions = KeyboardOptions(
                 imeAction = ImeAction.Go
-            )
+            ),
+            focusRequester = itemFocusRequester,
         )
         Spacer(Modifier.width(4.dp))
         AppIconButton(
@@ -364,12 +384,15 @@ private fun ItemnameBox(
 
 @Composable
 private fun Body(
+    qtyFocusRequester: FocusRequester? = null,
     stockPcs: Double,
     stockCrtn: Long,
     wStockPcs: Double,
     wStockCrtn: Long,
     qty: String,
     crtn: String,
+    qtyEnabled: Boolean,
+    crtnEnabled: Boolean,
     onQtyChange: (String) -> Unit,
     onCrtnChange: (String) -> Unit,
 ) {
@@ -466,6 +489,8 @@ private fun Body(
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal
             ),
+            enabled = qtyEnabled,
+            focusRequester = qtyFocusRequester,
         )
         if (HP.settings.saleCartons == true) {
             Spacer(Modifier.width(8.dp))
@@ -480,6 +505,7 @@ private fun Body(
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal
                 ),
+                enabled = crtnEnabled,
             )
         }
     }
@@ -492,12 +518,15 @@ private fun Prev() {
         Modifier.fillMaxSize()
     ) {
         Body(
+            null,
             0.0,
             0L,
             0.0,
             0L,
             "",
             "",
+            true,
+            true,
             {},
             {},
         )

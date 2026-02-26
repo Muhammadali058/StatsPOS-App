@@ -282,6 +282,7 @@ private fun Basic(
             label = {
                 Text("Default Rate")
             },
+            showEndIcon = false,
         )
         ComboBox(
             modifier = Modifier
@@ -292,6 +293,7 @@ private fun Basic(
             label = {
                 Text("Default Discount")
             },
+            showEndIcon = false,
         )
         ComboBox(
             modifier = Modifier
@@ -302,6 +304,7 @@ private fun Basic(
             label = {
                 Text("Print Language")
             },
+            showEndIcon = false,
         )
     }
 }

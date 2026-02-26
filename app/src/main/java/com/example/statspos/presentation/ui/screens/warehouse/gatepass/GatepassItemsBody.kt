@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +40,7 @@ import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListImageView
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
@@ -235,28 +238,42 @@ private fun ListCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            LabelLarge(item.itemname.toString())
-        }
-        Spacer(Modifier.height(2.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-        ) {
-            Row(
+            // Image
+            ListImageView(
+                imageUrl = item.imageUrl,
+                modifier = Modifier
+                    .size(60.dp),
+            ) {
+                Spacer(Modifier.width(8.dp))
+            }
+
+            Column(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                HeadingMedium("Qty: ")
-                LabelMedium(HP.formatDecimal(item.qty))
-            }
-            if (HP.settings.saleCartons == true) {
+                LabelLarge(item.itemname.toString())
                 Spacer(Modifier.height(2.dp))
                 Row(
                     modifier = Modifier
-                        .weight(1f),
+                        .fillMaxWidth(),
                 ) {
-                    HeadingMedium("Crtn: ")
-                    LabelMedium(item.crtn.toString())
+                    Row(
+                        modifier = Modifier
+                            .weight(1f),
+                    ) {
+                        HeadingMedium("Qty: ")
+                        LabelMedium(HP.formatDecimal(item.qty))
+                    }
+                    if (HP.settings.saleCartons == true) {
+                        Spacer(Modifier.height(2.dp))
+                        Row(
+                            modifier = Modifier
+                                .weight(1f),
+                        ) {
+                            HeadingMedium("Crtn: ")
+                            LabelMedium(item.crtn.toString())
+                        }
+                    }
                 }
             }
         }

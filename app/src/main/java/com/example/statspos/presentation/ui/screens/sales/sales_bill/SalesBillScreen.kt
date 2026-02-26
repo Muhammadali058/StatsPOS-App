@@ -6,10 +6,13 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -24,6 +27,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -32,10 +36,13 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.example.statspos.R
 import com.example.statspos.domain.models.sales.Sales
 import com.example.statspos.domain.models.sales.SalesBills
+import com.example.statspos.presentation.ui.components.AppDropdownMenu
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
+import com.example.statspos.presentation.ui.components.AppText
 import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.PasswordDialog
@@ -59,6 +66,13 @@ private sealed class Routes : NavKey {
     @Serializable
     data class AddUpdateSalesItem(val updateId: Long, val isUpdate: Boolean, val sales: Sales) :
         Routes()
+
+    @Serializable
+    data class ViewBillMargin(
+        val invoiceId: Long,
+        val isPostedBill: Boolean,
+        val totalDisc: Double
+    ) : Routes()
 
     @Serializable
     data object SearchItem : Routes()
@@ -142,6 +156,9 @@ fun SalesBillScreen(
                     onAddUpdateSalesItem = { updateId, isUpdate, sales ->
                         navigate(Routes.AddUpdateSalesItem(updateId, isUpdate, sales))
                     },
+                    onMarginClick = { totalDisc ->
+                        navigate(Routes.ViewBillMargin(invoiceId, isPostedBill, totalDisc))
+                    },
                     onBack = onBack,
                     goBackWithResult = {
                         goBackWithResult()
@@ -157,6 +174,16 @@ fun SalesBillScreen(
                     onSearchItemClick = {
                         navigate(Routes.SearchItem)
                     },
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<Routes.ViewBillMargin> { key ->
+                ViewSalesBillMarginScreen(
+                    invoiceId = key.invoiceId,
+                    isPostedBill = key.isPostedBill,
+                    totalDisc = key.totalDisc,
                     onBack = {
                         backStack.removeLastOrNull()
                     }
@@ -183,6 +210,7 @@ private fun Home(
     isPendingBill: Boolean = false,
     isPostedBill: Boolean = false,
     onAddUpdateSalesItem: (Long, Boolean, Sales) -> Unit,
+    onMarginClick: (Double) -> Unit,
     onBack: () -> Unit,
     goBackWithResult: () -> Unit,
 ) {
@@ -198,6 +226,7 @@ private fun Home(
     var showErrorDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
+    var menuExpanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(event) {
         checkEvent(
@@ -301,6 +330,34 @@ private fun Home(
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
                                 }
+                            }
+                        }
+
+                        if (HP.userRights.seeMargin == true) {
+                            IconButton(
+                                onClick = {
+                                    menuExpanded = true
+                                }
+                            ) {
+                                AppIcon(
+                                    icon = Icons.Default.MoreVert,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+
+                            AppDropdownMenu(
+                                expanded = menuExpanded,
+                                onDismissRequest = { menuExpanded = false },
+                                modifier = Modifier
+                                    .width(200.dp),
+                            ) {
+                                DropdownMenuItem(
+                                    text = { AppText("Margin") },
+                                    onClick = {
+                                        menuExpanded = false
+                                        onMarginClick(state.totalDisc)
+                                    }
+                                )
                             }
                         }
                     }

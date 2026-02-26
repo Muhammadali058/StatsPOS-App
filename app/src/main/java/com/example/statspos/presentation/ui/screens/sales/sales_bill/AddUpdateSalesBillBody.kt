@@ -298,7 +298,7 @@ private fun Basic(
         )
         if (HP.userRights.discount == true) {
             DiscountTextbox(
-                value = if (HP.getDoubleValue(disc) > 0.0) disc else "",
+                value = disc,
                 onValueChange = onDiscChange,
                 isDiscRsPer = isDiscRsPer,
                 onIsDiscRsPerChange = onIsDiscRsPerChange,
@@ -312,7 +312,7 @@ private fun Basic(
                 horizontalArrangement = Arrangement.Center,
             ) {
                 BalanceBox(
-                    text = "Rs. $totalDisc"
+                    text = "Rs. ${HP.formatDecimal(totalDisc)}"
                 )
             }
             Spacer(Modifier.height(8.dp))

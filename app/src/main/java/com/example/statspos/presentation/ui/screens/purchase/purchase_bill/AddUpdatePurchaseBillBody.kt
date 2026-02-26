@@ -251,7 +251,7 @@ private fun Basic(
         }
         Spacer(Modifier.height(8.dp))
         DiscountTextbox(
-            value = if (HP.getDoubleValue(disc) > 0.0) disc else "",
+            value = disc,
             onValueChange = onDiscChange,
             isDiscRsPer = isDiscRsPer,
             onIsDiscRsPerChange = onIsDiscRsPerChange,
@@ -265,7 +265,7 @@ private fun Basic(
             horizontalArrangement = Arrangement.Center,
         ) {
             BalanceBox(
-                text = "Rs. $totalDisc"
+                text = "Rs. ${HP.formatDecimal(totalDisc)}"
             )
         }
         Spacer(Modifier.height(8.dp))
@@ -389,14 +389,14 @@ private fun Others(
                 addNone = true,
             )
         }
-        Textbox(
-            value = expense,
-            onValueChange = onExpenseChange,
-            modifier = Modifier.fillMaxWidth(),
-            label = {
-                Text("Expense")
-            }
-        )
+//        Textbox(
+//            value = if (HP.getDoubleValue(expense) > 0.0) expense else "",
+//            onValueChange = onExpenseChange,
+//            modifier = Modifier.fillMaxWidth(),
+//            label = {
+//                Text("Expense")
+//            }
+//        )
         Textbox(
             value = refInvoiceNo,
             onValueChange = onRefInvoiceNoChange,

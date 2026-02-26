@@ -37,6 +37,8 @@ class AddUpdateStockTransferItemViewModel @Inject constructor(
         val wStockCrtn: Long = 0L,
 
         // Extra
+        val qtyEnabled: Boolean = true,
+        val crtnEnabled: Boolean = true,
         val warehouseName: String = "",
         val itemname: String = "",
         val isUpdate: Boolean = false,
@@ -111,13 +113,11 @@ class AddUpdateStockTransferItemViewModel @Inject constructor(
             it.copy(
                 itemname = value,
                 itemId = 0L,
-
-                stockPcs = 0.0,
-                stockCrtn = 0L,
-                wStockPcs = 0.0,
-                wStockCrtn = 0L,
             )
         }
+
+        if (value.isEmpty())
+            clearTextboxes()
     }
 
     fun onWarehouseNameChange(value: String) {
@@ -170,7 +170,7 @@ class AddUpdateStockTransferItemViewModel @Inject constructor(
                 is Resource.Error -> showError(result.error)
                 is Resource.Information -> showMessage(result.message)
                 is Resource.Success -> {
-//                    clearTextboxes()
+                    clearTextboxes()
                     onSuccess()
                 }
             }
@@ -218,7 +218,7 @@ class AddUpdateStockTransferItemViewModel @Inject constructor(
         }
     }
 
-    fun getItem(value: String) {
+    fun getItem(value: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -245,8 +245,12 @@ class AddUpdateStockTransferItemViewModel @Inject constructor(
                                 stockCrtn = item.stockCrtn!!,
                                 wStockPcs = item.wStockPcs!!,
                                 wStockCrtn = item.wStockCrtn!!,
+
+                                qtyEnabled = item.crtnSize!! != 1,
+                                crtnEnabled = item.crtnSize!! == 1 || item.crtnSize!! > 1,
                             )
                         }
+                        onSuccess()
                     } else {
                         state.update {
                             it.copy(
@@ -256,10 +260,13 @@ class AddUpdateStockTransferItemViewModel @Inject constructor(
                                 stockCrtn = 0L,
                                 wStockPcs = 0.0,
                                 wStockCrtn = 0L,
+                                qtyEnabled = true,
+                                crtnEnabled = true,
                             )
                         }
                         showSnackbar("Items not found")
                     }
+
                 }
             }
         }
@@ -299,6 +306,13 @@ class AddUpdateStockTransferItemViewModel @Inject constructor(
                 itemId = 0L,
                 qty = "",
                 crtn = "",
+
+                stockPcs = 0.0,
+                stockCrtn = 0L,
+                wStockPcs = 0.0,
+                wStockCrtn = 0L,
+                qtyEnabled = true,
+                crtnEnabled = true,
 
                 isUpdate = false,
                 updateId = 0L,

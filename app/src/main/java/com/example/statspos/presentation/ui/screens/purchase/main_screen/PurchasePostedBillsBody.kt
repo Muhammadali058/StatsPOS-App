@@ -109,7 +109,7 @@ fun PurchasePostedBillsBody(
 
     if (showPasswordDialog) {
         PasswordDialog(
-            passwordFor = PasswordFor.EDIT_SALES_BILL,
+            passwordFor = PasswordFor.EDIT_PURCHASE_BILL,
             onDismiss = {
                 showPasswordDialog = false
             },
@@ -148,7 +148,7 @@ fun PurchasePostedBillsBody(
                 ComboBox(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    items = HP.salesPostedBillsSearchBy,
+                    items = HP.purchasePostedBillsSearchBy,
                     selectedItem = state.searchBy,
                     onItemSelected = viewModel::onSearchByChange,
                     label = {
@@ -175,7 +175,7 @@ fun PurchasePostedBillsBody(
                     ComboBox(
                         modifier = Modifier
                             .fillMaxWidth(0.5f),
-                        items = HP.salesType,
+                        items = HP.purchaseType,
                         selectedItem = state.purchaseType,
                         onItemSelected = { item ->
                             viewModel.onPurchaseTypeChange(item)
@@ -190,7 +190,7 @@ fun PurchasePostedBillsBody(
                     ComboBox(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        items = HP.salesOn,
+                        items = HP.purchaseOn,
                         selectedItem = state.purchaseOn,
                         onItemSelected = { item ->
                             viewModel.onPurchaseOnChange(item)

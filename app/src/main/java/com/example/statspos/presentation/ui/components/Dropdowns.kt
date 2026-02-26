@@ -41,6 +41,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -75,6 +76,7 @@ fun Dropdown(
     readOnly: Boolean = false,
     singleLine: Boolean = true,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
+    focusRequester: FocusRequester? = null,
     contentPadding: PaddingValues = PaddingValues(
         start = 15.dp,
         top = 10.dp,
@@ -158,6 +160,7 @@ fun Dropdown(
                 }
             },
             keyboardActions = keyboardActions,
+            focusRequester = focusRequester,
             contentPadding = contentPadding,
             padding = padding,
         )

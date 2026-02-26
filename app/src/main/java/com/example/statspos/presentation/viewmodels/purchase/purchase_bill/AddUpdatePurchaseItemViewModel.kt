@@ -69,14 +69,20 @@ class AddUpdatePurchaseItemViewModel @Inject constructor(
         val itemCost: Double = 0.0,
         val stockPcs: Double = 0.0,
         val stockCrtn: Long = 0L,
+        val stockWarningMax: Int = 0,
         val warehouseStock: String = "",
+        val oldRates: String = "",
         val qtyEnabled: Boolean = true,
         val crtnEnabled: Boolean = true,
-        val rateEnabled: Boolean = true,
+        val retailEnabled: Boolean = true,
+        val wholesaleEnabled: Boolean = true,
         val crtnRateEnabled: Boolean = true,
+        val freezeDisc: Boolean = true,
+        val freezeTax: Boolean = true,
 
         val isExists: Boolean = false,
         val isExistsResult: Boolean = false,
+        val stockWarningResult: Boolean = false,
 
         val isPostedBill: Boolean = false,
         val isUpdate: Boolean = false,
@@ -221,6 +227,30 @@ class AddUpdatePurchaseItemViewModel @Inject constructor(
         updateTotal()
     }
 
+    fun onIsNewStockChange(value: Boolean) {
+        state.update { it.copy(isNewStock = value) }
+    }
+
+    fun onLockPcsChange(value: Boolean) {
+        state.update { it.copy(lockPcs = value) }
+    }
+
+    fun onLockCrtnChange(value: Boolean) {
+        state.update { it.copy(lockCrtn = value) }
+    }
+
+    fun onExpiryChange(value: LocalDate) {
+        state.update { it.copy(expiry = value) }
+    }
+
+    fun onFreezeDiscChange(value: Boolean) {
+        state.update { it.copy(freezeDisc = value) }
+    }
+
+    fun onFreezeTaxChange(value: Boolean) {
+        state.update { it.copy(freezeTax = value) }
+    }
+
     // endregion
 
     // region Network calls
@@ -353,7 +383,7 @@ class AddUpdatePurchaseItemViewModel @Inject constructor(
                 itemname = item.itemname!!,
                 itemId = item.id!!,
 
-                cost = if(item.lastCost!! == 0.0) item.cost.toString() else item.lastCost.toString(),
+                cost = if (item.lastCost!! == 0.0) item.cost.toString() else item.lastCost.toString(),
                 retail = item.retail.toString(),
                 wholesale = item.wholesale.toString(),
                 rate3 = item.rate3.toString(),
@@ -367,6 +397,7 @@ class AddUpdatePurchaseItemViewModel @Inject constructor(
 
                 stockPcs = if (HP.settings.showItemStock == true) item.stockPcs!! else 0.0,
                 stockCrtn = if (HP.settings.showItemStock == true) item.stockCrtn!! else 0,
+                stockWarningMax = item.stockWarningMax!!,
                 lockPcs = item.lockPcs!!,
                 lockCrtn = item.lockCrtn!!,
                 expiry = HP.toLocalDate(item.expiry!!),
@@ -377,6 +408,8 @@ class AddUpdatePurchaseItemViewModel @Inject constructor(
             )
         }
 
+        changeCartonOptions()
+        showOldRates(item.oldRates.toString())
         showWarehouseStock(item.warehouseStock.toString())
         updateTotal()
     }
@@ -416,7 +449,7 @@ class AddUpdatePurchaseItemViewModel @Inject constructor(
             lockPcs = state.value.lockPcs,
             lockCrtn = state.value.lockCrtn,
 
-        )
+            )
 
         return purchaseItem
     }
@@ -456,9 +489,14 @@ class AddUpdatePurchaseItemViewModel @Inject constructor(
 
                 // Extras
                 itemCost = purchaseItem.cost!!,
+                stockPcs = item.stockPcs!!,
+                stockCrtn = item.stockCrtn!!,
+                stockWarningMax = item.stockWarningMax!!,
             )
         }
 
+        changeCartonOptions()
+        showOldRates(item.oldRates.toString())
         showWarehouseStock(item.warehouseStock.toString())
         updateTotal()
     }
@@ -483,13 +521,15 @@ class AddUpdatePurchaseItemViewModel @Inject constructor(
                 marketPrice = "",
 
                 isDiscRsPer = HP.settings.isDefaultDiscRs == true,
-                disc = "",
+//                disc = "",
                 calculatedDisc = 0.0,
                 totalDisc = 0.0,
 
-                tax = "",
+//                tax = "",
+                calculatedTax = 0.0,
                 totalTax = 0.0,
 
+                grossTotal = 0.0,
                 total = 0.0,
                 expiry = LocalDate.now(),
                 isNewStock = false,
@@ -504,15 +544,26 @@ class AddUpdatePurchaseItemViewModel @Inject constructor(
                 itemCost = 0.0,
                 stockPcs = 0.0,
                 stockCrtn = 0L,
+                stockWarningMax = 0,
                 warehouseStock = "",
+                oldRates = "",
                 qtyEnabled = true,
                 crtnEnabled = true,
-                rateEnabled = true,
+                retailEnabled = true,
+                wholesaleEnabled = true,
                 crtnRateEnabled = true,
 
                 isExists = false,
                 isExistsResult = false,
             )
+        }
+
+        if (!state.value.freezeDisc) {
+            state.update { it.copy(disc = "") }
+        }
+
+        if (!state.value.freezeTax) {
+            state.update { it.copy(tax = "") }
         }
     }
 
@@ -536,7 +587,64 @@ class AddUpdatePurchaseItemViewModel @Inject constructor(
             }
         }
 
-        return true
+        if (!state.value.isUpdate) {
+            val stock = state.value.stockPcs + (state.value.stockCrtn * state.value.crtnSize)
+            val qtyPurchased =
+                HP.getDoubleValue(state.value.qty) + (HP.getDoubleValue(state.value.crtn) * state.value.crtnSize)
+            val totalStock = stock + qtyPurchased
+
+            if (state.value.stockWarningMax > 0 && totalStock >= state.value.stockWarningMax) {
+                if (!state.value.stockWarningResult) {
+                    showConfirmDialog(
+                        "Item stock will be over from limit, You want to purchase?",
+                        2
+                    )
+                    return false
+                }
+            }
+        }
+
+        return isValidCartonSize()
+    }
+
+    private fun isValidCartonSize(): Boolean {
+        val retail = HP.getDoubleValue(state.value.retail)
+        val wholesale = HP.getDoubleValue(state.value.wholesale)
+        val crtnRate = HP.getDoubleValue(state.value.crtnRate)
+        val crtnSize = state.value.crtnSize
+
+        if (crtnSize == 0)
+            return true
+        else if (crtnSize == 1) {
+            if (crtnRate == 0.0) {
+                showMessage("Please enter carton rate")
+                return false
+            }
+        } else {
+            if (crtnRate == 0.0) {
+                showMessage("Please enter carton rate")
+                return false
+            } else if (retail == 0.0 && wholesale == 0.0) {
+                showMessage("Please enter sale rate")
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private fun showOldRates(oldRates: String) {
+        val values = Gson().get<JsonArray>(oldRates).map {
+            it.toString().replace("\"", "")
+        }
+
+        var result = ""
+        for (value in values) {
+            val temp = value.split(" | ")
+            result += "${temp[0]} ${temp[3]}\n${temp[1]}\n${temp[2]}\n\n"
+        }
+
+        state.update { it.copy(oldRates = result) }
     }
 
     private fun showWarehouseStock(warehouseStock: String) {
@@ -632,28 +740,57 @@ class AddUpdatePurchaseItemViewModel @Inject constructor(
         }
     }
 
-    private fun getDiscount(): Double {
-        if (state.value.itemId == 0L)
-            return 0.0
-        else {
-            val disc = HP.getDoubleValue(state.value.disc)
-            val qty = HP.getDoubleValue(state.value.qty)
-            if (state.value.isDiscRsPer) {
-                val totalDisc = qty * disc
-                state.update { it.copy(calculatedDisc = disc) }
-                return totalDisc
-            } else {
-                val rate = HP.getDoubleValue(state.value.cost)
-                val totalDisc = (disc / 100) * rate
-                state.update { it.copy(calculatedDisc = totalDisc) }
-
-                return totalDisc * qty
-            }
-        }
-    }
-
     fun setIsExistsResult(value: Boolean) {
         state.update { it.copy(isExistsResult = value) }
+    }
+
+    fun setStockWarningResult(value: Boolean) {
+        state.update { it.copy(stockWarningResult = value) }
+    }
+
+    private fun changeCartonOptions() {
+        if (HP.settings.saleCartons == true) {
+            if (state.value.crtnSize == 0) {
+                state.update {
+                    it.copy(
+                        crtnEnabled = false,
+                        crtnRateEnabled = false,
+                    )
+                }
+            } else {
+                state.update {
+                    it.copy(
+                        crtnEnabled = true,
+                        crtnRateEnabled = true,
+                    )
+                }
+            }
+
+            if (state.value.crtnSize == 1) {
+                state.update {
+                    it.copy(
+                        qtyEnabled = false,
+                        retailEnabled = false,
+                        wholesaleEnabled = false,
+                    )
+                }
+            } else {
+                state.update {
+                    it.copy(
+                        qtyEnabled = true,
+                        retailEnabled = true,
+                        wholesaleEnabled = true,
+                    )
+                }
+            }
+        } else {
+            state.update {
+                it.copy(
+                    crtnEnabled = false,
+                    crtnRateEnabled = false,
+                )
+            }
+        }
     }
 
     // endregion

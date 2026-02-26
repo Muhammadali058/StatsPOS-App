@@ -60,9 +60,10 @@ import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
 @Composable
-fun ViewSalesBillItemsScreen(
+fun ViewSalesBillMarginScreen(
     invoiceId: Long,
     isPostedBill: Boolean,
+    totalDisc: Double,
     onBack: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -113,7 +114,12 @@ fun ViewSalesBillItemsScreen(
                 onNavigationClick = {
                     onBack()
                 },
-                title = "Total: ${HP.formatDecimal(state.totalBill, mustDecimals = 1)}",
+                title = "Total Profit: ${
+                    HP.formatDecimal(
+                        rate = (state.totalProfit - totalDisc),
+                        mustDecimals = 1,
+                    )
+                }",
             )
         },
     ) { innerPadding ->
@@ -157,24 +163,50 @@ fun ViewSalesBillItemsScreen(
                     )
                 }
 
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp)
                 ) {
-                    HeadingMedium(text = "Items: ")
-                    LabelMedium(text = state.totalItems.toString())
-                    Spacer(Modifier.width(8.dp))
-                    HeadingMedium(text = "Qty: ")
-                    LabelMedium(text = HP.formatDecimal(state.totalQty))
-                    if (HP.settings.saleCartons == true) {
-                        Spacer(Modifier.width(8.dp))
-                        HeadingMedium(text = "Crtn: ")
-                        LabelMedium(text = state.totalCrtn.toString())
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .weight(1f)
+                        ) {
+                            HeadingMedium(text = "Total Bill: ")
+                            LabelMedium(text = HP.formatDecimal(state.totalBill))
+                        }
+                        Row(
+                            modifier = Modifier
+                                .weight(1f)
+                        ) {
+                            HeadingMedium(text = "Total Cost: ")
+                            LabelMedium(text = HP.formatDecimal(state.totalCost))
+                        }
                     }
-                    Spacer(Modifier.width(8.dp))
-                    HeadingMedium(text = "Disc: ")
-                    LabelMedium(text = HP.formatDecimal(state.totalItemDisc))
+                    Spacer(Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .weight(1f)
+                        ) {
+                            HeadingMedium(text = "Gross Profit: ")
+                            LabelMedium(text = HP.formatDecimal(state.totalProfit))
+                        }
+                        Row(
+                            modifier = Modifier
+                                .weight(1f)
+                        ) {
+                            HeadingMedium(text = "Bill Discount: ")
+                            LabelMedium(text = HP.formatDecimal(totalDisc))
+                        }
+                    }
                 }
             }
         }
@@ -321,8 +353,28 @@ private fun ListCard(
                         modifier = Modifier
                             .weight(1f)
                     ) {
-                        HeadingLarge(text = "Total: ")
-                        LabelLarge(text = HP.formatDecimal(item.total))
+                        HeadingMedium(text = "Total: ")
+                        LabelMedium(text = HP.formatDecimal(item.total))
+                    }
+                }
+                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .weight(.7f)
+                    ) {
+                        HeadingMedium(text = "Cost: ")
+                        LabelMedium(text = HP.formatDecimal(item.cost))
+                    }
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                    ) {
+                        HeadingLarge(text = "Profit: ")
+                        LabelLarge(text = HP.formatDecimal(item.profit))
                     }
                 }
             }

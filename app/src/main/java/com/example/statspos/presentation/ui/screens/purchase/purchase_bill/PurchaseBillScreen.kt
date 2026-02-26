@@ -58,7 +58,11 @@ private sealed class Routes : NavKey {
     data object Home : Routes()
 
     @Serializable
-    data class AddUpdatePurchaseItem(val updateId: Long, val isUpdate: Boolean, val purchase: Purchase) :
+    data class AddUpdatePurchaseItem(
+        val updateId: Long,
+        val isUpdate: Boolean,
+        val purchase: Purchase
+    ) :
         Routes()
 
     @Serializable
@@ -150,18 +154,18 @@ fun PurchaseBillScreen(
                 )
             }
             entry<Routes.AddUpdatePurchaseItem> { key ->
-//                AddUpdateSalesItemScreen(
-//                    sharedViewModel = sharedViewModel,
-//                    updateId = key.updateId,
-//                    isUpdate = key.isUpdate,
-//                    sales = key.purchase,
-//                    onSearchItemClick = {
-//                        navigate(Routes.SearchItem)
-//                    },
-//                    onBack = {
-//                        backStack.removeLastOrNull()
-//                    }
-//                )
+                AddUpdatePurchaseItemScreen(
+                    sharedViewModel = sharedViewModel,
+                    updateId = key.updateId,
+                    isUpdate = key.isUpdate,
+                    purchase = key.purchase,
+                    onSearchItemClick = {
+                        navigate(Routes.SearchItem)
+                    },
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
             }
             entry<Routes.SearchItem> { key ->
                 SearchItemsScreen(

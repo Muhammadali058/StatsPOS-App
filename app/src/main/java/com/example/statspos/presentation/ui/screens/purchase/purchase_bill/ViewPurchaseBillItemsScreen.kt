@@ -115,7 +115,7 @@ fun ViewPurchaseBillItemsScreen(
                 onNavigationClick = {
                     onBack()
                 },
-                title = "Bill Items",
+                title = "Total: ${HP.formatDecimal(state.totalBill, mustDecimals = 1)}",
             )
         },
     ) { innerPadding ->

@@ -183,7 +183,7 @@ fun AddUpdateUserScreen(
                         .imePadding(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(16.dp))
                     Basic(
                         username = state.username,
                         password = state.password,
@@ -263,6 +263,12 @@ fun AddUpdateUserScreen(
                         onDeleteAnythingChange = viewModel::onDeleteAnythingChange,
                         entry = state.entry,
                         onEntryChange = viewModel::onEntryChange,
+                        creditBill = state.creditBill,
+                        onCreditBillChange = viewModel::onCreditBillChange,
+                        editCreditBill = state.editCreditBill,
+                        onEditCreditBillChange = viewModel::onEditCreditBillChange,
+                        editPurchaseBill = state.editPurchaseBill,
+                        onEditPurchaseBillChange = viewModel::onEditPurchaseBillChange,
 //                        POS
                         changeRates = state.changeRates,
                         onChangeRatesChange = viewModel::onChangeRatesChange,
@@ -270,12 +276,8 @@ fun AddUpdateUserScreen(
                         onSeeMarginChange = viewModel::onSeeMarginChange,
                         salesReturn = state.salesReturn,
                         onSalesReturnChange = viewModel::onSalesReturnChange,
-                        creditBill = state.creditBill,
-                        onCreditBillChange = viewModel::onCreditBillChange,
                         editSalesBill = state.editSalesBill,
                         onEditSalesBillChange = viewModel::onEditSalesBillChange,
-                        editCreditBill = state.editCreditBill,
-                        onEditCreditBillChange = viewModel::onEditCreditBillChange,
                         dateWiseSales = state.dateWiseSales,
                         onDateWiseSalesChange = viewModel::onDateWiseSalesChange,
                         payBill = state.payBill,
@@ -371,6 +373,7 @@ private fun Basic(
             label = {
                 Text("User Type")
             },
+            showEndIcon = false,
         )
         ComboBox(
             modifier = Modifier
@@ -381,6 +384,7 @@ private fun Basic(
             label = {
                 Text("Shift")
             },
+            showEndIcon = false,
         )
     }
 }
@@ -443,6 +447,12 @@ private fun UserRights(
     onDeleteAnythingChange: (Boolean) -> Unit,
     entry: Boolean,
     onEntryChange: (Boolean) -> Unit,
+    editPurchaseBill: Boolean,
+    onEditPurchaseBillChange: (Boolean) -> Unit,
+    creditBill: Boolean,
+    onCreditBillChange: (Boolean) -> Unit,
+    editCreditBill: Boolean,
+    onEditCreditBillChange: (Boolean) -> Unit,
 //    POS
     changeRates: Boolean,
     onChangeRatesChange: (Boolean) -> Unit,
@@ -450,12 +460,8 @@ private fun UserRights(
     onSeeMarginChange: (Boolean) -> Unit,
     salesReturn: Boolean,
     onSalesReturnChange: (Boolean) -> Unit,
-    creditBill: Boolean,
-    onCreditBillChange: (Boolean) -> Unit,
     editSalesBill: Boolean,
     onEditSalesBillChange: (Boolean) -> Unit,
-    editCreditBill: Boolean,
-    onEditCreditBillChange: (Boolean) -> Unit,
     dateWiseSales: Boolean,
     onDateWiseSalesChange: (Boolean) -> Unit,
     payBill: Boolean,
@@ -679,6 +685,27 @@ private fun UserRights(
                 onCheckedChange = onEntryChange,
                 label = "Entry"
             )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = creditBill,
+                onCheckedChange = onCreditBillChange,
+                label = "Credit Bill"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = editCreditBill,
+                onCheckedChange = onEditCreditBillChange,
+                label = "Edit Credit Bill"
+            )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = editPurchaseBill,
+                onCheckedChange = onEditPurchaseBillChange,
+                label = "Edit Purchase Bill"
+            )
         }
         Spacer(Modifier.height(8.dp))
         Title("POS")
@@ -707,24 +734,9 @@ private fun UserRights(
             )
             AppSwitch(
                 modifier = Modifier.weight(1f),
-                checked = creditBill,
-                onCheckedChange = onCreditBillChange,
-                label = "Credit Bill"
-            )
-        }
-        Spacer(Modifier.height(8.dp))
-        Row {
-            AppSwitch(
-                modifier = Modifier.weight(1f),
                 checked = editSalesBill,
                 onCheckedChange = onEditSalesBillChange,
                 label = "Edit Sales Bill"
-            )
-            AppSwitch(
-                modifier = Modifier.weight(1f),
-                checked = editCreditBill,
-                onCheckedChange = onEditCreditBillChange,
-                label = "Edit Credit Bill"
             )
         }
         Spacer(Modifier.height(8.dp))
@@ -860,6 +872,8 @@ private fun BodyPrev() {
             )
 
             UserRights(
+                false,
+                { },
                 false,
                 { },
                 false,

@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardType
@@ -74,6 +75,8 @@ fun NewReceiptEntryBody(
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     var showErrorDialog by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
+    val accountFocusRequester = remember { FocusRequester() }
+    val amountFocusRequester = remember { FocusRequester() }
 
     LaunchedEffect(event) {
         checkEvent(
@@ -114,6 +117,8 @@ fun NewReceiptEntryBody(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Body(
+                    accountFocusRequester = accountFocusRequester,
+                    amountFocusRequester = amountFocusRequester,
                     customerName = state.customerName,
                     vendorName = state.vendorName,
                     isVendor = state.isVendor,
@@ -126,9 +131,11 @@ fun NewReceiptEntryBody(
                     onVendorNameChange = viewModel::onVendorNameChange,
                     onCustomerSelected = { customer ->
                         viewModel.onCustomerIdChange(customer.id)
+                        amountFocusRequester.requestFocus()
                     },
                     onVendorSelected = { vendor ->
                         viewModel.onVendorIdChange(vendor.id)
+                        amountFocusRequester.requestFocus()
                     },
                     onIsVendorChanged = viewModel::onIsVendorChange,
                     onAmountChanged = viewModel::onAmountChange,
@@ -163,7 +170,8 @@ fun NewReceiptEntryBody(
                         viewModel.passEntry {
                             context.showToast("Enter posted successfully")
                             sharedViewModel.notifyDataChanged()
-                            keyboardController?.hide()
+//                            keyboardController?.hide()
+                            accountFocusRequester.requestFocus()
                         }
                     }
                 }
@@ -178,6 +186,8 @@ fun NewReceiptEntryBody(
 
 @Composable
 private fun Body(
+    accountFocusRequester: FocusRequester?,
+    amountFocusRequester: FocusRequester?,
     customerName: String,
     vendorName: String,
     isVendor: Boolean,
@@ -228,7 +238,8 @@ private fun Body(
                 label = {
                     Text("Customer")
                 },
-                padding = PaddingValues(top = 4.dp)
+                padding = PaddingValues(top = 4.dp),
+                focusRequester = accountFocusRequester,
             )
         }
         if (isVendor) {
@@ -240,7 +251,8 @@ private fun Body(
                 label = {
                     Text("Vendor")
                 },
-                padding = PaddingValues(top = 4.dp)
+                padding = PaddingValues(top = 4.dp),
+                focusRequester = accountFocusRequester,
             )
         }
         Row(
@@ -268,6 +280,7 @@ private fun Body(
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal
                 ),
+                focusRequester = amountFocusRequester,
             )
             if (HP.userRights.dateWiseEntry == true) {
                 Spacer(Modifier.width(8.dp))
@@ -350,6 +363,8 @@ private fun Prev() {
             .fillMaxSize(),
     ) {
         Body(
+            null,
+            null,
             customerName = "",
             vendorName = "",
             isVendor = false,

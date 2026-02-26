@@ -30,6 +30,7 @@ class SalesItemsViewModel @Inject constructor(
 
         val totalBill: Double = 0.0,
         val totalCost: Double = 0.0,
+        val totalProfit: Double = 0.0,
         val totalQty: Double = 0.0,
         val totalCrtn: Int = 0,
         val totalItemDisc: Double = 0.0,
@@ -140,6 +141,8 @@ class SalesItemsViewModel @Inject constructor(
                         result.data.get("total").asJsonObject.get("grandTotal").asDouble
                     val totalCost =
                         result.data.get("total").asJsonObject.get("totalCost").asDouble
+                    val totalProfit =
+                        result.data.get("total").asJsonObject.get("totalProfit").asDouble
                     val totalQty =
                         result.data.get("total").asJsonObject.get("totalQty").asDouble
                     val totalCrtn =
@@ -156,6 +159,7 @@ class SalesItemsViewModel @Inject constructor(
 
                             totalBill = totalBill,
                             totalCost = totalCost,
+                            totalProfit = totalProfit,
                             totalQty = totalQty,
                             totalCrtn = totalCrtn,
                             totalItemDisc = totalDisc,

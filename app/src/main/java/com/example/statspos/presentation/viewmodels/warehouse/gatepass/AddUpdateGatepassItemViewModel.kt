@@ -36,6 +36,8 @@ class AddUpdateGatepassItemViewModel @Inject constructor(
         // Extra
         val gatepassName: String = "",
         val itemname: String = "",
+        val qtyEnabled: Boolean = true,
+        val crtnEnabled: Boolean = true,
         val isUpdate: Boolean = false,
         val updateId: Long = 0L,
 
@@ -110,6 +112,9 @@ class AddUpdateGatepassItemViewModel @Inject constructor(
                 itemId = 0L,
             )
         }
+
+        if (value.isEmpty())
+            clearTextboxes()
     }
 
     fun onGatepassNameChange(value: String) {
@@ -162,7 +167,7 @@ class AddUpdateGatepassItemViewModel @Inject constructor(
                 is Resource.Error -> showError(result.error)
                 is Resource.Information -> showMessage(result.message)
                 is Resource.Success -> {
-//                    clearTextboxes()
+                    clearTextboxes()
                     onSuccess()
                 }
             }
@@ -210,7 +215,7 @@ class AddUpdateGatepassItemViewModel @Inject constructor(
         }
     }
 
-    fun getItem(value: String) {
+    fun getItem(value: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -232,12 +237,19 @@ class AddUpdateGatepassItemViewModel @Inject constructor(
                             it.copy(
                                 itemname = item.itemname!!,
                                 itemId = item.id!!,
+
+                                qtyEnabled = item.crtnSize!! != 1,
+                                crtnEnabled = item.crtnSize!! == 1 || item.crtnSize!! > 1,
                             )
                         }
+                        onSuccess()
                     } else {
                         state.update {
                             it.copy(
                                 itemId = 0L,
+
+                                qtyEnabled = true,
+                                crtnEnabled = true,
                             )
                         }
                         showSnackbar("Items not found")
@@ -276,6 +288,8 @@ class AddUpdateGatepassItemViewModel @Inject constructor(
                 itemId = 0L,
                 qty = "",
                 crtn = "",
+                qtyEnabled = true,
+                crtnEnabled = true,
 
                 isUpdate = false,
                 updateId = 0L,

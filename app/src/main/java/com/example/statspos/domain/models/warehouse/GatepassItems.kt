@@ -12,4 +12,5 @@ data class GatepassItems(
 
     // Extras not part of database
     var itemname: String? = null,
+    var imageUrl: String? = null,
 )

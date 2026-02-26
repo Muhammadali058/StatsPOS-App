@@ -245,6 +245,7 @@ private fun Home(
     var showErrorDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
+    var menuExpanded by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
     LaunchedEffect(event) {
@@ -314,8 +315,6 @@ private fun Home(
             }
         )
     }
-
-    var menuExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
         snackbarHost = {

@@ -1,0 +1,471 @@
+package com.example.statspos.presentation.ui.screens.purchase.purchase_bill
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.statspos.domain.models.DropdownItem
+import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
+import com.example.statspos.presentation.ui.components.AppSwitch
+import com.example.statspos.presentation.ui.components.BalanceBox
+import com.example.statspos.presentation.ui.components.ComboBox
+import com.example.statspos.presentation.ui.components.DateTextbox
+import com.example.statspos.presentation.ui.components.DiscountTextbox
+import com.example.statspos.presentation.ui.components.Dropdown
+import com.example.statspos.presentation.ui.components.ErrorDialog
+import com.example.statspos.presentation.ui.components.ExpandableSection
+import com.example.statspos.presentation.ui.components.ProgressBarLayout
+import com.example.statspos.presentation.ui.components.SaveButton
+import com.example.statspos.presentation.ui.components.SubComboBox
+import com.example.statspos.presentation.ui.components.Textbox
+import com.example.statspos.presentation.ui.utils.ConstantPaddings
+import com.example.statspos.presentation.viewmodels.SharedViewModel
+import com.example.statspos.presentation.viewmodels.purchase.purchase_bill.AddUpdatePurchaseViewModel
+import com.example.statspos.presentation.viewmodels.purchase.purchase_bill.PurchaseItemsViewModel
+import com.example.statspos.utils.HP
+import com.example.statspos.utils.UiEvent
+import com.example.statspos.utils.checkEvent
+import java.time.LocalDate
+
+@Composable
+fun AddUpdatePurchaseBillBody(
+    sharedViewModel: SharedViewModel,
+    purchaseViewModel: AddUpdatePurchaseViewModel,
+    snackbarHostState: SnackbarHostState,
+    invoiceId: Long,
+    isPendingBill: Boolean,
+    isPostedBill: Boolean,
+    onBack: () -> Unit,
+) {
+    val state by purchaseViewModel.state.collectAsStateWithLifecycle()
+    val event by purchaseViewModel.event.collectAsState(UiEvent.Idle)
+    var showErrorDialog by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
+
+    LaunchedEffect(event) {
+        checkEvent(
+            event = event,
+            snackbarHostState = snackbarHostState,
+            viewModelIdleEvent = purchaseViewModel::onEvent,
+            onError = {
+                showErrorDialog = true
+            }
+        )
+    }
+
+    // Edit data when update
+    LaunchedEffect(Unit) {
+        if (!state.hasLoadedOnce) {
+            if (isPendingBill || isPostedBill) {
+                purchaseViewModel.editData(invoiceId)
+            }
+
+            purchaseViewModel.setHasLoadedOnce(true)
+        }
+    }
+
+    if (showErrorDialog) {
+        ErrorDialog(
+            error = state.error,
+            onDismiss = {
+                showErrorDialog = false
+            },
+        )
+    }
+
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(vertical = 16.dp)
+    ) {
+        Column(
+            Modifier
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Column(
+                Modifier
+                    .weight(1f)
+                    .verticalScroll(scrollState),
+//                    .imePadding()
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Basic(
+                    vendorName = state.vendorName,
+                    balance = state.balance,
+                    isDiscRsPer = state.isDiscRsPer,
+                    disc = state.disc,
+                    totalDisc = state.totalDisc,
+                    date = state.date,
+                    purchaseOn = state.purchaseOn,
+                    purchaseType = state.purchaseType,
+                    onVendorNameChange = purchaseViewModel::onVendorNameChange,
+                    onVendorSelected = { vendor ->
+                        purchaseViewModel.onVendorIdChange(vendor.id)
+                    },
+                    onDiscChange = purchaseViewModel::onDiscChange,
+                    onIsDiscRsPerChange = purchaseViewModel::onIsDiscRsPerChange,
+                    onPurchaseOnChange = purchaseViewModel::onPurchaseOnChange,
+                    onPurchaseTypeChange = purchaseViewModel::onPurchaseTypeChange,
+                    onDateChange = purchaseViewModel::onDateChange,
+                )
+                MOP(
+                    mop = state.mop,
+                    bank = state.bank,
+                    subBank = state.subBank,
+                    onMOPChange = purchaseViewModel::onMOPChange,
+                    onBankSelected = purchaseViewModel::onBankSelected,
+                    onSubBankSelected = purchaseViewModel::onSubBankSelected,
+                )
+                Others(
+                    remarks = state.remarks,
+                    expense = state.expense,
+                    refInvoiceNo = state.refInvoiceNo,
+                    supplier = state.supplier,
+                    onSupplierSelected = purchaseViewModel::onSupplierSelected,
+                    onExpenseChange = purchaseViewModel::onExpenseChange,
+                    onRefInvoiceNoChange = purchaseViewModel::onRefInvoiceNoChange,
+                )
+                Spacer(Modifier.height(8.dp))
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(ConstantPaddings.BODY_HORIZONTAL)
+                    .padding(top = 8.dp)
+            ) {
+                if (!isPostedBill) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.5f),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (state.isSaving) {
+                            AppCircularProgressIndicator()
+                        } else {
+                            SaveButton(text = "Save") {
+                                purchaseViewModel.tempClose {
+                                    sharedViewModel.notifyBillSaved()
+                                    onBack()
+                                }
+                            }
+                        }
+                    }
+                    Spacer(Modifier.width(8.dp))
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (state.isPosting) {
+                        AppCircularProgressIndicator()
+                    } else {
+                        SaveButton(text = "Post") {
+                            purchaseViewModel.postBill {
+                                sharedViewModel.notifyBillPosted()
+                                onBack()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (state.isLoading) {
+            ProgressBarLayout()
+        }
+    }
+}
+
+@Composable
+private fun Basic(
+    vendorName: String,
+    balance: String,
+    disc: String,
+    isDiscRsPer: Boolean,
+    totalDisc: Double,
+    date: LocalDate,
+    purchaseOn: DropdownItem,
+    purchaseType: DropdownItem,
+    onVendorNameChange: (String) -> Unit,
+    onVendorSelected: (DropdownItem) -> Unit,
+    onDiscChange: (String) -> Unit,
+    onIsDiscRsPerChange: (Boolean) -> Unit,
+    onPurchaseOnChange: (DropdownItem) -> Unit,
+    onPurchaseTypeChange: (DropdownItem) -> Unit,
+    onDateChange: (LocalDate) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(ConstantPaddings.BODY_HORIZONTAL)
+    ) {
+        Dropdown(
+            value = vendorName,
+            onValueChange = onVendorNameChange,
+            items = HP.vendors,
+            onItemSelected = onVendorSelected,
+            label = {
+                Text("Vendor")
+            },
+            padding = PaddingValues(top = 4.dp)
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            BalanceBox(
+                text = balance
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        DiscountTextbox(
+            value = if (HP.getDoubleValue(disc) > 0.0) disc else "",
+            onValueChange = onDiscChange,
+            isDiscRsPer = isDiscRsPer,
+            onIsDiscRsPerChange = onIsDiscRsPerChange,
+            modifier = Modifier
+                .fillMaxWidth(),
+            padding = PaddingValues(top = 4.dp)
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            BalanceBox(
+                text = "Rs. $totalDisc"
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            ComboBox(
+                modifier = Modifier
+                    .fillMaxWidth(0.5f),
+                items = HP.purchaseOn,
+                selectedItem = purchaseOn,
+                onItemSelected = onPurchaseOnChange,
+                label = {
+                    Text(text = "Purchase On")
+                },
+                showEndIcon = false,
+                enabled = HP.userRights.creditBill == true,
+            )
+            Spacer(Modifier.width(8.dp))
+            ComboBox(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                items = HP.purchaseType,
+                selectedItem = purchaseType,
+                onItemSelected = onPurchaseTypeChange,
+                label = {
+                    Text(text = "Purchase Type")
+                },
+                showEndIcon = false,
+            )
+        }
+        if (HP.userRights.dateWiseSales == true) {
+            DateTextbox(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                date = date,
+                onDateChange = onDateChange,
+                label = "Date"
+            )
+        }
+    }
+}
+
+@Composable
+private fun MOP(
+    mop: DropdownItem,
+    bank: DropdownItem,
+    subBank: DropdownItem,
+    onMOPChange: (DropdownItem) -> Unit,
+    onBankSelected: (DropdownItem) -> Unit,
+    onSubBankSelected: (DropdownItem) -> Unit,
+) {
+    ExpandableSection(
+        title = "M.O.P Bank",
+        initiallyExpanded = false,
+    ) {
+        ComboBox(
+            modifier = Modifier
+                .fillMaxWidth(),
+            items = HP.mop,
+            selectedItem = mop,
+            onItemSelected = onMOPChange,
+            label = {
+                Text("M.O.P")
+            }
+        )
+        ComboBox(
+            modifier = Modifier
+                .fillMaxWidth(),
+            items = HP.banks,
+            selectedItem = bank,
+            onItemSelected = onBankSelected,
+            label = {
+                Text("Bank")
+            },
+            addNone = true,
+            enabled = mop.id == 2L,
+        )
+        SubComboBox(
+            modifier = Modifier
+                .fillMaxWidth(),
+            items = HP.subBanks,
+            selectedItem = subBank,
+            onItemSelected = onSubBankSelected,
+            label = {
+                Text("Bank Account")
+            },
+            addNone = true,
+            enabled = mop.id == 2L,
+            mainId = bank.id
+        )
+    }
+}
+
+
+@Composable
+private fun Others(
+    remarks: String,
+    expense: String,
+    refInvoiceNo: String,
+    supplier: DropdownItem?,
+    onSupplierSelected: (DropdownItem) -> Unit,
+    onExpenseChange: (String) -> Unit,
+    onRefInvoiceNoChange: (String) -> Unit,
+) {
+    ExpandableSection(
+        title = "Others",
+        initiallyExpanded = false,
+    ) {
+        if(HP.adminSettings.showSuppliersInPurchase == true) {
+            ComboBox(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                items = HP.suppliers,
+                selectedItem = supplier,
+                onItemSelected = onSupplierSelected,
+                label = {
+                    Text(text = "Supplier")
+                },
+                addNone = true,
+            )
+        }
+        Textbox(
+            value = expense,
+            onValueChange = onExpenseChange,
+            modifier = Modifier.fillMaxWidth(),
+            label = {
+                Text("Expense")
+            }
+        )
+        Textbox(
+            value = refInvoiceNo,
+            onValueChange = onRefInvoiceNoChange,
+            modifier = Modifier.fillMaxWidth(),
+            label = {
+                Text("Ref. Inv No")
+            }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BodyPrev() {
+    val scrollState = rememberScrollState()
+
+    Column(
+        Modifier
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Column(
+            Modifier
+                .weight(1f)
+                .verticalScroll(scrollState),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Basic(
+                "",
+                "",
+                "",
+                true,
+                0.0,
+                LocalDate.now(),
+                HP.purchaseOn[0],
+                HP.purchaseType[0],
+                {},
+                { },
+                { },
+                { },
+                { },
+                { },
+                { },
+            )
+            Spacer(Modifier.height(8.dp))
+            Others(
+                "",
+                "",
+                "",
+                HP.getNoneDropdownItem(),
+                {  },
+                {  },
+                {  },
+            )
+            MOP(
+                mop = HP.mop[0],
+                bank = HP.getNoneDropdownItem(),
+                subBank = HP.getNoneDropdownItem(),
+                onMOPChange = {},
+                onBankSelected = {},
+                onSubBankSelected = {},
+            )
+        }
+        Box(
+            modifier = Modifier
+                .padding(16.dp),
+        ) {
+            SaveButton {}
+        }
+
+    }
+}

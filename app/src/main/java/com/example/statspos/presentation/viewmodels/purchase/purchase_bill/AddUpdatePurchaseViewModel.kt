@@ -478,11 +478,9 @@ class AddUpdatePurchaseViewModel @Inject constructor(
             return false
         }
 
-        if (state.value.purchaseOn.id == 2L) {
-            if (state.value.vendorId == 0L) {
-                showMessage("Please select vendor")
-                return false
-            }
+        if (state.value.vendorId == 0L) {
+            showMessage("Please select vendor")
+            return false
         }
 
         if (state.value.mop.id == 2L) {

@@ -26,6 +26,7 @@ import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.screens.TopRoutes
 import com.example.statspos.presentation.ui.screens.accounts.banks.BanksBody
 import com.example.statspos.presentation.ui.screens.accounts.banks.SubBanksBody
+import com.example.statspos.presentation.ui.screens.purchase.purchase_bill.PurchaseBillScreen
 import com.example.statspos.presentation.ui.screens.purchase.purchase_bill.ViewPurchaseBillItemsScreen
 import com.example.statspos.presentation.ui.screens.sales.sales_bill.SalesBillScreen
 import com.example.statspos.presentation.ui.screens.sales.sales_bill.ViewSalesBillItemsScreen
@@ -88,23 +89,16 @@ fun PurchaseScreen(
                 )
             }
             entry<Routes.AddUpdatePurchase> { key ->
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                ) {
-                    Text("Purchase")
-                }
-
-//                SalesBillScreen(
-//                    sharedViewModel = sharedViewModel,
-//                    invoiceId = key.updateId,
-//                    isPendingBill = key.isPendingBill,
-//                    isPostedBill = key.isPostedBill,
-//                    purchaseBill = key.purchaseBill,
-//                    onBack = {
-//                        backStack.removeLastOrNull()
-//                    }
-//                )
+                PurchaseBillScreen(
+                    sharedViewModel = sharedViewModel,
+                    invoiceId = key.updateId,
+                    isPendingBill = key.isPendingBill,
+                    isPostedBill = key.isPostedBill,
+                    purchaseBill = key.purchaseBill,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
             }
             entry<Routes.ViewBillItems> { key ->
                 ViewPurchaseBillItemsScreen(

@@ -1,5 +1,8 @@
 package com.example.statspos.domain.models.purchase
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Purchase(
     var id: Long? = null,
     var invoiceNo: Int? = null,
@@ -38,4 +41,5 @@ data class Purchase(
     var updateVendor: Boolean? = null,
     var isPostedBill: Boolean? = null,
     var isPendingBill: Boolean? = null,
+    var totalItems: Int? = null,
 )

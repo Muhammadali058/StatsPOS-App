@@ -155,7 +155,7 @@ class SuppliersViewModel @Inject constructor(
             if (state.value.isLoadingNextPage)
                 return@launch
 
-            if(state.value.list.size < HP.itemsPerPage)
+            if(state.value.list.size < HP.ITEMS_PER_PAGE)
                 return@launch
 
             state.update {
@@ -214,7 +214,7 @@ class SuppliersViewModel @Inject constructor(
 
     private fun getSearchParams(page: Int): JsonObject = JsonObject().apply {
         addProperty("page", page)
-        addProperty("itemsPerPage", HP.itemsPerPage)
+        addProperty("itemsPerPage", HP.ITEMS_PER_PAGE)
         addProperty("text", state.value.search)
     }
 

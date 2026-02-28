@@ -189,7 +189,7 @@ class SalesPostedBillsViewModel @Inject constructor(
             if (state.value.isLoadingNextPage)
                 return@launch
 
-            if(state.value.list.size < HP.itemsPerPage)
+            if(state.value.list.size < HP.ITEMS_PER_PAGE)
                 return@launch
 
             state.update {
@@ -248,7 +248,7 @@ class SalesPostedBillsViewModel @Inject constructor(
 
     private fun getSearchParams(page: Int): JsonObject = JsonObject().apply {
         addProperty("page", page)
-        addProperty("itemsPerPage", HP.itemsPerPage)
+        addProperty("itemsPerPage", HP.ITEMS_PER_PAGE)
         addProperty("fromDate", HP.getZonedDateWithFromTime(state.value.fromDate))
         addProperty("toDate", HP.getZonedDateWithToTime(state.value.toDate))
         addProperty("salesOn", state.value.salesOn.id)

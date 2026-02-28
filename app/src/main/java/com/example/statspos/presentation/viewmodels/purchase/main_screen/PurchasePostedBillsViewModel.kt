@@ -185,7 +185,7 @@ class PurchasePostedBillsViewModel @Inject constructor(
             if (state.value.isLoadingNextPage)
                 return@launch
 
-            if(state.value.list.size < HP.itemsPerPage)
+            if(state.value.list.size < HP.ITEMS_PER_PAGE)
                 return@launch
 
             state.update {
@@ -244,7 +244,7 @@ class PurchasePostedBillsViewModel @Inject constructor(
 
     private fun getSearchParams(page: Int): JsonObject = JsonObject().apply {
         addProperty("page", page)
-        addProperty("itemsPerPage", HP.itemsPerPage)
+        addProperty("itemsPerPage", HP.ITEMS_PER_PAGE)
         addProperty("fromDate", HP.getZonedDate(state.value.fromDate))
         addProperty("toDate", HP.getZonedDate(state.value.toDate))
         addProperty("purchaseOn", state.value.purchaseOn.id)

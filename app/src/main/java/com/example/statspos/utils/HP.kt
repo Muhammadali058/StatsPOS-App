@@ -1,6 +1,5 @@
 package com.example.statspos.utils
 
-import android.util.Log
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.items.Items
 import com.example.statspos.domain.models.main.Branches
@@ -26,7 +25,7 @@ import kotlin.math.abs
 object HP {
     var localClient: LocalClients? = null
 
-    const val itemsPerPage = 10
+    const val ITEMS_PER_PAGE = 50
 
     val mop = listOf(
         DropdownItem(1L, "Cash"),

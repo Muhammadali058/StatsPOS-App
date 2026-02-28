@@ -286,7 +286,7 @@ class PurchaseViewModel @Inject constructor(
 
     private fun getSearchParams(page: Int): JsonObject = JsonObject().apply {
         addProperty("page", page)
-        addProperty("itemsPerPage", HP.itemsPerPage)
+        addProperty("itemsPerPage", HP.ITEMS_PER_PAGE)
         addProperty("searchBy", state.value.filterId)
         addProperty("categoryId", state.value.categoryId)
         addProperty("subCategoryId", state.value.subCategoryId)

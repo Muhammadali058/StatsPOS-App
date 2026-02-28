@@ -110,4 +110,26 @@ sealed class TopRoutes : NavKey {
     @Serializable
     data object Gatepass : TopRoutes()
     // endregion
+    // region Reports
+    @Serializable
+    data object SalesReports : TopRoutes()
+
+    @Serializable
+    data object PurchaseReports : TopRoutes()
+
+    @Serializable
+    data object ProfitReports : TopRoutes()
+
+    @Serializable
+    data object StockReports : TopRoutes()
+
+    @Serializable
+    data object AccountsReports : TopRoutes()
+
+    @Serializable
+    data object ItemsReports : TopRoutes()
+
+    @Serializable
+    data object AuditReports : TopRoutes()
+    // endregion
 }

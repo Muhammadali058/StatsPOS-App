@@ -1,10 +1,11 @@
-package com.example.statspos.presentation.viewmodels.accounts.vendors
+package com.example.statspos.presentation.viewmodels.reports
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.statspos.domain.models.accounts.Accounts
-import com.example.statspos.domain.repository.accounts.VendorsRepository
-import com.example.statspos.utils.HP
+import com.example.statspos.domain.models.accounts.Banks
+import com.example.statspos.domain.models.accounts.Expenses
+import com.example.statspos.domain.repository.accounts.BanksRepository
+import com.example.statspos.domain.repository.reports.SalesReportsRepository
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
@@ -20,23 +21,18 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class VendorsViewModel @Inject constructor(
-    private val api: VendorsRepository
+class SalesReportsViewModel @Inject constructor(
+    private val api: SalesReportsRepository
 ) : ViewModel() {
 
     // region ScreenState
     data class ScreenState(
-        val list: List<Accounts> = emptyList(),
-        val totalVendors: Int = 0,
-        val page: Int = 1,
-        val endReached: Boolean = false,
+        val list: List<Banks> = emptyList(),
+        val totalBanks: Int = 0,
 
         val search: String = "",
-        val categoryName: String = "",
-        val categoryId: Long = 0L,
 
         val isLoading: Boolean = false,
-        val isLoadingNextPage: Boolean = false,
         val error: String? = null,
     )
 
@@ -97,24 +93,11 @@ class VendorsViewModel @Inject constructor(
         state.update { it.copy(error = error) }
         onEvent(UiEvent.ShowError(error ?: ""))
     }
-
     // endregion
-
-    init {
-        loadData()
-    }
 
     // region onChangeMethods
     fun onSearchChange(value: String) {
         state.update { it.copy(search = value) }
-    }
-
-    fun onCategoryNameChange(value: String) {
-        state.update { it.copy(categoryName = value) }
-    }
-
-    fun onCategoryIdChange(value: Long) {
-        state.update { it.copy(categoryId = value) }
     }
     // endregion
 
@@ -124,81 +107,26 @@ class VendorsViewModel @Inject constructor(
             if (state.value.isLoading)
                 return@launch
 
-            if (state.value.isLoadingNextPage)
-                return@launch
+            beforeRequest()
 
-            state.update {
-                it.copy(
-                    isLoading = true,
-                    error = null,
-                    page = 1,
-                    endReached = false,
-                )
+            val params = JsonObject().apply {
+                addProperty("text", state.value.search)
             }
 
-            val params = getSearchParams(1)
-
-            when (val result = api.loadVendors(params)) {
+            when (val result = api.billWiseReport(params)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
 
-                    val resultTotal = result.data.get("total").asJsonObject.get("totalVendors").asInt
-                    val resultList = Gson().getListOf<Accounts>(result.data.get("rows").asJsonArray)
+                    val resultTotal =
+                        result.data.get("total").asJsonObject.get("totalBanks").asInt
+                    val resultList =
+                        Gson().getListOf<Banks>(result.data.get("rows").asJsonArray)
                     state.update {
                         it.copy(
                             list = resultList,
-                            totalVendors = resultTotal,
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    fun loadNextItems() {
-        viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
-
-            if (state.value.isLoadingNextPage)
-                return@launch
-
-            if(state.value.list.size < HP.ITEMS_PER_PAGE)
-                return@launch
-
-            state.update {
-                it.copy(
-                    isLoadingNextPage = true,
-                    error = null,
-                    page = state.value.page + 1,
-                )
-            }
-
-            val params = getSearchParams(state.value.page)
-
-            when (val result = api.loadVendors(params)) {
-                is Resource.Error -> {
-                    state.update { it.copy(isLoadingNextPage = false, error = result.error) }
-                    result.error?.let { onEvent(UiEvent.ShowError(result.error)) }
-                }
-
-                is Resource.Information -> {
-                    state.update { it.copy(isLoadingNextPage = false) }
-                    result.message?.let { showSnackbar(result.message) }
-                }
-
-                is Resource.Success -> {
-                    state.update { it.copy(isLoadingNextPage = false, error = null) }
-
-                    val resultTotal = result.data.get("total").asJsonObject.get("totalVendors").asInt
-                    val resultList = Gson().getListOf<Accounts>(result.data.get("rows").asJsonArray)
-                    state.update {
-                        it.copy(
-                            list = state.value.list + resultList,
-                            totalVendors = resultTotal,
-                            endReached = resultList.isEmpty(),
+                            totalBanks = resultTotal,
                         )
                     }
                 }
@@ -221,13 +149,5 @@ class VendorsViewModel @Inject constructor(
     private fun resultSuccess() {
         state.update { it.copy(isLoading = false, error = null) }
     }
-
-    private fun getSearchParams(page: Int): JsonObject = JsonObject().apply {
-        addProperty("page", page)
-        addProperty("itemsPerPage", HP.ITEMS_PER_PAGE)
-        addProperty("categoryId", state.value.categoryId)
-        addProperty("text", state.value.search)
-    }
-
     // endregion
 }

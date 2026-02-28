@@ -132,7 +132,7 @@ fun HomeScreen(
 
     // Navigation
     val navigationState = rememberNavigationState(
-        startRoute = BottomRoutes.Home,
+        startRoute = BottomRoutes.Reports,
         topLevelRoutes = BOTTOM_DESTINATIONS.keys,
         serializersModules = SerializersModule {
             polymorphic(NavKey::class) {
@@ -258,7 +258,11 @@ fun HomeScreen(
                             )
                         }
                         entry<BottomRoutes.Reports> {
-                            ReportsScreen()
+                            ReportsScreen(
+                                onTopRouteClick = { key ->
+                                    onTopRouteClick(key)
+                                }
+                            )
                         }
                     }
                 )

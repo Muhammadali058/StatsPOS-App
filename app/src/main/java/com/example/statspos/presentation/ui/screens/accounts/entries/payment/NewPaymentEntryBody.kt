@@ -349,6 +349,7 @@ private fun MOP(
             enabled = mop.id == 2L,
             mainId = bank.id
         )
+        Spacer(Modifier.height(8.dp))
     }
 }
 

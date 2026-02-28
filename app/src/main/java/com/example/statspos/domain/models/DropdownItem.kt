@@ -6,3 +6,8 @@ data class DropdownItem(
     var mainId:Long = 0,
     var type:String = "",
 )
+
+data class RadioItem(
+    var id:Int,
+    var name:String,
+)

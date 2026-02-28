@@ -216,7 +216,7 @@ private fun Body(
         )
         AppCheckbox(
             modifier = Modifier.fillMaxWidth(),
-            label = "Remember Me",
+            label = "Remember",
             checked = remember,
             onCheckedChange = onRememberCheckedChange
         )

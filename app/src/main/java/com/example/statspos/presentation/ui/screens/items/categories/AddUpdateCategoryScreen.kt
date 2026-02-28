@@ -159,7 +159,7 @@ fun AddUpdateCategoryScreen(
                     }
                 }
             )
-        }
+        },
     ) { innerPadding ->
         Box(
             Modifier

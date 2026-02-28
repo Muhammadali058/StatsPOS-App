@@ -280,6 +280,7 @@ fun MainScreen() {
             // region Reports
             entry<TopRoutes.SalesReports> {
                 SalesReportsScreen(
+                    sharedViewModel = sharedViewModel,
                     onBack = {
                         backStack.removeLastOrNull()
                     }

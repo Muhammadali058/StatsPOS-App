@@ -24,20 +24,25 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
@@ -51,11 +56,17 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.R
+import com.example.statspos.domain.models.reports.TotalReport
+import com.example.statspos.domain.models.reports.sales.SalesBillWiseReport
+import com.example.statspos.domain.models.reports.sales.SalesItemsReport
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
+import com.example.statspos.presentation.ui.components.AppSwitch
 import com.example.statspos.presentation.ui.components.AutoCompleteItemsTextbox
 import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
+import com.example.statspos.presentation.ui.components.BottomSheet
+import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
@@ -65,12 +76,16 @@ import com.example.statspos.presentation.ui.components.SubDropdown
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
+import com.example.statspos.presentation.ui.utils.PdfPreviewScreen
+import com.example.statspos.presentation.ui.utils.openPdf
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.reports.SalesReportsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import java.io.File
 import java.time.LocalDate
 
 private sealed class Routes : NavKey {
@@ -81,7 +96,7 @@ private sealed class Routes : NavKey {
     data object SearchItem : Routes()
 
     @Serializable
-    data class ViewReport(val updateId: Long) : Routes()
+    data class ViewReport(val filePath: String) : Routes()
 }
 
 @Composable
@@ -111,9 +126,6 @@ fun SalesReportsScreen(
                     onSearchItemClick = {
                         navigate(Routes.SearchItem)
                     },
-                    onViewReportClick = { updateId ->
-                        navigate(Routes.ViewReport(updateId))
-                    },
                 )
             }
             entry<Routes.SearchItem> { key ->
@@ -125,19 +137,26 @@ fun SalesReportsScreen(
                 )
             }
             entry<Routes.ViewReport> { key ->
-
+                val file = File(key.filePath)
+                PdfPreviewScreen(
+                    file = file,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
             }
         }
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Home(
     sharedViewModel: SharedViewModel,
     onBack: () -> Unit,
     onSearchItemClick: () -> Unit,
-    onViewReportClick: (Long) -> Unit,
 ) {
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel = hiltViewModel<SalesReportsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -145,7 +164,10 @@ private fun Home(
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
     var showBarcodeScanner by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showBottomSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(event) {
         checkEvent(
@@ -194,6 +216,48 @@ private fun Home(
         )
     }
 
+    fun showBillWiseReport(
+        salesBillWiseReport: List<SalesBillWiseReport>,
+        totalReport: TotalReport
+    ) {
+        val file = salesBillWiseReport(
+            context = context,
+            fromDate = HP.getFormatedDate(state.fromDate),
+            toDate = HP.getFormatedDate(state.toDate),
+            billWiseReport = salesBillWiseReport,
+            totalReport = totalReport,
+        )
+
+        openPdf(context, file)
+    }
+
+    fun showItemsReport(
+        salesItemsReport: List<SalesItemsReport>,
+        totalReport: TotalReport
+    ) {
+        if (state.sum) {
+            val file = salesItemsSumReport(
+                context = context,
+                fromDate = HP.getFormatedDate(state.fromDate),
+                toDate = HP.getFormatedDate(state.toDate),
+                itemsReport = salesItemsReport,
+                totalReport = totalReport,
+            )
+
+            openPdf(context, file)
+        } else {
+            val file = salesItemsReport(
+                context = context,
+                fromDate = HP.getFormatedDate(state.fromDate),
+                toDate = HP.getFormatedDate(state.toDate),
+                itemsReport = salesItemsReport,
+                totalReport = totalReport,
+            )
+
+            openPdf(context, file)
+        }
+    }
+
     Scaffold(
         contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = {
@@ -210,6 +274,86 @@ private fun Home(
             )
         }
     ) { innerPadding ->
+
+        // Bottom Sheet
+        if (showBottomSheet) {
+            BottomSheet(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                sheetState = sheetState,
+                onDismissRequest = {
+                    showBottomSheet = false
+                },
+            ) {
+                ComboBox(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    items = HP.salesType,
+                    selectedItem = state.salesType,
+                    onItemSelected = { item ->
+                        viewModel.onSalesTypeChange(item)
+                    },
+                    label = {
+                        Text(text = "Sales Type")
+                    },
+                    addNone = true,
+                    noneText = "Both",
+                )
+                ComboBox(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    items = HP.salesOn,
+                    selectedItem = state.salesOn,
+                    onItemSelected = { item ->
+                        viewModel.onSalesOnChange(item)
+                    },
+                    label = {
+                        Text(text = "Sales On")
+                    },
+                    addNone = true,
+                    noneText = "Both",
+                )
+                ComboBox(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    items = HP.mop,
+                    selectedItem = state.mop,
+                    onItemSelected = { item ->
+                        viewModel.onMOPChange(item)
+                    },
+                    label = {
+                        Text(text = "M.O.P")
+                    },
+                    addNone = true,
+                    noneText = "Both",
+                )
+                ComboBox(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    items = HP.salesRetailType,
+                    selectedItem = state.salesRetailType,
+                    onItemSelected = { item ->
+                        viewModel.onSalesRetailTypeChange(item)
+                    },
+                    label = {
+                        Text(text = "Type")
+                    },
+                    addNone = true,
+                    noneText = "Both",
+                )
+
+                Button(onClick = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            showBottomSheet = false
+                        }
+                    }
+                }) {
+                    Text("OK")
+                }
+            }
+        }
+
         Box(
             Modifier
                 .fillMaxSize()
@@ -221,21 +365,19 @@ private fun Home(
             Column(
                 modifier = Modifier
                     .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Column(
                     Modifier
                         .weight(1f)
                         .verticalScroll(scrollState),
-                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    SearchBox(
+                    DateBox(
                         fromDate = state.fromDate,
                         toDate = state.toDate,
                         onFromDateChange = viewModel::onFromDateChange,
                         onToDateChange = viewModel::onToDateChange,
                         onFilterClick = {
-
+                            showBottomSheet = true
                         },
                     )
                     ItemnameBox(
@@ -256,6 +398,11 @@ private fun Home(
                             showBarcodeScanner = true
                         },
                         onSearchItemClick = onSearchItemClick,
+                        onItemClick = {
+                            viewModel.onItemClick { salesItemsReport, totalReport ->
+                                showItemsReport(salesItemsReport, totalReport)
+                            }
+                        }
                     )
                     Spacer(Modifier.height(8.dp))
                     Dropdowns(
@@ -281,9 +428,69 @@ private fun Home(
                         onAccountCategoryIdChange = viewModel::onAccountCategoryIdChange,
                         onSupplierIdChange = viewModel::onSupplierIdChange,
                         onUserIdChange = viewModel::onUserIdChange,
+                        onCategoryClick = {
+                            viewModel.onCategoryClick { salesItemsReport, totalReport ->
+                                showItemsReport(salesItemsReport, totalReport)
+                            }
+                        },
+                        onSubCategoryClick = {
+                            viewModel.onSubCategoryClick { salesItemsReport, totalReport ->
+                                showItemsReport(salesItemsReport, totalReport)
+                            }
+                        },
+                        onVendorClick = {
+                            viewModel.onVendorClick { salesItemsReport, totalReport ->
+                                showItemsReport(salesItemsReport, totalReport)
+                            }
+                        },
+                        onCustomerClick = {
+                            viewModel.onCustomerClick { salesBillWiseReport, totalReport ->
+                                showBillWiseReport(salesBillWiseReport, totalReport)
+                            }
+                        },
+                        onAccountCategoryClick = {
+                            viewModel.onAccountCategoryClick { salesBillWiseReport, totalReport ->
+                                showBillWiseReport(salesBillWiseReport, totalReport)
+                            }
+                        },
+                        onSupplierClick = {
+                            viewModel.onSupplierClick { salesBillWiseReport, totalReport ->
+                                showBillWiseReport(salesBillWiseReport, totalReport)
+                            }
+                        },
+                        onUserClick = {
+                            viewModel.onUserClick { salesBillWiseReport, totalReport ->
+                                showBillWiseReport(salesBillWiseReport, totalReport)
+                            }
+                        },
                     )
                     Spacer(Modifier.height(8.dp))
-                    ReportButtons()
+                    ReportButtons(
+                        onBriefReportClick = {
+
+                        },
+                        onTotalBillsClick = {
+                            viewModel.onTotalBillsClick { salesBillWiseReport, totalReport ->
+                                showBillWiseReport(salesBillWiseReport, totalReport)
+                            }
+                        },
+                        onTotalItemsClick = {
+                            viewModel.onTotalItemsClick { salesItemsReport, totalReport ->
+                                showItemsReport(salesItemsReport, totalReport)
+                            }
+                        },
+                        onFilterReportClick = {
+                            viewModel.onFilterClick { salesItemsReport, totalReport ->
+                                showItemsReport(salesItemsReport, totalReport)
+                            }
+                        },
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    AppSwitch(
+                        checked = state.sum,
+                        onCheckedChange = viewModel::onSumChange,
+                        label = "Sum"
+                    )
                 }
             }
 
@@ -295,7 +502,7 @@ private fun Home(
 }
 
 @Composable
-private fun SearchBox(
+private fun DateBox(
     fromDate: LocalDate,
     toDate: LocalDate,
     onFromDateChange: (LocalDate) -> Unit,
@@ -340,7 +547,12 @@ private fun SearchBox(
 }
 
 @Composable
-private fun ReportButtons() {
+private fun ReportButtons(
+    onBriefReportClick: () -> Unit,
+    onTotalBillsClick: () -> Unit,
+    onTotalItemsClick: () -> Unit,
+    onFilterReportClick: () -> Unit,
+) {
     val scrollState = rememberScrollState()
 
     Column(
@@ -354,13 +566,21 @@ private fun ReportButtons() {
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ReportButton("Brief Report", Modifier.width(120.dp)) { }
+            ReportButton("Brief Report", Modifier.width(120.dp)) {
+                onBriefReportClick()
+            }
             Spacer(Modifier.width(8.dp))
-            ReportButton("Total Bills", Modifier.width(120.dp)) { }
+            ReportButton("Total Bills", Modifier.width(120.dp)) {
+                onTotalBillsClick()
+            }
             Spacer(Modifier.width(8.dp))
-            ReportButton("Total Items", Modifier.width(120.dp)) { }
+            ReportButton("Total Items", Modifier.width(120.dp)) {
+                onTotalItemsClick()
+            }
             Spacer(Modifier.width(8.dp))
-            ReportButton("Filter Report", Modifier.width(120.dp)) { }
+            ReportButton("Filter Report", Modifier.width(120.dp)) {
+                onFilterReportClick()
+            }
         }
     }
 }
@@ -374,6 +594,7 @@ private fun ItemnameBox(
     onEndIconClick: (String) -> Unit,
     onBarcodeClick: () -> Unit,
     onSearchItemClick: () -> Unit,
+    onItemClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -419,7 +640,7 @@ private fun ItemnameBox(
                     modifier = Modifier.offset(y = (-1).dp),
                     shape = RoundedCornerShape(bottomEnd = 4.dp, bottomStart = 4.dp)
                 ) {
-
+                    onItemClick()
                 }
             }
             Spacer(Modifier.width(4.dp))
@@ -472,6 +693,13 @@ private fun Dropdowns(
     onAccountCategoryIdChange: (Long) -> Unit,
     onSupplierIdChange: (Long) -> Unit,
     onUserIdChange: (Long) -> Unit,
+    onCategoryClick: () -> Unit,
+    onSubCategoryClick: () -> Unit,
+    onVendorClick: () -> Unit,
+    onCustomerClick: () -> Unit,
+    onAccountCategoryClick: () -> Unit,
+    onSupplierClick: () -> Unit,
+    onUserClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -499,7 +727,7 @@ private fun Dropdowns(
                 )
             }
             Spacer(Modifier.width(8.dp))
-            ReportButton { }
+            ReportButton { onCategoryClick() }
         }
         Row(
             modifier = Modifier
@@ -524,7 +752,7 @@ private fun Dropdowns(
                 )
             }
             Spacer(Modifier.width(8.dp))
-            ReportButton { }
+            ReportButton { onSubCategoryClick() }
         }
         Row(
             modifier = Modifier
@@ -548,7 +776,7 @@ private fun Dropdowns(
                 )
             }
             Spacer(Modifier.width(8.dp))
-            ReportButton { }
+            ReportButton { onVendorClick() }
         }
         Row(
             modifier = Modifier
@@ -572,7 +800,7 @@ private fun Dropdowns(
                 )
             }
             Spacer(Modifier.width(8.dp))
-            ReportButton { }
+            ReportButton { onCustomerClick() }
         }
         Row(
             modifier = Modifier
@@ -596,7 +824,7 @@ private fun Dropdowns(
                 )
             }
             Spacer(Modifier.width(8.dp))
-            ReportButton { }
+            ReportButton { onAccountCategoryClick() }
         }
         Row(
             modifier = Modifier
@@ -620,7 +848,7 @@ private fun Dropdowns(
                 )
             }
             Spacer(Modifier.width(8.dp))
-            ReportButton { }
+            ReportButton { onSupplierClick() }
         }
         Row(
             modifier = Modifier
@@ -644,7 +872,7 @@ private fun Dropdowns(
                 )
             }
             Spacer(Modifier.width(8.dp))
-            ReportButton { }
+            ReportButton { onUserClick() }
         }
     }
 }
@@ -656,7 +884,7 @@ private fun Prev() {
         modifier = Modifier
             .fillMaxSize()
     ) {
-        SearchBox(
+        DateBox(
             LocalDate.now(),
             LocalDate.now(),
             {},
@@ -665,6 +893,7 @@ private fun Prev() {
         )
         ItemnameBox(
             "",
+            {},
             {},
             {},
             {},
@@ -696,8 +925,26 @@ private fun Prev() {
             {},
             {},
             {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
         )
         Spacer(Modifier.height(8.dp))
-        ReportButtons()
+        ReportButtons(
+            {},
+            {},
+            {},
+            {},
+        )
+        Spacer(Modifier.height(16.dp))
+        AppSwitch(
+            checked = true,
+            onCheckedChange = {},
+            label = "Sum"
+        )
     }
 }

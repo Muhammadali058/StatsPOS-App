@@ -115,4 +115,6 @@ dependencies {
 //    ExpressionBuilder
     implementation("net.objecthunter:exp4j:0.4.8")
 
+//    iText for Reports
+    implementation("com.itextpdf:itext7-core:7.2.5")
 }

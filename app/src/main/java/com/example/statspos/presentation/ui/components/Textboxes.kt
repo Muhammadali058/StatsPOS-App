@@ -255,7 +255,8 @@ fun AutoCompleteItemsTextbox(
     contentPadding: PaddingValues = ConstantPaddings.CUSTOM_TEXTBOX_INSIDE,
     padding: PaddingValues = ConstantPaddings.CUSTOM_TEXTBOX_OUTSIDE,
 ) {
-    var items by rememberSaveable { mutableStateOf(HP.autoCompleteItems) }
+//    var items by rememberSaveable { mutableStateOf(HP.autoCompleteItems) }
+    var items by remember { mutableStateOf(HP.autoCompleteItems) }
     var expanded by remember { mutableStateOf(false) }
 
     val filteredItems = remember(value) {

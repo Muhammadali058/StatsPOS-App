@@ -2,12 +2,14 @@ package com.example.statspos.presentation.viewmodels.reports
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.statspos.domain.models.accounts.Banks
-import com.example.statspos.domain.models.accounts.Expenses
+import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.items.Items
-import com.example.statspos.domain.repository.accounts.BanksRepository
+import com.example.statspos.domain.models.reports.TotalReport
+import com.example.statspos.domain.models.reports.sales.SalesBillWiseReport
+import com.example.statspos.domain.models.reports.sales.SalesItemsReport
 import com.example.statspos.domain.repository.items.ItemsRepository
 import com.example.statspos.domain.repository.reports.SalesReportsRepository
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
@@ -51,9 +53,15 @@ class SalesReportsViewModel @Inject constructor(
 
         val fromDate: LocalDate = LocalDate.now(),
         val toDate: LocalDate = LocalDate.now(),
+        val salesType: DropdownItem = HP.getNoneDropdownItem("Both"),
+        val salesOn: DropdownItem = HP.getNoneDropdownItem("Both"),
+        val mop: DropdownItem = HP.getNoneDropdownItem("Both"),
+        val salesRetailType: DropdownItem = HP.getNoneDropdownItem("Both"),
+        val sum: Boolean = false,
 
-        val list: List<Banks> = emptyList(),
-        val totalBanks: Int = 0,
+        val salesBillWiseReport: List<SalesBillWiseReport>? = null,
+        val salesItemsReport: List<SalesItemsReport>? = null,
+        val totalReport: TotalReport? = null,
 
         val isLoading: Boolean = false,
         val error: String? = null,
@@ -192,19 +200,145 @@ class SalesReportsViewModel @Inject constructor(
         state.update { it.copy(toDate = value) }
     }
 
+    fun onSalesTypeChange(value: DropdownItem) {
+        state.update { it.copy(salesType = value) }
+    }
+
+    fun onSalesOnChange(value: DropdownItem) {
+        state.update { it.copy(salesOn = value) }
+    }
+
+    fun onMOPChange(value: DropdownItem) {
+        state.update { it.copy(mop = value) }
+    }
+
+    fun onSalesRetailTypeChange(value: DropdownItem) {
+        state.update { it.copy(salesRetailType = value) }
+    }
+
+    fun onSumChange(value: Boolean) {
+        state.update { it.copy(sum = value) }
+    }
+
+    // endregion
+
+    // region Button Clicks
+    fun onTotalBillsClick(onSuccess: (List<SalesBillWiseReport>, TotalReport) -> Unit) {
+        loadBillWiseReport(getParams(), onSuccess)
+    }
+
+    fun onTotalItemsClick(onSuccess: (List<SalesItemsReport>, TotalReport) -> Unit) {
+        loadItemsReport(getParams(), onSuccess)
+    }
+
+    fun onFilterClick(onSuccess: (List<SalesItemsReport>, TotalReport) -> Unit) {
+        val params = getParams()
+        params.addProperty("itemId", state.value.itemId)
+        params.addProperty("categoryId", state.value.categoryId)
+        params.addProperty("subCategoryId", state.value.subCategoryId)
+        params.addProperty("vendorId", state.value.vendorId)
+        params.addProperty("customerId", state.value.customerId)
+        params.addProperty("customerCategoryId", state.value.accountCategoryId)
+        params.addProperty("supplierId", state.value.supplierId)
+        params.addProperty("userId", state.value.userId)
+        loadItemsReport(params, onSuccess)
+    }
+
+    fun onItemClick(onSuccess: (List<SalesItemsReport>, TotalReport) -> Unit) {
+        if (state.value.itemId == 0L) {
+            showMessage("Select item")
+        } else {
+            val params = getParams()
+            params.addProperty("itemId", state.value.itemId)
+            loadItemsReport(params, onSuccess)
+        }
+
+    }
+
+    fun onCategoryClick(onSuccess: (List<SalesItemsReport>, TotalReport) -> Unit) {
+        if (state.value.categoryId == 0L) {
+            showMessage("Select category")
+        } else {
+            val params = getParams()
+            params.addProperty("categoryId", state.value.categoryId)
+            loadItemsReport(params, onSuccess)
+        }
+
+    }
+
+    fun onSubCategoryClick(onSuccess: (List<SalesItemsReport>, TotalReport) -> Unit) {
+        if (state.value.subCategoryId == 0L) {
+            showMessage("Select sub-category")
+        } else {
+            val params = getParams()
+            params.addProperty("subCategoryId", state.value.subCategoryId)
+            loadItemsReport(params, onSuccess)
+        }
+
+    }
+
+    fun onVendorClick(onSuccess: (List<SalesItemsReport>, TotalReport) -> Unit) {
+        if (state.value.vendorId == 0L) {
+            showMessage("Select vendor")
+        } else {
+            val params = getParams()
+            params.addProperty("vendorId", state.value.vendorId)
+            loadItemsReport(params, onSuccess)
+        }
+
+    }
+
+    fun onCustomerClick(onSuccess: (List<SalesBillWiseReport>, TotalReport) -> Unit) {
+        if (state.value.customerId == 0L) {
+            showMessage("Select customer")
+        } else {
+            val params = getParams()
+            params.addProperty("customerId", state.value.customerId)
+            loadBillWiseReport(params, onSuccess)
+        }
+    }
+
+    fun onAccountCategoryClick(onSuccess: (List<SalesBillWiseReport>, TotalReport) -> Unit) {
+        if (state.value.accountCategoryId == 0L) {
+            showMessage("Select customer category")
+        } else {
+            val params = getParams()
+            params.addProperty("customerCategoryId", state.value.accountCategoryId)
+            loadBillWiseReport(params, onSuccess)
+        }
+    }
+
+    fun onSupplierClick(onSuccess: (List<SalesBillWiseReport>, TotalReport) -> Unit) {
+        if (state.value.supplierId == 0L) {
+            showMessage("Select supplier")
+        } else {
+            val params = getParams()
+            params.addProperty("supplierId", state.value.supplierId)
+            loadBillWiseReport(params, onSuccess)
+        }
+    }
+
+    fun onUserClick(onSuccess: (List<SalesBillWiseReport>, TotalReport) -> Unit) {
+        if (state.value.userId == 0L) {
+            showMessage("Select user")
+        } else {
+            val params = getParams()
+            params.addProperty("userId", state.value.userId)
+            loadBillWiseReport(params, onSuccess)
+        }
+    }
     // endregion
 
     // region Network calls
-    fun loadData() {
+    private fun loadBillWiseReport(
+        params: JsonObject,
+        onSuccess: (List<SalesBillWiseReport>, TotalReport) -> Unit
+    ) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
 
             beforeRequest()
-
-            val params = JsonObject().apply {
-                addProperty("text", "")
-            }
 
             when (val result = api.billWiseReport(params)) {
                 is Resource.Error -> resultError(result.error)
@@ -212,15 +346,62 @@ class SalesReportsViewModel @Inject constructor(
                 is Resource.Success -> {
                     resultSuccess()
 
-                    val resultTotal =
-                        result.data.get("total").asJsonObject.get("totalBanks").asInt
-                    val resultList =
-                        Gson().getListOf<Banks>(result.data.get("rows").asJsonArray)
-                    state.update {
-                        it.copy(
-                            list = resultList,
-                            totalBanks = resultTotal,
-                        )
+                    val salesBillWiseReport =
+                        Gson().getListOf<SalesBillWiseReport>(result.data.get("rows").asJsonArray)
+                    if (salesBillWiseReport.isNotEmpty()) {
+                        val totalReport =
+                            Gson().get<TotalReport>(result.data.get("total").asJsonObject)
+
+                        state.update {
+                            it.copy(
+                                salesBillWiseReport = salesBillWiseReport,
+                                totalReport = totalReport,
+                            )
+                        }
+
+                        onSuccess(salesBillWiseReport, totalReport)
+                    } else {
+                        showMessage("Not record found")
+                    }
+                }
+            }
+        }
+    }
+
+    private fun loadItemsReport(
+        params: JsonObject,
+        onSuccess: (List<SalesItemsReport>, TotalReport) -> Unit
+    ) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            beforeRequest()
+
+            params.addProperty("sum", state.value.sum)
+
+            when (val result = api.itemsReport(params)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val salesItemsReport =
+                        Gson().getListOf<SalesItemsReport>(result.data.get("rows").asJsonArray)
+                    if (salesItemsReport.isNotEmpty()) {
+                        val totalReport =
+                            Gson().get<TotalReport>(result.data.get("total").asJsonObject)
+
+                        state.update {
+                            it.copy(
+                                salesItemsReport = salesItemsReport,
+                                totalReport = totalReport,
+                            )
+                        }
+
+                        onSuccess(salesItemsReport, totalReport)
+                    } else {
+                        showMessage("Not record found")
                     }
                 }
             }
@@ -279,5 +460,18 @@ class SalesReportsViewModel @Inject constructor(
     private fun resultSuccess() {
         state.update { it.copy(isLoading = false, error = null) }
     }
+
+    private fun getParams(): JsonObject {
+        return JsonObject().apply {
+            addProperty("fromDate", HP.getZonedDateWithFromTime(state.value.fromDate))
+            addProperty("toDate", HP.getZonedDateWithToTime(state.value.toDate))
+            addProperty("salesOn", state.value.salesOn.id.toInt())
+            addProperty("salesType", state.value.salesType.id.toInt())
+            addProperty("mop", state.value.mop.id.toInt())
+            addProperty("type", state.value.salesRetailType.id.toInt())
+            addProperty("fbrInvoice", 0)
+        }
+    }
+
     // endregion
 }

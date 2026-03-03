@@ -1,5 +1,6 @@
 package com.example.statspos.data.remote.reports
 
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import retrofit2.Response
 import retrofit2.http.Body
@@ -19,14 +20,14 @@ interface SalesReportsApi {
     suspend fun briefReport(@Body body: JsonObject): Response<JsonObject>
 
     @POST("salesReports/chartDaily")
-    suspend fun chartDaily(@Body body: JsonObject): Response<JsonObject>
+    suspend fun chartDaily(@Body body: JsonObject): Response<JsonArray>
 
     @POST("salesReports/chartWeekly")
-    suspend fun chartWeekly(@Body body: JsonObject): Response<JsonObject>
+    suspend fun chartWeekly(@Body body: JsonObject): Response<JsonArray>
 
     @POST("salesReports/chartMonthly")
-    suspend fun chartMonthly(@Body body: JsonObject): Response<JsonObject>
+    suspend fun chartMonthly(@Body body: JsonObject): Response<JsonArray>
 
     @POST("salesReports/chartYearly")
-    suspend fun chartYearly(@Body body: JsonObject): Response<JsonObject>
+    suspend fun chartYearly(@Body body: JsonObject): Response<JsonArray>
 }

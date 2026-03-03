@@ -5,6 +5,7 @@ import com.example.statspos.domain.repository.reports.SalesReportsRepository
 import com.example.statspos.utils.DB
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.safeApiCall
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import javax.inject.Inject
 
@@ -43,7 +44,7 @@ class SalesReportsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun chartDaily(body: JsonObject): Resource<JsonObject> {
+    override suspend fun chartDaily(body: JsonObject): Resource<JsonArray> {
         return safeApiCall {
             api.chartDaily(
                 DB.addParams(body)
@@ -51,7 +52,7 @@ class SalesReportsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun chartWeekly(body: JsonObject): Resource<JsonObject> {
+    override suspend fun chartWeekly(body: JsonObject): Resource<JsonArray> {
         return safeApiCall {
             api.chartWeekly(
                 DB.addParams(body)
@@ -59,7 +60,7 @@ class SalesReportsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun chartMonthly(body: JsonObject): Resource<JsonObject> {
+    override suspend fun chartMonthly(body: JsonObject): Resource<JsonArray> {
         return safeApiCall {
             api.chartMonthly(
                 DB.addParams(body)
@@ -67,7 +68,7 @@ class SalesReportsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun chartYearly(body: JsonObject): Resource<JsonObject> {
+    override suspend fun chartYearly(body: JsonObject): Resource<JsonArray> {
         return safeApiCall {
             api.chartYearly(
                 DB.addParams(body)

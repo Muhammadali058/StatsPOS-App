@@ -5,12 +5,21 @@ import com.example.statspos.domain.repository.reports.ProfitReportsRepository
 import com.example.statspos.utils.DB
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.safeApiCall
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import javax.inject.Inject
 
 class ProfitReportsRepositoryImpl @Inject constructor(
     private val api: ProfitReportsApi
 ) : ProfitReportsRepository {
+    override suspend fun mainReport(body: JsonObject): Resource<JsonObject> {
+        return safeApiCall {
+            api.mainReport(
+                DB.addParams(body)
+            )
+        }
+    }
+
     override suspend fun billWiseReport(body: JsonObject): Resource<JsonObject> {
         return safeApiCall {
             api.billWiseReport(
@@ -35,7 +44,7 @@ class ProfitReportsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun chartDaily(body: JsonObject): Resource<JsonObject> {
+    override suspend fun chartDaily(body: JsonObject): Resource<JsonArray> {
         return safeApiCall {
             api.chartDaily(
                 DB.addParams(body)
@@ -43,7 +52,7 @@ class ProfitReportsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun chartWeekly(body: JsonObject): Resource<JsonObject> {
+    override suspend fun chartWeekly(body: JsonObject): Resource<JsonArray> {
         return safeApiCall {
             api.chartWeekly(
                 DB.addParams(body)
@@ -51,7 +60,7 @@ class ProfitReportsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun chartMonthly(body: JsonObject): Resource<JsonObject> {
+    override suspend fun chartMonthly(body: JsonObject): Resource<JsonArray> {
         return safeApiCall {
             api.chartMonthly(
                 DB.addParams(body)
@@ -59,7 +68,7 @@ class ProfitReportsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun chartYearly(body: JsonObject): Resource<JsonObject> {
+    override suspend fun chartYearly(body: JsonObject): Resource<JsonArray> {
         return safeApiCall {
             api.chartYearly(
                 DB.addParams(body)

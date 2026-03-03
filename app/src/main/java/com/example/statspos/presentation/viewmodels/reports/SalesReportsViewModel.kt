@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.items.Items
+import com.example.statspos.domain.models.reports.ChartReport
 import com.example.statspos.domain.models.reports.MainReport
 import com.example.statspos.domain.models.reports.TotalReport
 import com.example.statspos.domain.models.reports.sales.SalesBillWiseReport
@@ -12,6 +13,7 @@ import com.example.statspos.domain.models.reports.sales.SalesItemsReport
 import com.example.statspos.domain.repository.items.ItemsRepository
 import com.example.statspos.domain.repository.reports.SalesReportsRepository
 import com.example.statspos.utils.HP
+import com.example.statspos.utils.HP.subCategories
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
@@ -62,6 +64,7 @@ class SalesReportsViewModel @Inject constructor(
         val sum: Boolean = false,
 
         val mainReport: MainReport = MainReport(),
+        val chartReport: List<ChartReport> = emptyList(),
         val salesBillWiseReport: List<SalesBillWiseReport>? = null,
         val salesItemsReport: List<SalesItemsReport>? = null,
         val totalReport: TotalReport? = null,
@@ -131,6 +134,7 @@ class SalesReportsViewModel @Inject constructor(
 
     init {
         loadMainReport()
+        loadChartReport()
     }
 
     // region onChangeMethods
@@ -367,6 +371,39 @@ class SalesReportsViewModel @Inject constructor(
         }
     }
 
+    private fun loadChartReport() {
+        viewModelScope.launch {
+//            if (state.value.isLoading)
+//                return@launch
+//
+//            beforeRequest()
+
+            val params = getChartParams()
+            params.addProperty("days", 7)
+
+            when (val result = api.chartDaily(params)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+//                    resultSuccess()
+
+                    val chartReport = result.data.asJsonArray.map { obj ->
+                        ChartReport(
+                            total = obj.asJsonObject.get("total").asDouble,
+                            date = obj.asJsonObject.get("date").asString.split("/")[0],
+                        )
+                    }
+
+                    state.update {
+                        it.copy(
+                            chartReport = chartReport,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     private fun loadBillWiseReport(
         params: JsonObject,
         onSuccess: (List<SalesBillWiseReport>, TotalReport) -> Unit
@@ -481,7 +518,7 @@ class SalesReportsViewModel @Inject constructor(
             }
         }
     }
-    // endregion
+// endregion
 
     // region Others
     private fun resultError(error: String?) {
@@ -510,5 +547,16 @@ class SalesReportsViewModel @Inject constructor(
         }
     }
 
-    // endregion
+    private fun getChartParams(): JsonObject {
+        return JsonObject().apply {
+            addProperty("date", HP.getZonedDate(LocalDate.now()))
+            addProperty("salesOn", state.value.salesOn.id.toInt())
+            addProperty("salesType", state.value.salesType.id.toInt())
+            addProperty("mop", state.value.mop.id.toInt())
+            addProperty("type", state.value.salesRetailType.id.toInt())
+            addProperty("fbrInvoice", 0)
+        }
+    }
+
+// endregion
 }

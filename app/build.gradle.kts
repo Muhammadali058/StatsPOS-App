@@ -117,4 +117,10 @@ dependencies {
 
 //    iText for Reports
     implementation("com.itextpdf:itext7-core:7.2.5")
+
+//    Vico for charts
+    implementation(libs.vico.compose)
+    implementation(libs.vico.compose.m2)
+    implementation(libs.vico.compose.m3)
+    implementation(libs.vico.views)
 }

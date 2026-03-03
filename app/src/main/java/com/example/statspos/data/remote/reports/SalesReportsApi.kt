@@ -6,6 +6,9 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface SalesReportsApi {
+    @POST("salesReports/mainReport")
+    suspend fun mainReport(@Body body: JsonObject): Response<JsonObject>
+
     @POST("salesReports/billWiseReport")
     suspend fun billWiseReport(@Body body: JsonObject): Response<JsonObject>
 

@@ -4,6 +4,8 @@ import com.example.statspos.utils.Resource
 import com.google.gson.JsonObject
 
 interface SalesReportsRepository {
+    suspend fun mainReport(body: JsonObject): Resource<JsonObject>
+
     suspend fun billWiseReport(body: JsonObject): Resource<JsonObject>
 
     suspend fun itemsReport(body: JsonObject): Resource<JsonObject>

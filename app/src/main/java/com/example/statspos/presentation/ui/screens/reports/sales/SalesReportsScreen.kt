@@ -1,6 +1,7 @@
 package com.example.statspos.presentation.ui.screens.reports.sales
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,7 +26,10 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -42,11 +46,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -63,6 +71,7 @@ import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.AppSwitch
+import com.example.statspos.presentation.ui.components.AppText
 import com.example.statspos.presentation.ui.components.AutoCompleteItemsTextbox
 import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
 import com.example.statspos.presentation.ui.components.BottomSheet
@@ -371,6 +380,14 @@ private fun Home(
                         .weight(1f)
                         .verticalScroll(scrollState),
                 ) {
+                    TodaySales(
+                        cashSales = state.mainReport.cashSales,
+                        creditSales = state.mainReport.creditSales,
+                        salesReturns = state.mainReport.salesReturns,
+                        totalSales = state.mainReport.totalSales,
+                        totalBills = state.mainReport.totalBills,
+                    )
+                    Spacer(Modifier.height(16.dp))
                     DateBox(
                         fromDate = state.fromDate,
                         toDate = state.toDate,
@@ -380,31 +397,6 @@ private fun Home(
                             showBottomSheet = true
                         },
                     )
-                    ItemnameBox(
-                        value = state.itemname,
-                        onValueChange = viewModel::onItemnameChange,
-                        onItemSelected = {
-                            viewModel.getItem(it)
-                            keyboardController?.hide()
-                        },
-                        onSearchClick = {
-                            viewModel.getItem(it)
-                            keyboardController?.hide()
-                        },
-                        onEndIconClick = {
-                            viewModel.onItemnameChange("")
-                        },
-                        onBarcodeClick = {
-                            showBarcodeScanner = true
-                        },
-                        onSearchItemClick = onSearchItemClick,
-                        onItemClick = {
-                            viewModel.onItemClick { salesItemsReport, totalReport ->
-                                showItemsReport(salesItemsReport, totalReport)
-                            }
-                        }
-                    )
-                    Spacer(Modifier.height(8.dp))
                     Dropdowns(
                         categoryName = state.categoryName,
                         subCategoryName = state.subCategoryName,
@@ -464,11 +456,32 @@ private fun Home(
                             }
                         },
                     )
+                    ItemnameBox(
+                        value = state.itemname,
+                        onValueChange = viewModel::onItemnameChange,
+                        onItemSelected = {
+                            viewModel.getItem(it)
+                            keyboardController?.hide()
+                        },
+                        onSearchClick = {
+                            viewModel.getItem(it)
+                            keyboardController?.hide()
+                        },
+                        onEndIconClick = {
+                            viewModel.onItemnameChange("")
+                        },
+                        onBarcodeClick = {
+                            showBarcodeScanner = true
+                        },
+                        onSearchItemClick = onSearchItemClick,
+                        onItemClick = {
+                            viewModel.onItemClick { salesItemsReport, totalReport ->
+                                showItemsReport(salesItemsReport, totalReport)
+                            }
+                        }
+                    )
                     Spacer(Modifier.height(8.dp))
                     ReportButtons(
-                        onBriefReportClick = {
-
-                        },
                         onTotalBillsClick = {
                             viewModel.onTotalBillsClick { salesBillWiseReport, totalReport ->
                                 showBillWiseReport(salesBillWiseReport, totalReport)
@@ -491,6 +504,7 @@ private fun Home(
                         onCheckedChange = viewModel::onSumChange,
                         label = "Sum"
                     )
+                    Spacer(Modifier.height(8.dp))
                 }
             }
 
@@ -548,7 +562,6 @@ private fun DateBox(
 
 @Composable
 private fun ReportButtons(
-    onBriefReportClick: () -> Unit,
     onTotalBillsClick: () -> Unit,
     onTotalItemsClick: () -> Unit,
     onFilterReportClick: () -> Unit,
@@ -566,10 +579,6 @@ private fun ReportButtons(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ReportButton("Brief Report", Modifier.width(120.dp)) {
-                onBriefReportClick()
-            }
-            Spacer(Modifier.width(8.dp))
             ReportButton("Total Bills", Modifier.width(120.dp)) {
                 onTotalBillsClick()
             }
@@ -891,12 +900,8 @@ private fun Prev() {
             {},
             {},
         )
-        ItemnameBox(
-            "",
-            {},
-            {},
-            {},
-            {},
+        Spacer(Modifier.height(8.dp))
+        ReportButtons(
             {},
             {},
             {},
@@ -933,8 +938,11 @@ private fun Prev() {
             {},
             {},
         )
-        Spacer(Modifier.height(8.dp))
-        ReportButtons(
+        ItemnameBox(
+            "",
+            {},
+            {},
+            {},
             {},
             {},
             {},
@@ -945,6 +953,145 @@ private fun Prev() {
             checked = true,
             onCheckedChange = {},
             label = "Sum"
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TodaySales(
+    cashSales:Double = 0.0,
+    creditSales:Double = 0.0,
+    salesReturns:Double = 0.0,
+    totalSales:Double = 0.0,
+    totalBills:Int = 0,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Card(
+            modifier = Modifier,
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 3.dp
+            ),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+            ),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Spacer(Modifier.height(12.dp))
+                AppText(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp),
+                    text = "Today",
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                )
+                Spacer(Modifier.height(2.dp))
+                AppText(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp),
+                    text = "Summary of daily sales",
+                    style = TextStyle(
+                        fontSize = 12.sp,
+                    )
+                )
+                Spacer(Modifier.height(8.dp))
+                HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                    ) {
+                        TodayBox(
+                            modifier = Modifier
+                                .weight(1f),
+                            text = "Cash Sales",
+                            value = cashSales,
+                        )
+                        TodayBox(
+                            modifier = Modifier
+                                .weight(1f),
+                            text = "Credit Sales",
+                            value = creditSales,
+                        )
+                        TodayBox(
+                            modifier = Modifier
+                                .weight(1f),
+                            text = "Returns",
+                            value = salesReturns,
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                    ) {
+                        TodayBox(
+                            modifier = Modifier
+                                .weight(1f),
+                            text = "Total Sales",
+                            value = totalSales,
+                        )
+                        TodayBox(
+                            modifier = Modifier
+                                .weight(1f),
+                            text = "Total Invoices",
+                            value = totalBills.toDouble(),
+                            addRs = false,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TodayBox(
+    modifier: Modifier = Modifier,
+    text: String,
+    value: Double,
+    addRs:Boolean = true,
+) {
+    Column(
+        modifier = modifier
+            .padding(4.dp)
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.primary,
+                RoundedCornerShape(8.dp))
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        AppText(
+            text = text,
+            style = TextStyle(
+                fontSize = 12.sp,
+            )
+        )
+        Spacer(Modifier.height(8.dp))
+
+        val temp = if(addRs)
+            "Rs.${HP.formatDecimal(value, numberOfDecimals = 0)}"
+        else
+            HP.formatDecimal(value, numberOfDecimals = 0)
+        AppText(
+            text = temp,
+            style = TextStyle(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+            )
         )
     }
 }

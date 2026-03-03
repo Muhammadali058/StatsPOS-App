@@ -1,9 +1,11 @@
 package com.example.statspos.presentation.viewmodels.reports
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.items.Items
+import com.example.statspos.domain.models.reports.MainReport
 import com.example.statspos.domain.models.reports.TotalReport
 import com.example.statspos.domain.models.reports.sales.SalesBillWiseReport
 import com.example.statspos.domain.models.reports.sales.SalesItemsReport
@@ -59,6 +61,7 @@ class SalesReportsViewModel @Inject constructor(
         val salesRetailType: DropdownItem = HP.getNoneDropdownItem("Both"),
         val sum: Boolean = false,
 
+        val mainReport: MainReport = MainReport(),
         val salesBillWiseReport: List<SalesBillWiseReport>? = null,
         val salesItemsReport: List<SalesItemsReport>? = null,
         val totalReport: TotalReport? = null,
@@ -125,6 +128,10 @@ class SalesReportsViewModel @Inject constructor(
         onEvent(UiEvent.ShowError(error ?: ""))
     }
     // endregion
+
+    init {
+        loadMainReport()
+    }
 
     // region onChangeMethods
     fun onItemnameChange(value: String) {
@@ -330,6 +337,36 @@ class SalesReportsViewModel @Inject constructor(
     // endregion
 
     // region Network calls
+    private fun loadMainReport() {
+        viewModelScope.launch {
+//            if (state.value.isLoading)
+//                return@launch
+//
+//            beforeRequest()
+
+            val params = JsonObject().apply {
+                addProperty("fromDate", HP.getZonedDate(state.value.fromDate))
+                addProperty("toDate", HP.getZonedDate(state.value.toDate))
+            }
+
+            when (val result = api.mainReport(params)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+//                    resultSuccess()
+
+                    val mainReport = Gson().get<MainReport>(result.data.asJsonObject)
+
+                    state.update {
+                        it.copy(
+                            mainReport = mainReport,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     private fun loadBillWiseReport(
         params: JsonObject,
         onSuccess: (List<SalesBillWiseReport>, TotalReport) -> Unit

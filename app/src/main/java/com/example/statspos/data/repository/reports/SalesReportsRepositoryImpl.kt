@@ -11,6 +11,14 @@ import javax.inject.Inject
 class SalesReportsRepositoryImpl @Inject constructor(
     private val api: SalesReportsApi
 ) : SalesReportsRepository {
+    override suspend fun mainReport(body: JsonObject): Resource<JsonObject> {
+        return safeApiCall {
+            api.mainReport(
+                DB.addParams(body)
+            )
+        }
+    }
+
     override suspend fun billWiseReport(body: JsonObject): Resource<JsonObject> {
         return safeApiCall {
             api.billWiseReport(

@@ -101,13 +101,12 @@ fun NewReceiptEntryBody(
     Box(
         Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.surface)
     ) {
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(top = 8.dp)
-                .padding(bottom = 16.dp),
+                .padding(top = 8.dp, bottom = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Column(

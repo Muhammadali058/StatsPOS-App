@@ -1,5 +1,9 @@
 package com.example.statspos.presentation.ui.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -9,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun AppText(
@@ -65,7 +70,10 @@ fun HeadingMedium(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onPrimaryContainer,
     textAlign: TextAlign = TextAlign.Start,
-    style: TextStyle = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, textAlign = textAlign),
+    style: TextStyle = MaterialTheme.typography.labelMedium.copy(
+        fontWeight = FontWeight.Bold,
+        textAlign = textAlign
+    ),
 ) {
     Text(
         modifier = modifier,
@@ -88,4 +96,25 @@ fun HeadingLarge(
         color = color,
         style = style
     )
+}
+
+@Composable
+fun BottomHeading(
+    modifier: Modifier = Modifier,
+    text: String,
+    value: String,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(8.dp)
+    ) {
+        HeadingMedium(
+            text = text,
+        )
+        LabelMedium(
+            text = value,
+        )
+    }
 }

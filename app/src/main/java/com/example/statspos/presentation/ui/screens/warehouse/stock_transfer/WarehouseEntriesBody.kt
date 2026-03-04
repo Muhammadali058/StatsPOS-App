@@ -34,6 +34,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.warehouse.WarehouseEntries
+import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.ErrorDialog
@@ -42,6 +43,7 @@ import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.PullToRefreshList
+import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.warehouse.stock_transfer.WarehouseEntriesViewModel
@@ -100,31 +102,31 @@ fun WarehouseEntriesBody(
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(ConstantPaddings.BODY_HORIZONTAL)
             ) {
-                Spacer(Modifier.height(8.dp))
-                SearchBox(
-                    modifier = Modifier
-                        .padding(bottom = 4.dp),
-                    warehouse = state.warehouse,
-                    fromDate = state.fromDate,
-                    toDate = state.toDate,
-                    onWaerhouseSelected = { warehouse ->
-                        viewModel.onWarehouseSelected(warehouse)
-                        viewModel.loadData()
-                    },
-                    onFromDateChange = { date ->
-                        viewModel.onFromDateChange(date)
-                        viewModel.loadData()
-                    },
-                    onToDateChange = { date ->
-                        viewModel.onToDateChange(date)
-                        viewModel.loadData()
-                    },
-                )
+                SearchBox {
+                    SearchBox(
+                        warehouse = state.warehouse,
+                        fromDate = state.fromDate,
+                        toDate = state.toDate,
+                        onWaerhouseSelected = { warehouse ->
+                            viewModel.onWarehouseSelected(warehouse)
+                            viewModel.loadData()
+                        },
+                        onFromDateChange = { date ->
+                            viewModel.onFromDateChange(date)
+                            viewModel.loadData()
+                        },
+                        onToDateChange = { date ->
+                            viewModel.onToDateChange(date)
+                            viewModel.loadData()
+                        },
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
                 BodyList(
                     modifier = Modifier
-                        .weight(1f),
+                        .weight(1f)
+                        .padding(ConstantPaddings.BODY_HORIZONTAL),
                     isRefreshing = state.isLoading,
                     onRefresh = {
                         viewModel.loadData()
@@ -136,14 +138,10 @@ fun WarehouseEntriesBody(
                 )
             }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-                HeadingMedium(text = "Total Entries: ")
-                LabelMedium(text = state.totalWarehouseEntries.toString())
-            }
+            BottomHeading(
+                text = "Total Entries: ",
+                value = state.totalWarehouseEntries.toString()
+            )
         }
     }
 }

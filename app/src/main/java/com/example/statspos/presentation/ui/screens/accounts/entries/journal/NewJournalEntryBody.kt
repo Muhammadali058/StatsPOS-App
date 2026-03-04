@@ -90,7 +90,7 @@ fun NewJournalEntryBody(
     Box(
         Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.surface)
     ) {
         Column(
             Modifier
@@ -143,7 +143,7 @@ fun NewJournalEntryBody(
                         viewModel.passEntry {
                             context.showToast("Enter posted successfully")
                             sharedViewModel.notifyDataChanged()
-                            keyboardController?.hide()
+//                            keyboardController?.hide()
                         }
                     }
                 }

@@ -395,7 +395,7 @@ private fun Home(
             Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(MaterialTheme.colorScheme.background)
+                .background(MaterialTheme.colorScheme.surface)
         ) {
             Column(
                 Modifier

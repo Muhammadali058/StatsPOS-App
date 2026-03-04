@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.warehouse.WarehouseEntryItems
+import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
@@ -110,12 +111,12 @@ fun WarehouseEntryItemsBody(
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(ConstantPaddings.BODY_HORIZONTAL)
                 ) {
                     Spacer(Modifier.height(8.dp))
                     BodyList(
                         modifier = Modifier
-                            .weight(1f),
+                            .weight(1f)
+                            .padding(ConstantPaddings.BODY_HORIZONTAL),
                         isRefreshing = state.isLoading,
                         onRefresh = {
                             viewModel.loadData(warehouseEntryId)
@@ -124,18 +125,10 @@ fun WarehouseEntryItemsBody(
                     )
                 }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    HeadingMedium(
-                        text = "Total Entry Items: ",
-                    )
-                    LabelMedium(
-                        text = state.totalWarehouseEntryItems.toString(),
-                    )
-                }
+                BottomHeading(
+                    text = "Total Entry Items: ",
+                    value = state.totalWarehouseEntryItems.toString()
+                )
             }
 
             if (state.isLoading) {

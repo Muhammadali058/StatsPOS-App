@@ -45,6 +45,7 @@ import com.example.statspos.domain.models.accounts.Accounts
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
+import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.BottomSheet
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
@@ -54,6 +55,7 @@ import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.ListImageView
 import com.example.statspos.presentation.ui.components.PullToRefreshList
+import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
@@ -230,28 +232,24 @@ private fun Home(
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(ConstantPaddings.BODY_HORIZONTAL)
                 ) {
-                    Spacer(Modifier.height(8.dp))
                     SearchBox(
-                        modifier = Modifier
-                            .padding(bottom = 4.dp),
                         value = state.search,
                         onValueChange = viewModel::onSearchChange,
                         onSearchClick = {
                             viewModel.loadData()
                             keyboardController?.hide()
                         },
-                        onEndIconClick = {
-                            viewModel.onSearchChange("")
-                        },
+                        showFilterIcon = true,
                         onFilterClick = {
                             showBottomSheet = true
                         }
                     )
+                    Spacer(Modifier.height(4.dp))
                     BodyList(
                         modifier = Modifier
-                            .weight(1f),
+                            .weight(1f)
+                            .padding(ConstantPaddings.BODY_HORIZONTAL),
                         isRefreshing = state.isLoading,
                         onRefresh = {
                             viewModel.loadData()
@@ -268,54 +266,12 @@ private fun Home(
                     )
                 }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    HeadingMedium(
-                        text = "Total Vendors: ",
-                    )
-                    LabelMedium(
-                        text = state.totalVendors.toString(),
-                    )
-                }
+                BottomHeading(
+                    text = "Total Vendors: ",
+                    value = state.totalVendors.toString()
+                )
             }
         }
-    }
-}
-
-@Composable
-private fun SearchBox(
-    modifier: Modifier = Modifier,
-    value: String,
-    onValueChange: (String) -> Unit,
-    onSearchClick: (String) -> Unit,
-    onEndIconClick: (String) -> Unit,
-    onFilterClick: () -> Unit,
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        SearchTextbox(
-            modifier = Modifier
-                .weight(1f),
-            value = value,
-            onValueChange = onValueChange,
-            onEndIconClick = onEndIconClick,
-            onSearchClick = onSearchClick,
-        )
-        Spacer(Modifier.width(4.dp))
-        AppIconButton(
-            onClick = {
-                onFilterClick()
-            },
-            icon = Icons.Default.FilterList,
-            buttonSize = 32.dp,
-            size = 26.dp
-        )
     }
 }
 

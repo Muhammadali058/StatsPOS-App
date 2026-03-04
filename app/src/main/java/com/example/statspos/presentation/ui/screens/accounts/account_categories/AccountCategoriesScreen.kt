@@ -37,12 +37,14 @@ import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.domain.models.accounts.AccountCategories
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
+import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.PullToRefreshList
+import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.screens.accounts.customers.AddUpdateCustomerScreen
@@ -180,12 +182,8 @@ private fun Home(
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(ConstantPaddings.BODY_HORIZONTAL)
                 ) {
-                    Spacer(Modifier.height(8.dp))
                     SearchBox(
-                        modifier = Modifier
-                            .padding(bottom = 4.dp),
                         value = state.search,
                         onValueChange = viewModel::onSearchChange,
                         onSearchClick = {
@@ -193,9 +191,11 @@ private fun Home(
                             keyboardController?.hide()
                         },
                     )
+                    Spacer(Modifier.height(4.dp))
                     BodyList(
                         modifier = Modifier
-                            .weight(1f),
+                            .weight(1f)
+                            .padding(ConstantPaddings.BODY_HORIZONTAL),
                         isRefreshing = state.isLoading,
                         onRefresh = {
                             viewModel.loadData()
@@ -207,45 +207,12 @@ private fun Home(
                     )
                 }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    HeadingMedium(
-                        text = "Total Account Categories: ",
-                    )
-                    LabelMedium(
-                        text = state.totalAccountCategories.toString(),
-                    )
-                }
+                BottomHeading(
+                    text = "Total Account Categories: ",
+                    value = state.totalAccountCategories.toString()
+                )
             }
         }
-    }
-}
-
-@Composable
-private fun SearchBox(
-    modifier: Modifier = Modifier,
-    value: String,
-    onValueChange: (String) -> Unit,
-    onSearchClick: (String) -> Unit,
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        SearchTextbox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            value = value,
-            onValueChange = onValueChange,
-            onEndIconClick = {
-                onValueChange("")
-            },
-            onSearchClick = onSearchClick,
-        )
     }
 }
 

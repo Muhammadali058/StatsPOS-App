@@ -30,6 +30,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.accounts.Accounts
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
+import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
@@ -37,6 +38,7 @@ import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.PullToRefreshList
+import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
@@ -109,36 +111,36 @@ fun SubExpensesBody(
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(ConstantPaddings.BODY_HORIZONTAL)
                 ) {
-                    Spacer(Modifier.height(8.dp))
-                    ComboBox(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        selectedItem = state.expense,
-                        items = HP.expenses,
-                        onItemSelected = { dropdownItem ->
-                            viewModel.onExpenseSelected(dropdownItem)
-                            viewModel.loadData()
-                        },
-                        label = {
-                            Text("Expense")
-                        },
-                        addNone = true,
-                    )
-                    SearchBox(
-                        modifier = Modifier
-                            .padding(bottom = 4.dp),
-                        value = state.search,
-                        onValueChange = viewModel::onSearchChange,
-                        onSearchClick = {
-                            viewModel.loadData()
-                            keyboardController?.hide()
-                        },
-                    )
+                    SearchBox {
+                        ComboBox(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            selectedItem = state.expense,
+                            items = HP.expenses,
+                            onItemSelected = { dropdownItem ->
+                                viewModel.onExpenseSelected(dropdownItem)
+                                viewModel.loadData()
+                            },
+                            label = {
+                                Text("Expense")
+                            },
+                            addNone = true,
+                        )
+                        SearchTextbox(
+                            value = state.search,
+                            onValueChange = viewModel::onSearchChange,
+                            onSearchClick = {
+                                viewModel.loadData()
+                                keyboardController?.hide()
+                            },
+                        )
+                    }
+                    Spacer(Modifier.height(4.dp))
                     BodyList(
                         modifier = Modifier
-                            .weight(1f),
+                            .weight(1f)
+                            .padding(ConstantPaddings.BODY_HORIZONTAL),
                         isRefreshing = state.isLoading,
                         onRefresh = {
                             viewModel.loadData()
@@ -150,45 +152,12 @@ fun SubExpensesBody(
                     )
                 }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    HeadingMedium(
-                        text = "Total Sub-Expenses: ",
-                    )
-                    LabelMedium(
-                        text = state.totalSubExpenses.toString(),
-                    )
-                }
+                BottomHeading(
+                    text = "Total Sub-Expenses: ",
+                    value = state.totalSubExpenses.toString()
+                )
             }
         }
-    }
-}
-
-@Composable
-private fun SearchBox(
-    modifier: Modifier = Modifier,
-    value: String,
-    onValueChange: (String) -> Unit,
-    onSearchClick: (String) -> Unit,
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        SearchTextbox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            value = value,
-            onValueChange = onValueChange,
-            onEndIconClick = {
-                onValueChange("")
-            },
-            onSearchClick = onSearchClick,
-        )
     }
 }
 

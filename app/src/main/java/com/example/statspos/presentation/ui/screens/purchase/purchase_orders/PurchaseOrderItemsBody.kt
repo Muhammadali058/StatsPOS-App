@@ -32,6 +32,7 @@ import com.example.statspos.domain.models.items.PackageItems
 import com.example.statspos.domain.models.purchase.PurchaseOrderItems
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
+import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
@@ -39,6 +40,7 @@ import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.PullToRefreshList
+import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
@@ -111,34 +113,34 @@ fun PurchaseOrderItemsBody(
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(ConstantPaddings.BODY_HORIZONTAL)
                 ) {
-                    Spacer(Modifier.height(8.dp))
-                    Dropdown(
-                        value = state.purchaseOrderName,
-                        onValueChange = viewModel::onPurchaseOrderNameChange,
-                        items = HP.purchaseOrders,
-                        onItemSelected = { dropdownItem ->
-                            viewModel.onPurchaseOrderIdChange(dropdownItem.id)
-                            viewModel.loadData()
-                        },
-                        label = {
-                            Text("Order")
-                        }
-                    )
-                    SearchBox(
-                        modifier = Modifier
-                            .padding(bottom = 4.dp),
-                        value = state.search,
-                        onValueChange = viewModel::onSearchChange,
-                        onSearchClick = {
-                            viewModel.loadData()
-                            keyboardController?.hide()
-                        },
-                    )
+                    SearchBox {
+                        Dropdown(
+                            value = state.purchaseOrderName,
+                            onValueChange = viewModel::onPurchaseOrderNameChange,
+                            items = HP.purchaseOrders,
+                            onItemSelected = { dropdownItem ->
+                                viewModel.onPurchaseOrderIdChange(dropdownItem.id)
+                                viewModel.loadData()
+                            },
+                            label = {
+                                Text("Order")
+                            }
+                        )
+                        SearchTextbox(
+                            value = state.search,
+                            onValueChange = viewModel::onSearchChange,
+                            onSearchClick = {
+                                viewModel.loadData()
+                                keyboardController?.hide()
+                            },
+                        )
+                    }
+                    Spacer(Modifier.height(4.dp))
                     BodyList(
                         modifier = Modifier
-                            .weight(1f),
+                            .weight(1f)
+                            .padding(ConstantPaddings.BODY_HORIZONTAL),
                         isRefreshing = state.isLoading,
                         onRefresh = {
                             viewModel.loadData()
@@ -150,18 +152,10 @@ fun PurchaseOrderItemsBody(
                     )
                 }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    HeadingMedium(
-                        text = "Total Order Items: ",
-                    )
-                    LabelMedium(
-                        text = state.totalPurchaseOrderItems.toString(),
-                    )
-                }
+                BottomHeading(
+                    text = "Total Order Items: ",
+                    value = state.totalPurchaseOrderItems.toString()
+                )
             }
         }
     }

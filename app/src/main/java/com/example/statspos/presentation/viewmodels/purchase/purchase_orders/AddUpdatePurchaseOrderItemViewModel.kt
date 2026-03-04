@@ -174,7 +174,7 @@ class AddUpdatePurchaseOrderItemViewModel @Inject constructor(
                 is Resource.Error -> showError(result.error)
                 is Resource.Information -> showMessage(result.message)
                 is Resource.Success -> {
-//                    clearTextboxes()
+                    clearTextboxes()
                     onSuccess()
                 }
             }
@@ -223,7 +223,7 @@ class AddUpdatePurchaseOrderItemViewModel @Inject constructor(
         }
     }
 
-    fun getItem(value: String) {
+    fun getItem(value: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -249,6 +249,7 @@ class AddUpdatePurchaseOrderItemViewModel @Inject constructor(
                                 crtnSize = item.crtnSize!!,
                             )
                         }
+                        onSuccess()
                     } else {
                         state.update {
                             it.copy(

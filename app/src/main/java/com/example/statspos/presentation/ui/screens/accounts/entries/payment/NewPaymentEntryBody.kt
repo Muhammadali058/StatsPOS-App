@@ -101,7 +101,7 @@ fun NewPaymentEntryBody(
     Box(
         Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.surface)
     ) {
         Column(
             Modifier
@@ -168,7 +168,8 @@ fun NewPaymentEntryBody(
                         viewModel.passEntry {
                             context.showToast("Enter posted successfully")
                             sharedViewModel.notifyDataChanged()
-                            keyboardController?.hide()
+//                            keyboardController?.hide()
+                            accountFocusRequester.requestFocus()
                         }
                     }
                 }

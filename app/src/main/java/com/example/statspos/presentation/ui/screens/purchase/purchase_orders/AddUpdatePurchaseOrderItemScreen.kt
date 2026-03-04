@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.union
@@ -34,10 +33,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
@@ -57,17 +56,16 @@ import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
+import com.example.statspos.presentation.ui.components.SearchItemBox
 import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.items.packages.AddUpdatePackageItemViewModel
 import com.example.statspos.presentation.viewmodels.purchase.purchase_orders.AddUpdatePurchaseOrderItemViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import com.example.statspos.utils.showToast
-import kotlin.math.cos
 
 @Composable
 fun AddUpdatePurchaseOrderItemScreen(
@@ -94,6 +92,8 @@ fun AddUpdatePurchaseOrderItemScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showBarcodeScanner by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
+    val itemFocusRequester = remember { FocusRequester() }
+    val qtyFocusRequester = remember { FocusRequester() }
 
     LaunchedEffect(event) {
         checkEvent(
@@ -130,7 +130,9 @@ fun AddUpdatePurchaseOrderItemScreen(
             val item = sharedViewModelState.item
             item?.run {
                 viewModel.onItemnameChange(itemname!!)
-                viewModel.getItem(itemname!!)
+                viewModel.getItem(itemname!!) {
+                    qtyFocusRequester.requestFocus()
+                }
                 sharedViewModel.consumeDataChanged()
             }
         }
@@ -168,7 +170,9 @@ fun AddUpdatePurchaseOrderItemScreen(
             },
             onScanned = {
                 viewModel.onItemnameChange(it)
-                viewModel.getItem(it)
+                viewModel.getItem(it) {
+                    qtyFocusRequester.requestFocus()
+                }
                 showBarcodeScanner = false
             }
         )
@@ -208,10 +212,10 @@ fun AddUpdatePurchaseOrderItemScreen(
             Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(MaterialTheme.colorScheme.background)
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(ConstantPaddings.BODY_HORIZONTAL)
-                .padding(vertical = 16.dp)
-        ){
+                .padding(vertical = 8.dp)
+        ) {
             Column(
                 Modifier
                     .fillMaxSize(),
@@ -235,19 +239,25 @@ fun AddUpdatePurchaseOrderItemScreen(
                         },
                         enabled = false,
                     )
-                    ItemnameBox(
+                    SearchItemBox(
+                        itemFocusRequester = itemFocusRequester,
                         value = state.itemname,
                         onValueChange = viewModel::onItemnameChange,
                         onItemSelected = {
-                            viewModel.getItem(it)
-                            keyboardController?.hide()
+                            viewModel.getItem(it) {
+                                qtyFocusRequester.requestFocus()
+                            }
+//                            keyboardController?.hide()
                         },
                         onSearchClick = {
-                            viewModel.getItem(it)
-                            keyboardController?.hide()
+                            viewModel.getItem(it) {
+                                qtyFocusRequester.requestFocus()
+                            }
+//                            keyboardController?.hide()
                         },
                         onEndIconClick = {
                             viewModel.onItemnameChange("")
+                            itemFocusRequester.requestFocus()
                         },
                         onBarcodeClick = {
                             showBarcodeScanner = true
@@ -255,6 +265,7 @@ fun AddUpdatePurchaseOrderItemScreen(
                         onSearchItemClick = onSearchItemClick
                     )
                     Body(
+                        qtyFocusRequester = qtyFocusRequester,
                         qty = state.qty,
                         crtn = state.crtn,
                         cost = state.cost,
@@ -271,13 +282,15 @@ fun AddUpdatePurchaseOrderItemScreen(
                             WindowInsets.navigationBars
                                 .union(WindowInsets.ime)
                         )
-                ){
+                ) {
                     if (state.isSaving) {
                         AppCircularProgressIndicator()
                     } else {
                         SaveButton {
                             viewModel.insertOrUpdateData {
-                                goBackWithResult()
+                                sharedViewModel.notifyDataChanged()
+                                itemFocusRequester.requestFocus()
+//                                goBackWithResult()
                             }
                         }
                     }
@@ -293,70 +306,8 @@ fun AddUpdatePurchaseOrderItemScreen(
 }
 
 @Composable
-private fun ItemnameBox(
-    value: String,
-    onValueChange: (String) -> Unit,
-    onItemSelected: (String) -> Unit,
-    onSearchClick: (String) -> Unit,
-    onEndIconClick: (String) -> Unit,
-    onBarcodeClick: () -> Unit,
-    onSearchItemClick: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        AutoCompleteItemsTextbox(
-            modifier = Modifier
-                .weight(1f),
-            value = value,
-            onValueChange = onValueChange,
-            onItemSelected = onItemSelected,
-            onEndIconClick = onEndIconClick,
-            onSearchClick = onSearchClick,
-            label = {
-                Text(
-                    text = "Select Item"
-                )
-            },
-            trailingIcon = {
-                IconButton(onClick = {
-                    onEndIconClick(value)
-                }) {
-                    AppIcon(
-                        icon = Icons.Default.Clear,
-                        size = 20.dp
-                    )
-                }
-            },
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Go
-            )
-        )
-        Spacer(Modifier.width(4.dp))
-        AppIconButton(
-            onClick = {
-                onBarcodeClick()
-            },
-            icon = R.drawable.ic_barcode,
-            buttonSize = 32.dp,
-            size = 26.dp
-        )
-        Spacer(Modifier.width(4.dp))
-        AppIconButton(
-            onClick = {
-                onSearchItemClick()
-            },
-            icon = Icons.Default.Search,
-            buttonSize = 32.dp,
-            size = 26.dp
-        )
-    }
-}
-
-@Composable
 private fun Body(
+    qtyFocusRequester: FocusRequester? = null,
     qty: String,
     crtn: String,
     cost: String,
@@ -365,7 +316,7 @@ private fun Body(
     onCrtnChange: (String) -> Unit,
     onCostChange: (String) -> Unit,
 ) {
-    Row{
+    Row {
         Textbox(
             value = qty,
             onValueChange = onQtyChange,
@@ -378,8 +329,9 @@ private fun Body(
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Decimal
             ),
+            focusRequester = qtyFocusRequester,
         )
-        if(HP.settings.saleCartons == true) {
+        if (HP.settings.saleCartons == true) {
             Spacer(Modifier.width(8.dp))
             Textbox(
                 value = crtn,

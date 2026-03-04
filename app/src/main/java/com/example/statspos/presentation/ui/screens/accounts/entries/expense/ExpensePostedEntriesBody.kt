@@ -41,6 +41,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.accounts.Entries
 import com.example.statspos.presentation.ui.components.AppIconButton
+import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.DateTextbox
@@ -52,6 +53,7 @@ import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.PasswordDialog
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.PullToRefreshList
+import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
@@ -148,37 +150,37 @@ fun ExpensePostedEntriesBody(
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(ConstantPaddings.BODY_HORIZONTAL)
             ) {
-                Spacer(Modifier.height(8.dp))
-                SearchBox(
-                    modifier = Modifier
-                        .padding(bottom = 4.dp),
-                    value = state.search,
-                    fromDate = state.fromDate,
-                    toDate = state.toDate,
-                    selectedMOP = state.selectedMOP,
-                    onValueChange = viewModel::onSearchChange,
-                    onFromDateChange = { date ->
-                        viewModel.onFromDateChange(date)
-                        viewModel.loadEntries()
-                    },
-                    onToDateChange = { date ->
-                        viewModel.onToDateChange(date)
-                        viewModel.loadEntries()
-                    },
-                    onSelectedMOPChange = { mop ->
-                        viewModel.onSelectedMOPChange(mop)
-                        viewModel.loadEntries()
-                    },
-                    onSearchClick = {
-                        viewModel.loadEntries()
-                        keyboardController?.hide()
-                    },
-                )
+                SearchBox {
+                    SearchBox(
+                        value = state.search,
+                        fromDate = state.fromDate,
+                        toDate = state.toDate,
+                        selectedMOP = state.selectedMOP,
+                        onValueChange = viewModel::onSearchChange,
+                        onFromDateChange = { date ->
+                            viewModel.onFromDateChange(date)
+                            viewModel.loadEntries()
+                        },
+                        onToDateChange = { date ->
+                            viewModel.onToDateChange(date)
+                            viewModel.loadEntries()
+                        },
+                        onSelectedMOPChange = { mop ->
+                            viewModel.onSelectedMOPChange(mop)
+                            viewModel.loadEntries()
+                        },
+                        onSearchClick = {
+                            viewModel.loadEntries()
+                            keyboardController?.hide()
+                        },
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
                 BodyList(
                     modifier = Modifier
-                        .weight(1f),
+                        .weight(1f)
+                        .padding(ConstantPaddings.BODY_HORIZONTAL),
                     isRefreshing = state.isLoading,
                     onRefresh = {
                         viewModel.loadEntries()
@@ -197,23 +199,12 @@ fun ExpensePostedEntriesBody(
                 )
             }
 
-            Row(
+            BottomHeading(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .navigationBarsPadding()
-//                    .windowInsetsPadding(
-//                        WindowInsets.navigationBars
-//                            .union(WindowInsets.ime)
-//                    )
-            ) {
-                HeadingMedium(
-                    text = "Total Entries: ",
-                )
-                LabelMedium(
-                    text = state.totalEntries.toString(),
-                )
-            }
+                    .navigationBarsPadding(),
+                text = "Total Entries: ",
+                value = state.totalEntries.toString()
+            )
         }
 
         // Delete progress bar
@@ -241,8 +232,6 @@ private fun SearchBox(
             .fillMaxWidth(),
     ) {
         SearchTextbox(
-            modifier = Modifier
-                .fillMaxWidth(),
             value = value,
             onValueChange = onValueChange,
             onEndIconClick = {

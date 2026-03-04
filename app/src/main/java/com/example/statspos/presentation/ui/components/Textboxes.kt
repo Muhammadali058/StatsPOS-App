@@ -8,7 +8,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -25,6 +29,8 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -494,47 +500,6 @@ fun DiscountTextbox(
 }
 
 @Composable
-fun SearchTextbox(
-    modifier: Modifier = Modifier,
-    value: String,
-    label: String = "Search",
-    onValueChange: (String) -> Unit,
-    onSearchClick: (String) -> Unit,
-    onEndIconClick: (String) -> Unit,
-) {
-    Textbox(
-        modifier = modifier,
-        value = value,
-        onValueChange = onValueChange,
-        label = {
-            Text(
-                text = label
-            )
-        },
-        trailingIcon = {
-            IconButton(onClick = {
-                onEndIconClick(value)
-            }) {
-                AppIcon(
-                    icon = Icons.Default.Clear,
-                    modifier = Modifier.size(20.dp)
-                )
-//                AppIcon(icon = R.drawable.ic_search)
-            }
-        },
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Text,
-            imeAction = ImeAction.Search
-        ),
-        keyboardActions = KeyboardActions(
-            onSearch = {
-                onSearchClick(value)
-            }
-        )
-    )
-}
-
-@Composable
 fun DateTextbox(
     modifier: Modifier = Modifier,
     date: LocalDate,
@@ -675,5 +640,169 @@ fun TextboxCB(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun SearchTextbox(
+    modifier: Modifier = Modifier,
+    value: String,
+    label: String = "Search",
+    onValueChange: (String) -> Unit,
+    onSearchClick: (String) -> Unit,
+    onEndIconClick: (String) -> Unit = {
+        onValueChange("")
+    },
+) {
+    Textbox(
+        modifier = modifier
+            .fillMaxWidth(),
+        value = value,
+        onValueChange = onValueChange,
+        label = {
+            Text(
+                text = label
+            )
+        },
+        trailingIcon = {
+            IconButton(onClick = {
+                onEndIconClick(value)
+            }) {
+                AppIcon(
+                    icon = Icons.Default.Clear,
+                    modifier = Modifier.size(20.dp)
+                )
+//                AppIcon(icon = R.drawable.ic_search)
+            }
+        },
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Search
+        ),
+        keyboardActions = KeyboardActions(
+            onSearch = {
+                onSearchClick(value)
+            }
+        )
+    )
+}
+
+@Composable
+fun SearchBox(
+    modifier: Modifier = Modifier,
+    value: String,
+    onValueChange: (String) -> Unit,
+    onSearchClick: (String) -> Unit,
+    showFilterIcon: Boolean = false,
+    onFilterClick: () -> Unit = {},
+) {
+    Row(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(ConstantPaddings.BODY_HORIZONTAL)
+            .padding(vertical = 8.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        SearchTextbox(
+            modifier = Modifier
+                .weight(1f),
+            value = value,
+            onValueChange = onValueChange,
+            onSearchClick = onSearchClick,
+        )
+        if (showFilterIcon) {
+            Spacer(Modifier.width(4.dp))
+            AppIconButton(
+                onClick = {
+                    onFilterClick()
+                },
+                icon = Icons.Default.FilterList,
+                buttonSize = 32.dp,
+                size = 26.dp
+            )
+        }
+    }
+}
+
+@Composable
+fun SearchBox(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(ConstantPaddings.BODY_HORIZONTAL)
+            .padding(vertical = 8.dp)
+    ) {
+        content()
+    }
+}
+
+
+@Composable
+fun SearchItemBox(
+    modifier: Modifier = Modifier,
+    itemFocusRequester: FocusRequester? = null,
+    value: String,
+    onValueChange: (String) -> Unit,
+    onItemSelected: (String) -> Unit,
+    onSearchClick: (String) -> Unit,
+    onEndIconClick: (String) -> Unit,
+    onBarcodeClick: () -> Unit,
+    onSearchItemClick: () -> Unit,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        AutoCompleteItemsTextbox(
+            modifier = Modifier
+                .weight(1f),
+            value = value,
+            onValueChange = onValueChange,
+            onItemSelected = onItemSelected,
+            onEndIconClick = onEndIconClick,
+            onSearchClick = onSearchClick,
+            label = {
+                Text(
+                    text = "Select Item"
+                )
+            },
+            trailingIcon = {
+                IconButton(onClick = {
+                    onEndIconClick(value)
+                }) {
+                    AppIcon(
+                        icon = Icons.Default.Clear,
+                        size = 20.dp
+                    )
+                }
+            },
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Go
+            ),
+            focusRequester = itemFocusRequester,
+        )
+        Spacer(Modifier.width(4.dp))
+        AppIconButton(
+            onClick = {
+                onBarcodeClick()
+            },
+            icon = R.drawable.ic_barcode,
+            buttonSize = 32.dp,
+            size = 26.dp
+        )
+        Spacer(Modifier.width(4.dp))
+        AppIconButton(
+            onClick = {
+                onSearchItemClick()
+            },
+            icon = Icons.Default.Search,
+            buttonSize = 32.dp,
+            size = 26.dp
+        )
     }
 }

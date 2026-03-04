@@ -4,6 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -115,6 +116,22 @@ fun AppIconButton(
             size = size,
             tint = tint,
             modifier = Modifier
+        )
+    }
+}
+
+@Composable
+fun ShowReportIcon(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    IconButton(
+        modifier = modifier,
+        onClick = onClick,
+    ) {
+        AppIcon(
+            icon = Icons.Default.Download,
+            modifier = Modifier.size(20.dp)
         )
     }
 }

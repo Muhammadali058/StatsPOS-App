@@ -38,6 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.sales.SalesBills
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
+import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.BottomSheet
 import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.DateTextbox
@@ -49,6 +50,7 @@ import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.PasswordDialog
 import com.example.statspos.presentation.ui.components.PullToRefreshList
+import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
@@ -262,35 +264,35 @@ fun SalesPostedBillsBody(
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(ConstantPaddings.BODY_HORIZONTAL)
                 ) {
-                    Spacer(Modifier.height(8.dp))
-                    SearchBox(
-                        modifier = Modifier
-                            .padding(bottom = 4.dp),
-                        value = state.search,
-                        onValueChange = viewModel::onSearchChange,
-                        onSearchClick = {
-                            viewModel.loadData()
-                            keyboardController?.hide()
-                        },
-                        onFilterClick = {
-                            showBottomSheet = true
-                        },
-                        fromDate = state.fromDate,
-                        toDate = state.toDate,
-                        onFromDateChange = { date ->
-                            viewModel.onFromDateChange(date)
-                            viewModel.loadData()
-                        },
-                        onToDateChange = { date ->
-                            viewModel.onToDateChange(date)
-                            viewModel.loadData()
-                        },
-                    )
+                    SearchBox {
+                        SearchBox(
+                            value = state.search,
+                            onValueChange = viewModel::onSearchChange,
+                            onSearchClick = {
+                                viewModel.loadData()
+                                keyboardController?.hide()
+                            },
+                            onFilterClick = {
+                                showBottomSheet = true
+                            },
+                            fromDate = state.fromDate,
+                            toDate = state.toDate,
+                            onFromDateChange = { date ->
+                                viewModel.onFromDateChange(date)
+                                viewModel.loadData()
+                            },
+                            onToDateChange = { date ->
+                                viewModel.onToDateChange(date)
+                                viewModel.loadData()
+                            },
+                        )
+                    }
+                    Spacer(Modifier.height(4.dp))
                     BodyList(
                         modifier = Modifier
-                            .weight(1f),
+                            .weight(1f)
+                            .padding(ConstantPaddings.BODY_HORIZONTAL),
                         isRefreshing = state.isLoading,
                         onRefresh = {
                             viewModel.loadData()
@@ -355,18 +357,10 @@ fun SalesPostedBillsBody(
                     )
                 }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    HeadingMedium(
-                        text = "Total Bills: ",
-                    )
-                    LabelMedium(
-                        text = state.totalBills.toString(),
-                    )
-                }
+                BottomHeading(
+                    text = "Total Bills: ",
+                    value = state.totalBills.toString()
+                )
             }
         }
     }

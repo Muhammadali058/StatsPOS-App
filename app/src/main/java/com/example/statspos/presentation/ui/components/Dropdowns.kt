@@ -75,6 +75,20 @@ fun Dropdown(
     enabled: Boolean = true,
     readOnly: Boolean = false,
     singleLine: Boolean = true,
+    trailingIcon: @Composable (() -> Unit)? = {
+        IconButton(
+            onClick = {
+                onValueChange("")
+                onItemSelected(DropdownItem(0L, noneText))
+            },
+            enabled = enabled,
+        ) {
+            AppIcon(
+                icon = Icons.Default.Clear,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    },
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     focusRequester: FocusRequester? = null,
     contentPadding: PaddingValues = PaddingValues(
@@ -145,20 +159,7 @@ fun Dropdown(
                     )
                 }
             },
-            trailingIcon = {
-                IconButton(
-                    onClick = {
-                        onValueChange("")
-                        onItemSelected(DropdownItem(0L, noneText))
-                    },
-                    enabled = enabled,
-                ) {
-                    AppIcon(
-                        icon = Icons.Default.Clear,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            },
+            trailingIcon = trailingIcon,
             keyboardActions = keyboardActions,
             focusRequester = focusRequester,
             contentPadding = contentPadding,
@@ -230,6 +231,20 @@ fun SubDropdown(
     enabled: Boolean = true,
     readOnly: Boolean = false,
     singleLine: Boolean = true,
+    trailingIcon: @Composable (() -> Unit)? = {
+        IconButton(
+            onClick = {
+                onValueChange("")
+                onItemSelected(DropdownItem(0L, noneText))
+            },
+            enabled = enabled,
+        ) {
+            AppIcon(
+                icon = Icons.Default.Clear,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    },
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     contentPadding: PaddingValues = PaddingValues(
         start = 15.dp,
@@ -323,20 +338,7 @@ fun SubDropdown(
                     )
                 }
             },
-            trailingIcon = {
-                IconButton(
-                    onClick = {
-                        onValueChange("")
-                        onItemSelected(DropdownItem(0L, noneText))
-                    },
-                    enabled = enabled,
-                ) {
-                    AppIcon(
-                        icon = Icons.Default.Clear,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            },
+            trailingIcon = trailingIcon,
             keyboardActions = keyboardActions,
             contentPadding = contentPadding
         )

@@ -71,6 +71,7 @@ import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
+import com.example.statspos.presentation.ui.components.SearchItemBox
 import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.components.TextboxCB
 import com.example.statspos.presentation.ui.components.TopAppBar
@@ -269,9 +270,8 @@ fun AddUpdatePurchaseItemScreen(
             Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(MaterialTheme.colorScheme.background)
-//                .padding(ConstantPaddings.BODY_HORIZONTAL)
-                .padding(vertical = 16.dp)
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(vertical = 8.dp)
         ) {
             Column(
                 Modifier
@@ -286,7 +286,7 @@ fun AddUpdatePurchaseItemScreen(
                         .imePadding(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    ItemnameBox(
+                    SearchItemBox(
                         itemFocusRequester = itemFocusRequester,
                         value = state.itemname,
                         onValueChange = viewModel::onItemnameChange,
@@ -396,72 +396,6 @@ fun AddUpdatePurchaseItemScreen(
             }
         }
 
-    }
-}
-
-@Composable
-private fun ItemnameBox(
-    itemFocusRequester: FocusRequester? = null,
-    value: String,
-    onValueChange: (String) -> Unit,
-    onItemSelected: (String) -> Unit,
-    onSearchClick: (String) -> Unit,
-    onEndIconClick: (String) -> Unit,
-    onBarcodeClick: () -> Unit,
-    onSearchItemClick: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(ConstantPaddings.BODY_HORIZONTAL),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        AutoCompleteItemsTextbox(
-            modifier = Modifier
-                .weight(1f),
-            value = value,
-            onValueChange = onValueChange,
-            onItemSelected = onItemSelected,
-            onEndIconClick = onEndIconClick,
-            onSearchClick = onSearchClick,
-            label = {
-                Text(
-                    text = "Select Item"
-                )
-            },
-            trailingIcon = {
-                IconButton(onClick = {
-                    onEndIconClick(value)
-                }) {
-                    AppIcon(
-                        icon = Icons.Default.Clear,
-                        size = 20.dp
-                    )
-                }
-            },
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Go
-            ),
-            focusRequester = itemFocusRequester,
-        )
-        Spacer(Modifier.width(4.dp))
-        AppIconButton(
-            onClick = {
-                onBarcodeClick()
-            },
-            icon = R.drawable.ic_barcode,
-            buttonSize = 32.dp,
-            size = 26.dp
-        )
-        Spacer(Modifier.width(4.dp))
-        AppIconButton(
-            onClick = {
-                onSearchItemClick()
-            },
-            icon = Icons.Default.Search,
-            buttonSize = 32.dp,
-            size = 26.dp
-        )
     }
 }
 

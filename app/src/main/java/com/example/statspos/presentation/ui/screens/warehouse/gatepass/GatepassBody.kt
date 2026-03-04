@@ -33,6 +33,7 @@ import com.example.statspos.domain.models.items.Packages
 import com.example.statspos.domain.models.warehouse.Gatepasses
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
+import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.ErrorDialog
@@ -41,6 +42,7 @@ import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.PullToRefreshList
+import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
@@ -115,55 +117,52 @@ fun GatepassBody(
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(ConstantPaddings.BODY_HORIZONTAL)
                 ) {
-                    Spacer(Modifier.height(8.dp))
-                    SearchBox(
-                        modifier = Modifier
-                            .padding(bottom = 4.dp),
-                        value = state.search,
-                        onValueChange = viewModel::onSearchChange,
-                        onSearchClick = {
-                            viewModel.loadData()
-                            keyboardController?.hide()
-                        },
-                        warehouse = state.warehouse,
-                        onWaerhouseSelected = { warehouse ->
-                            viewModel.onWarehouseSelected(warehouse)
-                            viewModel.loadData()
-                        },
-                        date = state.date,
-                        onDateChange = { date->
-                            viewModel.onDateChange(date)
-                            viewModel.loadData()
-                        },
-                    )
+                    SearchBox {
+                        SearchBox(
+                            value = state.search,
+                            onValueChange = viewModel::onSearchChange,
+                            onSearchClick = {
+                                viewModel.loadData()
+                                keyboardController?.hide()
+                            },
+                            warehouse = state.warehouse,
+                            onWaerhouseSelected = { warehouse ->
+                                viewModel.onWarehouseSelected(warehouse)
+                                viewModel.loadData()
+                            },
+                            date = state.date,
+                            onDateChange = { date ->
+                                viewModel.onDateChange(date)
+                                viewModel.loadData()
+                            },
+                        )
+                    }
+                    Spacer(Modifier.height(4.dp))
                     BodyList(
                         modifier = Modifier
-                            .weight(1f),
+                            .weight(1f)
+                            .padding(ConstantPaddings.BODY_HORIZONTAL),
                         isRefreshing = state.isLoading,
                         onRefresh = {
                             viewModel.loadData()
                         },
                         items = state.list,
                         onItemClick = { packages ->
-                            onAddButtonClick(packages.id!!, true, state.warehouse.id, HP.getZonedDate(state.date))
+                            onAddButtonClick(
+                                packages.id!!,
+                                true,
+                                state.warehouse.id,
+                                HP.getZonedDate(state.date)
+                            )
                         }
                     )
                 }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    HeadingMedium(
-                        text = "Total Gatepass: ",
-                    )
-                    LabelMedium(
-                        text = state.totalGatepasses.toString(),
-                    )
-                }
+                BottomHeading(
+                    text = "Total Gatepass: ",
+                    value = state.totalGatepasses.toString()
+                )
             }
         }
     }
@@ -180,7 +179,7 @@ private fun SearchBox(
     date: LocalDate,
     onDateChange: (LocalDate) -> Unit,
 ) {
-    Column (
+    Column(
         modifier = modifier
             .fillMaxWidth(),
     ) {
@@ -203,13 +202,8 @@ private fun SearchBox(
             label = "Date"
         )
         SearchTextbox(
-            modifier = Modifier
-                .fillMaxWidth(),
             value = value,
             onValueChange = onValueChange,
-            onEndIconClick = {
-                onValueChange("")
-            },
             onSearchClick = onSearchClick,
         )
     }
@@ -256,7 +250,7 @@ private fun ListCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column{
+            Column {
                 LabelLarge(item.gatepassName.toString())
                 Spacer(Modifier.height(2.dp))
                 Row(

@@ -105,8 +105,8 @@ fun AddUpdateSalesBillBody(
     Box(
         Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(vertical = 16.dp)
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(vertical = 8.dp)
     ) {
         Column(
             Modifier

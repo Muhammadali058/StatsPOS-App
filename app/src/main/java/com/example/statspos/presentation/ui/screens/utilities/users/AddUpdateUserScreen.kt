@@ -169,7 +169,8 @@ fun AddUpdateUserScreen(
             Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(MaterialTheme.colorScheme.background)
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(vertical = 8.dp)
         ) {
             Column(
                 Modifier
@@ -183,7 +184,6 @@ fun AddUpdateUserScreen(
                         .imePadding(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Spacer(Modifier.height(16.dp))
                     Basic(
                         username = state.username,
                         password = state.password,
@@ -296,7 +296,6 @@ fun AddUpdateUserScreen(
                 Box(
                     modifier = Modifier
                         .padding(ConstantPaddings.BODY_HORIZONTAL)
-                        .padding(vertical = 16.dp)
                 ) {
                     if (state.isSaving) {
                         AppCircularProgressIndicator()

@@ -55,6 +55,7 @@ import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.ExpandableSection
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
+import com.example.statspos.presentation.ui.components.SearchItemBox
 import com.example.statspos.presentation.ui.components.SubComboBox
 import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
@@ -130,7 +131,7 @@ fun NewStockEntryBody(
     Box(
         Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.surface)
     ) {
         Column(
             Modifier
@@ -145,7 +146,9 @@ fun NewStockEntryBody(
                     .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                ItemnameBox(
+                SearchItemBox(
+                    modifier = Modifier
+                        .padding(ConstantPaddings.BODY_HORIZONTAL),
                     value = state.itemname,
                     onValueChange = viewModel::onItemnameChange,
                     onItemSelected = {
@@ -218,70 +221,6 @@ fun NewStockEntryBody(
         if (state.isLoading) {
             ProgressBarLayout()
         }
-    }
-}
-
-@Composable
-private fun ItemnameBox(
-    value: String,
-    onValueChange: (String) -> Unit,
-    onItemSelected: (String) -> Unit,
-    onSearchClick: (String) -> Unit,
-    onEndIconClick: (String) -> Unit,
-    onBarcodeClick: () -> Unit,
-    onSearchItemClick: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(ConstantPaddings.BODY_HORIZONTAL),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        AutoCompleteItemsTextbox(
-            modifier = Modifier
-                .weight(1f),
-            value = value,
-            onValueChange = onValueChange,
-            onItemSelected = onItemSelected,
-            onEndIconClick = onEndIconClick,
-            onSearchClick = onSearchClick,
-            label = {
-                Text(
-                    text = "Select Item"
-                )
-            },
-            trailingIcon = {
-                IconButton(onClick = {
-                    onEndIconClick(value)
-                }) {
-                    AppIcon(
-                        icon = Icons.Default.Clear,
-                        size = 20.dp
-                    )
-                }
-            },
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Go
-            )
-        )
-        Spacer(Modifier.width(4.dp))
-        AppIconButton(
-            onClick = {
-                onBarcodeClick()
-            },
-            icon = R.drawable.ic_barcode,
-            buttonSize = 32.dp,
-            size = 26.dp
-        )
-        Spacer(Modifier.width(4.dp))
-        AppIconButton(
-            onClick = {
-                onSearchItemClick()
-            },
-            icon = Icons.Default.Search,
-            buttonSize = 32.dp,
-            size = 26.dp
-        )
     }
 }
 
@@ -449,48 +388,5 @@ private fun MOP(
             mainId = bank.id
         )
         Spacer(Modifier.height(8.dp))
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun Prev() {
-    Column(
-        Modifier
-            .fillMaxSize(),
-    ) {
-        ItemnameBox(
-            value = "",
-            onValueChange = {},
-            onItemSelected = {},
-            onSearchClick = {},
-            onEndIconClick = {},
-            onBarcodeClick = {},
-            onSearchItemClick = {}
-        )
-        Body(
-            null,
-            null,
-            "",
-            "",
-            "",
-            LocalDate.now(),
-            "",
-            { },
-            { },
-            { },
-            { },
-            { },
-            { },
-            { },
-        )
-        MOP(
-            mop = HP.mop[0],
-            bank = HP.getNoneDropdownItem(),
-            subBank = HP.getNoneDropdownItem(),
-            onMOPChange = {},
-            onBankSelected = {},
-            onSubBankSelected = {},
-        )
     }
 }

@@ -54,6 +54,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.NavKey
 import com.example.statspos.presentation.ui.screens.BottomRoutes
 import com.example.statspos.presentation.ui.screens.TopRoutes
+import com.example.statspos.presentation.ui.theme.backgroundLight
+import com.example.statspos.presentation.ui.theme.dividerLight
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.utils.SnackbarType
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -201,7 +203,8 @@ fun BottomBar(
                     modifier = Modifier
                         .fillMaxWidth(),
                     thickness = if (selected) 2.dp else 1.dp,
-                    color = if (selected) selectedColor else MaterialTheme.colorScheme.primaryContainer,
+                    color = if (selected) selectedColor else MaterialTheme.colorScheme.surfaceDim,
+//                    color = if (selected) selectedColor else MaterialTheme.colorScheme.primaryContainer,
                 )
 
                 Spacer(Modifier.height(6.dp))
@@ -268,7 +271,8 @@ fun BottomSheet(
     modifier: Modifier = Modifier,
     sheetState: SheetState,
     onDismissRequest: () -> Unit,
-    containerColor: Color = MaterialTheme.colorScheme.background,
+//    containerColor: Color = MaterialTheme.colorScheme.background,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
     contentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
     tonalElevation: Dp = 0.dp,
     shape: Shape = BottomSheetDefaults.ExpandedShape,

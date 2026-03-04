@@ -92,7 +92,7 @@ fun NewExpenseEntryBody(
     Box(
         Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.surface)
     ) {
         Column(
             Modifier
@@ -147,7 +147,7 @@ fun NewExpenseEntryBody(
                         viewModel.passEntry {
                             context.showToast("Enter posted successfully")
                             sharedViewModel.notifyDataChanged()
-                            keyboardController?.hide()
+//                            keyboardController?.hide()
                         }
                     }
                 }

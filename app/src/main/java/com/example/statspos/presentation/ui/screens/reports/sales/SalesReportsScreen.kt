@@ -7,6 +7,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -25,6 +27,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
@@ -68,10 +71,12 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.R
+import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.reports.ChartReport
 import com.example.statspos.domain.models.reports.TotalReport
 import com.example.statspos.domain.models.reports.sales.SalesBillWiseReport
 import com.example.statspos.domain.models.reports.sales.SalesItemsReport
+import com.example.statspos.presentation.ui.components.AppHorizontalDivider
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
@@ -86,6 +91,8 @@ import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.ReportButton
+import com.example.statspos.presentation.ui.components.ReportCard
+import com.example.statspos.presentation.ui.components.ShowReportIcon
 import com.example.statspos.presentation.ui.components.SubDropdown
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.components.TrendChart
@@ -397,7 +404,6 @@ private fun Home(
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
                 .padding(ConstantPaddings.BODY_HORIZONTAL)
-                .padding(bottom = 16.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -408,6 +414,7 @@ private fun Home(
                         .weight(1f)
                         .verticalScroll(scrollState),
                 ) {
+                    Spacer(Modifier.height(16.dp))
                     TodaySales(
                         cashSales = state.mainReport.cashSales,
                         creditSales = state.mainReport.creditSales,
@@ -415,7 +422,7 @@ private fun Home(
                         totalSales = state.mainReport.totalSales,
                         totalBills = state.mainReport.totalBills,
                     )
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(16.dp))
                     TrendChart(
                         chartFor = "Sales",
                         chartReport = state.chartReport,
@@ -423,122 +430,152 @@ private fun Home(
                         onChartDurationChange = viewModel::onChartDurationChange
                     )
                     Spacer(Modifier.height(16.dp))
-                    Title("Detailed Reports", R.drawable.reports)
-                    Spacer(Modifier.height(8.dp))
-                    DateBox(
-                        fromDate = state.fromDate,
-                        toDate = state.toDate,
-                        onFromDateChange = viewModel::onFromDateChange,
-                        onToDateChange = viewModel::onToDateChange,
-                        onFilterClick = {
-                            showBottomSheet = true
-                        },
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    ReportButtons(
-                        onTotalBillsClick = {
-                            viewModel.onTotalBillsClick { salesBillWiseReport, totalReport ->
-                                showBillWiseReport(salesBillWiseReport, totalReport)
-                            }
-                        },
-                        onTotalItemsClick = {
-                            viewModel.onTotalItemsClick { salesItemsReport, totalReport ->
-                                showItemsReport(salesItemsReport, totalReport)
-                            }
-                        },
-                        onFilterReportClick = {
-                            viewModel.onFilterClick { salesItemsReport, totalReport ->
-                                showItemsReport(salesItemsReport, totalReport)
-                            }
-                        },
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Dropdowns(
-                        categoryName = state.categoryName,
-                        subCategoryName = state.subCategoryName,
-                        categoryId = state.categoryId,
-                        vendorName = state.vendorName,
-                        customerName = state.customerName,
-                        accountCategoryName = state.accountCategoryName,
-                        supplierName = state.supplierName,
-                        username = state.username,
-                        onCategoryNameChange = viewModel::onCategoryNameChange,
-                        onSubCategoryNameChange = viewModel::onSubCategoryNameChange,
-                        onVendorNameChange = viewModel::onVendorNameChange,
-                        onCustomerNameChange = viewModel::onCustomerNameChange,
-                        onAccountCategoryNameChange = viewModel::onAccountCategoryNameChange,
-                        onSupplierNameChange = viewModel::onSupplierNameChange,
-                        onUsernameChange = viewModel::onUsernameChange,
-                        onCategoryIdChange = viewModel::onCategoryIdChange,
-                        onSubCategoryIdChange = viewModel::onSubCategoryIdChange,
-                        onVendorIdChange = viewModel::onVendorIdChange,
-                        onCustomerIdChange = viewModel::onCustomerIdChange,
-                        onAccountCategoryIdChange = viewModel::onAccountCategoryIdChange,
-                        onSupplierIdChange = viewModel::onSupplierIdChange,
-                        onUserIdChange = viewModel::onUserIdChange,
-                        onCategoryClick = {
-                            viewModel.onCategoryClick { salesItemsReport, totalReport ->
-                                showItemsReport(salesItemsReport, totalReport)
-                            }
-                        },
-                        onSubCategoryClick = {
-                            viewModel.onSubCategoryClick { salesItemsReport, totalReport ->
-                                showItemsReport(salesItemsReport, totalReport)
-                            }
-                        },
-                        onVendorClick = {
-                            viewModel.onVendorClick { salesItemsReport, totalReport ->
-                                showItemsReport(salesItemsReport, totalReport)
-                            }
-                        },
-                        onCustomerClick = {
-                            viewModel.onCustomerClick { salesBillWiseReport, totalReport ->
-                                showBillWiseReport(salesBillWiseReport, totalReport)
-                            }
-                        },
-                        onAccountCategoryClick = {
-                            viewModel.onAccountCategoryClick { salesBillWiseReport, totalReport ->
-                                showBillWiseReport(salesBillWiseReport, totalReport)
-                            }
-                        },
-                        onSupplierClick = {
-                            viewModel.onSupplierClick { salesBillWiseReport, totalReport ->
-                                showBillWiseReport(salesBillWiseReport, totalReport)
-                            }
-                        },
-                        onUserClick = {
-                            viewModel.onUserClick { salesBillWiseReport, totalReport ->
-                                showBillWiseReport(salesBillWiseReport, totalReport)
-                            }
-                        },
-                    )
-                    ItemnameBox(
-                        value = state.itemname,
-                        onValueChange = viewModel::onItemnameChange,
-                        onItemSelected = {
-                            viewModel.getItem(it)
-                            keyboardController?.hide()
-                        },
-                        onSearchClick = {
-                            viewModel.getItem(it)
-                            keyboardController?.hide()
-                        },
-                        onEndIconClick = {
-                            viewModel.onItemnameChange("")
-                        },
-                        onBarcodeClick = {
-                            showBarcodeScanner = true
-                        },
-                        onSearchItemClick = onSearchItemClick,
-                        onItemClick = {
-                            viewModel.onItemClick { salesItemsReport, totalReport ->
-                                showItemsReport(salesItemsReport, totalReport)
-                            }
-                        },
-                        sum = state.sum,
-                        onSumChange = viewModel::onSumChange,
-                    )
-                    Spacer(Modifier.height(8.dp))
+
+                    ReportCard {
+                        Spacer(Modifier.height(12.dp))
+                        AppText(
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp),
+                            text = "Detailed Reports",
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        )
+                        Spacer(Modifier.height(2.dp))
+                        AppText(
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp),
+                            text = "Save & share pdf reports",
+                            style = TextStyle(
+                                fontSize = 12.sp,
+                            )
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        AppHorizontalDivider()
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp)
+                        ) {
+                            Spacer(Modifier.height(12.dp))
+                            DateBox(
+                                fromDate = state.fromDate,
+                                toDate = state.toDate,
+                                onFromDateChange = viewModel::onFromDateChange,
+                                onToDateChange = viewModel::onToDateChange,
+                                onFilterClick = {
+                                    showBottomSheet = true
+                                },
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            ReportButtons(
+                                onTotalBillsClick = {
+                                    viewModel.onTotalBillsClick { salesBillWiseReport, totalReport ->
+                                        showBillWiseReport(salesBillWiseReport, totalReport)
+                                    }
+                                },
+                                onTotalItemsClick = {
+                                    viewModel.onTotalItemsClick { salesItemsReport, totalReport ->
+                                        showItemsReport(salesItemsReport, totalReport)
+                                    }
+                                },
+                                onFilterReportClick = {
+                                    viewModel.onFilterClick { salesItemsReport, totalReport ->
+                                        showItemsReport(salesItemsReport, totalReport)
+                                    }
+                                },
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Dropdowns(
+                                categoryName = state.categoryName,
+                                subCategoryName = state.subCategoryName,
+                                categoryId = state.categoryId,
+                                vendorName = state.vendorName,
+                                customerName = state.customerName,
+                                accountCategoryName = state.accountCategoryName,
+                                supplierName = state.supplierName,
+                                username = state.username,
+                                onCategoryNameChange = viewModel::onCategoryNameChange,
+                                onSubCategoryNameChange = viewModel::onSubCategoryNameChange,
+                                onVendorNameChange = viewModel::onVendorNameChange,
+                                onCustomerNameChange = viewModel::onCustomerNameChange,
+                                onAccountCategoryNameChange = viewModel::onAccountCategoryNameChange,
+                                onSupplierNameChange = viewModel::onSupplierNameChange,
+                                onUsernameChange = viewModel::onUsernameChange,
+                                onCategoryIdChange = viewModel::onCategoryIdChange,
+                                onSubCategoryIdChange = viewModel::onSubCategoryIdChange,
+                                onVendorIdChange = viewModel::onVendorIdChange,
+                                onCustomerIdChange = viewModel::onCustomerIdChange,
+                                onAccountCategoryIdChange = viewModel::onAccountCategoryIdChange,
+                                onSupplierIdChange = viewModel::onSupplierIdChange,
+                                onUserIdChange = viewModel::onUserIdChange,
+                                onCategoryClick = {
+                                    viewModel.onCategoryClick { salesItemsReport, totalReport ->
+                                        showItemsReport(salesItemsReport, totalReport)
+                                    }
+                                },
+                                onSubCategoryClick = {
+                                    viewModel.onSubCategoryClick { salesItemsReport, totalReport ->
+                                        showItemsReport(salesItemsReport, totalReport)
+                                    }
+                                },
+                                onVendorClick = {
+                                    viewModel.onVendorClick { salesItemsReport, totalReport ->
+                                        showItemsReport(salesItemsReport, totalReport)
+                                    }
+                                },
+                                onCustomerClick = {
+                                    viewModel.onCustomerClick { salesBillWiseReport, totalReport ->
+                                        showBillWiseReport(salesBillWiseReport, totalReport)
+                                    }
+                                },
+                                onAccountCategoryClick = {
+                                    viewModel.onAccountCategoryClick { salesBillWiseReport, totalReport ->
+                                        showBillWiseReport(salesBillWiseReport, totalReport)
+                                    }
+                                },
+                                onSupplierClick = {
+                                    viewModel.onSupplierClick { salesBillWiseReport, totalReport ->
+                                        showBillWiseReport(salesBillWiseReport, totalReport)
+                                    }
+                                },
+                                onUserClick = {
+                                    viewModel.onUserClick { salesBillWiseReport, totalReport ->
+                                        showBillWiseReport(salesBillWiseReport, totalReport)
+                                    }
+                                },
+                            )
+                            ItemnameBox(
+                                value = state.itemname,
+                                onValueChange = viewModel::onItemnameChange,
+                                onItemSelected = {
+                                    viewModel.getItem(it)
+                                    keyboardController?.hide()
+                                },
+                                onSearchClick = {
+                                    viewModel.getItem(it)
+                                    keyboardController?.hide()
+                                },
+                                onEndIconClick = {
+                                    viewModel.onItemnameChange("")
+                                },
+                                onBarcodeClick = {
+                                    showBarcodeScanner = true
+                                },
+                                onSearchItemClick = onSearchItemClick,
+                                onItemClick = {
+                                    viewModel.onItemClick { salesItemsReport, totalReport ->
+                                        showItemsReport(salesItemsReport, totalReport)
+                                    }
+                                },
+                                sum = state.sum,
+                                onSumChange = viewModel::onSumChange,
+                            )
+                            Spacer(Modifier.height(16.dp))
+                        }
+                    }
+                    Spacer(Modifier.height(16.dp))
                 }
             }
 
@@ -760,366 +797,202 @@ private fun Dropdowns(
         modifier = Modifier
             .fillMaxWidth()
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                Dropdown(
-                    value = categoryName,
-                    onValueChange = onCategoryNameChange,
-                    items = HP.categories,
-                    onItemSelected = { dropdownItem ->
-                        onCategoryIdChange(dropdownItem.id)
-                    },
-                    label = {
-                        Text(text = "Category")
-                    }
-                )
+        Dropdown(
+            value = categoryName,
+            onValueChange = onCategoryNameChange,
+            items = HP.categories,
+            onItemSelected = { dropdownItem ->
+                onCategoryIdChange(dropdownItem.id)
+            },
+            label = {
+                Text(text = "Category")
+            },
+            trailingIcon = {
+                ShowReportIcon {
+                    onCategoryClick()
+                }
             }
-            Spacer(Modifier.width(8.dp))
-            ReportButton { onCategoryClick() }
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                SubDropdown(
-                    value = subCategoryName,
-                    onValueChange = onSubCategoryNameChange,
-                    items = HP.subCategories,
-                    mainId = categoryId,
-                    onItemSelected = { dropdownItem ->
-                        onSubCategoryIdChange(dropdownItem.id)
-                    },
-                    label = {
-                        Text(text = "Sub-Category")
-                    }
-                )
+        )
+        SubDropdown(
+            value = subCategoryName,
+            onValueChange = onSubCategoryNameChange,
+            items = HP.subCategories,
+            mainId = categoryId,
+            onItemSelected = { dropdownItem ->
+                onSubCategoryIdChange(dropdownItem.id)
+            },
+            label = {
+                Text(text = "Sub-Category")
+            },
+            trailingIcon = {
+                ShowReportIcon {
+                    onSubCategoryClick()
+                }
             }
-            Spacer(Modifier.width(8.dp))
-            ReportButton { onSubCategoryClick() }
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                Dropdown(
-                    value = vendorName,
-                    onValueChange = onVendorNameChange,
-                    items = HP.vendors,
-                    onItemSelected = { dropdownItem ->
-                        onVendorIdChange(dropdownItem.id)
-                    },
-                    label = {
-                        Text(text = "Vendor")
-                    }
-                )
+        )
+        Dropdown(
+            value = vendorName,
+            onValueChange = onVendorNameChange,
+            items = HP.vendors,
+            onItemSelected = { dropdownItem ->
+                onVendorIdChange(dropdownItem.id)
+            },
+            label = {
+                Text(text = "Vendor")
+            },
+            trailingIcon = {
+                ShowReportIcon {
+                    onVendorClick()
+                }
             }
-            Spacer(Modifier.width(8.dp))
-            ReportButton { onVendorClick() }
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                Dropdown(
-                    value = customerName,
-                    onValueChange = onCustomerNameChange,
-                    items = HP.customers,
-                    onItemSelected = { dropdownItem ->
-                        onCustomerIdChange(dropdownItem.id)
-                    },
-                    label = {
-                        Text(text = "Customer")
-                    }
-                )
+        )
+        Dropdown(
+            value = customerName,
+            onValueChange = onCustomerNameChange,
+            items = HP.customers,
+            onItemSelected = { dropdownItem ->
+                onCustomerIdChange(dropdownItem.id)
+            },
+            label = {
+                Text(text = "Customer")
+            },
+            trailingIcon = {
+                ShowReportIcon {
+                    onCustomerClick()
+                }
             }
-            Spacer(Modifier.width(8.dp))
-            ReportButton { onCustomerClick() }
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                Dropdown(
-                    value = accountCategoryName,
-                    onValueChange = onAccountCategoryNameChange,
-                    items = HP.accountCategories,
-                    onItemSelected = { dropdownItem ->
-                        onAccountCategoryIdChange(dropdownItem.id)
-                    },
-                    label = {
-                        Text(text = "Customer Category")
-                    }
-                )
+        )
+        Dropdown(
+            value = accountCategoryName,
+            onValueChange = onAccountCategoryNameChange,
+            items = HP.accountCategories,
+            onItemSelected = { dropdownItem ->
+                onAccountCategoryIdChange(dropdownItem.id)
+            },
+            label = {
+                Text(text = "Customer Category")
+            },
+            trailingIcon = {
+                ShowReportIcon {
+                    onAccountCategoryClick()
+                }
             }
-            Spacer(Modifier.width(8.dp))
-            ReportButton { onAccountCategoryClick() }
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                Dropdown(
-                    value = supplierName,
-                    onValueChange = onSupplierNameChange,
-                    items = HP.suppliers,
-                    onItemSelected = { dropdownItem ->
-                        onSupplierIdChange(dropdownItem.id)
-                    },
-                    label = {
-                        Text(text = "Supplier")
-                    }
-                )
+        )
+        Dropdown(
+            value = supplierName,
+            onValueChange = onSupplierNameChange,
+            items = HP.suppliers,
+            onItemSelected = { dropdownItem ->
+                onSupplierIdChange(dropdownItem.id)
+            },
+            label = {
+                Text(text = "Supplier")
+            },
+            trailingIcon = {
+                ShowReportIcon {
+                    onSupplierClick()
+                }
             }
-            Spacer(Modifier.width(8.dp))
-            ReportButton { onSupplierClick() }
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                Dropdown(
-                    value = username,
-                    onValueChange = onUsernameChange,
-                    items = HP.users,
-                    onItemSelected = { dropdownItem ->
-                        onUserIdChange(dropdownItem.id)
-                    },
-                    label = {
-                        Text(text = "User")
-                    }
-                )
+        )
+        Dropdown(
+            value = username,
+            onValueChange = onUsernameChange,
+            items = HP.users,
+            onItemSelected = { dropdownItem ->
+                onUserIdChange(dropdownItem.id)
+            },
+            label = {
+                Text(text = "User")
+            },
+            trailingIcon = {
+                ShowReportIcon {
+                    onUserClick()
+                }
             }
-            Spacer(Modifier.width(8.dp))
-            ReportButton { onUserClick() }
-        }
-    }
-}
-
-@Composable
-private fun Title(
-    title: String,
-    @DrawableRes icon: Int? = null,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start,
-    ) {
-//        if (icon != null) {
-//            AppIcon(
-//                icon = icon,
-//                size = 24.dp,
-//            )
-//            Spacer(Modifier.width(16.dp))
-//        }
-        AppText(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
         )
     }
 }
 
-//@Preview(showBackground = true)
-@Composable
-private fun Prev() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        DateBox(
-            LocalDate.now(),
-            LocalDate.now(),
-            {},
-            {},
-            {},
-        )
-        Spacer(Modifier.height(8.dp))
-        ReportButtons(
-            {},
-            {},
-            {},
-        )
-        Spacer(Modifier.height(8.dp))
-        Dropdowns(
-            "",
-            "",
-            0L,
-            "",
-            "",
-            "",
-            "",
-            "",
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-        )
-        ItemnameBox(
-            "",
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            false,
-            {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
 @Composable
 private fun TodaySales(
+    modifier: Modifier = Modifier,
     cashSales: Double = 0.0,
     creditSales: Double = 0.0,
     salesReturns: Double = 0.0,
     totalSales: Double = 0.0,
     totalBills: Int = 0,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Card(
+    ReportCard(modifier) {
+        Column(
             modifier = Modifier
-                .padding(top = 16.dp),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 3.dp
-            ),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-            ),
+                .fillMaxWidth()
         ) {
+            Spacer(Modifier.height(12.dp))
+            AppText(
+                modifier = Modifier
+                    .padding(horizontal = 12.dp),
+                text = "Today",
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            )
+            Spacer(Modifier.height(2.dp))
+            AppText(
+                modifier = Modifier
+                    .padding(horizontal = 12.dp),
+                text = "Summary of daily sales",
+                style = TextStyle(
+                    fontSize = 12.sp,
+                )
+            )
+            Spacer(Modifier.height(8.dp))
+            AppHorizontalDivider()
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(8.dp)
             ) {
-                Spacer(Modifier.height(12.dp))
-                AppText(
+                Row(
                     modifier = Modifier
-                        .padding(horizontal = 12.dp),
-                    text = "Today",
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
-                )
-                Spacer(Modifier.height(2.dp))
-                AppText(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp),
-                    text = "Summary of daily sales",
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                    )
-                )
-                Spacer(Modifier.height(8.dp))
-                HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
+                        .fillMaxWidth(),
                 ) {
-                    Row(
+                    TodayBox(
                         modifier = Modifier
-                            .fillMaxWidth(),
-                    ) {
-                        TodayBox(
-                            modifier = Modifier
-                                .weight(1f),
-                            text = "Cash Sales",
-                            value = cashSales,
-                        )
-                        TodayBox(
-                            modifier = Modifier
-                                .weight(1f),
-                            text = "Credit Sales",
-                            value = creditSales,
-                        )
-                        TodayBox(
-                            modifier = Modifier
-                                .weight(1f),
-                            text = "Returns",
-                            value = salesReturns,
-                        )
-                    }
-                    Row(
+                            .weight(1f),
+                        text = "Cash Sales",
+                        value = cashSales,
+                    )
+                    TodayBox(
                         modifier = Modifier
-                            .fillMaxWidth(),
-                    ) {
-                        TodayBox(
-                            modifier = Modifier
-                                .weight(1f),
-                            text = "Total Sales",
-                            value = totalSales,
-                        )
-                        TodayBox(
-                            modifier = Modifier
-                                .weight(1f),
-                            text = "Total Invoices",
-                            value = totalBills.toDouble(),
-                            addRs = false,
-                        )
-                    }
+                            .weight(1f),
+                        text = "Credit Sales",
+                        value = creditSales,
+                    )
+                    TodayBox(
+                        modifier = Modifier
+                            .weight(1f),
+                        text = "Returns",
+                        value = salesReturns,
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    TodayBox(
+                        modifier = Modifier
+                            .weight(1f),
+                        text = "Total Sales",
+                        value = totalSales,
+                    )
+                    TodayBox(
+                        modifier = Modifier
+                            .weight(1f),
+                        text = "Total Invoices",
+                        value = totalBills.toDouble(),
+                        addRs = false,
+                    )
                 }
             }
         }
@@ -1137,8 +1010,8 @@ fun TodayBox(
         modifier = modifier
             .padding(4.dp)
             .border(
-                0.5.dp,
-                MaterialTheme.colorScheme.primary,
+                1.dp,
+                MaterialTheme.colorScheme.onPrimaryContainer,
                 RoundedCornerShape(8.dp)
             )
             .padding(8.dp),
@@ -1164,59 +1037,4 @@ fun TodayBox(
             )
         )
     }
-}
-
-
-@Composable
-internal fun rememberMarker(
-    valueFormatter: DefaultCartesianMarker.ValueFormatter =
-        DefaultCartesianMarker.ValueFormatter.default(),
-    showIndicator: Boolean = true,
-): CartesianMarker {
-    val labelBackground =
-        rememberShapeComponent(
-            fill = Fill(MaterialTheme.colorScheme.background),
-            shape = CircleShape,
-            strokeFill = Fill(MaterialTheme.colorScheme.outline),
-            strokeThickness = 1.dp,
-        )
-    val label =
-        rememberTextComponent(
-            style =
-                TextStyle(
-                    color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.Center,
-                    fontSize = 12.sp,
-                ),
-            padding = Insets(8.dp, 4.dp),
-            background = labelBackground,
-            minWidth = TextComponent.MinWidth.fixed(40.dp),
-        )
-    val indicatorFrontComponent =
-        rememberShapeComponent(Fill(MaterialTheme.colorScheme.surface), CircleShape)
-    val guideline = rememberAxisGuidelineComponent()
-
-    return rememberDefaultCartesianMarker(
-        label = label,
-        valueFormatter = valueFormatter,
-        indicator =
-            if (showIndicator) {
-                { color ->
-                    LayeredComponent(
-                        back = ShapeComponent(Fill(color.copy(alpha = 0.15f)), CircleShape),
-                        front =
-                            LayeredComponent(
-                                back = ShapeComponent(fill = Fill(color), shape = CircleShape),
-                                front = indicatorFrontComponent,
-                                padding = Insets(5.dp),
-                            ),
-                        padding = Insets(10.dp),
-                    )
-                }
-            } else {
-                null
-            },
-        indicatorSize = 36.dp,
-        guideline = guideline,
-    )
 }

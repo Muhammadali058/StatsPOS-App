@@ -165,7 +165,7 @@ class AddUpdatePackageItemViewModel @Inject constructor(
                 is Resource.Error -> showError(result.error)
                 is Resource.Information -> showMessage(result.message)
                 is Resource.Success -> {
-//                    clearTextboxes()
+                    clearTextboxes()
                     onSuccess()
                 }
             }
@@ -214,7 +214,7 @@ class AddUpdatePackageItemViewModel @Inject constructor(
         }
     }
 
-    fun getItem(value: String) {
+    fun getItem(value: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -239,6 +239,7 @@ class AddUpdatePackageItemViewModel @Inject constructor(
                                 rate = item.retail.toString(),
                             )
                         }
+                        onSuccess()
                     } else {
                         state.update {
                             it.copy(
@@ -281,6 +282,7 @@ class AddUpdatePackageItemViewModel @Inject constructor(
                 itemId = 0L,
                 qty = "",
                 rate = "",
+                total = "",
 
                 isUpdate = false,
                 updateId = 0L,

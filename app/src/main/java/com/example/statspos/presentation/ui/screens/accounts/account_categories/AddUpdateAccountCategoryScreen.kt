@@ -162,9 +162,9 @@ fun AddUpdateAccountCategoryScreen(
             Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(MaterialTheme.colorScheme.background)
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(ConstantPaddings.BODY_HORIZONTAL)
-                .padding(vertical = 16.dp)
+                .padding(vertical = 8.dp)
         ) {
             Column(
                 Modifier

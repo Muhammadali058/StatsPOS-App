@@ -38,6 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.purchase.PurchaseBills
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
+import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.BottomSheet
 import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.DateTextbox
@@ -49,6 +50,7 @@ import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.PasswordDialog
 import com.example.statspos.presentation.ui.components.PullToRefreshList
+import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
@@ -247,35 +249,35 @@ fun PurchasePostedBillsBody(
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(ConstantPaddings.BODY_HORIZONTAL)
                 ) {
-                    Spacer(Modifier.height(8.dp))
-                    SearchBox(
-                        modifier = Modifier
-                            .padding(bottom = 4.dp),
-                        value = state.search,
-                        onValueChange = viewModel::onSearchChange,
-                        onSearchClick = {
-                            viewModel.loadData()
-                            keyboardController?.hide()
-                        },
-                        onFilterClick = {
-                            showBottomSheet = true
-                        },
-                        fromDate = state.fromDate,
-                        toDate = state.toDate,
-                        onFromDateChange = { date ->
-                            viewModel.onFromDateChange(date)
-                            viewModel.loadData()
-                        },
-                        onToDateChange = { date ->
-                            viewModel.onToDateChange(date)
-                            viewModel.loadData()
-                        },
-                    )
+                    SearchBox {
+                        SearchBox(
+                            value = state.search,
+                            onValueChange = viewModel::onSearchChange,
+                            onSearchClick = {
+                                viewModel.loadData()
+                                keyboardController?.hide()
+                            },
+                            onFilterClick = {
+                                showBottomSheet = true
+                            },
+                            fromDate = state.fromDate,
+                            toDate = state.toDate,
+                            onFromDateChange = { date ->
+                                viewModel.onFromDateChange(date)
+                                viewModel.loadData()
+                            },
+                            onToDateChange = { date ->
+                                viewModel.onToDateChange(date)
+                                viewModel.loadData()
+                            },
+                        )
+                    }
+                    Spacer(Modifier.height(4.dp))
                     BodyList(
                         modifier = Modifier
-                            .weight(1f),
+                            .weight(1f)
+                            .padding(ConstantPaddings.BODY_HORIZONTAL),
                         isRefreshing = state.isLoading,
                         onRefresh = {
                             viewModel.loadData()
@@ -342,18 +344,10 @@ fun PurchasePostedBillsBody(
                     )
                 }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    HeadingMedium(
-                        text = "Total Bills: ",
-                    )
-                    LabelMedium(
-                        text = state.totalBills.toString(),
-                    )
-                }
+                BottomHeading(
+                    text = "Total Bills: ",
+                    value = state.totalBills.toString()
+                )
             }
         }
     }
@@ -381,9 +375,6 @@ private fun SearchBox(
                 .weight(1f),
             value = value,
             onValueChange = onValueChange,
-            onEndIconClick = {
-                onValueChange("")
-            },
             onSearchClick = onSearchClick,
         )
         Spacer(Modifier.width(4.dp))
@@ -498,7 +489,7 @@ private fun ListCard(
                     Spacer(Modifier.width(16.dp))
                     HeadingMedium("Inv No. ")
                     LabelMedium(item.invoiceNo.toString())
-                    if(item.refInvoiceNo.toString().isNotEmpty()) {
+                    if (item.refInvoiceNo.toString().isNotEmpty()) {
                         Spacer(Modifier.width(16.dp))
                         HeadingMedium("Ref Inv No. ")
                         LabelMedium(item.refInvoiceNo.toString())
@@ -522,7 +513,7 @@ private fun ListCard(
                     HeadingMedium("User: ")
                     LabelLarge(item.username.toString())
                 }
-                if(item.warehouseName.toString().isNotEmpty()) {
+                if (item.warehouseName.toString().isNotEmpty()) {
                     Spacer(Modifier.height(2.dp))
                     Row(
                         modifier = Modifier
@@ -556,7 +547,10 @@ private fun ListCard(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            LabelLarge(HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)), Modifier.weight(1f))
+            LabelLarge(
+                HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)),
+                Modifier.weight(1f)
+            )
             LabelMedium(item.purchaseOn.toString(), Modifier.weight(.5f))
             LabelMedium(item.purchaseType.toString(), Modifier.weight(.5f))
             LabelMedium(item.mop.toString(), Modifier.weight(.5f))

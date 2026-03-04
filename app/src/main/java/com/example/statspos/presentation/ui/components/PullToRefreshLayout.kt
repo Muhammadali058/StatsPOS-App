@@ -18,6 +18,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 
@@ -64,7 +65,8 @@ fun PullToRefreshList(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+//                .background(MaterialTheme.colorScheme.background)
+                .background(Color.Transparent)
         ) {
             content()
 //            items(items.size) { i ->

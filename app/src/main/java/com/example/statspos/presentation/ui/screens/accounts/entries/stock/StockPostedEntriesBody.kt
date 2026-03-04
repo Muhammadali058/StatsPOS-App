@@ -35,6 +35,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.accounts.Entries
+import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.ErrorDialog
@@ -43,6 +44,7 @@ import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.PullToRefreshList
+import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.accounts.entries.stock.StockEntriesViewModel
@@ -100,31 +102,31 @@ fun StockPostedEntriesBody(
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(ConstantPaddings.BODY_HORIZONTAL)
             ) {
-                Spacer(Modifier.height(8.dp))
-                SearchBox(
-                    modifier = Modifier
-                        .padding(bottom = 4.dp),
-                    fromDate = state.fromDate,
-                    toDate = state.toDate,
-                    selectedMOP = state.selectedMOP,
-                    onFromDateChange = { date ->
-                        viewModel.onFromDateChange(date)
-                        viewModel.loadEntries()
-                    },
-                    onToDateChange = { date ->
-                        viewModel.onToDateChange(date)
-                        viewModel.loadEntries()
-                    },
-                    onSelectedMOPChange = { mop ->
-                        viewModel.onSelectedMOPChange(mop)
-                        viewModel.loadEntries()
-                    },
-                )
+                SearchBox {
+                    SearchBox(
+                        fromDate = state.fromDate,
+                        toDate = state.toDate,
+                        selectedMOP = state.selectedMOP,
+                        onFromDateChange = { date ->
+                            viewModel.onFromDateChange(date)
+                            viewModel.loadEntries()
+                        },
+                        onToDateChange = { date ->
+                            viewModel.onToDateChange(date)
+                            viewModel.loadEntries()
+                        },
+                        onSelectedMOPChange = { mop ->
+                            viewModel.onSelectedMOPChange(mop)
+                            viewModel.loadEntries()
+                        },
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
                 BodyList(
                     modifier = Modifier
-                        .weight(1f),
+                        .weight(1f)
+                        .padding(ConstantPaddings.BODY_HORIZONTAL),
                     isRefreshing = state.isLoading,
                     onRefresh = {
                         viewModel.loadEntries()
@@ -133,23 +135,12 @@ fun StockPostedEntriesBody(
                 )
             }
 
-            Row(
+            BottomHeading(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .navigationBarsPadding()
-//                    .windowInsetsPadding(
-//                        WindowInsets.navigationBars
-//                            .union(WindowInsets.ime)
-//                    )
-            ) {
-                HeadingMedium(
-                    text = "Total Entries: ",
-                )
-                LabelMedium(
-                    text = state.totalEntries.toString(),
-                )
-            }
+                    .navigationBarsPadding(),
+                text = "Total Entries: ",
+                value = state.totalEntries.toString()
+            )
         }
 
         // Delete progress bar

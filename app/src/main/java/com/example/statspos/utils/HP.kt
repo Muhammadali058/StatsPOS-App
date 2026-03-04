@@ -73,6 +73,12 @@ object HP {
         DropdownItem(1L, "Purchase"),
         DropdownItem(2L, "Return"),
     )
+    val chartDurations = listOf(
+        DropdownItem(1L, "Day"),
+        DropdownItem(2L, "Week"),
+        DropdownItem(3L, "Month"),
+        DropdownItem(4L, "Year"),
+    )
     // endregion
 
     var clientId: Int = 1

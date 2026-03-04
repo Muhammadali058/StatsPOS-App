@@ -400,6 +400,10 @@ fun ComboBox(
     noneText: String = "None",
     enabled: Boolean = true,
     showEndIcon: Boolean = true,
+    showBorder: Boolean = true,
+    textStyle: TextStyle = TextStyle(
+        fontSize = 15.sp,
+    ),
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     shape: Shape = OutlinedTextFieldDefaults.shape,
@@ -449,7 +453,7 @@ fun ComboBox(
                     )
                 }
             },
-            trailingIcon = if(showEndIcon) {
+            trailingIcon = if (showEndIcon) {
                 {
                     IconButton(
                         onClick = {
@@ -466,7 +470,9 @@ fun ComboBox(
                         )
                     }
                 }
-            }else null,
+            } else null,
+            showBorder = showBorder,
+            textStyle = textStyle,
         )
 
         ExposedDropdownMenu(

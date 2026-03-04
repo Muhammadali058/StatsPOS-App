@@ -88,6 +88,7 @@ import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.ReportButton
 import com.example.statspos.presentation.ui.components.SubDropdown
 import com.example.statspos.presentation.ui.components.TopAppBar
+import com.example.statspos.presentation.ui.components.TrendChart
 import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.ui.utils.PdfPreviewScreen
@@ -415,61 +416,14 @@ private fun Home(
                         totalBills = state.mainReport.totalBills,
                     )
                     Spacer(Modifier.height(8.dp))
-
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                    ) {
-                        Card(
-                            modifier = Modifier
-                                .padding(top = 8.dp),
-                            elevation = CardDefaults.cardElevation(
-                                defaultElevation = 3.dp
-                            ),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            ),
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                            ) {
-                                Spacer(Modifier.height(12.dp))
-                                AppText(
-                                    modifier = Modifier
-                                        .padding(horizontal = 12.dp),
-                                    text = "Sales Chart",
-                                    style = TextStyle(
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                    )
-                                )
-                                Spacer(Modifier.height(2.dp))
-                                AppText(
-                                    modifier = Modifier
-                                        .padding(horizontal = 12.dp),
-                                    text = "Sales trend chart for last 7 days",
-                                    style = TextStyle(
-                                        fontSize = 12.sp,
-                                    )
-                                )
-                                Spacer(Modifier.height(8.dp))
-                                HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(8.dp)
-                                ) {
-                                    DailySalesChart(state.chartReport)
-                                }
-                            }
-                        }
-                    }
-
-
+                    TrendChart(
+                        chartFor = "Sales",
+                        chartReport = state.chartReport,
+                        chartDuration = state.chartDuration,
+                        onChartDurationChange = viewModel::onChartDurationChange
+                    )
                     Spacer(Modifier.height(16.dp))
-                    Title("PDF Reports", R.drawable.reports)
+                    Title("Detailed Reports", R.drawable.reports)
                     Spacer(Modifier.height(8.dp))
                     DateBox(
                         fromDate = state.fromDate,
@@ -592,73 +546,6 @@ private fun Home(
                 ProgressBarLayout()
             }
         }
-    }
-}
-
-@Composable
-fun DailySalesChart(data: List<ChartReport>) {
-    if (data.isNotEmpty()) {
-        val modelProducer = remember { CartesianChartModelProducer() }
-
-        LaunchedEffect(data) {
-            modelProducer.runTransaction {
-                columnSeries {
-                    series(
-                        data.map { it.total }
-                    )
-                }
-            }
-        }
-
-        val startAxis = VerticalAxis.rememberStart(
-            label = rememberAxisLabelComponent(
-                style = TextStyle(
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    fontSize = 12.sp
-                )
-            )
-        )
-
-        val bottomAxis = HorizontalAxis.rememberBottom(
-            valueFormatter = remember(data) {
-                CartesianValueFormatter { _, value, _ ->
-                    val index = value.toInt()
-                    data.getOrNull(index)?.date ?: ""
-                }
-            },
-            label = rememberAxisLabelComponent(
-                style = TextStyle(
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    fontSize = 12.sp
-                )
-            )
-        )
-
-        CartesianChartHost(
-            chart = rememberCartesianChart(
-                rememberColumnCartesianLayer(
-                    columnProvider = ColumnCartesianLayer.ColumnProvider.series(
-                        rememberLineComponent(
-                            fill = Fill(MaterialTheme.colorScheme.primary),
-                            thickness = 16.dp,
-                            shape = RectangleShape
-                        )
-                    )
-                ),
-                startAxis = startAxis,
-                bottomAxis = bottomAxis,
-                marker = rememberMarker(
-                    valueFormatter = DefaultCartesianMarker.ValueFormatter.default(
-                        prefix = "Rs."
-                    ),
-                    showIndicator = true
-                ),
-            ),
-            modelProducer = modelProducer,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp)
-        )
     }
 }
 

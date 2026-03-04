@@ -13,7 +13,6 @@ import com.example.statspos.domain.models.reports.sales.SalesItemsReport
 import com.example.statspos.domain.repository.items.ItemsRepository
 import com.example.statspos.domain.repository.reports.SalesReportsRepository
 import com.example.statspos.utils.HP
-import com.example.statspos.utils.HP.subCategories
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
@@ -62,6 +61,8 @@ class SalesReportsViewModel @Inject constructor(
         val mop: DropdownItem = HP.getNoneDropdownItem("Both"),
         val salesRetailType: DropdownItem = HP.getNoneDropdownItem("Both"),
         val sum: Boolean = false,
+
+        val chartDuration: DropdownItem = HP.chartDurations[0],
 
         val mainReport: MainReport = MainReport(),
         val chartReport: List<ChartReport> = emptyList(),
@@ -231,6 +232,11 @@ class SalesReportsViewModel @Inject constructor(
         state.update { it.copy(sum = value) }
     }
 
+    fun onChartDurationChange(value: DropdownItem) {
+        state.update { it.copy(chartDuration = value) }
+        loadChartReport()
+    }
+
     // endregion
 
     // region Button Clicks
@@ -379,18 +385,58 @@ class SalesReportsViewModel @Inject constructor(
 //            beforeRequest()
 
             val params = getChartParams()
-            params.addProperty("days", 7)
+            val result = when (state.value.chartDuration.id) {
+                1L -> {
+                    params.addProperty("days", 7)
+                    api.chartDaily(params)
+                }
 
-            when (val result = api.chartDaily(params)) {
+                2L -> {
+                    params.addProperty("weeks", 7)
+                    api.chartWeekly(params)
+                }
+
+                3L -> {
+                    params.addProperty("months", 7)
+                    api.chartMonthly(params)
+                }
+
+                else -> {
+                    params.addProperty("years", 7)
+                    api.chartYearly(params)
+                }
+            }
+
+
+            when (result) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
 //                    resultSuccess()
 
                     val chartReport = result.data.asJsonArray.map { obj ->
+                        Log.d("TAG Data", obj.toString())
+                        val date = obj.asJsonObject.get("date").asString
+                        Log.d("TAG Date", date)
                         ChartReport(
                             total = obj.asJsonObject.get("total").asDouble,
-                            date = obj.asJsonObject.get("date").asString.split("/")[0],
+                            date = when (state.value.chartDuration.id) {
+                                1L -> {
+                                    date.split("/")[0]
+                                }
+
+                                2L -> {
+                                    "W" + date.split("-")[1]
+                                }
+
+                                3L -> {
+                                    "M" + date.split("-")[0]
+                                }
+
+                                else -> {
+                                    date.substring(2, 4)
+                                }
+                            },
                         )
                     }
 

@@ -93,10 +93,13 @@ fun Textbox(
         unfocusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer,
         disabledContainerColor = Color.Transparent,
     ),
-    textStyle: TextStyle = TextStyle(),
+    textStyle: TextStyle = TextStyle(
+        fontSize = 15.sp,
+    ),
     enabled: Boolean = true,
     readOnly: Boolean = false,
     singleLine: Boolean = true,
+    showBorder: Boolean = true,
     focusRequester: FocusRequester? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     leadingIcon: @Composable (() -> Unit)? = null,
@@ -129,7 +132,6 @@ fun Textbox(
         interactionSource = interactionSource,
         textStyle = textStyle.copy(
             color = MaterialTheme.colorScheme.onPrimaryContainer,
-            fontSize = 15.sp,
         ),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.onPrimaryContainer),
         keyboardOptions = keyboardOptions,
@@ -149,14 +151,26 @@ fun Textbox(
                 placeholder = placeholder,
                 contentPadding = contentPadding,
                 colors = colors,
-                container = {
-                    OutlinedTextFieldDefaults.Container(
-                        enabled = enabled,
-                        isError = false,
-                        interactionSource = interactionSource,
-                        colors = colors,
-                        shape = shape,
-                    )
+                container = if (showBorder) {
+                    {
+                        OutlinedTextFieldDefaults.Container(
+                            enabled = enabled,
+                            isError = false,
+                            interactionSource = interactionSource,
+                            colors = colors,
+                            shape = shape,
+                        )
+                    }
+                } else {
+                    {
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    color = Color.Transparent,
+                                    shape = shape,
+                                )
+                        )
+                    }
                 }
             )
         }
@@ -604,7 +618,7 @@ fun TextboxCB(
             trailingIcon = {
                 IconButton(
                     onClick = {
-                        if(enabled)
+                        if (enabled)
                             expanded = !expanded
                     }
                 ) {

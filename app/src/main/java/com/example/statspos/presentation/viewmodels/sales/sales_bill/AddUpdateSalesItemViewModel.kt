@@ -352,8 +352,8 @@ class AddUpdateSalesItemViewModel @Inject constructor(
                 // Extras
                 stockPcs = if (HP.settings.showItemStock == true) item.stockPcs!! else 0.0,
                 stockCrtn = if (HP.settings.showItemStock == true) item.stockCrtn!! else 0,
-                lastRate = if (HP.settings.showCustomerLastRate == true && state.value.sales.customerId != 0L) item.lastRate!! else 0.0,
-                lastCrtnRate = if (HP.settings.showCustomerLastRate == true && state.value.sales.customerId != 0L) item.lastCrtnRate!! else 0.0,
+//                lastRate = if (HP.settings.showCustomerLastRate == true && state.value.sales.customerId != 0L) item.lastRate!! else 0.0,
+//                lastCrtnRate = if (HP.settings.showCustomerLastRate == true && state.value.sales.customerId != 0L) item.lastCrtnRate!! else 0.0,
                 lockPcs = item.lockPcs!!,
                 lockCrtn = item.lockCrtn!!,
                 isExists = item.isExists!!,
@@ -390,7 +390,28 @@ class AddUpdateSalesItemViewModel @Inject constructor(
             }
         }
 
-        showSellingRatesIntoTextboxes()
+        // If always use last rate
+        if (!state.value.isUpdate && HP.settings.alwaysUseLastRate == true) {
+            if (state.value.sales.customerId != 0L) {
+                if (item.lastRate!! > 0.0) {
+                    state.update {
+                        it.copy(
+                            rate = item.lastRate.toString()
+                        )
+                    }
+                }
+                if (item.lastCrtnRate!! > 0.0) {
+                    state.update {
+                        it.copy(
+                            crtnRate = item.lastCrtnRate.toString()
+                        )
+                    }
+                }
+            }
+        }
+
+        showSellingRatesIntoList()
+        showCustomerLastRate(item)
         showWarehouseStock(item.warehouseStock.toString())
         updateTotal()
     }
@@ -476,7 +497,7 @@ class AddUpdateSalesItemViewModel @Inject constructor(
             )
         }
 
-        showSellingRatesIntoTextboxes()
+        showSellingRatesIntoList()
         showWarehouseStock(item.warehouseStock.toString())
     }
 
@@ -569,7 +590,7 @@ class AddUpdateSalesItemViewModel @Inject constructor(
         return true
     }
 
-    private fun showSellingRatesIntoTextboxes() {
+    private fun showSellingRatesIntoList() {
         val list = if (HP.settings.fourRateSystem == true) {
             listOf(
                 state.value.retail.toString(),
@@ -590,6 +611,7 @@ class AddUpdateSalesItemViewModel @Inject constructor(
             )
         }
 
+        // Lock
         if (state.value.lockPcs) {
             state.update {
                 it.copy(
@@ -625,7 +647,27 @@ class AddUpdateSalesItemViewModel @Inject constructor(
         }
     }
 
-    private fun showWarehouseStock(warehouseStock:String){
+    private fun showCustomerLastRate(item: Items) {
+        if (HP.settings.showCustomerLastRate == true && state.value.sales.customerId != 0L) {
+            if(HP.settings.alwaysUseLastRate == true){
+                state.update {
+                    it.copy(
+                        lastRate = if (state.value.isRetail) item.retail!! else item.wholesale!!,
+                        lastCrtnRate = item.crtnRate!!,
+                    )
+                }
+            }else {
+                state.update {
+                    it.copy(
+                        lastRate = item.lastRate!!,
+                        lastCrtnRate = item.lastCrtnRate!!,
+                    )
+                }
+            }
+        }
+    }
+
+    private fun showWarehouseStock(warehouseStock: String) {
         val stock = Gson().get<JsonArray>(warehouseStock).map {
             it.toString()
         }

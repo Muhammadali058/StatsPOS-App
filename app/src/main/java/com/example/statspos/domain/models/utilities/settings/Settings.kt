@@ -21,6 +21,7 @@ data class Settings(
     var fourRateSystem: Boolean? = null,
     var sameDateBillEdit: Boolean? = null,
     var showCustomerLastRate: Boolean? = null,
+    var alwaysUseLastRate: Boolean? = null,
     var allowManyDuplicateBillPrints: Boolean? = null,
     var isPaymentNecessary: Boolean? = null,
     var shiftWiseSales: Boolean? = null,

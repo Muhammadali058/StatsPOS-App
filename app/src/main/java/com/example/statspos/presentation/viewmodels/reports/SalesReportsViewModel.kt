@@ -355,8 +355,7 @@ class SalesReportsViewModel @Inject constructor(
 //            beforeRequest()
 
             val params = JsonObject().apply {
-                addProperty("fromDate", HP.getZonedDate(state.value.fromDate))
-                addProperty("toDate", HP.getZonedDate(state.value.toDate))
+                addProperty("date", HP.getZonedDate(LocalDate.now()))
             }
 
             when (val result = api.mainReport(params)) {

@@ -1,9 +1,6 @@
 package com.example.statspos.presentation.ui.screens.reports
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,47 +11,29 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
-import com.example.statspos.R
-import com.example.statspos.domain.models.RadioItem
 import com.example.statspos.presentation.ui.components.AppIcon
-import com.example.statspos.presentation.ui.components.AppSwitch
 import com.example.statspos.presentation.ui.components.AppText
-import com.example.statspos.presentation.ui.components.RadioGroup
+import com.example.statspos.presentation.ui.components.PullToRefreshList
+import com.example.statspos.presentation.ui.components.ReportCard
 import com.example.statspos.presentation.ui.components.TopItem
 import com.example.statspos.presentation.ui.screens.TopRoutes
+import com.example.statspos.presentation.ui.screens.reports.sales.TodayBox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
-import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.utils.showToast
-import kotlinx.coroutines.launch
 
 private val reports = listOf(
     TopItem("Sales", TopRoutes.SalesReports),
@@ -63,55 +42,136 @@ private val reports = listOf(
     TopItem("Stock", TopRoutes.StockReports),
     TopItem("Accounts", TopRoutes.AccountsReports),
     TopItem("Items", TopRoutes.ItemsReports),
-    TopItem("Audit", TopRoutes.AuditReports),
 )
 
 @Composable
 fun ReportsScreen(
     onTopRouteClick: (NavKey) -> Unit,
 ) {
-    LazyColumn(
+    val scrollState = rememberScrollState()
+
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .padding(ConstantPaddings.BODY_HORIZONTAL),
     ) {
-        item {
-            Spacer(Modifier.height(8.dp))
-        }
+        Spacer(Modifier.height(8.dp))
+        ReportsGrid(reports, onTopRouteClick)
+        Spacer(Modifier.height(8.dp))
 
-        item {
-            Title("Reports", R.drawable.reports)
-        }
-        item {
-            ReportsGrid(reports, onTopRouteClick)
+        Column(
+            modifier = Modifier
+                .weight(1f)
+        ) {
+            PullToRefreshList(
+                modifier = Modifier,
+                isRefreshing = false,
+                onRefresh = {  },
+            ) {
+                item {
+                    Spacer(Modifier.height(8.dp))
+                    TodaySales(
+                        cashSales = 0.0,
+                        creditSales = 0.0,
+                        salesReturns = 0.0,
+                        totalSales = 0.0,
+                        totalBills = 0,
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    TodaySales(
+                        cashSales = 0.0,
+                        creditSales = 0.0,
+                        salesReturns = 0.0,
+                        totalSales = 0.0,
+                        totalBills = 0,
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    TodaySales(
+                        cashSales = 0.0,
+                        creditSales = 0.0,
+                        salesReturns = 0.0,
+                        totalSales = 0.0,
+                        totalBills = 0,
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    TodaySales(
+                        cashSales = 0.0,
+                        creditSales = 0.0,
+                        salesReturns = 0.0,
+                        totalSales = 0.0,
+                        totalBills = 0,
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    TodaySales(
+                        cashSales = 0.0,
+                        creditSales = 0.0,
+                        salesReturns = 0.0,
+                        totalSales = 0.0,
+                        totalBills = 0,
+                    )
+                    Spacer(Modifier.height(12.dp))
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun Title(
-    title: String,
-    @DrawableRes icon: Int? = null,
+private fun TodaySales(
+    modifier: Modifier = Modifier,
+    cashSales: Double = 0.0,
+    creditSales: Double = 0.0,
+    salesReturns: Double = 0.0,
+    totalSales: Double = 0.0,
+    totalBills: Int = 0,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start,
+    ReportCard(
+        modifier = modifier,
+        heading = "Today",
+        subHeading = "Summary of daily sales",
     ) {
-//        if (icon != null) {
-//            AppIcon(
-//                icon = icon,
-//                size = 24.dp,
-//            )
-//            Spacer(Modifier.width(16.dp))
-//        }
-        AppText(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            TodayBox(
+                modifier = Modifier
+                    .weight(1f),
+                text = "Cash Sales",
+                value = cashSales,
+            )
+            TodayBox(
+                modifier = Modifier
+                    .weight(1f),
+                text = "Credit Sales",
+                value = creditSales,
+            )
+            TodayBox(
+                modifier = Modifier
+                    .weight(1f),
+                text = "Returns",
+                value = salesReturns,
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            TodayBox(
+                modifier = Modifier
+                    .weight(1f),
+                text = "Total Sales",
+                value = totalSales,
+            )
+            TodayBox(
+                modifier = Modifier
+                    .weight(1f),
+                text = "Total Invoices",
+                value = totalBills.toDouble(),
+                addRs = false,
+            )
+        }
     }
 }
 

@@ -12,6 +12,16 @@ import javax.inject.Inject
 class StockReportsRepositoryImpl @Inject constructor(
     private val api: StockReportsApi
 ) : StockReportsRepository {
+    override suspend fun mainReport(body: JsonObject): Resource<JsonObject> {
+        body.addProperty("branchGroupId", HP.branchGroupId)
+
+        return safeApiCall {
+            api.mainReport(
+                DB.addParams(body)
+            )
+        }
+    }
+
     override suspend fun stockReport(body: JsonObject): Resource<JsonObject> {
         body.addProperty("branchGroupId", HP.branchGroupId)
 

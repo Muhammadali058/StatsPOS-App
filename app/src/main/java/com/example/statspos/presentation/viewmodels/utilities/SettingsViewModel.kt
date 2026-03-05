@@ -58,6 +58,7 @@ class SettingsViewModel @Inject constructor(
         val fourRateSystem: Boolean = false,
         val sameDateBillEdit: Boolean = false,
         val showCustomerLastRate: Boolean = false,
+        val alwaysUseLastRate: Boolean = false,
         val allowManyDuplicateBillPrints: Boolean = false,
         val isPaymentNecessary: Boolean = false,
         val itemExistsInSalesWarning: Boolean = false,
@@ -252,6 +253,10 @@ class SettingsViewModel @Inject constructor(
         state.update { it.copy(showCustomerLastRate = value) }
     }
 
+    fun onAlwaysUseLastRateChange(value: Boolean) {
+        state.update { it.copy(alwaysUseLastRate = value) }
+    }
+
     fun onAllowManyDuplicateBillPrintsChange(value: Boolean) {
         state.update { it.copy(allowManyDuplicateBillPrints = value) }
     }
@@ -400,6 +405,7 @@ class SettingsViewModel @Inject constructor(
             fourRateSystem = state.value.fourRateSystem,
             sameDateBillEdit = state.value.sameDateBillEdit,
             showCustomerLastRate = state.value.showCustomerLastRate,
+            alwaysUseLastRate = state.value.alwaysUseLastRate,
             allowManyDuplicateBillPrints = state.value.allowManyDuplicateBillPrints,
             isPaymentNecessary = state.value.isPaymentNecessary,
             itemExistsInSalesWarning = state.value.itemExistsInSalesWarning,
@@ -454,6 +460,7 @@ class SettingsViewModel @Inject constructor(
                 fourRateSystem = setting.fourRateSystem!!,
                 sameDateBillEdit = setting.sameDateBillEdit!!,
                 showCustomerLastRate = setting.showCustomerLastRate!!,
+                alwaysUseLastRate = setting.alwaysUseLastRate!!,
                 allowManyDuplicateBillPrints = setting.allowManyDuplicateBillPrints!!,
                 isPaymentNecessary = setting.isPaymentNecessary!!,
                 itemExistsInSalesWarning = setting.itemExistsInSalesWarning!!,

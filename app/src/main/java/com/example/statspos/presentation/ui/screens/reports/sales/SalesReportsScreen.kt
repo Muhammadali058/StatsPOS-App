@@ -1,13 +1,11 @@
 package com.example.statspos.presentation.ui.screens.reports.sales
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,23 +16,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -51,15 +43,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -71,12 +59,9 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.R
-import com.example.statspos.domain.models.DropdownItem
-import com.example.statspos.domain.models.reports.ChartReport
 import com.example.statspos.domain.models.reports.TotalReport
 import com.example.statspos.domain.models.reports.sales.SalesBillWiseReport
 import com.example.statspos.domain.models.reports.sales.SalesItemsReport
-import com.example.statspos.presentation.ui.components.AppHorizontalDivider
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
@@ -105,28 +90,6 @@ import com.example.statspos.presentation.viewmodels.reports.SalesReportsViewMode
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
-import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
-import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisLabelComponent
-import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
-import com.patrykandpatrick.vico.compose.cartesian.data.columnSeries
-import com.patrykandpatrick.vico.compose.cartesian.layer.ColumnCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
-import com.patrykandpatrick.vico.compose.cartesian.marker.DefaultCartesianMarker
-import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
-import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
-import com.patrykandpatrick.vico.compose.common.Fill
-import com.patrykandpatrick.vico.compose.common.Insets
-import com.patrykandpatrick.vico.compose.common.LayeredComponent
-import com.patrykandpatrick.vico.compose.common.component.ShapeComponent
-import com.patrykandpatrick.vico.compose.common.component.TextComponent
-import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
-import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
-import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import java.io.File
@@ -420,7 +383,7 @@ private fun Home(
                         creditSales = state.mainReport.creditSales,
                         salesReturns = state.mainReport.salesReturns,
                         totalSales = state.mainReport.totalSales,
-                        totalBills = state.mainReport.totalBills,
+                        totalSalesBills = state.mainReport.totalSalesBills,
                     )
                     Spacer(Modifier.height(16.dp))
                     TrendChart(
@@ -431,34 +394,16 @@ private fun Home(
                     )
                     Spacer(Modifier.height(16.dp))
 
-                    ReportCard {
-                        Spacer(Modifier.height(12.dp))
-                        AppText(
-                            modifier = Modifier
-                                .padding(horizontal = 12.dp),
-                            text = "Detailed Reports",
-                            style = TextStyle(
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                            )
-                        )
-                        Spacer(Modifier.height(2.dp))
-                        AppText(
-                            modifier = Modifier
-                                .padding(horizontal = 12.dp),
-                            text = "Save & share pdf reports",
-                            style = TextStyle(
-                                fontSize = 12.sp,
-                            )
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        AppHorizontalDivider()
+                    ReportCard(
+                        heading = "Detailed Reports",
+                        subHeading = "Save & share pdf reports"
+                    )
+                    {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 12.dp)
-                        ) {
-                            Spacer(Modifier.height(12.dp))
+                                .padding(4.dp)
+                        ){
                             DateBox(
                                 fromDate = state.fromDate,
                                 toDate = state.toDate,
@@ -572,7 +517,7 @@ private fun Home(
                                 sum = state.sum,
                                 onSumChange = viewModel::onSumChange,
                             )
-                            Spacer(Modifier.height(16.dp))
+                            Spacer(Modifier.height(4.dp))
                         }
                     }
                     Spacer(Modifier.height(16.dp))
@@ -920,81 +865,53 @@ private fun TodaySales(
     creditSales: Double = 0.0,
     salesReturns: Double = 0.0,
     totalSales: Double = 0.0,
-    totalBills: Int = 0,
+    totalSalesBills: Int = 0,
 ) {
-    ReportCard(modifier) {
-        Column(
+    ReportCard(
+        modifier = modifier,
+        heading = "Today",
+        subHeading = "Summary of daily sales",
+    ) {
+        Row(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth(),
         ) {
-            Spacer(Modifier.height(12.dp))
-            AppText(
+            TodayBox(
                 modifier = Modifier
-                    .padding(horizontal = 12.dp),
-                text = "Today",
-                style = TextStyle(
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                )
+                    .weight(1f),
+                text = "Cash Sales",
+                value = cashSales,
             )
-            Spacer(Modifier.height(2.dp))
-            AppText(
+            TodayBox(
                 modifier = Modifier
-                    .padding(horizontal = 12.dp),
-                text = "Summary of daily sales",
-                style = TextStyle(
-                    fontSize = 12.sp,
-                )
+                    .weight(1f),
+                text = "Credit Sales",
+                value = creditSales,
             )
-            Spacer(Modifier.height(8.dp))
-            AppHorizontalDivider()
-            Column(
+            TodayBox(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    TodayBox(
-                        modifier = Modifier
-                            .weight(1f),
-                        text = "Cash Sales",
-                        value = cashSales,
-                    )
-                    TodayBox(
-                        modifier = Modifier
-                            .weight(1f),
-                        text = "Credit Sales",
-                        value = creditSales,
-                    )
-                    TodayBox(
-                        modifier = Modifier
-                            .weight(1f),
-                        text = "Returns",
-                        value = salesReturns,
-                    )
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    TodayBox(
-                        modifier = Modifier
-                            .weight(1f),
-                        text = "Total Sales",
-                        value = totalSales,
-                    )
-                    TodayBox(
-                        modifier = Modifier
-                            .weight(1f),
-                        text = "Total Invoices",
-                        value = totalBills.toDouble(),
-                        addRs = false,
-                    )
-                }
-            }
+                    .weight(1f),
+                text = "Returns",
+                value = salesReturns,
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            TodayBox(
+                modifier = Modifier
+                    .weight(1f),
+                text = "Total Sales",
+                value = totalSales,
+            )
+            TodayBox(
+                modifier = Modifier
+                    .weight(1f),
+                text = "Total Invoices",
+                value = totalSalesBills.toDouble(),
+                addRs = false,
+            )
         }
     }
 }

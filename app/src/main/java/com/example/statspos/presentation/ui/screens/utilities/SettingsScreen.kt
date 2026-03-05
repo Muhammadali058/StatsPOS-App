@@ -190,6 +190,8 @@ fun SettingsScreen(
                         onSameDateBillEditChange = viewModel::onSameDateBillEditChange,
                         showCustomerLastRate = state.showCustomerLastRate,
                         onShowCustomerLastRateChange = viewModel::onShowCustomerLastRateChange,
+                        alwaysUseLastRate = state.alwaysUseLastRate,
+                        onAlwaysUseLastRateChange = viewModel::onAlwaysUseLastRateChange,
                         allowManyDuplicateBillPrints = state.allowManyDuplicateBillPrints,
                         onAllowManyDuplicateBillPrintsChange = viewModel::onAllowManyDuplicateBillPrintsChange,
                         isPaymentNecessary = state.isPaymentNecessary,
@@ -347,6 +349,8 @@ private fun Settings(
     onSameDateBillEditChange: (Boolean) -> Unit,
     showCustomerLastRate: Boolean,
     onShowCustomerLastRateChange: (Boolean) -> Unit,
+    alwaysUseLastRate: Boolean,
+    onAlwaysUseLastRateChange: (Boolean) -> Unit,
     allowManyDuplicateBillPrints: Boolean,
     onAllowManyDuplicateBillPrintsChange: (Boolean) -> Unit,
     isPaymentNecessary: Boolean,
@@ -494,9 +498,9 @@ private fun Settings(
             )
             AppSwitch(
                 modifier = Modifier.weight(1f),
-                checked = editOldCreditBill,
-                onCheckedChange = onEditOldCreditBillChange,
-                label = "Edit Old Credit Bill"
+                checked = alwaysUseLastRate,
+                onCheckedChange = onAlwaysUseLastRateChange,
+                label = "Always use Last Rate"
             )
         }
         Spacer(Modifier.height(24.dp))
@@ -509,9 +513,9 @@ private fun Settings(
             )
             AppSwitch(
                 modifier = Modifier.weight(1f),
-                checked = isPaymentNecessary,
-                onCheckedChange = onIsPaymentNecessaryChange,
-                label = "Payment Necessary in POS"
+                checked = editOldCreditBill,
+                onCheckedChange = onEditOldCreditBillChange,
+                label = "Edit Old Credit Bill"
             )
         }
         Spacer(Modifier.height(24.dp))
@@ -537,6 +541,15 @@ private fun Settings(
                 onCheckedChange = onLoadAutoCompleteItemsChange,
                 label = "Load Auto Complete Items"
             )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = isPaymentNecessary,
+                onCheckedChange = onIsPaymentNecessaryChange,
+                label = "Payment Necessary in POS"
+            )
+        }
+        Spacer(Modifier.height(24.dp))
+        Row {
             AppSwitch(
                 modifier = Modifier.weight(1f),
                 checked = fullWindowReports,
@@ -760,6 +773,8 @@ private fun BodyPrev() {
             )
 
             Settings(
+                false,
+                { },
                 false,
                 { },
                 false,

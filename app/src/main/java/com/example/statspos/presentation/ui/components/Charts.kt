@@ -99,7 +99,7 @@ fun TrendChart(
                     AppText(
                         modifier = Modifier
                             .padding(horizontal = 12.dp),
-                        text = "$chartFor trend chart for last 7 $duration",
+                        text = "$chartFor chart for last 7 $duration",
                         style = TextStyle(
                             fontSize = 12.sp,
                         )

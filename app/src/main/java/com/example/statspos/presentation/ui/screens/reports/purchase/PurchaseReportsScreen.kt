@@ -1,7 +1,6 @@
-package com.example.statspos.presentation.ui.screens.reports.sales
+package com.example.statspos.presentation.ui.screens.reports.purchase
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,11 +44,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -60,13 +56,12 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.R
 import com.example.statspos.domain.models.reports.TotalReport
-import com.example.statspos.domain.models.reports.sales.SalesBillWiseReport
-import com.example.statspos.domain.models.reports.sales.SalesItemsReport
+import com.example.statspos.domain.models.reports.purchase.PurchaseBillWiseReport
+import com.example.statspos.domain.models.reports.purchase.PurchaseItemsReport
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.AppSwitch
-import com.example.statspos.presentation.ui.components.AppText
 import com.example.statspos.presentation.ui.components.AutoCompleteItemsTextbox
 import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
 import com.example.statspos.presentation.ui.components.BottomSheet
@@ -85,19 +80,16 @@ import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
 import com.example.statspos.presentation.ui.screens.reports.ReportButtons
 import com.example.statspos.presentation.ui.screens.reports.ReportsDateBox
 import com.example.statspos.presentation.ui.screens.reports.ReportsItemnameBox
-import com.example.statspos.presentation.ui.screens.reports.TodayBox
-import com.example.statspos.presentation.ui.screens.reports.TodaySales
+import com.example.statspos.presentation.ui.screens.reports.TodayPurchase
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
-import com.example.statspos.presentation.ui.utils.PdfPreviewScreen
 import com.example.statspos.presentation.ui.utils.openPdf
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.reports.SalesReportsViewModel
+import com.example.statspos.presentation.viewmodels.reports.PurchaseReportsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import java.io.File
 import java.time.LocalDate
 
 private sealed class Routes : NavKey {
@@ -109,7 +101,7 @@ private sealed class Routes : NavKey {
 }
 
 @Composable
-fun SalesReportsScreen(
+fun PurchaseReportsScreen(
     sharedViewModel: SharedViewModel,
     onBack: () -> Unit,
 ) {
@@ -158,7 +150,7 @@ private fun Home(
 ) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<SalesReportsViewModel>()
+    val viewModel = hiltViewModel<PurchaseReportsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -217,14 +209,14 @@ private fun Home(
     }
 
     fun showBillWiseReport(
-        salesBillWiseReport: List<SalesBillWiseReport>,
+        purchaseBillWiseReport: List<PurchaseBillWiseReport>,
         totalReport: TotalReport
     ) {
-        val file = salesBillWiseReport(
+        val file = purchaseBillWiseReport(
             context = context,
             fromDate = HP.getFormatedDate(state.fromDate),
             toDate = HP.getFormatedDate(state.toDate),
-            billWiseReport = salesBillWiseReport,
+            billWiseReport = purchaseBillWiseReport,
             totalReport = totalReport,
         )
 
@@ -232,25 +224,25 @@ private fun Home(
     }
 
     fun showItemsReport(
-        salesItemsReport: List<SalesItemsReport>,
+        purchaseItemsReport: List<PurchaseItemsReport>,
         totalReport: TotalReport
     ) {
         if (state.sum) {
-            val file = salesItemsSumReport(
+            val file = purchaseItemsSumReport(
                 context = context,
                 fromDate = HP.getFormatedDate(state.fromDate),
                 toDate = HP.getFormatedDate(state.toDate),
-                itemsReport = salesItemsReport,
+                itemsReport = purchaseItemsReport,
                 totalReport = totalReport,
             )
 
             openPdf(context, file)
         } else {
-            val file = salesItemsReport(
+            val file = purchaseItemsReport(
                 context = context,
                 fromDate = HP.getFormatedDate(state.fromDate),
                 toDate = HP.getFormatedDate(state.toDate),
-                itemsReport = salesItemsReport,
+                itemsReport = purchaseItemsReport,
                 totalReport = totalReport,
             )
 
@@ -270,7 +262,7 @@ private fun Home(
                 onNavigationClick = {
                     onBack()
                 },
-                title = "Sales Reports",
+                title = "Purchase Reports",
             )
         }
     ) { innerPadding ->
@@ -288,13 +280,13 @@ private fun Home(
                 ComboBox(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    items = HP.salesType,
-                    selectedItem = state.salesType,
+                    items = HP.purchaseType,
+                    selectedItem = state.purchaseType,
                     onItemSelected = { item ->
-                        viewModel.onSalesTypeChange(item)
+                        viewModel.onPurchaseTypeChange(item)
                     },
                     label = {
-                        Text(text = "Sales Type")
+                        Text(text = "Purchase Type")
                     },
                     addNone = true,
                     noneText = "Both",
@@ -302,13 +294,13 @@ private fun Home(
                 ComboBox(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    items = HP.salesOn,
-                    selectedItem = state.salesOn,
+                    items = HP.purchaseOn,
+                    selectedItem = state.purchaseOn,
                     onItemSelected = { item ->
-                        viewModel.onSalesOnChange(item)
+                        viewModel.onPurchaseOnChange(item)
                     },
                     label = {
-                        Text(text = "Sales On")
+                        Text(text = "Purchase On")
                     },
                     addNone = true,
                     noneText = "Both",
@@ -323,20 +315,6 @@ private fun Home(
                     },
                     label = {
                         Text(text = "M.O.P")
-                    },
-                    addNone = true,
-                    noneText = "Both",
-                )
-                ComboBox(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    items = HP.salesRetailType,
-                    selectedItem = state.salesRetailType,
-                    onItemSelected = { item ->
-                        viewModel.onSalesRetailTypeChange(item)
-                    },
-                    label = {
-                        Text(text = "Type")
                     },
                     addNone = true,
                     noneText = "Both",
@@ -371,16 +349,16 @@ private fun Home(
                         .verticalScroll(scrollState),
                 ) {
                     Spacer(Modifier.height(16.dp))
-                    TodaySales(
-                        cashSales = state.mainReport.cashSales,
-                        creditSales = state.mainReport.creditSales,
-                        salesReturns = state.mainReport.salesReturns,
-                        totalSales = state.mainReport.totalSales,
-                        totalSalesBills = state.mainReport.totalSalesBills,
+                    TodayPurchase(
+                        cashPurchase = state.mainReport.cashPurchase,
+                        creditPurchase = state.mainReport.creditPurchase,
+                        purchaseReturns = state.mainReport.purchaseReturns,
+                        totalPurchase = state.mainReport.totalPurchase,
+                        totalPurchaseBills = state.mainReport.totalPurchaseBills,
                     )
                     Spacer(Modifier.height(16.dp))
                     TrendChart(
-                        chartFor = "Sales",
+                        chartFor = "Purchase",
                         chartReport = state.chartReport,
                         chartDuration = state.chartDuration,
                         onChartDurationChange = viewModel::onChartDurationChange
@@ -430,57 +408,57 @@ private fun Home(
                                 subCategoryName = state.subCategoryName,
                                 categoryId = state.categoryId,
                                 vendorName = state.vendorName,
-                                customerName = state.customerName,
                                 accountCategoryName = state.accountCategoryName,
+                                warehouseName = state.warehouseName,
                                 supplierName = state.supplierName,
                                 username = state.username,
                                 onCategoryNameChange = viewModel::onCategoryNameChange,
                                 onSubCategoryNameChange = viewModel::onSubCategoryNameChange,
                                 onVendorNameChange = viewModel::onVendorNameChange,
-                                onCustomerNameChange = viewModel::onCustomerNameChange,
                                 onAccountCategoryNameChange = viewModel::onAccountCategoryNameChange,
+                                onWarehouseNameChange = viewModel::onWarehouseNameChange,
                                 onSupplierNameChange = viewModel::onSupplierNameChange,
                                 onUsernameChange = viewModel::onUsernameChange,
                                 onCategoryIdChange = viewModel::onCategoryIdChange,
                                 onSubCategoryIdChange = viewModel::onSubCategoryIdChange,
                                 onVendorIdChange = viewModel::onVendorIdChange,
-                                onCustomerIdChange = viewModel::onCustomerIdChange,
                                 onAccountCategoryIdChange = viewModel::onAccountCategoryIdChange,
+                                onWarehouseIdChange = viewModel::onWarehouseIdChange,
                                 onSupplierIdChange = viewModel::onSupplierIdChange,
                                 onUserIdChange = viewModel::onUserIdChange,
                                 onCategoryClick = {
-                                    viewModel.onCategoryClick { salesItemsReport, totalReport ->
-                                        showItemsReport(salesItemsReport, totalReport)
+                                    viewModel.onCategoryClick { purchaseItemsReport, totalReport ->
+                                        showItemsReport(purchaseItemsReport, totalReport)
                                     }
                                 },
                                 onSubCategoryClick = {
-                                    viewModel.onSubCategoryClick { salesItemsReport, totalReport ->
-                                        showItemsReport(salesItemsReport, totalReport)
+                                    viewModel.onSubCategoryClick { purchaseItemsReport, totalReport ->
+                                        showItemsReport(purchaseItemsReport, totalReport)
                                     }
                                 },
                                 onVendorClick = {
-                                    viewModel.onVendorClick { salesItemsReport, totalReport ->
-                                        showItemsReport(salesItemsReport, totalReport)
-                                    }
-                                },
-                                onCustomerClick = {
-                                    viewModel.onCustomerClick { salesBillWiseReport, totalReport ->
-                                        showBillWiseReport(salesBillWiseReport, totalReport)
+                                    viewModel.onVendorClick { purchaseItemsReport, totalReport ->
+                                        showItemsReport(purchaseItemsReport, totalReport)
                                     }
                                 },
                                 onAccountCategoryClick = {
-                                    viewModel.onAccountCategoryClick { salesBillWiseReport, totalReport ->
-                                        showBillWiseReport(salesBillWiseReport, totalReport)
+                                    viewModel.onAccountCategoryClick { purchaseBillWiseReport, totalReport ->
+                                        showBillWiseReport(purchaseBillWiseReport, totalReport)
+                                    }
+                                },
+                                onWarehouseClick = {
+                                    viewModel.onWarehouseClick { purchaseBillWiseReport, totalReport ->
+                                        showBillWiseReport(purchaseBillWiseReport, totalReport)
                                     }
                                 },
                                 onSupplierClick = {
-                                    viewModel.onSupplierClick { salesBillWiseReport, totalReport ->
-                                        showBillWiseReport(salesBillWiseReport, totalReport)
+                                    viewModel.onSupplierClick { purchaseBillWiseReport, totalReport ->
+                                        showBillWiseReport(purchaseBillWiseReport, totalReport)
                                     }
                                 },
                                 onUserClick = {
-                                    viewModel.onUserClick { salesBillWiseReport, totalReport ->
-                                        showBillWiseReport(salesBillWiseReport, totalReport)
+                                    viewModel.onUserClick { purchaseBillWiseReport, totalReport ->
+                                        showBillWiseReport(purchaseBillWiseReport, totalReport)
                                     }
                                 },
                             )
@@ -530,29 +508,29 @@ private fun Dropdowns(
     subCategoryName: String,
     categoryId: Long,
     vendorName: String,
-    customerName: String,
     accountCategoryName: String,
+    warehouseName: String,
     supplierName: String,
     username: String,
     onCategoryNameChange: (String) -> Unit,
     onSubCategoryNameChange: (String) -> Unit,
     onVendorNameChange: (String) -> Unit,
-    onCustomerNameChange: (String) -> Unit,
     onAccountCategoryNameChange: (String) -> Unit,
+    onWarehouseNameChange: (String) -> Unit,
     onSupplierNameChange: (String) -> Unit,
     onUsernameChange: (String) -> Unit,
     onCategoryIdChange: (Long) -> Unit,
     onSubCategoryIdChange: (Long) -> Unit,
     onVendorIdChange: (Long) -> Unit,
-    onCustomerIdChange: (Long) -> Unit,
     onAccountCategoryIdChange: (Long) -> Unit,
+    onWarehouseIdChange: (Long) -> Unit,
     onSupplierIdChange: (Long) -> Unit,
     onUserIdChange: (Long) -> Unit,
     onCategoryClick: () -> Unit,
     onSubCategoryClick: () -> Unit,
     onVendorClick: () -> Unit,
-    onCustomerClick: () -> Unit,
     onAccountCategoryClick: () -> Unit,
+    onWarehouseClick: () -> Unit,
     onSupplierClick: () -> Unit,
     onUserClick: () -> Unit,
 ) {
@@ -613,23 +591,6 @@ private fun Dropdowns(
             changeIdOnEmpty = true,
         )
         Dropdown(
-            value = customerName,
-            onValueChange = onCustomerNameChange,
-            items = HP.customers,
-            onItemSelected = { dropdownItem ->
-                onCustomerIdChange(dropdownItem.id)
-            },
-            label = {
-                Text(text = "Customer")
-            },
-            trailingIcon = {
-                ShowReportIcon {
-                    onCustomerClick()
-                }
-            },
-            changeIdOnEmpty = true,
-        )
-        Dropdown(
             value = accountCategoryName,
             onValueChange = onAccountCategoryNameChange,
             items = HP.accountCategories,
@@ -637,11 +598,28 @@ private fun Dropdowns(
                 onAccountCategoryIdChange(dropdownItem.id)
             },
             label = {
-                Text(text = "Customer Category")
+                Text(text = "Vendor Category")
             },
             trailingIcon = {
                 ShowReportIcon {
                     onAccountCategoryClick()
+                }
+            },
+            changeIdOnEmpty = true,
+        )
+        Dropdown(
+            value = warehouseName,
+            onValueChange = onWarehouseNameChange,
+            items = HP.warehouses,
+            onItemSelected = { dropdownItem ->
+                onWarehouseIdChange(dropdownItem.id)
+            },
+            label = {
+                Text(text = "Warehouse")
+            },
+            trailingIcon = {
+                ShowReportIcon {
+                    onWarehouseClick()
                 }
             },
             changeIdOnEmpty = true,

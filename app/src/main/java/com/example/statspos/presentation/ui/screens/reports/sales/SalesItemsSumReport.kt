@@ -3,11 +3,13 @@ package com.example.statspos.presentation.ui.screens.reports.sales
 import android.content.Context
 import com.example.statspos.domain.models.reports.TotalReport
 import com.example.statspos.domain.models.reports.sales.SalesItemsReport
+import com.example.statspos.presentation.ui.components.PageXofYEventHandler
 import com.example.statspos.presentation.ui.utils.REPORT_BODY_FONT_SIZE
 import com.example.statspos.presentation.ui.utils.REPORT_HEADER_FONT_SIZE
 import com.example.statspos.presentation.ui.utils.REPORT_HEADINGS_FONT_SIZE
 import com.example.statspos.utils.HP
 import com.itextpdf.kernel.colors.ColorConstants
+import com.itextpdf.kernel.events.PdfDocumentEvent
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
@@ -36,6 +38,8 @@ fun salesItemsSumReport(
 
     val writer = PdfWriter(file)
     val pdf = PdfDocument(writer)
+    val pageHandler = PageXofYEventHandler(pdf)
+    pdf.addEventHandler(PdfDocumentEvent.END_PAGE, pageHandler)
     val document = Document(pdf)
 
     document.setMargins(20f, 20f, 20f, 20f)
@@ -127,7 +131,7 @@ fun salesItemsSumReport(
         )
 
         bodyTable.addCell(
-            Cell().add(Paragraph(item.qty.toString()).setFontSize(REPORT_BODY_FONT_SIZE))
+            Cell().add(Paragraph(HP.formatDecimal(item.qty)).setFontSize(REPORT_BODY_FONT_SIZE))
                 .setTextAlignment(TextAlignment.CENTER)
         )
 
@@ -139,7 +143,7 @@ fun salesItemsSumReport(
         }
 
         bodyTable.addCell(
-            Cell().add(Paragraph(item.total.toString()).setFontSize(REPORT_BODY_FONT_SIZE))
+            Cell().add(Paragraph(HP.formatDecimal(item.total)).setFontSize(REPORT_BODY_FONT_SIZE))
                 .setTextAlignment(TextAlignment.CENTER)
         )
     }
@@ -153,30 +157,35 @@ fun salesItemsSumReport(
     val row1 =
         Table(UnitValue.createPercentArray(floatArrayOf(60f, 40f)))
             .useAllAvailableWidth()
-    val totalQtyCell = Cell()
+
+    val paragraph = Paragraph()
+        .add(Text("Total Qty: ").setBold())
         .add(
-            Paragraph()
-                .add(Text("Total Qty: ").setBold())
+            Div()
+                .setWidth(UnitValue.createPointValue(100f))
+                .setBorderBottom(SolidBorder(ColorConstants.BLACK, 1f))
                 .add(
-                    Div()
-                        .setWidth(UnitValue.createPointValue(100f))
-                        .setBorderBottom(SolidBorder(ColorConstants.BLACK, 1f))
-                        .add(
-                            Paragraph(totalReport.totalQty.toString())
-                                .setTextAlignment(TextAlignment.CENTER)
-                        )
-                )
-                .add(Text("Total Crtn: ").setBold())
-                .add(
-                    Div()
-                        .setWidth(UnitValue.createPointValue(100f))
-                        .setBorderBottom(SolidBorder(ColorConstants.BLACK, 1f))
-                        .add(
-                            Paragraph(totalReport.totalCrtn.toString())
-                                .setTextAlignment(TextAlignment.CENTER)
-                        )
+                    Paragraph(HP.formatDecimal(totalReport.totalQty))
+                        .setTextAlignment(TextAlignment.CENTER)
                 )
         )
+
+    if (HP.settings.saleCartons == true) {
+        paragraph
+            .add(Text("Total Crtn: ").setBold())
+            .add(
+                Div()
+                    .setWidth(UnitValue.createPointValue(100f))
+                    .setBorderBottom(SolidBorder(ColorConstants.BLACK, 1f))
+                    .add(
+                        Paragraph(HP.formatDecimal(totalReport.totalCrtn))
+                            .setTextAlignment(TextAlignment.CENTER)
+                    )
+            )
+    }
+
+    val totalQtyCell = Cell()
+        .add(paragraph)
         .setFontSize(12f)
         .setBorder(null)
         .setTextAlignment(TextAlignment.LEFT)
@@ -190,7 +199,7 @@ fun salesItemsSumReport(
                         .setWidth(UnitValue.createPointValue(100f))
 //                        .setBorderBottom(SolidBorder(ColorConstants.BLACK, 1f))
                         .add(
-                            Paragraph(totalReport.total.toString())
+                            Paragraph(HP.formatDecimal(totalReport.total))
                                 .setTextAlignment(TextAlignment.RIGHT)
                         )
                 )
@@ -217,7 +226,7 @@ fun salesItemsSumReport(
                         .setWidth(UnitValue.createPointValue(100f))
                         .setBorderBottom(SolidBorder(ColorConstants.BLACK, 1f))
                         .add(
-                            Paragraph(totalReport.totalDisc.toString())
+                            Paragraph(HP.formatDecimal(totalReport.totalDisc))
                                 .setTextAlignment(TextAlignment.RIGHT)
                         )
                 )
@@ -243,7 +252,7 @@ fun salesItemsSumReport(
                         .setWidth(UnitValue.createPointValue(100f))
                         .setBorderBottom(SolidBorder(ColorConstants.BLACK, 1f))
                         .add(
-                            Paragraph(totalReport.grandTotal.toString())
+                            Paragraph(HP.formatDecimal(totalReport.grandTotal))
                                 .setTextAlignment(TextAlignment.RIGHT)
                         )
                 )
@@ -256,6 +265,7 @@ fun salesItemsSumReport(
     document.add(row3)
     // endregion
 
+    pageHandler.writeTotal(pdf)
     document.close()
     return file
 }

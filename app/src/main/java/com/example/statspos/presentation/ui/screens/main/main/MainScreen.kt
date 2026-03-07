@@ -29,6 +29,8 @@ import com.example.statspos.presentation.ui.screens.items.categories.CategoriesS
 import com.example.statspos.presentation.ui.screens.items.packages.PackagesScreen
 import com.example.statspos.presentation.ui.screens.purchase.main_screen.PurchaseScreen
 import com.example.statspos.presentation.ui.screens.purchase.purchase_orders.PurchaseOrdersScreen
+import com.example.statspos.presentation.ui.screens.reports.profit.ProfitReportsScreen
+import com.example.statspos.presentation.ui.screens.reports.purchase.PurchaseReportsScreen
 import com.example.statspos.presentation.ui.screens.reports.sales.SalesReportsScreen
 import com.example.statspos.presentation.ui.screens.sales.sales_bill.SalesBillScreen
 import com.example.statspos.presentation.ui.screens.sales.sales_bill.ViewSalesBillItemsScreen
@@ -280,6 +282,22 @@ fun MainScreen() {
             // region Reports
             entry<TopRoutes.SalesReports> {
                 SalesReportsScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<TopRoutes.PurchaseReports> {
+                PurchaseReportsScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<TopRoutes.ProfitReports> {
+                ProfitReportsScreen(
                     sharedViewModel = sharedViewModel,
                     onBack = {
                         backStack.removeLastOrNull()

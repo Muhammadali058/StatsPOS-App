@@ -1,7 +1,8 @@
-package com.example.statspos.presentation.ui.screens.reports.sales
+package com.example.statspos.presentation.ui.screens.reports.purchase
 
 import android.content.Context
 import com.example.statspos.domain.models.reports.TotalReport
+import com.example.statspos.domain.models.reports.purchase.PurchaseItemsReport
 import com.example.statspos.domain.models.reports.sales.SalesItemsReport
 import com.example.statspos.presentation.ui.components.PageXofYEventHandler
 import com.example.statspos.presentation.ui.utils.REPORT_BODY_FONT_SIZE
@@ -23,15 +24,15 @@ import com.itextpdf.layout.properties.TextAlignment
 import com.itextpdf.layout.properties.UnitValue
 import java.io.File
 
-fun salesItemsReport(
+fun purchaseItemsReport(
     context: Context,
     fromDate: String,
     toDate: String,
-    itemsReport: List<SalesItemsReport>,
+    itemsReport: List<PurchaseItemsReport>,
     totalReport: TotalReport,
 ): File {
     // region Document
-    val file = File(context.cacheDir, "Sales_Report_${System.currentTimeMillis()}.pdf")
+    val file = File(context.cacheDir, "Purchase_Report_${System.currentTimeMillis()}.pdf")
     if (file.exists()) {
         file.delete()
     }
@@ -47,7 +48,7 @@ fun salesItemsReport(
 
     // region Header
     // ---------------- Report Title ----------------
-    val title = Paragraph("Sales Report")
+    val title = Paragraph("Purchase Report")
         .setBold()
         .setFontSize(24f)
         .setTextAlignment(TextAlignment.CENTER)
@@ -97,22 +98,22 @@ fun salesItemsReport(
         listOf(
             "Date",
             "Sr.",
-            "Customer",
+            "Vendor",
             "Itemname",
             "Qty",
             "Crtn",
-            "Rate",
-            "C.Rate",
+            "Cost",
+            "C.Cost",
             "Total",
         )
     else
         listOf(
             "Date",
             "Sr.",
-            "Customer",
+            "Vendor",
             "Itemname",
             "Qty",
-            "Rate",
+            "Cost",
             "Disc",
             "Total",
         )
@@ -141,12 +142,12 @@ fun salesItemsReport(
         )
 
         bodyTable.addCell(
-            Cell().add(Paragraph(item.salesId.toString()).setFontSize(REPORT_BODY_FONT_SIZE))
+            Cell().add(Paragraph(item.purchaseId.toString()).setFontSize(REPORT_BODY_FONT_SIZE))
                 .setTextAlignment(TextAlignment.CENTER)
         )
 
         bodyTable.addCell(
-            Cell().add(Paragraph(item.customerName.toString()).setFontSize(REPORT_BODY_FONT_SIZE))
+            Cell().add(Paragraph(item.vendorName.toString()).setFontSize(REPORT_BODY_FONT_SIZE))
                 .setTextAlignment(TextAlignment.LEFT)
         )
 
@@ -168,13 +169,13 @@ fun salesItemsReport(
         }
 
         bodyTable.addCell(
-            Cell().add(Paragraph(HP.formatDecimal(item.rate)).setFontSize(REPORT_BODY_FONT_SIZE))
+            Cell().add(Paragraph(HP.formatDecimal(item.cost)).setFontSize(REPORT_BODY_FONT_SIZE))
                 .setTextAlignment(TextAlignment.CENTER)
         )
 
         if (HP.settings.saleCartons == true) {
             bodyTable.addCell(
-                Cell().add(Paragraph(HP.formatDecimal(item.crtnRate)).setFontSize(REPORT_BODY_FONT_SIZE))
+                Cell().add(Paragraph(HP.formatDecimal(item.costCrtn)).setFontSize(REPORT_BODY_FONT_SIZE))
                     .setTextAlignment(TextAlignment.CENTER)
             )
         }

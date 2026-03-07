@@ -1,6 +1,5 @@
 package com.example.statspos.presentation.viewmodels.reports
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
@@ -8,9 +7,10 @@ import com.example.statspos.domain.models.items.Items
 import com.example.statspos.domain.models.reports.ChartReport
 import com.example.statspos.domain.models.reports.MainReport
 import com.example.statspos.domain.models.reports.TotalReport
-import com.example.statspos.domain.models.reports.sales.SalesBillWiseReport
-import com.example.statspos.domain.models.reports.sales.SalesItemsReport
+import com.example.statspos.domain.models.reports.profit.ProfitBillWiseReport
+import com.example.statspos.domain.models.reports.profit.ProfitItemsReport
 import com.example.statspos.domain.repository.items.ItemsRepository
+import com.example.statspos.domain.repository.reports.ProfitReportsRepository
 import com.example.statspos.domain.repository.reports.SalesReportsRepository
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
@@ -30,8 +30,8 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
-class SalesReportsViewModel @Inject constructor(
-    private val api: SalesReportsRepository,
+class ProfitReportsViewModel @Inject constructor(
+    private val api: ProfitReportsRepository,
     private val itemsRepo: ItemsRepository,
 ) : ViewModel() {
 
@@ -67,8 +67,8 @@ class SalesReportsViewModel @Inject constructor(
 
         val mainReport: MainReport = MainReport(),
         val chartReport: List<ChartReport> = emptyList(),
-        val salesBillWiseReport: List<SalesBillWiseReport>? = null,
-        val salesItemsReport: List<SalesItemsReport>? = null,
+        val profitBillWiseReport: List<ProfitBillWiseReport>? = null,
+        val profitItemsReport: List<ProfitItemsReport>? = null,
         val totalReport: TotalReport? = null,
 
         val isLoading: Boolean = false,
@@ -241,15 +241,15 @@ class SalesReportsViewModel @Inject constructor(
     // endregion
 
     // region Button Clicks
-    fun onTotalBillsClick(onSuccess: (List<SalesBillWiseReport>, TotalReport) -> Unit) {
+    fun onTotalBillsClick(onSuccess: (List<ProfitBillWiseReport>, TotalReport) -> Unit) {
         loadBillWiseReport(getParams(), onSuccess)
     }
 
-    fun onTotalItemsClick(onSuccess: (List<SalesItemsReport>, TotalReport) -> Unit) {
+    fun onTotalItemsClick(onSuccess: (List<ProfitItemsReport>, TotalReport) -> Unit) {
         loadItemsReport(getParams(), onSuccess)
     }
 
-    fun onFilterClick(onSuccess: (List<SalesItemsReport>, TotalReport) -> Unit) {
+    fun onFilterClick(onSuccess: (List<ProfitItemsReport>, TotalReport) -> Unit) {
         val params = getParams()
         params.addProperty("itemId", state.value.itemId)
         params.addProperty("categoryId", state.value.categoryId)
@@ -262,7 +262,7 @@ class SalesReportsViewModel @Inject constructor(
         loadItemsReport(params, onSuccess)
     }
 
-    fun onItemClick(onSuccess: (List<SalesItemsReport>, TotalReport) -> Unit) {
+    fun onItemClick(onSuccess: (List<ProfitItemsReport>, TotalReport) -> Unit) {
         if (state.value.itemId == 0L) {
             showMessage("Select item")
         } else {
@@ -273,7 +273,7 @@ class SalesReportsViewModel @Inject constructor(
 
     }
 
-    fun onCategoryClick(onSuccess: (List<SalesItemsReport>, TotalReport) -> Unit) {
+    fun onCategoryClick(onSuccess: (List<ProfitItemsReport>, TotalReport) -> Unit) {
         if (state.value.categoryId == 0L) {
             showMessage("Select category")
         } else {
@@ -284,7 +284,7 @@ class SalesReportsViewModel @Inject constructor(
 
     }
 
-    fun onSubCategoryClick(onSuccess: (List<SalesItemsReport>, TotalReport) -> Unit) {
+    fun onSubCategoryClick(onSuccess: (List<ProfitItemsReport>, TotalReport) -> Unit) {
         if (state.value.subCategoryId == 0L) {
             showMessage("Select sub-category")
         } else {
@@ -295,7 +295,7 @@ class SalesReportsViewModel @Inject constructor(
 
     }
 
-    fun onVendorClick(onSuccess: (List<SalesItemsReport>, TotalReport) -> Unit) {
+    fun onVendorClick(onSuccess: (List<ProfitItemsReport>, TotalReport) -> Unit) {
         if (state.value.vendorId == 0L) {
             showMessage("Select vendor")
         } else {
@@ -306,7 +306,7 @@ class SalesReportsViewModel @Inject constructor(
 
     }
 
-    fun onCustomerClick(onSuccess: (List<SalesBillWiseReport>, TotalReport) -> Unit) {
+    fun onCustomerClick(onSuccess: (List<ProfitBillWiseReport>, TotalReport) -> Unit) {
         if (state.value.customerId == 0L) {
             showMessage("Select customer")
         } else {
@@ -316,7 +316,7 @@ class SalesReportsViewModel @Inject constructor(
         }
     }
 
-    fun onAccountCategoryClick(onSuccess: (List<SalesBillWiseReport>, TotalReport) -> Unit) {
+    fun onAccountCategoryClick(onSuccess: (List<ProfitBillWiseReport>, TotalReport) -> Unit) {
         if (state.value.accountCategoryId == 0L) {
             showMessage("Select customer category")
         } else {
@@ -326,7 +326,7 @@ class SalesReportsViewModel @Inject constructor(
         }
     }
 
-    fun onSupplierClick(onSuccess: (List<SalesBillWiseReport>, TotalReport) -> Unit) {
+    fun onSupplierClick(onSuccess: (List<ProfitBillWiseReport>, TotalReport) -> Unit) {
         if (state.value.supplierId == 0L) {
             showMessage("Select supplier")
         } else {
@@ -336,7 +336,7 @@ class SalesReportsViewModel @Inject constructor(
         }
     }
 
-    fun onUserClick(onSuccess: (List<SalesBillWiseReport>, TotalReport) -> Unit) {
+    fun onUserClick(onSuccess: (List<ProfitBillWiseReport>, TotalReport) -> Unit) {
         if (state.value.userId == 0L) {
             showMessage("Select user")
         } else {
@@ -450,7 +450,7 @@ class SalesReportsViewModel @Inject constructor(
 
     private fun loadBillWiseReport(
         params: JsonObject,
-        onSuccess: (List<SalesBillWiseReport>, TotalReport) -> Unit
+        onSuccess: (List<ProfitBillWiseReport>, TotalReport) -> Unit
     ) {
         viewModelScope.launch {
             if (state.value.isLoading)
@@ -464,20 +464,20 @@ class SalesReportsViewModel @Inject constructor(
                 is Resource.Success -> {
                     resultSuccess()
 
-                    val salesBillWiseReport =
-                        Gson().getListOf<SalesBillWiseReport>(result.data.get("rows").asJsonArray)
-                    if (salesBillWiseReport.isNotEmpty()) {
+                    val profitBillWiseReport =
+                        Gson().getListOf<ProfitBillWiseReport>(result.data.get("rows").asJsonArray)
+                    if (profitBillWiseReport.isNotEmpty()) {
                         val totalReport =
                             Gson().get<TotalReport>(result.data.get("total").asJsonObject)
 
                         state.update {
                             it.copy(
-                                salesBillWiseReport = salesBillWiseReport,
+                                profitBillWiseReport = profitBillWiseReport,
                                 totalReport = totalReport,
                             )
                         }
 
-                        onSuccess(salesBillWiseReport, totalReport)
+                        onSuccess(profitBillWiseReport, totalReport)
                     } else {
                         showMessage("Not record found")
                     }
@@ -488,7 +488,7 @@ class SalesReportsViewModel @Inject constructor(
 
     private fun loadItemsReport(
         params: JsonObject,
-        onSuccess: (List<SalesItemsReport>, TotalReport) -> Unit
+        onSuccess: (List<ProfitItemsReport>, TotalReport) -> Unit
     ) {
         viewModelScope.launch {
             if (state.value.isLoading)
@@ -504,20 +504,20 @@ class SalesReportsViewModel @Inject constructor(
                 is Resource.Success -> {
                     resultSuccess()
 
-                    val salesItemsReport =
-                        Gson().getListOf<SalesItemsReport>(result.data.get("rows").asJsonArray)
-                    if (salesItemsReport.isNotEmpty()) {
+                    val profitItemsReport =
+                        Gson().getListOf<ProfitItemsReport>(result.data.get("rows").asJsonArray)
+                    if (profitItemsReport.isNotEmpty()) {
                         val totalReport =
                             Gson().get<TotalReport>(result.data.get("total").asJsonObject)
 
                         state.update {
                             it.copy(
-                                salesItemsReport = salesItemsReport,
+                                profitItemsReport = profitItemsReport,
                                 totalReport = totalReport,
                             )
                         }
 
-                        onSuccess(salesItemsReport, totalReport)
+                        onSuccess(profitItemsReport, totalReport)
                     } else {
                         showMessage("Not record found")
                     }
@@ -587,7 +587,6 @@ class SalesReportsViewModel @Inject constructor(
             addProperty("salesType", state.value.salesType.id.toInt())
             addProperty("mop", state.value.mop.id.toInt())
             addProperty("type", state.value.salesRetailType.id.toInt())
-            addProperty("fbrInvoice", 0)
         }
     }
 
@@ -598,7 +597,6 @@ class SalesReportsViewModel @Inject constructor(
             addProperty("salesType", state.value.salesType.id.toInt())
             addProperty("mop", state.value.mop.id.toInt())
             addProperty("type", state.value.salesRetailType.id.toInt())
-            addProperty("fbrInvoice", 0)
         }
     }
 

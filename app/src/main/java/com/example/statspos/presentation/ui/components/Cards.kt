@@ -78,56 +78,42 @@ fun ReportCard(
 @Composable
 fun ReportCard(
     modifier: Modifier = Modifier,
-    heading:String,
-    subHeading:String,
+    heading: String,
+    subHeading: String,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-    ) {
-        Card(
-            modifier = Modifier,
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 3.dp
-            ),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-            ),
+    ReportCard(modifier) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
         ) {
+            Spacer(Modifier.height(12.dp))
+            AppText(
+                modifier = Modifier
+                    .padding(horizontal = 12.dp),
+                text = heading,
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            )
+            Spacer(Modifier.height(2.dp))
+            AppText(
+                modifier = Modifier
+                    .padding(horizontal = 12.dp),
+                text = subHeading,
+                style = TextStyle(
+                    fontSize = 12.sp,
+                )
+            )
+            Spacer(Modifier.height(8.dp))
+            AppHorizontalDivider()
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(8.dp)
             ) {
-                Spacer(Modifier.height(12.dp))
-                AppText(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp),
-                    text = heading,
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                    )
-                )
-                Spacer(Modifier.height(2.dp))
-                AppText(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp),
-                    text = subHeading,
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                    )
-                )
-                Spacer(Modifier.height(8.dp))
-                AppHorizontalDivider()
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    content()
-                }
+                content()
             }
         }
     }

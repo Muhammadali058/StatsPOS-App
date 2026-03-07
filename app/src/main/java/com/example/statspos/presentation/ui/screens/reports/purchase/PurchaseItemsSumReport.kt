@@ -1,7 +1,8 @@
-package com.example.statspos.presentation.ui.screens.reports.sales
+package com.example.statspos.presentation.ui.screens.reports.purchase
 
 import android.content.Context
 import com.example.statspos.domain.models.reports.TotalReport
+import com.example.statspos.domain.models.reports.purchase.PurchaseItemsReport
 import com.example.statspos.domain.models.reports.sales.SalesItemsReport
 import com.example.statspos.presentation.ui.components.PageXofYEventHandler
 import com.example.statspos.presentation.ui.utils.REPORT_BODY_FONT_SIZE
@@ -23,15 +24,15 @@ import com.itextpdf.layout.properties.TextAlignment
 import com.itextpdf.layout.properties.UnitValue
 import java.io.File
 
-fun salesItemsReport(
+fun purchaseItemsSumReport(
     context: Context,
     fromDate: String,
     toDate: String,
-    itemsReport: List<SalesItemsReport>,
+    itemsReport: List<PurchaseItemsReport>,
     totalReport: TotalReport,
 ): File {
     // region Document
-    val file = File(context.cacheDir, "Sales_Report_${System.currentTimeMillis()}.pdf")
+    val file = File(context.cacheDir, "Purchase_Report_${System.currentTimeMillis()}.pdf")
     if (file.exists()) {
         file.delete()
     }
@@ -47,7 +48,7 @@ fun salesItemsReport(
 
     // region Header
     // ---------------- Report Title ----------------
-    val title = Paragraph("Sales Report")
+    val title = Paragraph("Purchase Report")
         .setBold()
         .setFontSize(24f)
         .setTextAlignment(TextAlignment.CENTER)
@@ -86,34 +87,24 @@ fun salesItemsReport(
     // region Details
     // ---------------- Table ----------------
     val columnWidths = if (HP.settings.saleCartons == true)
-        floatArrayOf(1f, 0.5f, 2f, 2f, 0.5f, 0.5f, 0.5f, 0.5f, 1f)
+        floatArrayOf(3f, 1f, 1f, 1f)
     else
-        floatArrayOf(1f, 0.5f, 2f, 2f, 0.5f, 0.5f, 0.5f, 1f)
+        floatArrayOf(3f, 1f, 1f)
 
     val bodyTable = Table(UnitValue.createPercentArray(columnWidths))
     bodyTable.setWidth(UnitValue.createPercentValue(100f))
 
     val headers = if (HP.settings.saleCartons == true)
         listOf(
-            "Date",
-            "Sr.",
-            "Customer",
             "Itemname",
             "Qty",
             "Crtn",
-            "Rate",
-            "C.Rate",
             "Total",
         )
     else
         listOf(
-            "Date",
-            "Sr.",
-            "Customer",
             "Itemname",
             "Qty",
-            "Rate",
-            "Disc",
             "Total",
         )
 
@@ -136,21 +127,6 @@ fun salesItemsReport(
 
     itemsReport.forEach { item ->
         bodyTable.addCell(
-            Cell().add(Paragraph(item.date.toString()).setFontSize(REPORT_BODY_FONT_SIZE))
-                .setTextAlignment(TextAlignment.CENTER)
-        )
-
-        bodyTable.addCell(
-            Cell().add(Paragraph(item.salesId.toString()).setFontSize(REPORT_BODY_FONT_SIZE))
-                .setTextAlignment(TextAlignment.CENTER)
-        )
-
-        bodyTable.addCell(
-            Cell().add(Paragraph(item.customerName.toString()).setFontSize(REPORT_BODY_FONT_SIZE))
-                .setTextAlignment(TextAlignment.LEFT)
-        )
-
-        bodyTable.addCell(
             Cell().add(Paragraph(item.itemname.toString()).setFontSize(REPORT_BODY_FONT_SIZE))
                 .setTextAlignment(TextAlignment.LEFT)
         )
@@ -168,25 +144,6 @@ fun salesItemsReport(
         }
 
         bodyTable.addCell(
-            Cell().add(Paragraph(HP.formatDecimal(item.rate)).setFontSize(REPORT_BODY_FONT_SIZE))
-                .setTextAlignment(TextAlignment.CENTER)
-        )
-
-        if (HP.settings.saleCartons == true) {
-            bodyTable.addCell(
-                Cell().add(Paragraph(HP.formatDecimal(item.crtnRate)).setFontSize(REPORT_BODY_FONT_SIZE))
-                    .setTextAlignment(TextAlignment.CENTER)
-            )
-        }
-
-        if (HP.settings.saleCartons == false) {
-            bodyTable.addCell(
-                Cell().add(Paragraph(HP.formatDecimal(item.totalDisc)).setFontSize(REPORT_BODY_FONT_SIZE))
-                    .setTextAlignment(TextAlignment.CENTER)
-            )
-        }
-
-        bodyTable.addCell(
             Cell().add(Paragraph(HP.formatDecimal(item.total)).setFontSize(REPORT_BODY_FONT_SIZE))
                 .setTextAlignment(TextAlignment.CENTER)
         )
@@ -198,8 +155,7 @@ fun salesItemsReport(
 
     // region Footer
     // ---------------- Row1 ----------------
-    val row1 =
-        Table(UnitValue.createPercentArray(floatArrayOf(60f, 40f)))
+    val row1 = Table(UnitValue.createPercentArray(floatArrayOf(60f, 40f)))
             .useAllAvailableWidth()
 
     val paragraph = Paragraph()

@@ -1,33 +1,19 @@
-package com.example.statspos.presentation.ui.screens.reports.sales
+package com.example.statspos.presentation.ui.screens.reports.profit
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -41,15 +27,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -58,24 +39,16 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.example.statspos.R
 import com.example.statspos.domain.models.reports.TotalReport
-import com.example.statspos.domain.models.reports.sales.SalesBillWiseReport
-import com.example.statspos.domain.models.reports.sales.SalesItemsReport
-import com.example.statspos.presentation.ui.components.AppIcon
-import com.example.statspos.presentation.ui.components.AppIconButton
+import com.example.statspos.domain.models.reports.profit.ProfitBillWiseReport
+import com.example.statspos.domain.models.reports.profit.ProfitItemsReport
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
-import com.example.statspos.presentation.ui.components.AppSwitch
-import com.example.statspos.presentation.ui.components.AppText
-import com.example.statspos.presentation.ui.components.AutoCompleteItemsTextbox
 import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
 import com.example.statspos.presentation.ui.components.BottomSheet
 import com.example.statspos.presentation.ui.components.ComboBox
-import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
-import com.example.statspos.presentation.ui.components.ReportButton
 import com.example.statspos.presentation.ui.components.ReportCard
 import com.example.statspos.presentation.ui.components.ShowReportIcon
 import com.example.statspos.presentation.ui.components.SubDropdown
@@ -85,20 +58,19 @@ import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
 import com.example.statspos.presentation.ui.screens.reports.ReportButtons
 import com.example.statspos.presentation.ui.screens.reports.ReportsDateBox
 import com.example.statspos.presentation.ui.screens.reports.ReportsItemnameBox
-import com.example.statspos.presentation.ui.screens.reports.TodayBox
+import com.example.statspos.presentation.ui.screens.reports.TodayProfit
 import com.example.statspos.presentation.ui.screens.reports.TodaySales
+import com.example.statspos.presentation.ui.screens.reports.sales.salesItemsReport
+import com.example.statspos.presentation.ui.screens.reports.sales.salesItemsSumReport
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
-import com.example.statspos.presentation.ui.utils.PdfPreviewScreen
 import com.example.statspos.presentation.ui.utils.openPdf
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.reports.SalesReportsViewModel
+import com.example.statspos.presentation.viewmodels.reports.ProfitReportsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import java.io.File
-import java.time.LocalDate
 
 private sealed class Routes : NavKey {
     @Serializable
@@ -109,7 +81,7 @@ private sealed class Routes : NavKey {
 }
 
 @Composable
-fun SalesReportsScreen(
+fun ProfitReportsScreen(
     sharedViewModel: SharedViewModel,
     onBack: () -> Unit,
 ) {
@@ -158,7 +130,7 @@ private fun Home(
 ) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<SalesReportsViewModel>()
+    val viewModel = hiltViewModel<ProfitReportsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -217,14 +189,14 @@ private fun Home(
     }
 
     fun showBillWiseReport(
-        salesBillWiseReport: List<SalesBillWiseReport>,
+        profitBillWiseReport: List<ProfitBillWiseReport>,
         totalReport: TotalReport
     ) {
-        val file = salesBillWiseReport(
+        val file = profitBillWiseReport(
             context = context,
             fromDate = HP.getFormatedDate(state.fromDate),
             toDate = HP.getFormatedDate(state.toDate),
-            billWiseReport = salesBillWiseReport,
+            billWiseReport = profitBillWiseReport,
             totalReport = totalReport,
         )
 
@@ -232,25 +204,25 @@ private fun Home(
     }
 
     fun showItemsReport(
-        salesItemsReport: List<SalesItemsReport>,
+        profitItemsReport: List<ProfitItemsReport>,
         totalReport: TotalReport
     ) {
         if (state.sum) {
-            val file = salesItemsSumReport(
+            val file = profitItemsSumReport(
                 context = context,
                 fromDate = HP.getFormatedDate(state.fromDate),
                 toDate = HP.getFormatedDate(state.toDate),
-                itemsReport = salesItemsReport,
+                itemsReport = profitItemsReport,
                 totalReport = totalReport,
             )
 
             openPdf(context, file)
         } else {
-            val file = salesItemsReport(
+            val file = profitItemsReport(
                 context = context,
                 fromDate = HP.getFormatedDate(state.fromDate),
                 toDate = HP.getFormatedDate(state.toDate),
-                itemsReport = salesItemsReport,
+                itemsReport = profitItemsReport,
                 totalReport = totalReport,
             )
 
@@ -270,7 +242,7 @@ private fun Home(
                 onNavigationClick = {
                     onBack()
                 },
-                title = "Sales Reports",
+                title = "Profit Reports",
             )
         }
     ) { innerPadding ->
@@ -371,16 +343,15 @@ private fun Home(
                         .verticalScroll(scrollState),
                 ) {
                     Spacer(Modifier.height(16.dp))
-                    TodaySales(
-                        cashSales = state.mainReport.cashSales,
-                        creditSales = state.mainReport.creditSales,
-                        salesReturns = state.mainReport.salesReturns,
-                        totalSales = state.mainReport.totalSales,
-                        totalSalesBills = state.mainReport.totalSalesBills,
+                    TodayProfit(
+                        grossProfit = state.mainReport.grossProfit,
+                        expenses = state.mainReport.expenses,
+                        margin = state.mainReport.margin,
+                        netProfit = state.mainReport.netProfit,
                     )
                     Spacer(Modifier.height(16.dp))
                     TrendChart(
-                        chartFor = "Sales",
+                        chartFor = "Profit",
                         chartReport = state.chartReport,
                         chartDuration = state.chartDuration,
                         onChartDurationChange = viewModel::onChartDurationChange

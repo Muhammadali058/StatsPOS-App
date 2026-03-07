@@ -75,6 +75,7 @@ fun Dropdown(
     enabled: Boolean = true,
     readOnly: Boolean = false,
     singleLine: Boolean = true,
+    changeIdOnEmpty: Boolean = false,
     trailingIcon: @Composable (() -> Unit)? = {
         IconButton(
             onClick = {
@@ -134,6 +135,10 @@ fun Dropdown(
             onValueChange = {
                 onValueChange(it)
                 expanded = it.isNotEmpty()
+
+                if(changeIdOnEmpty && it.isEmpty()){
+                    onItemSelected(DropdownItem(0L, noneText))
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -231,6 +236,7 @@ fun SubDropdown(
     enabled: Boolean = true,
     readOnly: Boolean = false,
     singleLine: Boolean = true,
+    changeIdOnEmpty: Boolean = false,
     trailingIcon: @Composable (() -> Unit)? = {
         IconButton(
             onClick = {
@@ -313,6 +319,10 @@ fun SubDropdown(
             onValueChange = {
                 onValueChange(it)
                 expanded = it.isNotEmpty()
+
+                if(changeIdOnEmpty && it.isEmpty()){
+                    onItemSelected(DropdownItem(0L, noneText))
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()

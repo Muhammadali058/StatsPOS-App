@@ -82,6 +82,8 @@ import com.example.statspos.presentation.ui.components.SubDropdown
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.components.TrendChart
 import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
+import com.example.statspos.presentation.ui.screens.reports.TodayBox
+import com.example.statspos.presentation.ui.screens.reports.TodaySales
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.ui.utils.PdfPreviewScreen
 import com.example.statspos.presentation.ui.utils.openPdf
@@ -756,7 +758,8 @@ private fun Dropdowns(
                 ShowReportIcon {
                     onCategoryClick()
                 }
-            }
+            },
+            changeIdOnEmpty = true,
         )
         SubDropdown(
             value = subCategoryName,
@@ -773,7 +776,8 @@ private fun Dropdowns(
                 ShowReportIcon {
                     onSubCategoryClick()
                 }
-            }
+            },
+            changeIdOnEmpty = true,
         )
         Dropdown(
             value = vendorName,
@@ -789,7 +793,8 @@ private fun Dropdowns(
                 ShowReportIcon {
                     onVendorClick()
                 }
-            }
+            },
+            changeIdOnEmpty = true,
         )
         Dropdown(
             value = customerName,
@@ -805,7 +810,8 @@ private fun Dropdowns(
                 ShowReportIcon {
                     onCustomerClick()
                 }
-            }
+            },
+            changeIdOnEmpty = true,
         )
         Dropdown(
             value = accountCategoryName,
@@ -821,7 +827,8 @@ private fun Dropdowns(
                 ShowReportIcon {
                     onAccountCategoryClick()
                 }
-            }
+            },
+            changeIdOnEmpty = true,
         )
         Dropdown(
             value = supplierName,
@@ -837,7 +844,8 @@ private fun Dropdowns(
                 ShowReportIcon {
                     onSupplierClick()
                 }
-            }
+            },
+            changeIdOnEmpty = true,
         )
         Dropdown(
             value = username,
@@ -853,13 +861,14 @@ private fun Dropdowns(
                 ShowReportIcon {
                     onUserClick()
                 }
-            }
+            },
+            changeIdOnEmpty = true,
         )
     }
 }
 
 @Composable
-private fun TodaySales(
+private fun TodaySales1(
     modifier: Modifier = Modifier,
     cashSales: Double = 0.0,
     creditSales: Double = 0.0,
@@ -880,19 +889,19 @@ private fun TodaySales(
                 modifier = Modifier
                     .weight(1f),
                 text = "Cash Sales",
-                value = cashSales,
+                value = "Rs.${HP.formatDecimal(cashSales, numberOfDecimals = 0)}",
             )
             TodayBox(
                 modifier = Modifier
                     .weight(1f),
                 text = "Credit Sales",
-                value = creditSales,
+                value = "Rs.${HP.formatDecimal(creditSales, numberOfDecimals = 0)}",
             )
             TodayBox(
                 modifier = Modifier
                     .weight(1f),
                 text = "Returns",
-                value = salesReturns,
+                value = "Rs.${HP.formatDecimal(salesReturns, numberOfDecimals = 0)}",
             )
         }
         Row(
@@ -903,55 +912,14 @@ private fun TodaySales(
                 modifier = Modifier
                     .weight(1f),
                 text = "Total Sales",
-                value = totalSales,
+                value = "Rs.${HP.formatDecimal(totalSales, numberOfDecimals = 0)}",
             )
             TodayBox(
                 modifier = Modifier
                     .weight(1f),
                 text = "Total Invoices",
-                value = totalSalesBills.toDouble(),
-                addRs = false,
+                value = totalSalesBills.toString(),
             )
         }
-    }
-}
-
-@Composable
-fun TodayBox(
-    modifier: Modifier = Modifier,
-    text: String,
-    value: Double,
-    addRs: Boolean = true,
-) {
-    Column(
-        modifier = modifier
-            .padding(4.dp)
-            .border(
-                1.dp,
-                MaterialTheme.colorScheme.onPrimaryContainer,
-                RoundedCornerShape(8.dp)
-            )
-            .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        AppText(
-            text = text,
-            style = TextStyle(
-                fontSize = 12.sp,
-            )
-        )
-        Spacer(Modifier.height(8.dp))
-
-        val temp = if (addRs)
-            "Rs.${HP.formatDecimal(value, numberOfDecimals = 0)}"
-        else
-            HP.formatDecimal(value, numberOfDecimals = 0)
-        AppText(
-            text = temp,
-            style = TextStyle(
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-            )
-        )
     }
 }

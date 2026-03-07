@@ -14,6 +14,16 @@ class MainRepositoryImpl @Inject constructor(
     private val api: MainApi
 ) : MainRepository {
 
+    override suspend fun loadDashboardReport(body: JsonObject): Resource<JsonObject> {
+        body.addProperty("branchGroupId", HP.branchGroupId)
+
+        return safeApiCall {
+            api.loadDashboardReport(
+                DB.addParams(body)
+            )
+        }
+    }
+
     override suspend fun loadData(): Resource<JsonObject> {
         val body = JsonObject().apply {
             addProperty("branchGroupId", HP.branchGroupId)

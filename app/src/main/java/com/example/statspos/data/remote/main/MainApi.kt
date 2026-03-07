@@ -9,6 +9,9 @@ import retrofit2.http.POST
 import retrofit2.http.Part
 
 interface MainApi {
+    @POST("main/loadDashboardReport")
+    suspend fun loadDashboardReport(@Body body: JsonObject): Response<JsonObject>
+
     @POST("main/loadData")
     suspend fun loadData(@Body body: JsonObject): Response<JsonObject>
 

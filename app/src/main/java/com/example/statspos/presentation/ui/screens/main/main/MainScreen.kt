@@ -32,6 +32,7 @@ import com.example.statspos.presentation.ui.screens.purchase.purchase_orders.Pur
 import com.example.statspos.presentation.ui.screens.reports.profit.ProfitReportsScreen
 import com.example.statspos.presentation.ui.screens.reports.purchase.PurchaseReportsScreen
 import com.example.statspos.presentation.ui.screens.reports.sales.SalesReportsScreen
+import com.example.statspos.presentation.ui.screens.reports.stock.StockReportsScreen
 import com.example.statspos.presentation.ui.screens.sales.sales_bill.SalesBillScreen
 import com.example.statspos.presentation.ui.screens.sales.sales_bill.ViewSalesBillItemsScreen
 import com.example.statspos.presentation.ui.screens.utilities.SettingsScreen
@@ -298,6 +299,14 @@ fun MainScreen() {
             }
             entry<TopRoutes.ProfitReports> {
                 ProfitReportsScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<TopRoutes.StockReports> {
+                StockReportsScreen(
                     sharedViewModel = sharedViewModel,
                     onBack = {
                         backStack.removeLastOrNull()

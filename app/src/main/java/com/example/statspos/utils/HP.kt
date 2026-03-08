@@ -27,6 +27,57 @@ object HP {
 
     const val ITEMS_PER_PAGE = 50
 
+    var clientId: Int = 1
+    var branchId: Int = 1
+    var branchGroupId: Int = 0
+
+    var user = Users(id = 1, clientId = 1, branchId = 1)
+    var userRights = UserRights()
+    var settings = Settings()
+    var passwords = Passwords()
+    var adminSettings = AdminSettings()
+    var adminPasswords = AdminPasswords()
+
+    var autoCompleteItems = emptyList<String>()
+    var categories = emptyList<DropdownItem>()
+    var subCategories = emptyList<DropdownItem>()
+    var packages = emptyList<DropdownItem>()
+    var purchaseOrders = emptyList<DropdownItem>()
+    var customers = emptyList<DropdownItem>()
+    var vendors = emptyList<DropdownItem>()
+    var suppliers = emptyList<DropdownItem>()
+    var fixedAccounts = emptyList<DropdownItem>()
+    var users = emptyList<DropdownItem>()
+    var accountCategories = emptyList<DropdownItem>()
+    var expenses = emptyList<DropdownItem>()
+    var subExpenses = emptyList<DropdownItem>()
+    var banks = emptyList<DropdownItem>()
+    var subBanks = emptyList<DropdownItem>()
+    var warehouses = emptyList<DropdownItem>()
+    var branches = emptyList<DropdownItem>()
+    var branchGroups = emptyList<DropdownItem>()
+    var printSizes = emptyList<DropdownItem>()
+    var printLanguages = emptyList<DropdownItem>()
+    var accounts = emptyList<DropdownItem>()
+    var userTypes = emptyList<DropdownItem>()
+    var shifts = emptyList<DropdownItem>()
+    var branch = Branches()
+    var gatepasses = emptyList<DropdownItem>()
+
+    // region ComboBox Lists
+    // Items
+    var itemFilters = listOf(
+        DropdownItem(0, "By Name"),
+        DropdownItem(1, "By Barcode"),
+        DropdownItem(2, "By Ref. Code"),
+        DropdownItem(3, "By Urduname"),
+        DropdownItem(4, "By Cost"),
+        DropdownItem(5, "By Retail"),
+        DropdownItem(6, "By Wholesale"),
+        DropdownItem(7, "By Carton Rate"),
+        DropdownItem(8, "By Carton Size"),
+    )
+
     val mop = listOf(
         DropdownItem(1L, "Cash"),
         DropdownItem(2L, "Bank"),
@@ -79,57 +130,30 @@ object HP {
         DropdownItem(3L, "Month"),
         DropdownItem(4L, "Year"),
     )
-    // endregion
 
-    var clientId: Int = 1
-    var branchId: Int = 1
-    var branchGroupId: Int = 0
-
-    var user = Users(id = 1, clientId = 1, branchId = 1)
-    var userRights = UserRights()
-    var settings = Settings()
-    var passwords = Passwords()
-    var adminSettings = AdminSettings()
-    var adminPasswords = AdminPasswords()
-
-    var autoCompleteItems = emptyList<String>()
-    var categories = emptyList<DropdownItem>()
-    var subCategories = emptyList<DropdownItem>()
-    var packages = emptyList<DropdownItem>()
-    var purchaseOrders = emptyList<DropdownItem>()
-    var customers = emptyList<DropdownItem>()
-    var vendors = emptyList<DropdownItem>()
-    var suppliers = emptyList<DropdownItem>()
-    var fixedAccounts = emptyList<DropdownItem>()
-    var users = emptyList<DropdownItem>()
-    var accountCategories = emptyList<DropdownItem>()
-    var expenses = emptyList<DropdownItem>()
-    var subExpenses = emptyList<DropdownItem>()
-    var banks = emptyList<DropdownItem>()
-    var subBanks = emptyList<DropdownItem>()
-    var warehouses = emptyList<DropdownItem>()
-    var branches = emptyList<DropdownItem>()
-    var branchGroups = emptyList<DropdownItem>()
-    var printSizes = emptyList<DropdownItem>()
-    var printLanguages = emptyList<DropdownItem>()
-    var accounts = emptyList<DropdownItem>()
-    var userTypes = emptyList<DropdownItem>()
-    var shifts = emptyList<DropdownItem>()
-    var branch = Branches()
-
-    // Items
-    var itemFilters = listOf(
-        DropdownItem(0, "By Name"),
-        DropdownItem(1, "By Barcode"),
-        DropdownItem(2, "By Ref. Code"),
-        DropdownItem(3, "By Urduname"),
-        DropdownItem(4, "By Cost"),
-        DropdownItem(5, "By Retail"),
-        DropdownItem(6, "By Wholesale"),
-        DropdownItem(7, "By Carton Rate"),
-        DropdownItem(8, "By Carton Size"),
+    // Stock
+    val stockShowing = listOf(
+        DropdownItem(1L, "Current Stock"),
+        DropdownItem(2L, "Opening Stock"),
     )
-    var gatepasses = emptyList<DropdownItem>()
+    val stockAt = listOf(
+        DropdownItem(1L, "Cost"),
+        DropdownItem(2L, "Retail"),
+        DropdownItem(3L, "Wholesale"),
+    )
+    val stockExpiry = listOf(
+        DropdownItem(1L, "All"),
+        DropdownItem(2L, "Expirable"),
+        DropdownItem(3L, "Expired"),
+    )
+    val stockType = listOf(
+        DropdownItem(1L, "All"),
+        DropdownItem(2L, "Zero Stock"),
+        DropdownItem(3L, "Not Zero"),
+        DropdownItem(4L, "About to End"),
+        DropdownItem(5L, "Over Stock"),
+    )
+    // endregion
 
     fun setDropdowns(jsonObject: JsonObject) {
         settings = Gson().get<Settings>(jsonObject.get("settings").asJsonObject)
@@ -218,10 +242,6 @@ object HP {
 
     fun getNoneDropdownItem(noneText: String = ""): DropdownItem {
         return DropdownItem(0L, noneText)
-    }
-
-    fun addNoneToList(list: List<DropdownItem>, noneText: String = "None"): List<DropdownItem> {
-        return listOf(DropdownItem(0L, noneText)) + list
     }
 
     fun getDoubleValue(value: String): Double {

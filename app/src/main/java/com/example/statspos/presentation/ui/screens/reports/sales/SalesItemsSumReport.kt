@@ -90,8 +90,9 @@ fun salesItemsSumReport(
     else
         floatArrayOf(3f, 1f, 1f)
 
-    val bodyTable = Table(UnitValue.createPercentArray(columnWidths))
+    val bodyTable = Table(UnitValue.createPercentArray(columnWidths), true)
     bodyTable.setWidth(UnitValue.createPercentValue(100f))
+    document.add(bodyTable)
 
     val headers = if (HP.settings.saleCartons == true)
         listOf(
@@ -124,6 +125,7 @@ fun salesItemsSumReport(
         bodyTable.addHeaderCell(cell)
     }
 
+    var counter = 0
     itemsReport.forEach { item ->
         bodyTable.addCell(
             Cell().add(Paragraph(item.itemname.toString()).setFontSize(REPORT_BODY_FONT_SIZE))
@@ -146,10 +148,14 @@ fun salesItemsSumReport(
             Cell().add(Paragraph(HP.formatDecimal(item.total)).setFontSize(REPORT_BODY_FONT_SIZE))
                 .setTextAlignment(TextAlignment.CENTER)
         )
+
+        counter++
+        if (counter % 100 == 0) {
+            bodyTable.flush()
+        }
     }
 
-    document.add(bodyTable)
-//    document.add(Paragraph("\n"))
+    bodyTable.complete()
     // endregion
 
     // region Footer

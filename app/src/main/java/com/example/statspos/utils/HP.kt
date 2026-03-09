@@ -153,6 +153,12 @@ object HP {
         DropdownItem(4L, "About to End"),
         DropdownItem(5L, "Over Stock"),
     )
+
+    // Accounts
+    val listType = listOf(
+        DropdownItem(1L, "Simple List"),
+        DropdownItem(2L, "Sales List"),
+    )
     // endregion
 
     fun setDropdowns(jsonObject: JsonObject) {

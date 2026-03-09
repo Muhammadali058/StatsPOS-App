@@ -416,6 +416,7 @@ fun ComboBox(
     textStyle: TextStyle = TextStyle(
         fontSize = 15.sp,
     ),
+    trailingIcon: @Composable (() -> Unit)? = null,
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     shape: Shape = OutlinedTextFieldDefaults.shape,
@@ -432,8 +433,25 @@ fun ComboBox(
                 items
         }
     }
-
     var expanded by remember { mutableStateOf(false) }
+
+    val trailingIcon2 = trailingIcon
+        ?: @Composable {
+            IconButton(
+                onClick = {
+                    if (enabled) {
+                        expanded = false
+                        onItemSelected(itemsWithNone[0])
+                    }
+                },
+                enabled = enabled,
+            ) {
+                AppIcon(
+                    icon = Icons.Default.Clear,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
 
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -466,22 +484,7 @@ fun ComboBox(
                 }
             },
             trailingIcon = if (showEndIcon) {
-                {
-                    IconButton(
-                        onClick = {
-                            if (enabled) {
-                                expanded = false
-                                onItemSelected(itemsWithNone[0])
-                            }
-                        },
-                        enabled = enabled,
-                    ) {
-                        AppIcon(
-                            icon = Icons.Default.Clear,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
+                trailingIcon2
             } else null,
             showBorder = showBorder,
             textStyle = textStyle,
@@ -531,6 +534,9 @@ fun SubComboBox(
     addNone: Boolean = false,
     noneText: String = "None",
     enabled: Boolean = true,
+    showEndIcon: Boolean = true,
+    showBorder: Boolean = true,
+    trailingIcon: @Composable (() -> Unit)? = null,
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     shape: Shape = OutlinedTextFieldDefaults.shape,
@@ -575,6 +581,24 @@ fun SubComboBox(
 
     var expanded by remember { mutableStateOf(false) }
 
+    val trailingIcon2 = trailingIcon
+        ?: @Composable {
+            IconButton(
+                onClick = {
+                    if (enabled) {
+                        expanded = false
+                        onItemSelected(itemsWithNone[0])
+                    }
+                },
+                enabled = enabled,
+            ) {
+                AppIcon(
+                    icon = Icons.Default.Clear,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = {
@@ -605,22 +629,10 @@ fun SubComboBox(
                     )
                 }
             },
-            trailingIcon = {
-                IconButton(
-                    onClick = {
-                        if (enabled) {
-                            expanded = false
-                            onItemSelected(itemsWithNone[0])
-                        }
-                    },
-                    enabled = enabled,
-                ) {
-                    AppIcon(
-                        icon = Icons.Default.Clear,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            },
+            trailingIcon = if (showEndIcon) {
+                trailingIcon2
+            } else null,
+            showBorder = showBorder,
         )
 
         ExposedDropdownMenu(

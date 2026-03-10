@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,11 +38,13 @@ import com.example.statspos.domain.models.reports.TotalReport
 import com.example.statspos.domain.models.reports.accounts.AccountReport
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.ComboBox
+import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.ReportButton
 import com.example.statspos.presentation.ui.components.ReportCard
+import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.ShowReportIcon
 import com.example.statspos.presentation.ui.components.SubComboBox
 import com.example.statspos.presentation.ui.components.TopAppBar
@@ -52,6 +55,7 @@ import com.example.statspos.presentation.viewmodels.reports.AccountReportsViewMo
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
+import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -133,6 +137,77 @@ fun AccountsReportsScreen(
         openPdf(context, file)
     }
 
+    fun showReceipts(
+        accountReport: List<AccountReport>,
+        totalReport: TotalReport
+    ) {
+        val file = receiptsReport(
+            context = context,
+            fromDate = HP.getFormatedDate(state.fromDate),
+            toDate = HP.getFormatedDate(state.toDate),
+            accountReport = accountReport,
+            totalReport = totalReport,
+        )
+
+        openPdf(context, file)
+    }
+
+    fun showPayments(
+        accountReport: List<AccountReport>,
+        totalReport: TotalReport
+    ) {
+        val file = paymentsReport(
+            context = context,
+            fromDate = HP.getFormatedDate(state.fromDate),
+            toDate = HP.getFormatedDate(state.toDate),
+            accountReport = accountReport,
+            totalReport = totalReport,
+        )
+
+        openPdf(context, file)
+    }
+
+    fun showCustomers(
+        accountReport: List<AccountReport>,
+        totalReport: TotalReport
+    ) {
+        val file = customersReport(
+            context = context,
+            accountReport = accountReport,
+            totalReport = totalReport,
+        )
+
+        openPdf(context, file)
+    }
+
+    fun showVendors(
+        accountReport: List<AccountReport>,
+        totalReport: TotalReport
+    ) {
+        val file = vendorsReport(
+            context = context,
+            accountReport = accountReport,
+            totalReport = totalReport,
+        )
+
+        openPdf(context, file)
+    }
+
+    fun showCustomersBalanceList(
+        accountReport: List<AccountReport>,
+        totalReport: TotalReport
+    ) {
+        val file = customersBalanceListReport(
+            context = context,
+            fromDate = HP.getFormatedDate(state.fromDate),
+            toDate = HP.getFormatedDate(state.toDate),
+            accountReport = accountReport,
+            totalReport = totalReport,
+        )
+
+        openPdf(context, file)
+    }
+
     Scaffold(
         contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = {
@@ -154,18 +229,27 @@ fun AccountsReportsScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
-                .padding(ConstantPaddings.BODY_HORIZONTAL)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize(),
             ) {
+                SearchBox {
+                    DateBox(
+                        fromDate = state.fromDate,
+                        toDate = state.toDate,
+                        onFromDateChange = viewModel::onFromDateChange,
+                        onToDateChange = viewModel::onToDateChange,
+                    )
+                }
+
                 Column(
                     Modifier
                         .weight(1f)
-                        .verticalScroll(scrollState),
+                        .verticalScroll(scrollState)
+                        .padding(ConstantPaddings.BODY_HORIZONTAL),
                 ) {
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(12.dp))
                     ReportCard(
                         heading = "Ledger",
                         subHeading = "Detailed ledgers of accounts",
@@ -190,9 +274,9 @@ fun AccountsReportsScreen(
                             )
                         }
                     )
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(12.dp))
                     ReportCard(
-                        heading = "Bank Statement",
+                        heading = "Bank statement",
                         subHeading = "Details of bank receipts & payments",
                         content = {
                             BankStatement(
@@ -208,7 +292,31 @@ fun AccountsReportsScreen(
                             )
                         }
                     )
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(12.dp))
+                    ReportCard(
+                        heading = "Receipts and payments",
+                        subHeading = "Summary of receipts and payments",
+                        content = {
+                            ReceiptsAndPayments(
+                                mop = state.mop,
+                                username = state.username,
+                                onMopChange = viewModel::onMopChange,
+                                onUsernameChange = viewModel::onUsernameChange,
+                                onUserIdChange = viewModel::onUserIdChange,
+                                onReceiptsClick = {
+                                    viewModel.onReceiptsClick { accountReport, totalReport ->
+                                        showReceipts(accountReport, totalReport)
+                                    }
+                                },
+                                onPaymentsClick = {
+                                    viewModel.onPaymentsClick { accountReport, totalReport ->
+                                        showPayments(accountReport, totalReport)
+                                    }
+                                },
+                            )
+                        }
+                    )
+                    Spacer(Modifier.height(12.dp))
                     ReportCard(
                         heading = "Expenses",
                         subHeading = "Summary of expenses",
@@ -236,13 +344,100 @@ fun AccountsReportsScreen(
                             )
                         }
                     )
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(12.dp))
+                    ReportCard(
+                        heading = "Receivable and payable",
+                        subHeading = "Summary of cash receivable and payable",
+                        content = {
+                            ReceivableAndPayable(
+                                listType = state.listType,
+                                supplierName = state.supplierName,
+                                customerCategory = state.customerCategory,
+                                vendorCategory = state.vendorCategory,
+                                onListTypeChange = viewModel::onListTypeChange,
+                                onSupplierNameChange = viewModel::onSupplierNameChange,
+                                onCustomerCategoryChange = viewModel::onCustomerCategoryChange,
+                                onVendorCategoryChange = viewModel::onVendorCategoryChange,
+                                onSupplierIdChange = viewModel::onSupplierIdChange,
+                                onCustomersClick = {
+                                    viewModel.onCustomersClick { accountReport, totalReport ->
+                                        if (state.listType.id == 1L)
+                                            showCustomers(accountReport, totalReport)
+                                        else
+                                            showCustomersBalanceList(accountReport, totalReport)
+                                    }
+                                },
+                                onVendorsClick = {
+                                    viewModel.onVendorsClick { accountReport, totalReport ->
+                                        showVendors(accountReport, totalReport)
+                                    }
+                                },
+                                onSupplierClick = {
+                                    viewModel.onSuppliersClick { accountReport, totalReport ->
+                                        if (state.listType.id == 1L)
+                                            showCustomers(accountReport, totalReport)
+                                        else
+                                            showCustomersBalanceList(accountReport, totalReport)
+                                    }
+                                },
+                                onCustomerCategoryClick = {
+                                    viewModel.onCustomerCategoryClick { accountReport, totalReport ->
+                                        if (state.listType.id == 1L)
+                                            showCustomers(accountReport, totalReport)
+                                        else
+                                            showCustomersBalanceList(accountReport, totalReport)
+                                    }
+                                },
+                                onVendorCategoryClick = {
+                                    viewModel.onVendorCategoryClick { accountReport, totalReport ->
+                                        showVendors(accountReport, totalReport)
+                                    }
+                                },
+                            )
+                        }
+                    )
+                    Spacer(Modifier.height(12.dp))
                 }
             }
 
             if (state.isLoading) {
                 ProgressBarLayout()
             }
+        }
+    }
+}
+
+@Composable
+private fun DateBox(
+    fromDate: LocalDate,
+    toDate: LocalDate,
+    onFromDateChange: (LocalDate) -> Unit,
+    onToDateChange: (LocalDate) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(),
+    ) {
+        Spacer(Modifier.height(2.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            DateTextbox(
+                modifier = Modifier
+                    .weight(1f),
+                date = fromDate,
+                onDateChange = onFromDateChange,
+                label = "From Date"
+            )
+            Spacer(Modifier.width(8.dp))
+            DateTextbox(
+                modifier = Modifier
+                    .weight(1f),
+                date = toDate,
+                onDateChange = onToDateChange,
+                label = "To Date"
+            )
         }
     }
 }
@@ -334,12 +529,13 @@ private fun BankStatement(
             addNone = true,
             mainId = bank.id
         )
+        Spacer(Modifier.height(2.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
         ) {
-            ReportButton{
+            ReportButton {
                 onShowClick()
             }
         }
@@ -371,10 +567,11 @@ private fun Expenses(
             },
             addNone = true,
             trailingIcon = {
-                ShowReportIcon {
-                    onExpensesClick()
-                }
+                ShowReportIcon()
             },
+            onTrailingIconClick = {
+                onExpensesClick()
+            }
         )
         SubComboBox(
             modifier = Modifier
@@ -388,19 +585,175 @@ private fun Expenses(
             addNone = true,
             mainId = expense.id,
             trailingIcon = {
-                ShowReportIcon {
-                    onSubExpensesClick()
-                }
+                ShowReportIcon()
             },
+            onTrailingIconClick = {
+                onSubExpensesClick()
+            }
         )
+        Spacer(Modifier.height(2.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
         ) {
-            ReportButton("Total Expenses"){
+            ReportButton("Total Expenses") {
                 onTotalExpensesClick()
             }
         }
+    }
+}
+
+@Composable
+private fun ReceiptsAndPayments(
+    mop: DropdownItem,
+    username: String,
+    onMopChange: (DropdownItem) -> Unit,
+    onUsernameChange: (String) -> Unit,
+    onUserIdChange: (Long) -> Unit,
+    onReceiptsClick: () -> Unit,
+    onPaymentsClick: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        ComboBox(
+            modifier = Modifier
+                .fillMaxWidth(),
+            items = HP.mop,
+            selectedItem = mop,
+            onItemSelected = onMopChange,
+            label = {
+                Text("M.O.P")
+            },
+            addNone = true,
+            noneText = "Both",
+        )
+        Dropdown(
+            value = username,
+            onValueChange = onUsernameChange,
+            items = HP.users,
+            onItemSelected = { dropdownItem ->
+                onUserIdChange(dropdownItem.id)
+            },
+            label = {
+                Text(text = "User")
+            },
+            changeIdOnEmpty = true,
+        )
+        Spacer(Modifier.height(2.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            ReportButton("Receipts") {
+                onReceiptsClick()
+            }
+            Spacer(Modifier.width(8.dp))
+            ReportButton("Payments") {
+                onPaymentsClick()
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReceivableAndPayable(
+    listType: DropdownItem,
+    supplierName: String,
+    customerCategory: DropdownItem,
+    vendorCategory: DropdownItem,
+    onListTypeChange: (DropdownItem) -> Unit,
+    onSupplierNameChange: (String) -> Unit,
+    onCustomerCategoryChange: (DropdownItem) -> Unit,
+    onVendorCategoryChange: (DropdownItem) -> Unit,
+    onSupplierIdChange: (Long) -> Unit,
+    onCustomersClick: () -> Unit,
+    onVendorsClick: () -> Unit,
+    onSupplierClick: () -> Unit,
+    onCustomerCategoryClick: () -> Unit,
+    onVendorCategoryClick: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start,
+        ) {
+            ReportButton("Customers") {
+                onCustomersClick()
+            }
+            Spacer(Modifier.width(8.dp))
+            ReportButton("Vendors") {
+                onVendorsClick()
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        ComboBox(
+            modifier = Modifier
+                .fillMaxWidth(),
+            items = HP.listType,
+            selectedItem = listType,
+            onItemSelected = onListTypeChange,
+            label = {
+                Text("Type")
+            },
+        )
+        Dropdown(
+            value = supplierName,
+            onValueChange = onSupplierNameChange,
+            items = HP.suppliers,
+            onItemSelected = { dropdownItem ->
+                onSupplierIdChange(dropdownItem.id)
+            },
+            label = {
+                Text(text = "Customers by supplier")
+            },
+            trailingIcon = {
+                ShowReportIcon {
+                    onSupplierClick()
+                }
+            },
+            changeIdOnEmpty = true,
+        )
+        ComboBox(
+            modifier = Modifier
+                .fillMaxWidth(),
+            items = HP.accountCategories,
+            selectedItem = customerCategory,
+            onItemSelected = onCustomerCategoryChange,
+            label = {
+                Text("Customers by category")
+            },
+            addNone = true,
+            trailingIcon = {
+                ShowReportIcon()
+            },
+            onTrailingIconClick = {
+                onCustomerCategoryClick()
+            }
+        )
+        ComboBox(
+            modifier = Modifier
+                .fillMaxWidth(),
+            items = HP.accountCategories,
+            selectedItem = vendorCategory,
+            onItemSelected = onVendorCategoryChange,
+            label = {
+                Text("Vendors by category")
+            },
+            addNone = true,
+            trailingIcon = {
+                ShowReportIcon()
+            },
+            onTrailingIconClick = {
+                onVendorCategoryClick()
+            }
+        )
     }
 }

@@ -51,6 +51,7 @@ class AccountReportsViewModel @Inject constructor(
         val toDate: LocalDate = LocalDate.now(),
 
         val listType: DropdownItem = HP.listType[0],
+        val mop: DropdownItem = HP.getNoneDropdownItem("Both"),
 
         val mainReport: MainReport = MainReport(),
         val accountReport: List<AccountReport>? = null,
@@ -188,6 +189,10 @@ class AccountReportsViewModel @Inject constructor(
         state.update { it.copy(listType = value) }
     }
 
+    fun onMopChange(value: DropdownItem) {
+        state.update { it.copy(mop = value) }
+    }
+
     // endregion
 
     // region Button Clicks
@@ -254,6 +259,72 @@ class AccountReportsViewModel @Inject constructor(
             }
         }
     }
+
+    fun onReceiptsClick(onSuccess: (List<AccountReport>, TotalReport) -> Unit) {
+        val params = getParams()
+        params.addProperty("userId", state.value.userId)
+        params.addProperty("mop", state.value.mop.id)
+        loadReceipts(params, onSuccess)
+    }
+
+    fun onPaymentsClick(onSuccess: (List<AccountReport>, TotalReport) -> Unit) {
+        val params = getParams()
+        params.addProperty("userId", state.value.userId)
+        params.addProperty("mop", state.value.mop.id)
+        loadPayments(params, onSuccess)
+    }
+
+    fun onCustomersClick(onSuccess: (List<AccountReport>, TotalReport) -> Unit) {
+        val params = getParams()
+        if (state.value.listType.id == 1L)
+            loadDebtors(params, onSuccess)
+        else
+            loadCustomersBalanceList(params, onSuccess)
+    }
+
+    fun onVendorsClick(onSuccess: (List<AccountReport>, TotalReport) -> Unit) {
+        val params = getParams()
+        loadCreditors(params, onSuccess)
+    }
+
+    fun onSuppliersClick(onSuccess: (List<AccountReport>, TotalReport) -> Unit) {
+        if (state.value.supplierId == 0L) {
+            showMessage("Select supplier")
+        } else {
+            val params = getParams()
+            params.addProperty("supplierId", state.value.supplierId)
+
+            if (state.value.listType.id == 1L)
+                loadDebtors(params, onSuccess)
+            else
+                loadCustomersBalanceList(params, onSuccess)
+        }
+    }
+
+    fun onCustomerCategoryClick(onSuccess: (List<AccountReport>, TotalReport) -> Unit) {
+        if (state.value.customerCategory.id == 0L) {
+            showMessage("Select customer category")
+        } else {
+            val params = getParams()
+            params.addProperty("categoryId", state.value.customerCategory.id)
+
+            if (state.value.listType.id == 1L)
+                loadDebtors(params, onSuccess)
+            else
+                loadCustomersBalanceList(params, onSuccess)
+        }
+    }
+
+    fun onVendorCategoryClick(onSuccess: (List<AccountReport>, TotalReport) -> Unit) {
+        if (state.value.vendorCategory.id == 0L) {
+            showMessage("Select vendor category")
+        } else {
+            val params = getParams()
+            params.addProperty("categoryId", state.value.vendorCategory.id)
+            loadCreditors(params, onSuccess)
+        }
+    }
+
     // endregion
 
     // region Network calls
@@ -306,6 +377,196 @@ class AccountReportsViewModel @Inject constructor(
             beforeRequest()
 
             when (val result = api.expenses(params)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val accountReport =
+                        Gson().getListOf<AccountReport>(result.data.get("rows").asJsonArray)
+                    if (accountReport.isNotEmpty()) {
+                        val totalReport =
+                            Gson().get<TotalReport>(result.data.get("total").asJsonObject)
+
+                        state.update {
+                            it.copy(
+                                accountReport = accountReport,
+                                totalReport = totalReport,
+                            )
+                        }
+
+                        onSuccess(accountReport, totalReport)
+                    } else {
+                        showMessage("Not record found")
+                    }
+                }
+            }
+        }
+    }
+
+    private fun loadReceipts(
+        params: JsonObject,
+        onSuccess: (List<AccountReport>, TotalReport) -> Unit
+    ) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.receipts(params)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val accountReport =
+                        Gson().getListOf<AccountReport>(result.data.get("rows").asJsonArray)
+                    if (accountReport.isNotEmpty()) {
+                        val totalReport =
+                            Gson().get<TotalReport>(result.data.get("total").asJsonObject)
+
+                        state.update {
+                            it.copy(
+                                accountReport = accountReport,
+                                totalReport = totalReport,
+                            )
+                        }
+
+                        onSuccess(accountReport, totalReport)
+                    } else {
+                        showMessage("Not record found")
+                    }
+                }
+            }
+        }
+    }
+
+    private fun loadPayments(
+        params: JsonObject,
+        onSuccess: (List<AccountReport>, TotalReport) -> Unit
+    ) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.payments(params)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val accountReport =
+                        Gson().getListOf<AccountReport>(result.data.get("rows").asJsonArray)
+                    if (accountReport.isNotEmpty()) {
+                        val totalReport =
+                            Gson().get<TotalReport>(result.data.get("total").asJsonObject)
+
+                        state.update {
+                            it.copy(
+                                accountReport = accountReport,
+                                totalReport = totalReport,
+                            )
+                        }
+
+                        onSuccess(accountReport, totalReport)
+                    } else {
+                        showMessage("Not record found")
+                    }
+                }
+            }
+        }
+    }
+
+    private fun loadDebtors(
+        params: JsonObject,
+        onSuccess: (List<AccountReport>, TotalReport) -> Unit
+    ) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.debtors(params)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val accountReport =
+                        Gson().getListOf<AccountReport>(result.data.get("rows").asJsonArray)
+                    if (accountReport.isNotEmpty()) {
+                        val totalReport =
+                            Gson().get<TotalReport>(result.data.get("total").asJsonObject)
+
+                        state.update {
+                            it.copy(
+                                accountReport = accountReport,
+                                totalReport = totalReport,
+                            )
+                        }
+
+                        onSuccess(accountReport, totalReport)
+                    } else {
+                        showMessage("Not record found")
+                    }
+                }
+            }
+        }
+    }
+
+    private fun loadCreditors(
+        params: JsonObject,
+        onSuccess: (List<AccountReport>, TotalReport) -> Unit
+    ) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.creditors(params)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val accountReport =
+                        Gson().getListOf<AccountReport>(result.data.get("rows").asJsonArray)
+                    if (accountReport.isNotEmpty()) {
+                        val totalReport =
+                            Gson().get<TotalReport>(result.data.get("total").asJsonObject)
+
+                        state.update {
+                            it.copy(
+                                accountReport = accountReport,
+                                totalReport = totalReport,
+                            )
+                        }
+
+                        onSuccess(accountReport, totalReport)
+                    } else {
+                        showMessage("Not record found")
+                    }
+                }
+            }
+        }
+    }
+
+    private fun loadCustomersBalanceList(
+        params: JsonObject,
+        onSuccess: (List<AccountReport>, TotalReport) -> Unit
+    ) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.customersBalanceList(params)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {

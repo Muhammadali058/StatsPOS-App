@@ -348,7 +348,7 @@ private fun Home(
                         .weight(1f)
                         .verticalScroll(scrollState),
                 ) {
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(12.dp))
                     TodayPurchase(
                         cashPurchase = state.mainReport.cashPurchase,
                         creditPurchase = state.mainReport.creditPurchase,
@@ -356,142 +356,141 @@ private fun Home(
                         totalPurchase = state.mainReport.totalPurchase,
                         totalPurchaseBills = state.mainReport.totalPurchaseBills,
                     )
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(12.dp))
                     TrendChart(
                         chartFor = "Purchase",
                         chartReport = state.chartReport,
                         chartDuration = state.chartDuration,
                         onChartDurationChange = viewModel::onChartDurationChange
                     )
-                    Spacer(Modifier.height(16.dp))
-
+                    Spacer(Modifier.height(12.dp))
                     ReportCard(
                         heading = "Detailed Reports",
-                        subHeading = "Save & share pdf reports"
-                    )
-                    {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(4.dp)
-                        ){
-                            ReportsDateBox(
-                                fromDate = state.fromDate,
-                                toDate = state.toDate,
-                                onFromDateChange = viewModel::onFromDateChange,
-                                onToDateChange = viewModel::onToDateChange,
-                                onFilterClick = {
-                                    showBottomSheet = true
-                                },
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            ReportButtons(
-                                onTotalBillsClick = {
-                                    viewModel.onTotalBillsClick { salesBillWiseReport, totalReport ->
-                                        showBillWiseReport(salesBillWiseReport, totalReport)
-                                    }
-                                },
-                                onTotalItemsClick = {
-                                    viewModel.onTotalItemsClick { salesItemsReport, totalReport ->
-                                        showItemsReport(salesItemsReport, totalReport)
-                                    }
-                                },
-                                onFilterReportClick = {
-                                    viewModel.onFilterClick { salesItemsReport, totalReport ->
-                                        showItemsReport(salesItemsReport, totalReport)
-                                    }
-                                },
-                            )
-                            Spacer(Modifier.height(6.dp))
-                            Dropdowns(
-                                categoryName = state.categoryName,
-                                subCategoryName = state.subCategoryName,
-                                categoryId = state.categoryId,
-                                vendorName = state.vendorName,
-                                accountCategoryName = state.accountCategoryName,
-                                warehouseName = state.warehouseName,
-                                supplierName = state.supplierName,
-                                username = state.username,
-                                onCategoryNameChange = viewModel::onCategoryNameChange,
-                                onSubCategoryNameChange = viewModel::onSubCategoryNameChange,
-                                onVendorNameChange = viewModel::onVendorNameChange,
-                                onAccountCategoryNameChange = viewModel::onAccountCategoryNameChange,
-                                onWarehouseNameChange = viewModel::onWarehouseNameChange,
-                                onSupplierNameChange = viewModel::onSupplierNameChange,
-                                onUsernameChange = viewModel::onUsernameChange,
-                                onCategoryIdChange = viewModel::onCategoryIdChange,
-                                onSubCategoryIdChange = viewModel::onSubCategoryIdChange,
-                                onVendorIdChange = viewModel::onVendorIdChange,
-                                onAccountCategoryIdChange = viewModel::onAccountCategoryIdChange,
-                                onWarehouseIdChange = viewModel::onWarehouseIdChange,
-                                onSupplierIdChange = viewModel::onSupplierIdChange,
-                                onUserIdChange = viewModel::onUserIdChange,
-                                onCategoryClick = {
-                                    viewModel.onCategoryClick { purchaseItemsReport, totalReport ->
-                                        showItemsReport(purchaseItemsReport, totalReport)
-                                    }
-                                },
-                                onSubCategoryClick = {
-                                    viewModel.onSubCategoryClick { purchaseItemsReport, totalReport ->
-                                        showItemsReport(purchaseItemsReport, totalReport)
-                                    }
-                                },
-                                onVendorClick = {
-                                    viewModel.onVendorClick { purchaseItemsReport, totalReport ->
-                                        showItemsReport(purchaseItemsReport, totalReport)
-                                    }
-                                },
-                                onAccountCategoryClick = {
-                                    viewModel.onAccountCategoryClick { purchaseBillWiseReport, totalReport ->
-                                        showBillWiseReport(purchaseBillWiseReport, totalReport)
-                                    }
-                                },
-                                onWarehouseClick = {
-                                    viewModel.onWarehouseClick { purchaseBillWiseReport, totalReport ->
-                                        showBillWiseReport(purchaseBillWiseReport, totalReport)
-                                    }
-                                },
-                                onSupplierClick = {
-                                    viewModel.onSupplierClick { purchaseBillWiseReport, totalReport ->
-                                        showBillWiseReport(purchaseBillWiseReport, totalReport)
-                                    }
-                                },
-                                onUserClick = {
-                                    viewModel.onUserClick { purchaseBillWiseReport, totalReport ->
-                                        showBillWiseReport(purchaseBillWiseReport, totalReport)
-                                    }
-                                },
-                            )
-                            ReportsItemnameBox(
-                                value = state.itemname,
-                                onValueChange = viewModel::onItemnameChange,
-                                onItemSelected = {
-                                    viewModel.getItem(it)
-                                    keyboardController?.hide()
-                                },
-                                onSearchClick = {
-                                    viewModel.getItem(it)
-                                    keyboardController?.hide()
-                                },
-                                onEndIconClick = {
-                                    viewModel.onItemnameChange("")
-                                },
-                                onBarcodeClick = {
-                                    showBarcodeScanner = true
-                                },
-                                onSearchItemClick = onSearchItemClick,
-                                onItemClick = {
-                                    viewModel.onItemClick { salesItemsReport, totalReport ->
-                                        showItemsReport(salesItemsReport, totalReport)
-                                    }
-                                },
-                                sum = state.sum,
-                                onSumChange = viewModel::onSumChange,
-                            )
-                            Spacer(Modifier.height(4.dp))
+                        subHeading = "Save & share pdf reports",
+                        content = {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(4.dp)
+                            ){
+                                ReportsDateBox(
+                                    fromDate = state.fromDate,
+                                    toDate = state.toDate,
+                                    onFromDateChange = viewModel::onFromDateChange,
+                                    onToDateChange = viewModel::onToDateChange,
+                                    onFilterClick = {
+                                        showBottomSheet = true
+                                    },
+                                )
+                                Spacer(Modifier.height(4.dp))
+                                ReportButtons(
+                                    onTotalBillsClick = {
+                                        viewModel.onTotalBillsClick { salesBillWiseReport, totalReport ->
+                                            showBillWiseReport(salesBillWiseReport, totalReport)
+                                        }
+                                    },
+                                    onTotalItemsClick = {
+                                        viewModel.onTotalItemsClick { salesItemsReport, totalReport ->
+                                            showItemsReport(salesItemsReport, totalReport)
+                                        }
+                                    },
+                                    onFilterReportClick = {
+                                        viewModel.onFilterClick { salesItemsReport, totalReport ->
+                                            showItemsReport(salesItemsReport, totalReport)
+                                        }
+                                    },
+                                )
+                                Spacer(Modifier.height(6.dp))
+                                Dropdowns(
+                                    categoryName = state.categoryName,
+                                    subCategoryName = state.subCategoryName,
+                                    categoryId = state.categoryId,
+                                    vendorName = state.vendorName,
+                                    accountCategoryName = state.accountCategoryName,
+                                    warehouseName = state.warehouseName,
+                                    supplierName = state.supplierName,
+                                    username = state.username,
+                                    onCategoryNameChange = viewModel::onCategoryNameChange,
+                                    onSubCategoryNameChange = viewModel::onSubCategoryNameChange,
+                                    onVendorNameChange = viewModel::onVendorNameChange,
+                                    onAccountCategoryNameChange = viewModel::onAccountCategoryNameChange,
+                                    onWarehouseNameChange = viewModel::onWarehouseNameChange,
+                                    onSupplierNameChange = viewModel::onSupplierNameChange,
+                                    onUsernameChange = viewModel::onUsernameChange,
+                                    onCategoryIdChange = viewModel::onCategoryIdChange,
+                                    onSubCategoryIdChange = viewModel::onSubCategoryIdChange,
+                                    onVendorIdChange = viewModel::onVendorIdChange,
+                                    onAccountCategoryIdChange = viewModel::onAccountCategoryIdChange,
+                                    onWarehouseIdChange = viewModel::onWarehouseIdChange,
+                                    onSupplierIdChange = viewModel::onSupplierIdChange,
+                                    onUserIdChange = viewModel::onUserIdChange,
+                                    onCategoryClick = {
+                                        viewModel.onCategoryClick { purchaseItemsReport, totalReport ->
+                                            showItemsReport(purchaseItemsReport, totalReport)
+                                        }
+                                    },
+                                    onSubCategoryClick = {
+                                        viewModel.onSubCategoryClick { purchaseItemsReport, totalReport ->
+                                            showItemsReport(purchaseItemsReport, totalReport)
+                                        }
+                                    },
+                                    onVendorClick = {
+                                        viewModel.onVendorClick { purchaseItemsReport, totalReport ->
+                                            showItemsReport(purchaseItemsReport, totalReport)
+                                        }
+                                    },
+                                    onAccountCategoryClick = {
+                                        viewModel.onAccountCategoryClick { purchaseBillWiseReport, totalReport ->
+                                            showBillWiseReport(purchaseBillWiseReport, totalReport)
+                                        }
+                                    },
+                                    onWarehouseClick = {
+                                        viewModel.onWarehouseClick { purchaseBillWiseReport, totalReport ->
+                                            showBillWiseReport(purchaseBillWiseReport, totalReport)
+                                        }
+                                    },
+                                    onSupplierClick = {
+                                        viewModel.onSupplierClick { purchaseBillWiseReport, totalReport ->
+                                            showBillWiseReport(purchaseBillWiseReport, totalReport)
+                                        }
+                                    },
+                                    onUserClick = {
+                                        viewModel.onUserClick { purchaseBillWiseReport, totalReport ->
+                                            showBillWiseReport(purchaseBillWiseReport, totalReport)
+                                        }
+                                    },
+                                )
+                                ReportsItemnameBox(
+                                    value = state.itemname,
+                                    onValueChange = viewModel::onItemnameChange,
+                                    onItemSelected = {
+                                        viewModel.getItem(it)
+                                        keyboardController?.hide()
+                                    },
+                                    onSearchClick = {
+                                        viewModel.getItem(it)
+                                        keyboardController?.hide()
+                                    },
+                                    onEndIconClick = {
+                                        viewModel.onItemnameChange("")
+                                    },
+                                    onBarcodeClick = {
+                                        showBarcodeScanner = true
+                                    },
+                                    onSearchItemClick = onSearchItemClick,
+                                    onItemClick = {
+                                        viewModel.onItemClick { salesItemsReport, totalReport ->
+                                            showItemsReport(salesItemsReport, totalReport)
+                                        }
+                                    },
+                                    sum = state.sum,
+                                    onSumChange = viewModel::onSumChange,
+                                )
+                                Spacer(Modifier.height(4.dp))
+                            }
                         }
-                    }
-                    Spacer(Modifier.height(16.dp))
+                    )
+                    Spacer(Modifier.height(12.dp))
                 }
             }
 

@@ -130,7 +130,6 @@ fun ReportsScreen(
                 },
             ) {
                 item {
-//                    Spacer(Modifier.height(8.dp))
                     TodaySales(
                         cashSales = state.mainReport.cashSales,
                         creditSales = state.mainReport.creditSales,

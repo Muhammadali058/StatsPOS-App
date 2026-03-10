@@ -123,15 +123,22 @@ fun AppIconButton(
 @Composable
 fun ShowReportIcon(
     modifier: Modifier = Modifier,
+) {
+    AppIcon(
+        icon = Icons.Default.Download,
+        modifier = modifier.size(20.dp)
+    )
+}
+
+@Composable
+fun ShowReportIcon(
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
     IconButton(
         modifier = modifier,
         onClick = onClick,
     ) {
-        AppIcon(
-            icon = Icons.Default.Download,
-            modifier = Modifier.size(20.dp)
-        )
+        ShowReportIcon()
     }
 }

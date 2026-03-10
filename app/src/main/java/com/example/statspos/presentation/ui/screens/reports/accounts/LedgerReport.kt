@@ -87,7 +87,7 @@ fun ledgerReport(
 
     // region Details
     // ---------------- Table ----------------
-    val columnWidths = floatArrayOf(1f, 2f, 1f, 1f, 1f)
+    val columnWidths = floatArrayOf(1f, 3f, 1f, 1f, 1f)
 
     val bodyTable = Table(UnitValue.createPercentArray(columnWidths), true)
     bodyTable.setWidth(UnitValue.createPercentValue(100f))

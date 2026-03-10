@@ -1,13 +1,9 @@
 package com.example.statspos.presentation.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -16,9 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Clear
@@ -48,7 +42,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -136,7 +129,7 @@ fun Dropdown(
                 onValueChange(it)
                 expanded = it.isNotEmpty()
 
-                if(changeIdOnEmpty && it.isEmpty()){
+                if (changeIdOnEmpty && it.isEmpty()) {
                     onItemSelected(DropdownItem(0L, noneText))
                 }
             },
@@ -320,7 +313,7 @@ fun SubDropdown(
                 onValueChange(it)
                 expanded = it.isNotEmpty()
 
-                if(changeIdOnEmpty && it.isEmpty()){
+                if (changeIdOnEmpty && it.isEmpty()) {
                     onItemSelected(DropdownItem(0L, noneText))
                 }
             },
@@ -417,6 +410,7 @@ fun ComboBox(
         fontSize = 15.sp,
     ),
     trailingIcon: @Composable (() -> Unit)? = null,
+    onTrailingIconClick: (() -> Unit)? = null,
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     shape: Shape = OutlinedTextFieldDefaults.shape,
@@ -434,24 +428,6 @@ fun ComboBox(
         }
     }
     var expanded by remember { mutableStateOf(false) }
-
-    val trailingIcon2 = trailingIcon
-        ?: @Composable {
-            IconButton(
-                onClick = {
-                    if (enabled) {
-                        expanded = false
-                        onItemSelected(itemsWithNone[0])
-                    }
-                },
-                enabled = enabled,
-            ) {
-                AppIcon(
-                    icon = Icons.Default.Clear,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
 
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -484,7 +460,30 @@ fun ComboBox(
                 }
             },
             trailingIcon = if (showEndIcon) {
-                trailingIcon2
+                {
+                    IconButton(
+                        onClick = {
+                            if (enabled) {
+                                expanded = false
+
+                                if (onTrailingIconClick == null)
+                                    onItemSelected(itemsWithNone[0])
+                                else
+                                    onTrailingIconClick()
+                            }
+                        },
+                        enabled = enabled,
+                    ) {
+                        if (trailingIcon != null) {
+                            trailingIcon()
+                        } else {
+                            AppIcon(
+                                icon = Icons.Default.Clear,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                }
             } else null,
             showBorder = showBorder,
             textStyle = textStyle,
@@ -537,6 +536,7 @@ fun SubComboBox(
     showEndIcon: Boolean = true,
     showBorder: Boolean = true,
     trailingIcon: @Composable (() -> Unit)? = null,
+    onTrailingIconClick: (() -> Unit)? = null,
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     shape: Shape = OutlinedTextFieldDefaults.shape,
@@ -581,24 +581,6 @@ fun SubComboBox(
 
     var expanded by remember { mutableStateOf(false) }
 
-    val trailingIcon2 = trailingIcon
-        ?: @Composable {
-            IconButton(
-                onClick = {
-                    if (enabled) {
-                        expanded = false
-                        onItemSelected(itemsWithNone[0])
-                    }
-                },
-                enabled = enabled,
-            ) {
-                AppIcon(
-                    icon = Icons.Default.Clear,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-        }
-
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = {
@@ -630,7 +612,30 @@ fun SubComboBox(
                 }
             },
             trailingIcon = if (showEndIcon) {
-                trailingIcon2
+                {
+                    IconButton(
+                        onClick = {
+                            if (enabled) {
+                                expanded = false
+
+                                if (onTrailingIconClick == null)
+                                    onItemSelected(itemsWithNone[0])
+                                else
+                                    onTrailingIconClick()
+                            }
+                        },
+                        enabled = enabled,
+                    ) {
+                        if (trailingIcon != null) {
+                            trailingIcon()
+                        } else {
+                            AppIcon(
+                                icon = Icons.Default.Clear,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                }
             } else null,
             showBorder = showBorder,
         )

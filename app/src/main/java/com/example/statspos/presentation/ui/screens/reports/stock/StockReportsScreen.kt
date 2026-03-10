@@ -247,101 +247,101 @@ private fun Home(
                         .weight(1f)
                         .verticalScroll(scrollState),
                 ) {
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(12.dp))
                     TodayStock(
                         stockAtCost = state.mainReport.stockAtCost,
                         stockAtRetail = state.mainReport.stockAtRetail,
                         stockAtWholesale = state.mainReport.stockAtWholesale,
                     )
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(12.dp))
                     ReportCard(
                         heading = "Detailed Reports",
-                        subHeading = "Save & share pdf reports"
-                    )
-                    {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(4.dp)
-                        ) {
-                            ReportButtons(
-                                onTotalStockClick = {
-                                    viewModel.onTotalClick { stockItemsReport, totalReport ->
-                                        showItemsReport(stockItemsReport, totalReport)
-                                    }
-                                },
-                                onFilterReportClick = {
-                                    viewModel.onFilterClick { stockItemsReport, totalReport ->
-                                        showItemsReport(stockItemsReport, totalReport)
-                                    }
-                                },
-                            )
-                            Spacer(Modifier.height(12.dp))
-                            Dropdowns(
-                                stockShowing = state.stockShowing,
-                                stockAt = state.stockAt,
-                                stockExpiry = state.stockExpiry,
-                                stockType = state.stockType,
-                                categoryName = state.categoryName,
-                                subCategoryName = state.subCategoryName,
-                                categoryId = state.categoryId,
-                                vendorName = state.vendorName,
-                                warehouse = state.warehouse,
-                                onCategoryNameChange = viewModel::onCategoryNameChange,
-                                onSubCategoryNameChange = viewModel::onSubCategoryNameChange,
-                                onVendorNameChange = viewModel::onVendorNameChange,
-                                onWarehouseChange = viewModel::onWarehouseChange,
-                                onStockShowingChange = viewModel::onStockShowingChange,
-                                onStockAtChange = viewModel::onStockAtChange,
-                                onStockExpiryChange = viewModel::onStockExpiryChange,
-                                onStockTypeChange = viewModel::onStockTypeChange,
-                                onCategoryIdChange = viewModel::onCategoryIdChange,
-                                onSubCategoryIdChange = viewModel::onSubCategoryIdChange,
-                                onVendorIdChange = viewModel::onVendorIdChange,
-                                onCategoryClick = {
-                                    viewModel.onCategoryClick { purchaseItemsReport, totalReport ->
-                                        showItemsReport(purchaseItemsReport, totalReport)
-                                    }
-                                },
-                                onSubCategoryClick = {
-                                    viewModel.onSubCategoryClick { purchaseItemsReport, totalReport ->
-                                        showItemsReport(purchaseItemsReport, totalReport)
-                                    }
-                                },
-                                onVendorClick = {
-                                    viewModel.onVendorClick { purchaseItemsReport, totalReport ->
-                                        showItemsReport(purchaseItemsReport, totalReport)
-                                    }
-                                },
-                            )
-                            ItemnameBox(
-                                value = state.itemname,
-                                onValueChange = viewModel::onItemnameChange,
-                                onItemSelected = {
-                                    viewModel.getItem(it)
-                                    keyboardController?.hide()
-                                },
-                                onSearchClick = {
-                                    viewModel.getItem(it)
-                                    keyboardController?.hide()
-                                },
-                                onEndIconClick = {
-                                    viewModel.onItemnameChange("")
-                                },
-                                onBarcodeClick = {
-                                    showBarcodeScanner = true
-                                },
-                                onSearchItemClick = onSearchItemClick,
-                                onItemClick = {
-                                    viewModel.onItemClick { stockItemsReport, totalReport ->
-                                        showItemsReport(stockItemsReport, totalReport)
-                                    }
-                                },
-                            )
-                            Spacer(Modifier.height(4.dp))
+                        subHeading = "Save & share pdf reports",
+                        content = {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(4.dp)
+                            ) {
+                                ReportButtons(
+                                    onTotalStockClick = {
+                                        viewModel.onTotalClick { stockItemsReport, totalReport ->
+                                            showItemsReport(stockItemsReport, totalReport)
+                                        }
+                                    },
+                                    onFilterReportClick = {
+                                        viewModel.onFilterClick { stockItemsReport, totalReport ->
+                                            showItemsReport(stockItemsReport, totalReport)
+                                        }
+                                    },
+                                )
+                                Spacer(Modifier.height(12.dp))
+                                Dropdowns(
+                                    stockShowing = state.stockShowing,
+                                    stockAt = state.stockAt,
+                                    stockExpiry = state.stockExpiry,
+                                    stockType = state.stockType,
+                                    categoryName = state.categoryName,
+                                    subCategoryName = state.subCategoryName,
+                                    categoryId = state.categoryId,
+                                    vendorName = state.vendorName,
+                                    warehouse = state.warehouse,
+                                    onCategoryNameChange = viewModel::onCategoryNameChange,
+                                    onSubCategoryNameChange = viewModel::onSubCategoryNameChange,
+                                    onVendorNameChange = viewModel::onVendorNameChange,
+                                    onWarehouseChange = viewModel::onWarehouseChange,
+                                    onStockShowingChange = viewModel::onStockShowingChange,
+                                    onStockAtChange = viewModel::onStockAtChange,
+                                    onStockExpiryChange = viewModel::onStockExpiryChange,
+                                    onStockTypeChange = viewModel::onStockTypeChange,
+                                    onCategoryIdChange = viewModel::onCategoryIdChange,
+                                    onSubCategoryIdChange = viewModel::onSubCategoryIdChange,
+                                    onVendorIdChange = viewModel::onVendorIdChange,
+                                    onCategoryClick = {
+                                        viewModel.onCategoryClick { purchaseItemsReport, totalReport ->
+                                            showItemsReport(purchaseItemsReport, totalReport)
+                                        }
+                                    },
+                                    onSubCategoryClick = {
+                                        viewModel.onSubCategoryClick { purchaseItemsReport, totalReport ->
+                                            showItemsReport(purchaseItemsReport, totalReport)
+                                        }
+                                    },
+                                    onVendorClick = {
+                                        viewModel.onVendorClick { purchaseItemsReport, totalReport ->
+                                            showItemsReport(purchaseItemsReport, totalReport)
+                                        }
+                                    },
+                                )
+                                ItemnameBox(
+                                    value = state.itemname,
+                                    onValueChange = viewModel::onItemnameChange,
+                                    onItemSelected = {
+                                        viewModel.getItem(it)
+                                        keyboardController?.hide()
+                                    },
+                                    onSearchClick = {
+                                        viewModel.getItem(it)
+                                        keyboardController?.hide()
+                                    },
+                                    onEndIconClick = {
+                                        viewModel.onItemnameChange("")
+                                    },
+                                    onBarcodeClick = {
+                                        showBarcodeScanner = true
+                                    },
+                                    onSearchItemClick = onSearchItemClick,
+                                    onItemClick = {
+                                        viewModel.onItemClick { stockItemsReport, totalReport ->
+                                            showItemsReport(stockItemsReport, totalReport)
+                                        }
+                                    },
+                                )
+                                Spacer(Modifier.height(4.dp))
+                            }
                         }
-                    }
-                    Spacer(Modifier.height(16.dp))
+                    )
+                    Spacer(Modifier.height(12.dp))
                 }
             }
 

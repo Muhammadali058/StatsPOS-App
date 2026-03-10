@@ -36,8 +36,8 @@ class PageNumberEventHandler : IEventHandler {
 }
 
 class PageXofYEventHandler(private val pdf: PdfDocument) : IEventHandler {
-
     private val placeholder = PdfFormXObject(Rectangle(0f, 0f, 30f, 12f))
+    val fontSize = 10f
 
     override fun handleEvent(event: Event) {
         val docEvent = event as PdfDocumentEvent
@@ -53,10 +53,10 @@ class PageXofYEventHandler(private val pdf: PdfDocument) : IEventHandler {
 
         val x = pageSize.width / 2 // To keep Page 1 of 2 in center
 //        val x = pageSize.width - 60  // To keep Page 1 of 2 on right side
-        val y = 20f
+        val y = 10f // padding from bottom for (page 1 of 30)
 
         canvas.showTextAligned(
-            Paragraph(text),
+            Paragraph(text).setFontSize(fontSize),
             x,
             y,
             TextAlignment.RIGHT
@@ -70,7 +70,7 @@ class PageXofYEventHandler(private val pdf: PdfDocument) : IEventHandler {
     fun writeTotal(pdf: PdfDocument) {
         val canvas = Canvas(placeholder, pdf)
         canvas.showTextAligned(
-            Paragraph(pdf.numberOfPages.toString()),
+            Paragraph(pdf.numberOfPages.toString()).setFontSize(fontSize),
             0f,
             0f,
             TextAlignment.LEFT

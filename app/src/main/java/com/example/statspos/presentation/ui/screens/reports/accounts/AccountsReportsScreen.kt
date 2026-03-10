@@ -208,6 +208,36 @@ fun AccountsReportsScreen(
         openPdf(context, file)
     }
 
+    fun showIncomeStatement(
+        accountReport: List<AccountReport>,
+        totalReport: TotalReport
+    ) {
+        val file = incomeStatementReport(
+            context = context,
+            fromDate = HP.getFormatedDate(state.fromDate),
+            toDate = HP.getFormatedDate(state.toDate),
+            accountReport = accountReport,
+            totalReport = totalReport,
+        )
+
+        openPdf(context, file)
+    }
+
+    fun showCashAccount(
+        accountReport: List<AccountReport>,
+        totalReport: TotalReport
+    ) {
+        val file = cashAccountReport(
+            context = context,
+            fromDate = HP.getFormatedDate(state.fromDate),
+            toDate = HP.getFormatedDate(state.toDate),
+            accountReport = accountReport,
+            totalReport = totalReport,
+        )
+
+        openPdf(context, file)
+    }
+
     Scaffold(
         contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = {
@@ -394,6 +424,39 @@ fun AccountsReportsScreen(
                                     }
                                 },
                             )
+                        }
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    ReportCard(
+                        heading = "Others",
+                        subHeading = "Income Statement, cash account",
+                        content = {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Start,
+                                ) {
+                                    ReportButton("Income Statement") {
+                                        viewModel.onIncomeStatementClick { accountReport, totalReport ->
+                                            showIncomeStatement(accountReport, totalReport)
+                                        }
+                                    }
+                                    Spacer(Modifier.width(8.dp))
+                                    ReportButton("Cash Account") {
+                                        viewModel.onCashAccountClick { accountReport, totalReport ->
+                                            showCashAccount(accountReport, totalReport)
+                                        }
+                                    }
+                                }
+                                Spacer(Modifier.height(8.dp))
+                                ReportButton("Manage Cash") {
+
+                                }
+                            }
                         }
                     )
                     Spacer(Modifier.height(12.dp))

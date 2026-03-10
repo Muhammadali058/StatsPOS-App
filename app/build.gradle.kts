@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.implementation
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -117,6 +119,9 @@ dependencies {
 
 //    iText for Reports
     implementation("com.itextpdf:itext7-core:7.2.5")
+//    implementation(files("libs/typography-5.0.5.jar"))
+//    implementation ("com.itextpdf:kernel:7.2.6")
+//    implementation ("com.itextpdf:layout:7.2.6")
 
 //    Vico for charts
     implementation(libs.vico.compose)

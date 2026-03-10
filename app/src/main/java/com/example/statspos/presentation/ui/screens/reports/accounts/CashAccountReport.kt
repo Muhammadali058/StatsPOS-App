@@ -3,6 +3,7 @@ package com.example.statspos.presentation.ui.screens.reports.accounts
 import android.content.Context
 import com.example.statspos.domain.models.reports.TotalReport
 import com.example.statspos.domain.models.reports.accounts.AccountReport
+import com.example.statspos.domain.models.reports.sales.SalesItemsReport
 import com.example.statspos.presentation.ui.components.PageXofYEventHandler
 import com.example.statspos.presentation.ui.utils.REPORT_BODY_FONT_SIZE
 import com.example.statspos.presentation.ui.utils.REPORT_HEADER_FONT_SIZE
@@ -24,7 +25,7 @@ import com.itextpdf.layout.properties.UnitValue
 import java.io.File
 import kotlin.math.abs
 
-fun bankStatementReport(
+fun cashAccountReport(
     context: Context,
     fromDate: String,
     toDate: String,
@@ -32,7 +33,7 @@ fun bankStatementReport(
     totalReport: TotalReport,
 ): File {
     // region Document
-    val file = File(context.cacheDir, "Bank_Statement_Report_${System.currentTimeMillis()}.pdf")
+    val file = File(context.cacheDir, "Cash_Account_${System.currentTimeMillis()}.pdf")
     if (file.exists()) {
         file.delete()
     }
@@ -48,7 +49,7 @@ fun bankStatementReport(
 
     // region Header
     // ---------------- Report Title ----------------
-    val title = Paragraph(totalReport.accountName)
+    val title = Paragraph("Cash Account")
         .setBold()
         .setFontSize(24f)
         .setTextAlignment(TextAlignment.CENTER)
@@ -81,11 +82,12 @@ fun bankStatementReport(
     dateTable.addCell(fromDateCell)
     dateTable.addCell(toDateCell)
     document.add(dateTable)
+//    document.add(Paragraph("\n"))
     // endregion
 
     // region Details
     // ---------------- Table ----------------
-    val columnWidths = floatArrayOf(1f, 3f, 1f, 1f, 1f)
+    val columnWidths = floatArrayOf(1f, 3f, 1f, 1f)
 
     val bodyTable = Table(UnitValue.createPercentArray(columnWidths), true)
     bodyTable.setWidth(UnitValue.createPercentValue(100f))
@@ -96,7 +98,6 @@ fun bankStatementReport(
         "Details",
         "Debit",
         "Credit",
-        "Balance",
     )
 
     headers.forEachIndexed { index, item ->
@@ -126,10 +127,6 @@ fun bankStatementReport(
         Cell().add(Paragraph(if(totalReport.oldBalance!! <= 0) HP.formatDecimal(abs(totalReport.oldBalance!!)) else "0").setFontSize(REPORT_BODY_FONT_SIZE))
             .setTextAlignment(TextAlignment.CENTER)
     )
-    bodyTable.addCell(
-        Cell().add(Paragraph("").setFontSize(REPORT_BODY_FONT_SIZE))
-            .setTextAlignment(TextAlignment.CENTER)
-    )
 
     var counter = 0
     accountReport.forEach { item ->
@@ -150,11 +147,6 @@ fun bankStatementReport(
 
         bodyTable.addCell(
             Cell().add(Paragraph(HP.formatDecimal(item.credit)).setFontSize(REPORT_BODY_FONT_SIZE))
-                .setTextAlignment(TextAlignment.CENTER)
-        )
-
-        bodyTable.addCell(
-            Cell().add(Paragraph("${HP.formatDecimal(abs(item.balance!!))} ${if(item.balance!! > 0) "Dr" else "Cr"}").setFontSize(REPORT_BODY_FONT_SIZE))
                 .setTextAlignment(TextAlignment.CENTER)
         )
 

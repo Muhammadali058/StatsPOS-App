@@ -1,8 +1,8 @@
-package com.example.statspos.presentation.ui.screens.reports.accounts
+package com.example.statspos.presentation.ui.screens.reports.items
 
 import android.content.Context
 import com.example.statspos.domain.models.reports.TotalReport
-import com.example.statspos.domain.models.reports.accounts.AccountReport
+import com.example.statspos.domain.models.reports.items.ItemsReport
 import com.example.statspos.presentation.ui.components.PageXofYEventHandler
 import com.example.statspos.presentation.ui.utils.REPORT_BODY_FONT_SIZE
 import com.example.statspos.presentation.ui.utils.REPORT_HEADER_FONT_SIZE
@@ -22,17 +22,15 @@ import com.itextpdf.layout.element.Text
 import com.itextpdf.layout.properties.TextAlignment
 import com.itextpdf.layout.properties.UnitValue
 import java.io.File
-import kotlin.math.abs
+import java.time.LocalDate
 
-fun bankStatementReport(
+fun itemsListReport(
     context: Context,
-    fromDate: String,
-    toDate: String,
-    accountReport: List<AccountReport>,
+    itemsReport: List<ItemsReport>,
     totalReport: TotalReport,
 ): File {
     // region Document
-    val file = File(context.cacheDir, "Bank_Statement_Report_${System.currentTimeMillis()}.pdf")
+    val file = File(context.cacheDir, "Items_List_${System.currentTimeMillis()}.pdf")
     if (file.exists()) {
         file.delete()
     }
@@ -48,7 +46,7 @@ fun bankStatementReport(
 
     // region Header
     // ---------------- Report Title ----------------
-    val title = Paragraph(totalReport.accountName)
+    val title = Paragraph("Items List")
         .setBold()
         .setFontSize(24f)
         .setTextAlignment(TextAlignment.CENTER)
@@ -61,43 +59,47 @@ fun bankStatementReport(
     val fromDateCell = Cell()
         .add(
             Paragraph()
-                .add(Text("From Date: ").setBold())
-                .add(Text(fromDate))
+                .add(Text("Date: ").setBold())
+                .add(Text(HP.getFormatedDate(LocalDate.now())))
         )
         .setFontSize(REPORT_HEADINGS_FONT_SIZE)
         .setBorder(null)
         .setTextAlignment(TextAlignment.LEFT)
 
-    val toDateCell = Cell()
-        .add(
-            Paragraph()
-                .add(Text("To Date: ").setBold())
-                .add(Text(toDate))
-        )
-        .setFontSize(REPORT_HEADINGS_FONT_SIZE)
-        .setBorder(null)
-        .setTextAlignment(TextAlignment.RIGHT)
-
     dateTable.addCell(fromDateCell)
-    dateTable.addCell(toDateCell)
     document.add(dateTable)
     // endregion
 
     // region Details
     // ---------------- Table ----------------
-    val columnWidths = floatArrayOf(1f, 3f, 1f, 1f, 1f)
+    val columnWidths = if (HP.settings.saleCartons == true)
+        floatArrayOf(1f, 2f, 0.5f, 0.5f, 0.5f, 0.5f, 1f)
+    else
+        floatArrayOf(1f, 2f, 0.5f, 0.5f, 0.5f, 1f)
 
     val bodyTable = Table(UnitValue.createPercentArray(columnWidths), true)
     bodyTable.setWidth(UnitValue.createPercentValue(100f))
     document.add(bodyTable)
 
-    val headers = listOf(
-        "Date",
-        "Details",
-        "Debit",
-        "Credit",
-        "Balance",
-    )
+    val headers = if (HP.settings.saleCartons == true)
+        listOf(
+            "Barcode",
+            "Itemname",
+            "Cost",
+            "Retail",
+            "W.Sale",
+            "C.Rate",
+            "Ref. Code",
+        )
+    else
+        listOf(
+            "Barcode",
+            "Itemname",
+            "Cost",
+            "Retail",
+            "W.Sale",
+            "Ref. Code",
+        )
 
     headers.forEachIndexed { index, item ->
         val cell = Cell().add(
@@ -106,55 +108,52 @@ fun bankStatementReport(
                 .setFontSize(REPORT_HEADER_FONT_SIZE)
         )
 
+//        if (index == 2 || index == 3) {
+//            cell.setTextAlignment(TextAlignment.LEFT)
+//        } else {
+//            cell.setTextAlignment(TextAlignment.CENTER)
+//        }
+
         cell.setTextAlignment(TextAlignment.CENTER)
         bodyTable.addHeaderCell(cell)
     }
 
-    bodyTable.addCell(
-        Cell().add(Paragraph("").setFontSize(REPORT_BODY_FONT_SIZE))
-            .setTextAlignment(TextAlignment.CENTER)
-    )
-    bodyTable.addCell(
-        Cell().add(Paragraph("Opening Balance").setFontSize(REPORT_BODY_FONT_SIZE))
-            .setTextAlignment(TextAlignment.CENTER)
-    )
-    bodyTable.addCell(
-        Cell().add(Paragraph(if(totalReport.oldBalance!! >= 0) HP.formatDecimal(abs(totalReport.oldBalance!!)) else "0").setFontSize(REPORT_BODY_FONT_SIZE))
-            .setTextAlignment(TextAlignment.CENTER)
-    )
-    bodyTable.addCell(
-        Cell().add(Paragraph(if(totalReport.oldBalance!! <= 0) HP.formatDecimal(abs(totalReport.oldBalance!!)) else "0").setFontSize(REPORT_BODY_FONT_SIZE))
-            .setTextAlignment(TextAlignment.CENTER)
-    )
-    bodyTable.addCell(
-        Cell().add(Paragraph("").setFontSize(REPORT_BODY_FONT_SIZE))
-            .setTextAlignment(TextAlignment.CENTER)
-    )
-
     var counter = 0
-    accountReport.forEach { item ->
+    itemsReport.forEach { item ->
         bodyTable.addCell(
-            Cell().add(Paragraph(item.date.toString()).setFontSize(REPORT_BODY_FONT_SIZE))
+            Cell().add(Paragraph(item.barcode.toString()).setFontSize(REPORT_BODY_FONT_SIZE))
                 .setTextAlignment(TextAlignment.CENTER)
         )
 
         bodyTable.addCell(
-            Cell().add(Paragraph(item.naration.toString()).setFontSize(REPORT_BODY_FONT_SIZE))
+            Cell().add(Paragraph(item.itemname.toString()).setFontSize(REPORT_BODY_FONT_SIZE))
                 .setTextAlignment(TextAlignment.LEFT)
         )
 
         bodyTable.addCell(
-            Cell().add(Paragraph(HP.formatDecimal(item.debit)).setFontSize(REPORT_BODY_FONT_SIZE))
+            Cell().add(Paragraph(HP.formatDecimal(item.cost)).setFontSize(REPORT_BODY_FONT_SIZE))
                 .setTextAlignment(TextAlignment.CENTER)
         )
 
         bodyTable.addCell(
-            Cell().add(Paragraph(HP.formatDecimal(item.credit)).setFontSize(REPORT_BODY_FONT_SIZE))
+            Cell().add(Paragraph(HP.formatDecimal(item.retail)).setFontSize(REPORT_BODY_FONT_SIZE))
                 .setTextAlignment(TextAlignment.CENTER)
         )
 
         bodyTable.addCell(
-            Cell().add(Paragraph("${HP.formatDecimal(abs(item.balance!!))} ${if(item.balance!! > 0) "Dr" else "Cr"}").setFontSize(REPORT_BODY_FONT_SIZE))
+            Cell().add(Paragraph(HP.formatDecimal(item.wholesale)).setFontSize(REPORT_BODY_FONT_SIZE))
+                .setTextAlignment(TextAlignment.CENTER)
+        )
+
+        if (HP.settings.saleCartons == true) {
+            bodyTable.addCell(
+                Cell().add(Paragraph(HP.formatDecimal(item.crtnRate)).setFontSize(REPORT_BODY_FONT_SIZE))
+                    .setTextAlignment(TextAlignment.CENTER)
+            )
+        }
+
+        bodyTable.addCell(
+            Cell().add(Paragraph(item.refCode.toString()).setFontSize(REPORT_BODY_FONT_SIZE))
                 .setTextAlignment(TextAlignment.CENTER)
         )
 
@@ -174,55 +173,24 @@ fun bankStatementReport(
             .useAllAvailableWidth()
 
     val paragraph = Paragraph()
-        .add(Text("Debit: ").setBold())
+        .add(Text("Total Items: ").setBold())
         .add(
             Div()
                 .setWidth(UnitValue.createPointValue(100f))
                 .setBorderBottom(SolidBorder(ColorConstants.BLACK, 1f))
                 .add(
-                    Paragraph(HP.formatDecimal(totalReport.totalDebit))
+                    Paragraph(totalReport.totalItems.toString())
                         .setTextAlignment(TextAlignment.CENTER)
                 )
         )
 
-    paragraph
-        .add(Text("Credit: ").setBold())
-        .add(
-            Div()
-                .setWidth(UnitValue.createPointValue(100f))
-                .setBorderBottom(SolidBorder(ColorConstants.BLACK, 1f))
-                .add(
-                    Paragraph(HP.formatDecimal(totalReport.totalCredit))
-                        .setTextAlignment(TextAlignment.CENTER)
-                )
-        )
-
-    val totalQtyCell = Cell()
+    val totalItemsCell = Cell()
         .add(paragraph)
         .setFontSize(12f)
         .setBorder(null)
         .setTextAlignment(TextAlignment.LEFT)
 
-    val totalCell = Cell()
-        .add(
-            Paragraph()
-                .add(Text("Balance: ").setBold())
-                .add(
-                    Div()
-                        .setWidth(UnitValue.createPointValue(120f))
-                        .setBorderBottom(SolidBorder(ColorConstants.BLACK, 1f))
-                        .add(
-                            Paragraph("${HP.formatDecimal(abs(totalReport.newBalance!!))} ${if(totalReport.newBalance!! > 0) "Dr" else "Cr"}")
-                                .setTextAlignment(TextAlignment.CENTER)
-                        )
-                )
-        )
-        .setFontSize(REPORT_HEADINGS_FONT_SIZE)
-        .setBorder(null)
-        .setTextAlignment(TextAlignment.RIGHT)
-
-    row1.addCell(totalQtyCell)
-    row1.addCell(totalCell)
+    row1.addCell(totalItemsCell)
     document.add(row1)
     // endregion
 

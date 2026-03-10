@@ -17,7 +17,7 @@ data class AccountReport(
     var balance: Double? = null,
 
     var amount: Double? = null,
-    var expense: Double? = null,
+    var expense: String? = null,
 
     var oldBalance: Double? = null,
     var sales: Double? = null,

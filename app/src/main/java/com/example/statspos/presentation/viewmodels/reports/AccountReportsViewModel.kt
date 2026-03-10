@@ -325,6 +325,16 @@ class AccountReportsViewModel @Inject constructor(
         }
     }
 
+    fun onIncomeStatementClick(onSuccess: (List<AccountReport>, TotalReport) -> Unit) {
+        val params = getParams()
+        loadIncomeStatement(params, onSuccess)
+    }
+
+    fun onCashAccountClick(onSuccess: (List<AccountReport>, TotalReport) -> Unit) {
+        val params = getParams()
+        loadCashAccount(params, onSuccess)
+    }
+
     // endregion
 
     // region Network calls
@@ -593,6 +603,83 @@ class AccountReportsViewModel @Inject constructor(
             }
         }
     }
+
+    private fun loadCashAccount(
+        params: JsonObject,
+        onSuccess: (List<AccountReport>, TotalReport) -> Unit
+    ) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.cashAccount(params)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val accountReport =
+                        Gson().getListOf<AccountReport>(result.data.get("rows").asJsonArray)
+                    if (accountReport.isNotEmpty()) {
+                        val totalReport =
+                            Gson().get<TotalReport>(result.data.get("total").asJsonObject)
+
+                        state.update {
+                            it.copy(
+                                accountReport = accountReport,
+                                totalReport = totalReport,
+                            )
+                        }
+
+                        onSuccess(accountReport, totalReport)
+                    } else {
+                        showMessage("Not record found")
+                    }
+                }
+            }
+        }
+    }
+
+    private fun loadIncomeStatement(
+        params: JsonObject,
+        onSuccess: (List<AccountReport>, TotalReport) -> Unit
+    ) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.incomeStatement(params)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val accountReport =
+                        Gson().getListOf<AccountReport>(result.data.get("rows").asJsonArray)
+                    if (accountReport.isNotEmpty()) {
+                        val totalReport =
+                            Gson().get<TotalReport>(result.data.get("total").asJsonObject)
+
+                        state.update {
+                            it.copy(
+                                accountReport = accountReport,
+                                totalReport = totalReport,
+                            )
+                        }
+
+                        onSuccess(accountReport, totalReport)
+                    } else {
+                        showMessage("Not record found")
+                    }
+                }
+            }
+        }
+    }
+
 // endregion
 
     // region Others

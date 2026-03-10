@@ -1,5 +1,6 @@
-package com.example.statspos.presentation.ui.screens.reports.stock
+package com.example.statspos.presentation.ui.screens.reports.items
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -23,14 +24,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -56,14 +55,12 @@ import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.R
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.reports.TotalReport
-import com.example.statspos.domain.models.reports.stock.StockItemsReport
+import com.example.statspos.domain.models.reports.items.ItemsReport
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
-import com.example.statspos.presentation.ui.components.AppSwitch
 import com.example.statspos.presentation.ui.components.AutoCompleteItemsTextbox
 import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
-import com.example.statspos.presentation.ui.components.BottomSheet
 import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
@@ -74,18 +71,24 @@ import com.example.statspos.presentation.ui.components.ShowReportIcon
 import com.example.statspos.presentation.ui.components.SubDropdown
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
-import com.example.statspos.presentation.ui.screens.reports.ReportButtons
-import com.example.statspos.presentation.ui.screens.reports.ReportsItemnameBox
-import com.example.statspos.presentation.ui.screens.reports.TodayStock
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.ui.utils.openPdf
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.reports.StockReportsViewModel
+import com.example.statspos.presentation.viewmodels.reports.ItemsReportsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import com.itextpdf.io.image.ImageData
+import com.itextpdf.io.image.ImageDataFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.URL
+import java.util.concurrent.ConcurrentHashMap
 
 private sealed class Routes : NavKey {
     @Serializable
@@ -96,7 +99,7 @@ private sealed class Routes : NavKey {
 }
 
 @Composable
-fun StockReportsScreen(
+fun ItemsReportsScreen(
     sharedViewModel: SharedViewModel,
     onBack: () -> Unit,
 ) {
@@ -145,7 +148,7 @@ private fun Home(
 ) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<StockReportsViewModel>()
+    val viewModel = hiltViewModel<ItemsReportsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -201,17 +204,26 @@ private fun Home(
     }
 
     fun showItemsReport(
-        stockItemsReport: List<StockItemsReport>,
+        itemsReport: List<ItemsReport>,
         totalReport: TotalReport
     ) {
-        val file = stockItemsReport(
-            context = context,
-            costHeading = state.costHeading,
-            itemsReport = stockItemsReport,
-            totalReport = totalReport,
-        )
+        if (state.itemsListType.id == 1L) {
+            val file = itemsListReport(
+                context = context,
+                itemsReport = itemsReport,
+                totalReport = totalReport,
+            )
 
-        openPdf(context, file)
+            openPdf(context, file)
+        } else {
+            val file = itemsImagesListReport(
+                context = context,
+                itemsReport = itemsReport,
+                totalReport = totalReport,
+            )
+
+            openPdf(context, file)
+        }
     }
 
     Scaffold(
@@ -226,7 +238,7 @@ private fun Home(
                 onNavigationClick = {
                     onBack()
                 },
-                title = "Stock Reports",
+                title = "Item Reports",
             )
         }
     ) { innerPadding ->
@@ -248,15 +260,9 @@ private fun Home(
                         .verticalScroll(scrollState),
                 ) {
                     Spacer(Modifier.height(12.dp))
-                    TodayStock(
-                        stockAtCost = state.mainReport.stockAtCost,
-                        stockAtRetail = state.mainReport.stockAtRetail,
-                        stockAtWholesale = state.mainReport.stockAtWholesale,
-                    )
-                    Spacer(Modifier.height(12.dp))
                     ReportCard(
-                        heading = "Detailed Reports",
-                        subHeading = "Save & share pdf reports",
+                        heading = "Items List",
+                        subHeading = "Save & share items list in pdf format",
                         content = {
                             Column(
                                 modifier = Modifier
@@ -264,52 +270,44 @@ private fun Home(
                                     .padding(4.dp)
                             ) {
                                 ReportButtons(
-                                    onTotalStockClick = {
-                                        viewModel.onTotalClick { stockItemsReport, totalReport ->
+                                    onTotalListClick = {
+                                        viewModel.onTotalItemsClick { stockItemsReport, totalReport ->
                                             showItemsReport(stockItemsReport, totalReport)
                                         }
                                     },
-                                    onFilterReportClick = {
-                                        viewModel.onFilterClick { stockItemsReport, totalReport ->
+                                    onFilterListClick = {
+                                        viewModel.onFilterItemsClick { stockItemsReport, totalReport ->
                                             showItemsReport(stockItemsReport, totalReport)
                                         }
                                     },
                                 )
                                 Spacer(Modifier.height(12.dp))
                                 Dropdowns(
-                                    stockShowing = state.stockShowing,
-                                    stockAt = state.stockAt,
-                                    stockExpiry = state.stockExpiry,
-                                    stockType = state.stockType,
+                                    listType = state.itemsListType,
                                     categoryName = state.categoryName,
                                     subCategoryName = state.subCategoryName,
                                     categoryId = state.categoryId,
                                     vendorName = state.vendorName,
-                                    warehouse = state.warehouse,
                                     onCategoryNameChange = viewModel::onCategoryNameChange,
                                     onSubCategoryNameChange = viewModel::onSubCategoryNameChange,
                                     onVendorNameChange = viewModel::onVendorNameChange,
-                                    onWarehouseChange = viewModel::onWarehouseChange,
-                                    onStockShowingChange = viewModel::onStockShowingChange,
-                                    onStockAtChange = viewModel::onStockAtChange,
-                                    onStockExpiryChange = viewModel::onStockExpiryChange,
-                                    onStockTypeChange = viewModel::onStockTypeChange,
+                                    onListTypeChange = viewModel::onListTypeChange,
                                     onCategoryIdChange = viewModel::onCategoryIdChange,
                                     onSubCategoryIdChange = viewModel::onSubCategoryIdChange,
                                     onVendorIdChange = viewModel::onVendorIdChange,
                                     onCategoryClick = {
-                                        viewModel.onCategoryClick { stockItemsReport, totalReport ->
-                                            showItemsReport(stockItemsReport, totalReport)
+                                        viewModel.onCategoryClick { itemsReport, totalReport ->
+                                            showItemsReport(itemsReport, totalReport)
                                         }
                                     },
                                     onSubCategoryClick = {
-                                        viewModel.onSubCategoryClick { stockItemsReport, totalReport ->
-                                            showItemsReport(stockItemsReport, totalReport)
+                                        viewModel.onSubCategoryClick { itemsReport, totalReport ->
+                                            showItemsReport(itemsReport, totalReport)
                                         }
                                     },
                                     onVendorClick = {
-                                        viewModel.onVendorClick { stockItemsReport, totalReport ->
-                                            showItemsReport(stockItemsReport, totalReport)
+                                        viewModel.onVendorClick { itemsReport, totalReport ->
+                                            showItemsReport(itemsReport, totalReport)
                                         }
                                     },
                                 )
@@ -354,8 +352,8 @@ private fun Home(
 
 @Composable
 private fun ReportButtons(
-    onTotalStockClick: () -> Unit,
-    onFilterReportClick: () -> Unit,
+    onTotalListClick: () -> Unit,
+    onFilterListClick: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
 
@@ -370,12 +368,12 @@ private fun ReportButtons(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ReportButton("Total Stock", Modifier.width(120.dp)) {
-                onTotalStockClick()
+            ReportButton("Total List", Modifier.width(120.dp)) {
+                onTotalListClick()
             }
             Spacer(Modifier.width(8.dp))
-            ReportButton("Filter Report", Modifier.width(120.dp)) {
-                onFilterReportClick()
+            ReportButton("Filter List", Modifier.width(120.dp)) {
+                onFilterListClick()
             }
         }
     }
@@ -471,23 +469,15 @@ private fun ItemnameBox(
 
 @Composable
 private fun Dropdowns(
-    stockShowing: DropdownItem,
-    stockAt: DropdownItem,
-    stockExpiry: DropdownItem,
-    stockType: DropdownItem,
+    listType: DropdownItem,
     categoryName: String,
     subCategoryName: String,
     categoryId: Long,
     vendorName: String,
-    warehouse: DropdownItem,
     onCategoryNameChange: (String) -> Unit,
     onSubCategoryNameChange: (String) -> Unit,
     onVendorNameChange: (String) -> Unit,
-    onWarehouseChange: (DropdownItem) -> Unit,
-    onStockShowingChange: (DropdownItem) -> Unit,
-    onStockAtChange: (DropdownItem) -> Unit,
-    onStockExpiryChange: (DropdownItem) -> Unit,
-    onStockTypeChange: (DropdownItem) -> Unit,
+    onListTypeChange: (DropdownItem) -> Unit,
     onCategoryIdChange: (Long) -> Unit,
     onSubCategoryIdChange: (Long) -> Unit,
     onVendorIdChange: (Long) -> Unit,
@@ -499,72 +489,16 @@ private fun Dropdowns(
         modifier = Modifier
             .fillMaxWidth()
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-        ) {
-            ComboBox(
-                modifier = Modifier
-                    .fillMaxWidth(0.5f),
-                items = HP.stockShowing,
-                selectedItem = stockShowing,
-                onItemSelected = onStockShowingChange,
-                label = {
-                    Text(text = "Showing")
-                },
-                showEndIcon = false,
-            )
-            Spacer(Modifier.width(8.dp))
-            ComboBox(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                items = HP.stockAt,
-                selectedItem = stockAt,
-                onItemSelected = onStockAtChange,
-                label = {
-                    Text(text = "Stock At")
-                },
-                showEndIcon = false,
-            )
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-        ) {
-            ComboBox(
-                modifier = Modifier
-                    .fillMaxWidth(0.5f),
-                items = HP.stockExpiry,
-                selectedItem = stockExpiry,
-                onItemSelected = onStockExpiryChange,
-                label = {
-                    Text(text = "Expiry")
-                },
-                showEndIcon = false,
-            )
-            Spacer(Modifier.width(8.dp))
-            ComboBox(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                items = HP.stockType,
-                selectedItem = stockType,
-                onItemSelected = onStockTypeChange,
-                label = {
-                    Text(text = "Type")
-                },
-                showEndIcon = false,
-            )
-        }
         ComboBox(
             modifier = Modifier
                 .fillMaxWidth(),
-            items = HP.warehouses,
-            selectedItem = warehouse,
-            onItemSelected = onWarehouseChange,
+            items = HP.itemsListType,
+            selectedItem = listType,
+            onItemSelected = onListTypeChange,
             label = {
-                Text(text = "Warehouse")
+                Text(text = "Type")
             },
-            addNone = true,
+            showEndIcon = false,
         )
         Dropdown(
             value = categoryName,

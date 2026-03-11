@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Print
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -39,6 +40,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.accounts.Entries
+import com.example.statspos.domain.models.reports.accounts.AccountReport
+import com.example.statspos.domain.models.reports.accounts.EntryVoucher
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.ComboBox
@@ -54,9 +57,12 @@ import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
+import com.example.statspos.presentation.ui.screens.accounts.entries.vouchers.entryVoucher
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
+import com.example.statspos.presentation.ui.utils.openPdf
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.accounts.entries.payment.PaymentEntriesViewModel
+import com.example.statspos.utils.EntryType
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.PasswordFor
 import com.example.statspos.utils.UiEvent
@@ -137,6 +143,20 @@ fun PaymentPostedEntriesBody(
         )
     }
 
+    fun showVoucher(
+        entry: EntryVoucher,
+        ledger: List<AccountReport>?,
+    ) {
+        val file = entryVoucher(
+            context = context,
+            entryType = EntryType.PAYMENT,
+            entry = entry,
+            ledger = ledger,
+        )
+
+        openPdf(context, file)
+    }
+
     Box(
         Modifier
             .fillMaxSize()
@@ -194,6 +214,14 @@ fun PaymentPostedEntriesBody(
                                 showDeleteDialog = true
                             }
                         }
+                    },
+                    onPrintClick = { entry ->
+                        viewModel.getEntry(
+                            entryId = entry.id!!,
+                            onSuccess = { entry, ledger ->
+                                showVoucher(entry, ledger)
+                            }
+                        )
                     }
                 )
             }
@@ -283,6 +311,7 @@ private fun BodyList(
     onRefresh: () -> Unit,
     items: List<Entries>,
     onDeleteClick: (Entries) -> Unit,
+    onPrintClick: (Entries) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -290,9 +319,11 @@ private fun BodyList(
         onRefresh = onRefresh,
     ) {
         items(items) { item ->
-            ListCard(item = item) {
-                onDeleteClick(it)
-            }
+            ListCard(
+                item = item,
+                onDeleteClick = onDeleteClick,
+                onPrintClick = onPrintClick,
+            )
         }
     }
 }
@@ -301,7 +332,8 @@ private fun BodyList(
 private fun ListCard(
     modifier: Modifier = Modifier,
     item: Entries,
-    onDeleteClick: (Entries) -> Unit
+    onDeleteClick: (Entries) -> Unit,
+    onPrintClick: (Entries) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -356,16 +388,25 @@ private fun ListCard(
                     LabelMedium(item.naration.toString())
                 }
             }
-
-            // Delete button
-            if (HP.userRights.deleteAnything == true) {
-                Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(8.dp))
+            Column(
+                modifier = Modifier,
+            ) {
                 AppIconButton(
-                    icon = Icons.Default.Delete,
+                    icon = Icons.Default.Print,
                     onClick = {
-                        onDeleteClick(item)
+                        onPrintClick(item)
                     }
                 )
+                Spacer(Modifier.height(8.dp))
+                if (HP.userRights.deleteAnything == true) {
+                    AppIconButton(
+                        icon = Icons.Default.Delete,
+                        onClick = {
+                            onDeleteClick(item)
+                        }
+                    )
+                }
             }
         }
     }

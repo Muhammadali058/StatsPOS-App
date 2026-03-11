@@ -4,12 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.accounts.Entries
+import com.example.statspos.domain.models.reports.accounts.AccountReport
+import com.example.statspos.domain.models.reports.accounts.EntryVoucher
 import com.example.statspos.domain.repository.accounts.AccountsRepository
 import com.example.statspos.utils.EntryType
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
+import com.example.statspos.utils.get
 import com.example.statspos.utils.getEntryType
 import com.example.statspos.utils.getListOf
 import com.google.gson.Gson
@@ -185,6 +188,30 @@ class ReceiptEntriesViewModel @Inject constructor(
                 is Resource.Success -> {
                     resultSuccess()
                     onSuccess()
+                }
+            }
+        }
+    }
+
+    fun getEntry(entryId:Long, onSuccess: (EntryVoucher, List<AccountReport>?) -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            when (val result = api.getEntry(entryId)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val entryVoucher = Gson().get<EntryVoucher>(result.data.get("entry").asJsonArray.get(0).asJsonObject)
+                    var ledger: List<AccountReport>? = null
+
+                    if(HP.settings.showLedgerInVoucher == true){
+                        ledger = Gson().getListOf<AccountReport>(result.data.get("ledger").asJsonArray)
+                    }
+
+                    onSuccess(entryVoucher, ledger)
                 }
             }
         }

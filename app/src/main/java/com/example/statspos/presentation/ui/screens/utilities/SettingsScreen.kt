@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.DropdownItem
+import com.example.statspos.domain.models.reports.accounts.AccountReport
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
@@ -52,6 +53,7 @@ import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.components.UploadImageView
+import com.example.statspos.presentation.ui.screens.TopRoutes
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.utilities.SettingsViewModel
@@ -235,6 +237,15 @@ fun SettingsScreen(
                         onUseDeleteSalesBillChange = viewModel::onUseDeleteSalesBillChange,
                         onUseDeletePurchaseBillChange = viewModel::onUseDeletePurchaseBillChange,
                         onUseDeleteEntryChange = viewModel::onUseDeleteEntryChange,
+                    )
+
+                    ShopData(
+                        shopName = state.shopName,
+                        contact = state.contact,
+                        address = state.address,
+                        onShopNameChange = viewModel::onShopNameChange,
+                        onContactChange = viewModel::onContactChange,
+                        onAddressChange = viewModel::onAddressChange,
                     )
                 }
 
@@ -743,6 +754,52 @@ private fun Passwords(
                 label = "Use"
             )
         }
+    }
+}
+
+
+@Composable
+private fun ShopData(
+    shopName: String,
+    contact: String,
+    address: String,
+    onShopNameChange: (String) -> Unit,
+    onContactChange: (String) -> Unit,
+    onAddressChange: (String) -> Unit,
+) {
+    ExpandableSection(
+        title = "Shop Data",
+        initiallyExpanded = false,
+    ) {
+        Textbox(
+            value = shopName,
+            onValueChange = onShopNameChange,
+            modifier = Modifier
+                .fillMaxWidth(),
+            label = {
+                Text("Shop Name")
+            }
+        )
+        Textbox(
+            value = contact,
+            onValueChange = onContactChange,
+            modifier = Modifier
+                .fillMaxWidth(),
+            label = {
+                Text("Contact")
+            }
+        )
+        Textbox(
+            value = address,
+            onValueChange = onAddressChange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(84.dp),
+            label = {
+                Text("Address")
+            },
+            singleLine = false,
+        )
     }
 }
 

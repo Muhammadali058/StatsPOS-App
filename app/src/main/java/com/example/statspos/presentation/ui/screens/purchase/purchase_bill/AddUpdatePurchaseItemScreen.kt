@@ -287,6 +287,8 @@ fun AddUpdatePurchaseItemScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     SearchItemBox(
+                        modifier = Modifier
+                            .padding(ConstantPaddings.BODY_HORIZONTAL),
                         itemFocusRequester = itemFocusRequester,
                         value = state.itemname,
                         onValueChange = viewModel::onItemnameChange,

@@ -2,9 +2,8 @@ package com.example.statspos.presentation.viewmodels.purchase.purchase_orders
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.statspos.domain.models.items.Packages
+import com.example.statspos.domain.models.purchase.PurchaseOrderVoucher
 import com.example.statspos.domain.models.purchase.PurchaseOrders
-import com.example.statspos.domain.repository.items.PackagesRepository
 import com.example.statspos.domain.repository.purchase.PurchaseOrdersRepository
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
@@ -133,6 +132,24 @@ class PurchaseOrdersViewModel @Inject constructor(
                             totalPurchaseOrders = resultTotal,
                         )
                     }
+                }
+            }
+        }
+    }
+
+    fun getOrder(orderId:Long, onSuccess: (List<PurchaseOrderVoucher>) -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            when (val result = api.getOrder(orderId)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val purchaseOrder = Gson().getListOf<PurchaseOrderVoucher>(result.data.get("order").asJsonArray)
+                    onSuccess(purchaseOrder)
                 }
             }
         }

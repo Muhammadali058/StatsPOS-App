@@ -2,7 +2,7 @@ package com.example.statspos.presentation.ui.screens.accounts.entries.vouchers
 
 import android.content.Context
 import com.example.statspos.domain.models.reports.accounts.AccountReport
-import com.example.statspos.domain.models.reports.accounts.EntryVoucher
+import com.example.statspos.domain.models.accounts.EntryVoucher
 import com.example.statspos.presentation.ui.utils.REPORT_HEADINGS_FONT_SIZE
 import com.example.statspos.utils.EntryType
 import com.example.statspos.utils.HP
@@ -45,12 +45,14 @@ fun entryVoucher(
 
     // region Header
     // ---------------- Report Title ----------------
-    document.add(
-        Paragraph(HP.settings.shopName.toString())
-            .setBold()
-            .setFontSize(18f)
-            .setTextAlignment(TextAlignment.CENTER)
-    )
+    if(HP.settings.shopName.toString().isNotEmpty()) {
+        document.add(
+            Paragraph(HP.settings.shopName.toString())
+                .setBold()
+                .setFontSize(18f)
+                .setTextAlignment(TextAlignment.CENTER)
+        )
+    }
 
     val title = Paragraph("${if (entryType == EntryType.RECEIPT) "Receipt" else "Payment"} Voucher")
         .setBold()

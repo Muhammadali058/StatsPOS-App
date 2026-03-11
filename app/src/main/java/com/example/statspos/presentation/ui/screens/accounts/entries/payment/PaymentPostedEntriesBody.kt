@@ -41,7 +41,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.accounts.Entries
 import com.example.statspos.domain.models.reports.accounts.AccountReport
-import com.example.statspos.domain.models.reports.accounts.EntryVoucher
+import com.example.statspos.domain.models.accounts.EntryVoucher
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.ComboBox

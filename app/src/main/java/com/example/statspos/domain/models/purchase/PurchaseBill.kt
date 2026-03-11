@@ -1,0 +1,70 @@
+package com.example.statspos.domain.models.purchase
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class PurchaseBill(
+    var id: Long? = null,
+    var invoiceNo: Int? = null,
+    var itemname: String? = null,
+    var urduname: String? = null,
+    var barcode: String? = null,
+    var refCode: String? = null,
+
+    var qty: Double? = null,
+    var crtn: Int? = null,
+    var rate: Double? = null,
+    var retail: Double? = null,
+    var wholesale: Double? = null,
+    var rate3: Double? = null,
+    var rate4: Double? = null,
+    var crtnRate: Double? = null,
+    var isDiscRsPer: Boolean? = null,
+    var disc: Double? = null,
+    var calculatedDisc: Double? = null,
+    var totalDisc: Double? = null,
+    var total: Double? = null,
+
+    var originalDate: String? = null,
+    var date: String? = null,
+    var time: String? = null,
+
+    var grandTotal: Double? = null,
+    var grandDisc: Double? = null,
+    var grandIsDiscRsPer: Boolean? = null,
+    var grandTotalDisc: Double? = null,
+    var payment: Int? = null,
+    var change: Int? = null,
+    var isRetail: Boolean? = null,
+    var isPaid: Boolean? = null,
+    var isDelivered: Boolean? = null,
+
+    var customerName: String? = null,
+    var customerId: Long? = null,
+    var billType: String? = null,
+    var salesOn: String? = null,
+    var salesType: String? = null,
+    var mop: String? = null,
+
+    var oldBalance: Double? = null,
+    var newBalance: Double? = null,
+    var categoryName: String? = null,
+    var subCategoryName: String? = null,
+    var saleCartons: Boolean? = null,
+    var showLedgerInBill: Boolean? = null,
+
+    var user: String? = null,
+    var userPhone: String? = null,
+    var userAddress: String? = null,
+    var vendorName: String? = null,
+    var supplierName: String? = null,
+    var supplierContact: String? = null,
+    var supplierAddress: String? = null,
+    var customerContact: String? = null,
+    var customerAddress: String? = null,
+    var customerEmail: String? = null,
+    var customerCity: String? = null,
+    var bankName: String? = null,
+    var subBankName: String? = null,
+    var fbrInvoiceNo: String? = null,
+)

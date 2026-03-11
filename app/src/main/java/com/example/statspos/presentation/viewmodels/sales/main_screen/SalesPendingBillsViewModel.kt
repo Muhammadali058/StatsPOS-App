@@ -2,13 +2,17 @@ package com.example.statspos.presentation.viewmodels.sales.main_screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.accounts.EntryVoucher
+import com.example.statspos.domain.models.reports.accounts.AccountReport
 import com.example.statspos.domain.models.sales.Sales
+import com.example.statspos.domain.models.sales.SalesBill
 import com.example.statspos.domain.models.sales.SalesBills
 import com.example.statspos.domain.repository.sales.SalesRepository
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
+import com.example.statspos.utils.get
 import com.example.statspos.utils.getListOf
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -190,6 +194,35 @@ class SalesPendingBillsViewModel @Inject constructor(
         }
     }
 
+    fun getBill(invoiceId:Long, onSuccess: (bill: List<SalesBill>, List<AccountReport>?) -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            val params = JsonObject().apply {
+                addProperty("id", invoiceId)
+                addProperty("billType", 3)
+                addProperty("isPendingBill", true)
+            }
+
+            when (val result = api.getBill(params)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val bill = Gson().getListOf<SalesBill>(result.data.get("bill").asJsonArray)
+                    var ledger: List<AccountReport>? = null
+
+                    if(HP.settings.showLedgerInBill == true){
+                        ledger = Gson().getListOf<AccountReport>(result.data.get("ledger").asJsonArray)
+                    }
+
+                    onSuccess(bill,ledger)
+                }
+            }
+        }
+    }
     // endregion
 
     // region Others

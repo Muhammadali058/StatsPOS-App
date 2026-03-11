@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Print
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -24,15 +27,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.DropdownItem
-import com.example.statspos.domain.models.items.Packages
+import com.example.statspos.domain.models.warehouse.GatepassVoucher
 import com.example.statspos.domain.models.warehouse.Gatepasses
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
-import com.example.statspos.presentation.ui.components.AppSnackbarHost
+import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.DateTextbox
@@ -45,8 +49,8 @@ import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
+import com.example.statspos.presentation.ui.utils.openPdf
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.items.packages.PackagesViewModel
 import com.example.statspos.presentation.viewmodels.warehouse.gatepass.GatepassViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
@@ -59,6 +63,7 @@ fun GatepassBody(
     snackbarHostState: SnackbarHostState,
     onAddButtonClick: (Long, Boolean, Long, String) -> Unit,
 ) {
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel = hiltViewModel<GatepassViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -90,6 +95,17 @@ fun GatepassBody(
                 showErrorDialog = false
             },
         )
+    }
+
+    fun showVoucher(
+        gatepass: List<GatepassVoucher>,
+    ) {
+        val file = gatepassVoucher(
+            context = context,
+            gatepass = gatepass,
+        )
+
+        openPdf(context, file)
     }
 
     Scaffold(
@@ -148,12 +164,20 @@ fun GatepassBody(
                             viewModel.loadData()
                         },
                         items = state.list,
-                        onItemClick = { packages ->
+                        onItemClick = { gatepass ->
                             onAddButtonClick(
-                                packages.id!!,
+                                gatepass.id!!,
                                 true,
                                 state.warehouse.id,
                                 HP.getZonedDate(state.date)
+                            )
+                        },
+                        onPrintClick = { gatepass ->
+                            viewModel.getGatepass(
+                                gatepassId = gatepass.id!!,
+                                onSuccess = { gatepasses ->
+                                    showVoucher(gatepasses)
+                                }
                             )
                         }
                     )
@@ -216,6 +240,7 @@ private fun BodyList(
     onRefresh: () -> Unit,
     items: List<Gatepasses>,
     onItemClick: (Gatepasses) -> Unit,
+    onPrintClick: (Gatepasses) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -223,9 +248,11 @@ private fun BodyList(
         onRefresh = onRefresh,
     ) {
         items(items) { item ->
-            ListCard(item = item) {
-                onItemClick(it)
-            }
+            ListCard(
+                item = item,
+                onItemClick = onItemClick,
+                onPrintClick = onPrintClick,
+            )
         }
     }
 }
@@ -234,7 +261,8 @@ private fun BodyList(
 private fun ListCard(
     modifier: Modifier = Modifier,
     item: Gatepasses,
-    onItemClick: (Gatepasses) -> Unit
+    onItemClick: (Gatepasses) -> Unit,
+    onPrintClick: (Gatepasses) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -256,17 +284,35 @@ private fun ListCard(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    HeadingMedium("Date: ")
-                    LabelMedium(item.date.toString())
-                }
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    HeadingMedium("Remarks: ")
-                    LabelMedium(item.remarks.toString())
+                    Column(
+                        modifier = Modifier
+                            .weight(1f),
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                        ) {
+                            HeadingMedium("Date: ")
+                            LabelMedium(item.date.toString())
+                        }
+                        Spacer(Modifier.height(2.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                        ) {
+                            HeadingMedium("Remarks: ")
+                            LabelMedium(item.remarks.toString())
+                        }
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    AppIconButton(
+                        icon = Icons.Default.Print,
+                        onClick = {
+                            onPrintClick(item)
+                        }
+                    )
                 }
             }
         }

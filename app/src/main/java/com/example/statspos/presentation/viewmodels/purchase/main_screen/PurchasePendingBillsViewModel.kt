@@ -3,7 +3,10 @@ package com.example.statspos.presentation.viewmodels.purchase.main_screen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.purchase.Purchase
+import com.example.statspos.domain.models.purchase.PurchaseBill
 import com.example.statspos.domain.models.purchase.PurchaseBills
+import com.example.statspos.domain.models.reports.accounts.AccountReport
+import com.example.statspos.domain.models.sales.SalesBill
 import com.example.statspos.domain.repository.purchase.PurchaseRepository
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
@@ -188,6 +191,29 @@ class PurchasePendingBillsViewModel @Inject constructor(
         }
     }
 
+    fun getBill(invoiceId:Long, onSuccess: (bill: List<PurchaseBill>) -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            val params = JsonObject().apply {
+                addProperty("id", invoiceId)
+                addProperty("billType", 2)
+                addProperty("isPendingBill", true)
+            }
+
+            when (val result = api.getBill(params)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val bill = Gson().getListOf<PurchaseBill>(result.data.get("bill").asJsonArray)
+                    onSuccess(bill)
+                }
+            }
+        }
+    }
     // endregion
 
     // region Others

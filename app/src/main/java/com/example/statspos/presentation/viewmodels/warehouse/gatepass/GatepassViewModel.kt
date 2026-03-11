@@ -3,12 +3,16 @@ package com.example.statspos.presentation.viewmodels.warehouse.gatepass
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
+import com.example.statspos.domain.models.accounts.EntryVoucher
+import com.example.statspos.domain.models.reports.accounts.AccountReport
+import com.example.statspos.domain.models.warehouse.GatepassVoucher
 import com.example.statspos.domain.models.warehouse.Gatepasses
 import com.example.statspos.domain.repository.warehouse.GatepassesRepository
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
+import com.example.statspos.utils.get
 import com.example.statspos.utils.getListOf
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -146,6 +150,24 @@ class GatepassViewModel @Inject constructor(
                     HP.gatepasses = resultList.map {
                         DropdownItem(it.id!!, it.gatepassName!!)
                     }
+                }
+            }
+        }
+    }
+
+    fun getGatepass(gatepassId:Long, onSuccess: (List<GatepassVoucher>) -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            when (val result = api.loadGatepass(gatepassId)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val gatepass = Gson().getListOf<GatepassVoucher>(result.data.get("gatepass").asJsonArray)
+                    onSuccess(gatepass)
                 }
             }
         }

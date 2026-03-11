@@ -3,6 +3,8 @@ package com.example.statspos.presentation.viewmodels.sales.main_screen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
+import com.example.statspos.domain.models.reports.accounts.AccountReport
+import com.example.statspos.domain.models.sales.SalesBill
 import com.example.statspos.domain.models.sales.SalesBills
 import com.example.statspos.domain.repository.sales.SalesRepository
 import com.example.statspos.utils.HP
@@ -225,6 +227,36 @@ class SalesPostedBillsViewModel @Inject constructor(
                             endReached = resultList.isEmpty(),
                         )
                     }
+                }
+            }
+        }
+    }
+
+    fun getBill(invoiceId:Long, onSuccess: (bill: List<SalesBill>, List<AccountReport>?) -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            val params = JsonObject().apply {
+                addProperty("id", invoiceId)
+                addProperty("billType", 1)
+                addProperty("isPendingBill", false)
+            }
+
+            when (val result = api.getBill(params)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val bill = Gson().getListOf<SalesBill>(result.data.get("bill").asJsonArray)
+                    var ledger: List<AccountReport>? = null
+
+                    if(HP.settings.showLedgerInBill == true){
+                        ledger = Gson().getListOf<AccountReport>(result.data.get("ledger").asJsonArray)
+                    }
+
+                    onSuccess(bill,ledger)
                 }
             }
         }

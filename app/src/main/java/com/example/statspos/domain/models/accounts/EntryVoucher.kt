@@ -1,4 +1,4 @@
-package com.example.statspos.domain.models.reports.accounts
+package com.example.statspos.domain.models.accounts
 
 import kotlinx.serialization.Serializable
 

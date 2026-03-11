@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Print
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -31,10 +32,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.statspos.domain.models.purchase.PurchaseBill
 import com.example.statspos.domain.models.purchase.PurchaseBills
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
@@ -53,6 +56,7 @@ import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
+import com.example.statspos.presentation.ui.utils.openPdf
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.purchase.main_screen.PurchasePostedBillsViewModel
 import com.example.statspos.utils.HP
@@ -69,6 +73,7 @@ fun PurchasePostedBillsBody(
     onViewClick: (PurchaseBills) -> Unit,
     onAddUpdateButtonClick: (Long, Boolean, PurchaseBills?) -> Unit,
 ) {
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -80,7 +85,8 @@ fun PurchasePostedBillsBody(
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
-    var purchaseBill by remember { mutableStateOf<PurchaseBills?>(null) }
+    var showPrintPasswordDialog by remember { mutableStateOf(false) }
+    var bill by remember { mutableStateOf<PurchaseBills?>(null) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
@@ -117,7 +123,7 @@ fun PurchasePostedBillsBody(
             },
             onConfirm = {
                 showPasswordDialog = false
-                purchaseBill?.run {
+                bill?.run {
                     onAddUpdateButtonClick(id!!, true, this)
                 }
             }
@@ -126,6 +132,38 @@ fun PurchasePostedBillsBody(
 
     fun editBill(purchaseBills: PurchaseBills) {
         onAddUpdateButtonClick(purchaseBills.id!!, true, purchaseBills)
+    }
+
+    fun showBill(
+        bill: List<PurchaseBill>,
+    ) {
+        val file = purchaseBillVoucher(
+            context = context,
+            bill = bill,
+        )
+
+        openPdf(context, file)
+    }
+
+    fun printBill() {
+        bill?.run {
+            viewModel.getBill(id!!) { bill->
+                showBill(bill)
+            }
+        }
+    }
+
+    if (showPrintPasswordDialog) {
+        PasswordDialog(
+            passwordFor = PasswordFor.PRINT_DUPLICATES,
+            onDismiss = {
+                showPrintPasswordDialog = false
+            },
+            onConfirm = {
+                showPrintPasswordDialog = false
+                printBill()
+            }
+        )
     }
 
     Scaffold(
@@ -306,7 +344,7 @@ fun PurchasePostedBillsBody(
                                                     editBill(purchaseBills)
                                                 } else if (isToday) {
                                                     if (HP.passwords.useEditPurchaseBill == true) {
-                                                        purchaseBill = purchaseBills
+                                                        bill = purchaseBills
                                                         showPasswordDialog = true
                                                     } else {
                                                         editBill(purchaseBills)
@@ -314,7 +352,7 @@ fun PurchasePostedBillsBody(
                                                 } else {
                                                     if (HP.settings.editOldCreditBill == true) {
                                                         if (HP.passwords.useEditPurchaseBill == true) {
-                                                            purchaseBill = purchaseBills
+                                                            bill = purchaseBills
                                                             showPasswordDialog = true
                                                         } else {
                                                             editBill(purchaseBills)
@@ -329,7 +367,7 @@ fun PurchasePostedBillsBody(
                                                 editBill(purchaseBills)
                                             } else {
                                                 if (HP.passwords.useEditPurchaseBill == true) {
-                                                    purchaseBill = purchaseBills
+                                                    bill = purchaseBills
                                                     showPasswordDialog = true
                                                 } else {
                                                     editBill(purchaseBills)
@@ -340,7 +378,16 @@ fun PurchasePostedBillsBody(
                                 }
                             }
                         },
-                        onViewClick = onViewClick
+                        onViewClick = onViewClick,
+                        onPrintClick = { purchaseBill ->
+                            if (HP.adminPasswords.usePrintDuplicates == true) {
+                                bill = purchaseBill
+                                showPrintPasswordDialog = true
+                            } else {
+                                bill = purchaseBill
+                                printBill()
+                            }
+                        }
                     )
                 }
 
@@ -420,6 +467,7 @@ private fun BodyList(
     items: List<PurchaseBills>,
     onItemClick: (PurchaseBills) -> Unit,
     onViewClick: (PurchaseBills) -> Unit,
+    onPrintClick: (PurchaseBills) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -442,6 +490,7 @@ private fun BodyList(
                 item = item,
                 onItemClick = onItemClick,
                 onViewClick = onViewClick,
+                onPrintClick = onPrintClick,
             )
         }
     }
@@ -453,6 +502,7 @@ private fun ListCard(
     item: PurchaseBills,
     onItemClick: (PurchaseBills) -> Unit,
     onViewClick: (PurchaseBills) -> Unit,
+    onPrintClick: (PurchaseBills) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -526,12 +576,23 @@ private fun ListCard(
                 }
             }
             Spacer(Modifier.width(8.dp))
-            AppIconButton(
-                onClick = {
-                    onViewClick(item)
-                },
-                icon = Icons.Default.List
-            )
+            Column{
+                AppIconButton(
+                    onClick = {
+                        onViewClick(item)
+                    },
+                    icon = Icons.Default.List
+                )
+                if(HP.userRights.printDuplicates == true) {
+                    Spacer(Modifier.height(4.dp))
+                    AppIconButton(
+                        icon = Icons.Default.Print,
+                        onClick = {
+                            onPrintClick(item)
+                        }
+                    )
+                }
+            }
         }
         Spacer(Modifier.height(2.dp))
         Row(

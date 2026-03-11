@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Print
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -31,10 +32,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.statspos.domain.models.reports.accounts.AccountReport
+import com.example.statspos.domain.models.sales.SalesBill
 import com.example.statspos.domain.models.sales.SalesBills
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
@@ -53,6 +57,7 @@ import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
+import com.example.statspos.presentation.ui.utils.openPdf
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.sales.main_screen.SalesPostedBillsViewModel
 import com.example.statspos.utils.HP
@@ -69,6 +74,7 @@ fun SalesPostedBillsBody(
     onViewClick: (SalesBills) -> Unit,
     onAddUpdateButtonClick: (Long, Boolean, SalesBills?) -> Unit,
 ) {
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -80,7 +86,8 @@ fun SalesPostedBillsBody(
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
-    var salesBill by remember { mutableStateOf<SalesBills?>(null) }
+    var showPrintPasswordDialog by remember { mutableStateOf(false) }
+    var bill by remember { mutableStateOf<SalesBills?>(null) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
@@ -117,7 +124,7 @@ fun SalesPostedBillsBody(
             },
             onConfirm = {
                 showPasswordDialog = false
-                salesBill?.run {
+                bill?.run {
                     onAddUpdateButtonClick(id!!, true, this)
                 }
             }
@@ -126,6 +133,40 @@ fun SalesPostedBillsBody(
 
     fun editBill(salesBills: SalesBills) {
         onAddUpdateButtonClick(salesBills.id!!, true, salesBills)
+    }
+
+    fun showBill(
+        bill: List<SalesBill>,
+        ledger: List<AccountReport>?,
+    ) {
+        val file = salesBillVoucher(
+            context = context,
+            bill = bill,
+            ledger = ledger,
+        )
+
+        openPdf(context, file)
+    }
+
+    fun printBill() {
+        bill?.run {
+            viewModel.getBill(id!!) { bill, ledger ->
+                showBill(bill, ledger)
+            }
+        }
+    }
+
+    if (showPrintPasswordDialog) {
+        PasswordDialog(
+            passwordFor = PasswordFor.PRINT_DUPLICATES,
+            onDismiss = {
+                showPrintPasswordDialog = false
+            },
+            onConfirm = {
+                showPrintPasswordDialog = false
+                printBill()
+            }
+        )
     }
 
     Scaffold(
@@ -320,7 +361,7 @@ fun SalesPostedBillsBody(
                                                 editBill(salesBills)
                                             } else if (isToday) {
                                                 if (HP.passwords.useEditSalesBill == true) {
-                                                    salesBill = salesBills
+                                                    bill = salesBills
                                                     showPasswordDialog = true
                                                 } else {
                                                     editBill(salesBills)
@@ -328,7 +369,7 @@ fun SalesPostedBillsBody(
                                             } else {
                                                 if (HP.settings.editOldCreditBill == true) {
                                                     if (HP.passwords.useEditSalesBill == true) {
-                                                        salesBill = salesBills
+                                                        bill = salesBills
                                                         showPasswordDialog = true
                                                     } else {
                                                         editBill(salesBills)
@@ -343,7 +384,7 @@ fun SalesPostedBillsBody(
                                             editBill(salesBills)
                                         } else {
                                             if (HP.passwords.useEditSalesBill == true) {
-                                                salesBill = salesBills
+                                                bill = salesBills
                                                 showPasswordDialog = true
                                             } else {
                                                 editBill(salesBills)
@@ -353,7 +394,16 @@ fun SalesPostedBillsBody(
                                 }
                             }
                         },
-                        onViewClick = onViewClick
+                        onViewClick = onViewClick,
+                        onPrintClick = { salesBill ->
+                            if (HP.adminPasswords.usePrintDuplicates == true) {
+                                bill = salesBill
+                                showPrintPasswordDialog = true
+                            } else {
+                                bill = salesBill
+                                printBill()
+                            }
+                        }
                     )
                 }
 
@@ -436,6 +486,7 @@ private fun BodyList(
     items: List<SalesBills>,
     onItemClick: (SalesBills) -> Unit,
     onViewClick: (SalesBills) -> Unit,
+    onPrintClick: (SalesBills) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -458,6 +509,7 @@ private fun BodyList(
                 item = item,
                 onItemClick = onItemClick,
                 onViewClick = onViewClick,
+                onPrintClick = onPrintClick,
             )
         }
     }
@@ -469,6 +521,7 @@ private fun ListCard(
     item: SalesBills,
     onItemClick: (SalesBills) -> Unit,
     onViewClick: (SalesBills) -> Unit,
+    onPrintClick: (SalesBills) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -526,12 +579,23 @@ private fun ListCard(
                 }
             }
             Spacer(Modifier.width(8.dp))
-            AppIconButton(
-                onClick = {
-                    onViewClick(item)
-                },
-                icon = Icons.Default.List
-            )
+            Column{
+                AppIconButton(
+                    onClick = {
+                        onViewClick(item)
+                    },
+                    icon = Icons.Default.List
+                )
+                if(HP.userRights.printDuplicates == true) {
+                    Spacer(Modifier.height(4.dp))
+                    AppIconButton(
+                        icon = Icons.Default.Print,
+                        onClick = {
+                            onPrintClick(item)
+                        }
+                    )
+                }
+            }
         }
         Spacer(Modifier.height(2.dp))
         Row(

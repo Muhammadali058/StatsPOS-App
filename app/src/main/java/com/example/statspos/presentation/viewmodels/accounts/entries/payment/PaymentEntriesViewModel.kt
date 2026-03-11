@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.accounts.Entries
 import com.example.statspos.domain.models.reports.accounts.AccountReport
-import com.example.statspos.domain.models.reports.accounts.EntryVoucher
+import com.example.statspos.domain.models.accounts.EntryVoucher
 import com.example.statspos.domain.repository.accounts.AccountsRepository
 import com.example.statspos.utils.EntryType
 import com.example.statspos.utils.HP

@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Print
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -24,13 +26,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.statspos.domain.models.purchase.PurchaseBill
 import com.example.statspos.domain.models.purchase.PurchaseBills
+import com.example.statspos.domain.models.reports.accounts.AccountReport
+import com.example.statspos.domain.models.sales.SalesBill
 import com.example.statspos.domain.models.sales.SalesBills
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
+import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.ErrorDialog
@@ -39,14 +46,18 @@ import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.PasswordDialog
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
+import com.example.statspos.presentation.ui.screens.sales.main_screen.salesBillVoucher
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
+import com.example.statspos.presentation.ui.utils.openPdf
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.purchase.main_screen.PurchasePendingBillsViewModel
 import com.example.statspos.presentation.viewmodels.sales.main_screen.SalesPendingBillsViewModel
 import com.example.statspos.utils.HP
+import com.example.statspos.utils.PasswordFor
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
@@ -55,12 +66,15 @@ fun PurchasePendingBillsBody(
     sharedViewModel: SharedViewModel,
     onAddUpdateButtonClick: (Long, Boolean, PurchaseBills?) -> Unit,
 ) {
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel = hiltViewModel<PurchasePendingBillsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
+    var showPrintPasswordDialog by remember { mutableStateOf(false) }
+    var bill by remember { mutableStateOf<PurchaseBills?>(null) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
@@ -86,6 +100,38 @@ fun PurchasePendingBillsBody(
             onDismiss = {
                 showErrorDialog = false
             },
+        )
+    }
+
+    fun showBill(
+        bill: List<PurchaseBill>,
+    ) {
+        val file = purchaseBillVoucher(
+            context = context,
+            bill = bill,
+        )
+
+        openPdf(context, file)
+    }
+
+    fun printBill() {
+        bill?.run {
+            viewModel.getBill(id!!) { bill->
+                showBill(bill)
+            }
+        }
+    }
+
+    if (showPrintPasswordDialog) {
+        PasswordDialog(
+            passwordFor = PasswordFor.PRINT_DUPLICATES,
+            onDismiss = {
+                showPrintPasswordDialog = false
+            },
+            onConfirm = {
+                showPrintPasswordDialog = false
+                printBill()
+            }
         )
     }
 
@@ -140,6 +186,15 @@ fun PurchasePendingBillsBody(
                         onItemClick = { purchaseBill ->
                             onAddUpdateButtonClick(purchaseBill.id!!, true, purchaseBill)
                         },
+                        onPrintClick = { purchaseBill ->
+                            if (HP.adminPasswords.usePrintDuplicates == true) {
+                                bill = purchaseBill
+                                showPrintPasswordDialog = true
+                            } else {
+                                bill = purchaseBill
+                                printBill()
+                            }
+                        }
                     )
                 }
 
@@ -159,6 +214,7 @@ private fun BodyList(
     onRefresh: () -> Unit,
     items: List<PurchaseBills>,
     onItemClick: (PurchaseBills) -> Unit,
+    onPrintClick: (PurchaseBills) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -169,6 +225,7 @@ private fun BodyList(
             ListCard(
                 item = item,
                 onItemClick = onItemClick,
+                onPrintClick = onPrintClick,
             )
         }
     }
@@ -179,6 +236,7 @@ private fun ListCard(
     modifier: Modifier = Modifier,
     item: PurchaseBills,
     onItemClick: (PurchaseBills) -> Unit,
+    onPrintClick: (PurchaseBills) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -196,7 +254,7 @@ private fun ListCard(
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .weight(1f),
             ) {
                 Row(
                     modifier = Modifier
@@ -227,6 +285,17 @@ private fun ListCard(
                         HeadingMedium("Warehouse: ")
                         LabelLarge(item.warehouseName.toString())
                     }
+                }
+            }
+            if(HP.userRights.printDuplicates == true) {
+                Spacer(Modifier.width(8.dp))
+                Column {
+                    AppIconButton(
+                        icon = Icons.Default.Print,
+                        onClick = {
+                            onPrintClick(item)
+                        }
+                    )
                 }
             }
         }

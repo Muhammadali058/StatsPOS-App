@@ -1,6 +1,8 @@
 package com.example.statspos.presentation.ui.screens.sales.main_screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Print
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +35,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
@@ -58,6 +62,7 @@ import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.ui.utils.openPdf
+import com.example.statspos.presentation.ui.utils.sharePdf
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.sales.main_screen.SalesPostedBillsViewModel
 import com.example.statspos.utils.HP
@@ -88,6 +93,7 @@ fun SalesPostedBillsBody(
     var showPasswordDialog by remember { mutableStateOf(false) }
     var showPrintPasswordDialog by remember { mutableStateOf(false) }
     var bill by remember { mutableStateOf<SalesBills?>(null) }
+    var shareBill by remember { mutableStateOf(false) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
@@ -145,7 +151,10 @@ fun SalesPostedBillsBody(
             ledger = ledger,
         )
 
-        openPdf(context, file)
+        if (shareBill)
+            sharePdf(context, file)
+        else
+            openPdf(context, file)
     }
 
     fun printBill() {
@@ -198,7 +207,7 @@ fun SalesPostedBillsBody(
                         Text(text = "Search By")
                     },
                 )
-                if(HP.user.userType == 1) {
+                if (HP.user.userType == 1) {
                     ComboBox(
                         modifier = Modifier
                             .fillMaxWidth(),
@@ -398,9 +407,22 @@ fun SalesPostedBillsBody(
                         onPrintClick = { salesBill ->
                             if (HP.adminPasswords.usePrintDuplicates == true) {
                                 bill = salesBill
+                                shareBill = false
                                 showPrintPasswordDialog = true
                             } else {
                                 bill = salesBill
+                                shareBill = false
+                                printBill()
+                            }
+                        },
+                        onShareClick = { salesBill ->
+                            if (HP.adminPasswords.usePrintDuplicates == true) {
+                                bill = salesBill
+                                shareBill = true
+                                showPrintPasswordDialog = true
+                            } else {
+                                bill = salesBill
+                                shareBill = true
                                 printBill()
                             }
                         }
@@ -487,6 +509,7 @@ private fun BodyList(
     onItemClick: (SalesBills) -> Unit,
     onViewClick: (SalesBills) -> Unit,
     onPrintClick: (SalesBills) -> Unit,
+    onShareClick: (SalesBills) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -510,6 +533,7 @@ private fun BodyList(
                 onItemClick = onItemClick,
                 onViewClick = onViewClick,
                 onPrintClick = onPrintClick,
+                onShareClick = onShareClick,
             )
         }
     }
@@ -522,6 +546,7 @@ private fun ListCard(
     onItemClick: (SalesBills) -> Unit,
     onViewClick: (SalesBills) -> Unit,
     onPrintClick: (SalesBills) -> Unit,
+    onShareClick: (SalesBills) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -579,20 +604,31 @@ private fun ListCard(
                 }
             }
             Spacer(Modifier.width(8.dp))
-            Column{
+            Column {
                 AppIconButton(
+                    icon = Icons.Default.List,
                     onClick = {
                         onViewClick(item)
                     },
-                    icon = Icons.Default.List
+                    buttonSize = 26.dp,
+                    size = 20.dp,
                 )
-                if(HP.userRights.printDuplicates == true) {
-                    Spacer(Modifier.height(4.dp))
+                if (HP.userRights.printDuplicates == true) {
                     AppIconButton(
                         icon = Icons.Default.Print,
                         onClick = {
                             onPrintClick(item)
-                        }
+                        },
+                        buttonSize = 26.dp,
+                        size = 20.dp,
+                    )
+                    AppIconButton(
+                        icon = Icons.Default.Share,
+                        onClick = {
+                            onShareClick(item)
+                        },
+                        buttonSize = 26.dp,
+                        size = 20.dp,
                     )
                 }
             }
@@ -612,7 +648,10 @@ private fun ListCard(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            LabelLarge(HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)), Modifier.weight(1f))
+            LabelLarge(
+                HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)),
+                Modifier.weight(1f)
+            )
             LabelMedium(item.salesOn.toString(), Modifier.weight(.5f))
             LabelMedium(item.salesType.toString(), Modifier.weight(.5f))
             LabelMedium(item.mop.toString(), Modifier.weight(.5f))

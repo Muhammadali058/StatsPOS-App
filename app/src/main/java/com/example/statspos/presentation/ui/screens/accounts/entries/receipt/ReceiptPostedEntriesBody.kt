@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Print
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -55,6 +56,7 @@ import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.screens.accounts.entries.vouchers.entryVoucher
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.ui.utils.openPdf
+import com.example.statspos.presentation.ui.utils.sharePdf
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.accounts.entries.receipt.ReceiptEntriesViewModel
 import com.example.statspos.utils.EntryType
@@ -141,6 +143,7 @@ fun ReceiptPostedEntriesBody(
     fun showVoucher(
         entry: EntryVoucher,
         ledger: List<AccountReport>?,
+        share:Boolean = false,
     ) {
         val file = entryVoucher(
             context = context,
@@ -149,7 +152,10 @@ fun ReceiptPostedEntriesBody(
             ledger = ledger,
         )
 
-        openPdf(context, file)
+        if(share)
+            sharePdf(context, file)
+        else
+            openPdf(context, file)
     }
 
     Box(
@@ -215,6 +221,14 @@ fun ReceiptPostedEntriesBody(
                             entryId = entry.id!!,
                             onSuccess = { entry, ledger ->
                                 showVoucher(entry, ledger)
+                            }
+                        )
+                    },
+                    onShareClick = { entry ->
+                        viewModel.getEntry(
+                            entryId = entry.id!!,
+                            onSuccess = { entry, ledger ->
+                                showVoucher(entry, ledger, true)
                             }
                         )
                     }
@@ -312,6 +326,7 @@ private fun BodyList(
     items: List<Entries>,
     onDeleteClick: (Entries) -> Unit,
     onPrintClick: (Entries) -> Unit,
+    onShareClick: (Entries) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -323,6 +338,7 @@ private fun BodyList(
                 item = item,
                 onDeleteClick = onDeleteClick,
                 onPrintClick = onPrintClick,
+                onShareClick = onShareClick,
             )
         }
     }
@@ -334,6 +350,7 @@ private fun ListCard(
     item: Entries,
     onDeleteClick: (Entries) -> Unit,
     onPrintClick: (Entries) -> Unit,
+    onShareClick: (Entries) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -393,10 +410,20 @@ private fun ListCard(
                 modifier = Modifier,
             ) {
                 AppIconButton(
+                    icon = Icons.Default.Share,
+                    onClick = {
+                        onShareClick(item)
+                    },
+                    buttonSize = 26.dp,
+                    size = 20.dp,
+                )
+                AppIconButton(
                     icon = Icons.Default.Print,
                     onClick = {
                         onPrintClick(item)
-                    }
+                    },
+                    buttonSize = 26.dp,
+                    size = 20.dp,
                 )
                 Spacer(Modifier.height(8.dp))
                 if (HP.userRights.deleteAnything == true) {
@@ -404,7 +431,8 @@ private fun ListCard(
                         icon = Icons.Default.Delete,
                         onClick = {
                             onDeleteClick(item)
-                        }
+                        },
+                        size = 22.dp,
                     )
                 }
             }

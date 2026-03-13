@@ -1,7 +1,6 @@
 package com.example.statspos.presentation.ui.screens.utilities
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,9 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -27,7 +23,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,38 +31,87 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.domain.models.DropdownItem
-import com.example.statspos.domain.models.reports.accounts.AccountReport
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
-import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.AppSwitch
-import com.example.statspos.presentation.ui.components.AppText
 import com.example.statspos.presentation.ui.components.ComboBox
-import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.ExpandableSection
 import com.example.statspos.presentation.ui.components.PasswordTextbox
-import com.example.statspos.presentation.ui.components.ProgressBarLayout
+import com.example.statspos.presentation.ui.components.ReportButton
 import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.components.TopAppBar
-import com.example.statspos.presentation.ui.components.UploadImageView
-import com.example.statspos.presentation.ui.screens.TopRoutes
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.utilities.SettingsViewModel
-import com.example.statspos.presentation.viewmodels.utilities.users.AddUpdateUserViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import com.example.statspos.utils.showToast
-import okhttp3.MultipartBody
+import kotlinx.serialization.Serializable
+
+private sealed class Routes : NavKey {
+    @Serializable
+    data object Home : Routes()
+
+    @Serializable
+    data object PrintSettings : Routes()
+}
 
 @Composable
 fun SettingsScreen(
     sharedViewModel: SharedViewModel,
     onBack: () -> Unit,
+) {
+    val backStack = rememberNavBackStack(Routes.Home)
+    fun navigate(key: NavKey) {
+        if (backStack.lastOrNull() != key) {
+            backStack.add(key)
+        }
+    }
+    NavDisplay(
+        backStack = backStack,
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
+        entryProvider = entryProvider {
+            entry<Routes.Home> {
+                Home(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        onBack()
+                    },
+                    onPrintSettingsClick = {
+                        navigate(Routes.PrintSettings)
+                    }
+                )
+            }
+            entry<Routes.PrintSettings> { key ->
+                PrintSettingsScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                )
+            }
+        }
+    )
+}
+
+@Composable
+private fun Home(
+    sharedViewModel: SharedViewModel,
+    onBack: () -> Unit,
+    onPrintSettingsClick:() -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -247,6 +291,11 @@ fun SettingsScreen(
                         onContactChange = viewModel::onContactChange,
                         onAddressChange = viewModel::onAddressChange,
                     )
+
+                    Spacer(Modifier.height(12.dp))
+                    ReportButton("Print Settings") {
+                        onPrintSettingsClick()
+                    }
                 }
 
                 Box(

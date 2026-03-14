@@ -160,6 +160,8 @@ class GatepassViewModel @Inject constructor(
             if (state.value.isLoading)
                 return@launch
 
+            beforeRequest()
+
             when (val result = api.loadGatepass(gatepassId)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)

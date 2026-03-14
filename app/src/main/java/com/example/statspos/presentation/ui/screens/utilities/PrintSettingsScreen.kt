@@ -11,16 +11,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -31,21 +27,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
-import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.AppSwitch
-import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.ErrorDialog
+import com.example.statspos.presentation.ui.components.ExpandableSection
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.Textbox
@@ -53,12 +45,9 @@ import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.components.UploadImageView
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.items.categories.AddUpdateCategoryViewModel
 import com.example.statspos.presentation.viewmodels.utilities.PrintSettingsViewModel
-import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
-import com.example.statspos.utils.showToast
 import okhttp3.MultipartBody
 
 @Composable
@@ -143,18 +132,30 @@ fun PrintSettingsScreen(
                         .verticalScroll(scrollState),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
+                    ShopData(
+                        shopName = state.shopName,
+                        contact = state.contact,
+                        address = state.address,
+                        onShopNameChange = viewModel::onShopNameChange,
+                        onContactChange = viewModel::onContactChange,
+                        onAddressChange = viewModel::onAddressChange,
+                    )
                     Spacer(Modifier.height(12.dp))
                     Body(
                         showUrdu = state.showUrdu,
                         showLogo = state.showLogo,
                         onShowUrduChange = viewModel::onShowUrduChange,
                         onShowLogoChange = viewModel::onShowLogoChange,
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    ImageExpandable(
                         isUploadingImage = state.isUploadingImage,
                         imageUrl = state.imageUrl,
                         onImageUrlChange = {
                             viewModel.uploadImage(it)
                         }
                     )
+
                 }
 
                 Box(
@@ -185,14 +186,51 @@ fun PrintSettingsScreen(
 }
 
 @Composable
+private fun ShopData(
+    shopName: String,
+    contact: String,
+    address: String,
+    onShopNameChange: (String) -> Unit,
+    onContactChange: (String) -> Unit,
+    onAddressChange: (String) -> Unit,
+) {
+    Textbox(
+        value = shopName,
+        onValueChange = onShopNameChange,
+        modifier = Modifier
+            .fillMaxWidth(),
+        label = {
+            Text("Shop Name")
+        }
+    )
+    Textbox(
+        value = contact,
+        onValueChange = onContactChange,
+        modifier = Modifier
+            .fillMaxWidth(),
+        label = {
+            Text("Contact")
+        }
+    )
+    Textbox(
+        value = address,
+        onValueChange = onAddressChange,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(84.dp),
+        label = {
+            Text("Address")
+        },
+        singleLine = false,
+    )
+}
+
+@Composable
 private fun Body(
     showUrdu: Boolean,
     showLogo: Boolean,
     onShowUrduChange: (Boolean) -> Unit,
     onShowLogoChange: (Boolean) -> Unit,
-    isUploadingImage: Boolean,
-    imageUrl: String,
-    onImageUrlChange: (MultipartBody.Part) -> Unit,
 ) {
     Row (
         modifier = Modifier
@@ -210,20 +248,34 @@ private fun Body(
             label = "Show Logo"
         )
     }
-    Spacer(Modifier.height(12.dp))
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        if (isUploadingImage) {
-            AppCircularProgressIndicator()
-        } else {
-            UploadImageView(
-                imageUrl = imageUrl,
-                onImageUrlChange = onImageUrlChange
-            )
-        }
-    }
 }
+
+
+@Composable
+private fun ImageExpandable(
+    isUploadingImage: Boolean,
+    imageUrl: String,
+    onImageUrlChange: (MultipartBody.Part) -> Unit,
+) {
+//    ExpandableSection(
+//        title = "Logo",
+//        initiallyExpanded = false,
+//    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            if (isUploadingImage) {
+                AppCircularProgressIndicator()
+            } else {
+                UploadImageView(
+                    imageUrl = imageUrl,
+                    onImageUrlChange = onImageUrlChange
+                )
+            }
+        }
+//    }
+}
+

@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Print
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +40,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.purchase.PurchaseBill
 import com.example.statspos.domain.models.purchase.PurchaseBills
+import com.example.statspos.domain.models.sales.SalesBills
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.BottomHeading
@@ -57,6 +59,7 @@ import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.ui.utils.openPdf
+import com.example.statspos.presentation.ui.utils.sharePdf
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.purchase.main_screen.PurchasePostedBillsViewModel
 import com.example.statspos.utils.HP
@@ -87,6 +90,7 @@ fun PurchasePostedBillsBody(
     var showPasswordDialog by remember { mutableStateOf(false) }
     var showPrintPasswordDialog by remember { mutableStateOf(false) }
     var bill by remember { mutableStateOf<PurchaseBills?>(null) }
+    var shareBill by remember { mutableStateOf(false) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
@@ -142,7 +146,10 @@ fun PurchasePostedBillsBody(
             bill = bill,
         )
 
-        openPdf(context, file)
+        if (shareBill)
+            sharePdf(context, file)
+        else
+            openPdf(context, file)
     }
 
     fun printBill() {
@@ -379,15 +386,17 @@ fun PurchasePostedBillsBody(
                             }
                         },
                         onViewClick = onViewClick,
-                        onPrintClick = { purchaseBill ->
+                        onPrintClick = { purchaseBill, share ->
                             if (HP.adminPasswords.usePrintDuplicates == true) {
                                 bill = purchaseBill
+                                shareBill = share
                                 showPrintPasswordDialog = true
                             } else {
                                 bill = purchaseBill
+                                shareBill = share
                                 printBill()
                             }
-                        }
+                        },
                     )
                 }
 
@@ -467,7 +476,7 @@ private fun BodyList(
     items: List<PurchaseBills>,
     onItemClick: (PurchaseBills) -> Unit,
     onViewClick: (PurchaseBills) -> Unit,
-    onPrintClick: (PurchaseBills) -> Unit,
+    onPrintClick: (PurchaseBills, Boolean) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -502,7 +511,7 @@ private fun ListCard(
     item: PurchaseBills,
     onItemClick: (PurchaseBills) -> Unit,
     onViewClick: (PurchaseBills) -> Unit,
-    onPrintClick: (PurchaseBills) -> Unit,
+    onPrintClick: (PurchaseBills, Boolean) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -578,18 +587,29 @@ private fun ListCard(
             Spacer(Modifier.width(8.dp))
             Column{
                 AppIconButton(
+                    icon = Icons.Default.List,
                     onClick = {
                         onViewClick(item)
                     },
-                    icon = Icons.Default.List
+                    buttonSize = 26.dp,
+                    size = 20.dp,
                 )
-                if(HP.userRights.printDuplicates == true) {
-                    Spacer(Modifier.height(4.dp))
+                if (HP.userRights.printDuplicates == true) {
                     AppIconButton(
                         icon = Icons.Default.Print,
                         onClick = {
-                            onPrintClick(item)
-                        }
+                            onPrintClick(item, false)
+                        },
+                        buttonSize = 26.dp,
+                        size = 20.dp,
+                    )
+                    AppIconButton(
+                        icon = Icons.Default.Share,
+                        onClick = {
+                            onPrintClick(item, true)
+                        },
+                        buttonSize = 26.dp,
+                        size = 20.dp,
                     )
                 }
             }

@@ -1,5 +1,6 @@
 package com.example.statspos.presentation.viewmodels.main
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.utilities.users.UserRights
@@ -11,6 +12,7 @@ import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.get
+import com.example.statspos.utils.preloadImages
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -154,6 +156,7 @@ class LoginViewModel @Inject constructor(
                     resultSuccess()
 
                     HP.setDropdowns(result.data)
+                    preloadImages(listOf(HP.getImageUrl(HP.printSettings.imageUrl.toString())))
 
                     onSuccess()
                 }

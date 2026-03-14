@@ -237,6 +237,8 @@ class SalesPostedBillsViewModel @Inject constructor(
             if (state.value.isLoading)
                 return@launch
 
+            beforeRequest()
+
             val params = JsonObject().apply {
                 addProperty("id", invoiceId)
                 addProperty("billType", 1)

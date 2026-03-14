@@ -216,22 +216,14 @@ fun ReceiptPostedEntriesBody(
                             }
                         }
                     },
-                    onPrintClick = { entry ->
+                    onPrintClick = { entry, share ->
                         viewModel.getEntry(
                             entryId = entry.id!!,
                             onSuccess = { entry, ledger ->
-                                showVoucher(entry, ledger)
+                                showVoucher(entry, ledger, share)
                             }
                         )
                     },
-                    onShareClick = { entry ->
-                        viewModel.getEntry(
-                            entryId = entry.id!!,
-                            onSuccess = { entry, ledger ->
-                                showVoucher(entry, ledger, true)
-                            }
-                        )
-                    }
                 )
             }
 
@@ -325,8 +317,7 @@ private fun BodyList(
     onRefresh: () -> Unit,
     items: List<Entries>,
     onDeleteClick: (Entries) -> Unit,
-    onPrintClick: (Entries) -> Unit,
-    onShareClick: (Entries) -> Unit,
+    onPrintClick: (Entries, Boolean) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -338,7 +329,6 @@ private fun BodyList(
                 item = item,
                 onDeleteClick = onDeleteClick,
                 onPrintClick = onPrintClick,
-                onShareClick = onShareClick,
             )
         }
     }
@@ -349,8 +339,7 @@ private fun ListCard(
     modifier: Modifier = Modifier,
     item: Entries,
     onDeleteClick: (Entries) -> Unit,
-    onPrintClick: (Entries) -> Unit,
-    onShareClick: (Entries) -> Unit,
+    onPrintClick: (Entries, Boolean) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -412,7 +401,7 @@ private fun ListCard(
                 AppIconButton(
                     icon = Icons.Default.Share,
                     onClick = {
-                        onShareClick(item)
+                        onPrintClick(item, true)
                     },
                     buttonSize = 26.dp,
                     size = 20.dp,
@@ -420,7 +409,7 @@ private fun ListCard(
                 AppIconButton(
                     icon = Icons.Default.Print,
                     onClick = {
-                        onPrintClick(item)
+                        onPrintClick(item, false)
                     },
                     buttonSize = 26.dp,
                     size = 20.dp,

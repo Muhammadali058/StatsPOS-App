@@ -1,6 +1,7 @@
 package com.example.statspos.presentation.ui.screens.sales.main_screen
 
 import android.content.Context
+import android.util.Log
 import com.example.statspos.domain.models.reports.accounts.AccountReport
 import com.example.statspos.domain.models.sales.SalesBill
 import com.example.statspos.presentation.ui.components.PageXofYEventHandler
@@ -8,6 +9,7 @@ import com.example.statspos.presentation.ui.utils.REPORT_BODY_FONT_SIZE
 import com.example.statspos.presentation.ui.utils.REPORT_HEADER_FONT_SIZE
 import com.example.statspos.presentation.ui.utils.REPORT_HEADINGS_FONT_SIZE
 import com.example.statspos.utils.HP
+import com.example.statspos.utils.getDefaultImageCell
 import com.example.statspos.utils.urduTextToPdfImage
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.events.PdfDocumentEvent
@@ -48,24 +50,43 @@ fun salesBillVoucher(
 
     // region Header
     // ---------------- Top ----------------
-    document.add(
-        Paragraph("Mian Brothers Super Store")
-            .setBold()
-            .setFontSize(20f)
+    val shopTable =
+        Table(UnitValue.createPercentArray(if(HP.printSettings.showLogo == true) floatArrayOf(20f, 80f) else floatArrayOf(100f))).useAllAvailableWidth()
+
+    if(HP.printSettings.showLogo == true) {
+        val imageCell = getDefaultImageCell(
+            imageUrl = HP.getImageUrl(HP.printSettings.imageUrl.toString()),
+            horizontalAlignment = HorizontalAlignment.LEFT,
+            width = 80f,
+            height = 80f,
+        )
+        imageCell.setBorder(null)
+        shopTable.addCell(imageCell)
+    }
+
+    shopTable.addCell(
+        Cell()
+            .add(
+                Paragraph()
+                    .add(
+                        Text(HP.printSettings.shopName).setBold().setFontSize(20f)
+                            .setTextAlignment(TextAlignment.CENTER)
+                    )
+                    .add(
+                        Text("\n${HP.printSettings.address}").setFontSize(12f)
+                            .setTextAlignment(TextAlignment.CENTER)
+                    )
+                    .add(
+                        Text("\n${HP.printSettings.contact}").setFontSize(12f)
+                            .setTextAlignment(TextAlignment.CENTER)
+                    )
+            )
+            .setFontSize(REPORT_HEADINGS_FONT_SIZE)
+            .setBorder(null)
             .setTextAlignment(TextAlignment.CENTER)
     )
-    document.add(
-        Paragraph("Chungi amar sidhu ferozepur road, lahore")
-            .setFontSize(12f)
-            .setMarginTop(-5f)
-            .setTextAlignment(TextAlignment.CENTER)
-    )
-    document.add(
-        Paragraph("0303-0454628, 0307-0465629")
-            .setFontSize(12f)
-            .setMarginTop(-5f)
-            .setTextAlignment(TextAlignment.CENTER)
-    )
+
+    document.add(shopTable)
 
     // Horizontal Line
     document.add(
@@ -77,7 +98,7 @@ fun salesBillVoucher(
             )
             .setFontSize(12f)
             .setBorder(null)
-            .setMarginTop(-10f)
+//            .setMarginTop(10f)
             .setTextAlignment(TextAlignment.CENTER)
     )
 
@@ -90,8 +111,8 @@ fun salesBillVoucher(
             .add(
                 Paragraph()
                     .add(Text("Customer: ").setBold())
-                    .add(Text("Muhammad Ali"))
-                    .setMarginTop(-5f)
+                    .add(Text(bill[0].customerName))
+//                    .setMarginTop(-5f)
             )
             .setFontSize(REPORT_HEADINGS_FONT_SIZE)
             .setBorder(null)
@@ -103,8 +124,8 @@ fun salesBillVoucher(
             .add(
                 Paragraph()
                     .add(Text("Invoice #: ").setBold())
-                    .add(Text("12345"))
-                    .setMarginTop(-5f)
+                    .add(Text(bill[0].id.toString()))
+//                    .setMarginTop(-5f)
             )
             .setFontSize(REPORT_HEADINGS_FONT_SIZE)
             .setBorder(null)
@@ -116,8 +137,8 @@ fun salesBillVoucher(
             .add(
                 Paragraph()
                     .add(Text("Contact: ").setBold())
-                    .add(Text("0303-0454625"))
-                    .setMarginTop(-5f)
+                    .add(Text(bill[0].customerContact))
+//                    .setMarginTop(-5f)
             )
             .setFontSize(REPORT_HEADINGS_FONT_SIZE)
             .setBorder(null)
@@ -129,8 +150,8 @@ fun salesBillVoucher(
             .add(
                 Paragraph()
                     .add(Text("User: ").setBold())
-                    .add(Text("Muhammad Ali"))
-                    .setMarginTop(-5f)
+                    .add(Text(bill[0].user))
+//                    .setMarginTop(-5f)
             )
             .setFontSize(REPORT_HEADINGS_FONT_SIZE)
             .setBorder(null)
@@ -142,8 +163,8 @@ fun salesBillVoucher(
             .add(
                 Paragraph()
                     .add(Text("Address: ").setBold())
-                    .add(Text("Chungi amar sidhu, ferozepur road, lahore"))
-                    .setMarginTop(-5f)
+                    .add(Text(bill[0].customerAddress))
+//                    .setMarginTop(-5f)
             )
             .setFontSize(REPORT_HEADINGS_FONT_SIZE)
             .setBorder(null)
@@ -155,8 +176,8 @@ fun salesBillVoucher(
             .add(
                 Paragraph()
                     .add(Text("Date: ").setBold())
-                    .add(Text("17-12-2000 12:15 AM"))
-                    .setMarginTop(-5f)
+                    .add(Text("${bill[0].date}, ${bill[0].time}"))
+//                    .setMarginTop(-5f)
             )
             .setFontSize(REPORT_HEADINGS_FONT_SIZE)
             .setBorder(null)
@@ -227,10 +248,8 @@ fun salesBillVoucher(
         )
 
         // region Itemname & Urduname
-        val image = urduTextToPdfImage(context, item.urduname.toString())
-        image.setHorizontalAlignment(HorizontalAlignment.RIGHT)
-
-        val itemnameTable = Table(floatArrayOf(1f, 1f))
+        val itemnameTable =
+            Table(if (HP.printSettings.showUrdu == true) floatArrayOf(1f, 1f) else floatArrayOf(1f))
         itemnameTable.setWidth(UnitValue.createPercentValue(100f))
 
         itemnameTable.addCell(
@@ -239,11 +258,16 @@ fun salesBillVoucher(
                 .setBorder(null)
         )
 
-        itemnameTable.addCell(
-            Cell().add(image)
-                .setTextAlignment(TextAlignment.RIGHT)
-                .setBorder(null)
-        )
+        if (HP.printSettings.showUrdu == true) {
+            val image = urduTextToPdfImage(context, item.urduname.toString())
+            image.setHorizontalAlignment(HorizontalAlignment.RIGHT)
+
+            itemnameTable.addCell(
+                Cell().add(image)
+                    .setTextAlignment(TextAlignment.RIGHT)
+                    .setBorder(null)
+            )
+        }
 
         bodyTable.addCell(
             Cell().add(itemnameTable)
@@ -264,14 +288,14 @@ fun salesBillVoucher(
         }
 
         bodyTable.addCell(
-            Cell().add(Paragraph(HP.formatDecimal(item.rate)).setFontSize(REPORT_BODY_FONT_SIZE))
+            Cell().add(Paragraph(if(item.qty!! == 0.0) "0" else HP.formatDecimal(item.rate)).setFontSize(REPORT_BODY_FONT_SIZE))
                 .setTextAlignment(TextAlignment.CENTER)
         )
 
         if (HP.settings.saleCartons == true) {
             bodyTable.addCell(
                 Cell().add(
-                    Paragraph(HP.formatDecimal(item.crtnRate)).setFontSize(
+                    Paragraph(if(item.crtn!! == 0) "0" else HP.formatDecimal(item.crtnRate)).setFontSize(
                         REPORT_BODY_FONT_SIZE
                     )
                 )
@@ -399,9 +423,12 @@ fun salesBillVoucher(
                     .add(
                         Div()
                             .setWidth(UnitValue.createPointValue(100f))
-                            .setBorderBottom(SolidBorder(
-                                if(bill[0].salesOn == "Credit") ColorConstants.WHITE else ColorConstants.BLACK,
-                                if(bill[0].salesOn == "Credit") 0f else 1f))
+                            .setBorderBottom(
+                                SolidBorder(
+                                    if (bill[0].salesOn == "Credit") ColorConstants.WHITE else ColorConstants.BLACK,
+                                    if (bill[0].salesOn == "Credit") 0f else 1f
+                                )
+                            )
                             .add(
                                 Paragraph(HP.formatDecimal(bill[0].grandTotal))
                                     .setTextAlignment(TextAlignment.RIGHT)
@@ -414,7 +441,7 @@ fun salesBillVoucher(
             .setTextAlignment(TextAlignment.RIGHT)
     )
 
-    if(bill[0].salesOn == "Credit") {
+    if (bill[0].salesOn == "Credit") {
         footerTable.addCell(
             Cell()
                 .add(
@@ -435,7 +462,7 @@ fun salesBillVoucher(
                                 .setWidth(UnitValue.createPointValue(100f))
                                 .setBorderBottom(SolidBorder(ColorConstants.BLACK, 1f))
                                 .add(
-                                    Paragraph(HP.formatDecimal(bill[0].oldBalance))
+                                    Paragraph("${HP.formatDecimal(abs(bill[0].oldBalance!!))} ${if (bill[0].oldBalance!! > 0) "R" else "P"}")
                                         .setTextAlignment(TextAlignment.RIGHT)
                                 )
                         )
@@ -466,7 +493,7 @@ fun salesBillVoucher(
                                 .setWidth(UnitValue.createPointValue(100f))
 //                            .setBorderBottom(SolidBorder(ColorConstants.BLACK, 1f))
                                 .add(
-                                    Paragraph(HP.formatDecimal((bill[0].grandTotal!! + bill[0].oldBalance!!)))
+                                    Paragraph(HP.formatDecimal(abs(bill[0].grandTotal!! + bill[0].oldBalance!!)))
                                         .setTextAlignment(TextAlignment.RIGHT)
                                 )
                         )
@@ -528,7 +555,7 @@ fun salesBillVoucher(
                                 .setWidth(UnitValue.createPointValue(100f))
                                 .setBorderBottom(SolidBorder(ColorConstants.BLACK, 1f))
                                 .add(
-                                    Paragraph(HP.formatDecimal(bill[0].newBalance))
+                                    Paragraph("${HP.formatDecimal(abs(bill[0].newBalance!!))} ${if (bill[0].newBalance!! > 0) "R" else "P"}")
                                         .setTextAlignment(TextAlignment.RIGHT)
                                 )
                         )

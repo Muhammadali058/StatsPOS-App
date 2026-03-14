@@ -276,11 +276,12 @@ fun NavigationDrawer(
     viewModel: LocalDataViewModel,
     onClick: (BottomNavItem) -> Unit,
 ) {
-    val items = listOf(
-        BottomNavItem(Icons.Default.Home, "Home"),
-        BottomNavItem(Icons.Default.Home, "Users"),
-        BottomNavItem(Icons.Default.Home, "Settings"),
-    )
+//    val items = listOf(
+//        BottomNavItem(Icons.Default.Home, "Home"),
+//        BottomNavItem(Icons.Default.Home, "Users"),
+//        BottomNavItem(Icons.Default.Home, "Settings"),
+//    )
+    val items = emptyList<BottomNavItem>()
 
     var darkModeChecked by remember { mutableStateOf(false) }
 

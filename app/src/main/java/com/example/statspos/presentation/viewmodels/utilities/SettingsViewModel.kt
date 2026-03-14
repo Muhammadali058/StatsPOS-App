@@ -40,9 +40,9 @@ class SettingsViewModel @Inject constructor(
         val defaultDiscount: DropdownItem = HP.defaultDiscount[0],
 
         // Settings
-        val shopName: String = "",
-        val contact: String = "",
-        val address: String = "",
+//        val shopName: String = "",
+//        val contact: String = "",
+//        val address: String = "",
 
         val saleUnderStock: Boolean = false,
         val costWarning: Boolean = false,
@@ -151,17 +151,17 @@ class SettingsViewModel @Inject constructor(
     // endregion
 
     // region onChangeMethods
-    fun onShopNameChange(value: String) {
-        state.update { it.copy(shopName = value) }
-    }
-
-    fun onContactChange(value: String) {
-        state.update { it.copy(contact = value) }
-    }
-
-    fun onAddressChange(value: String) {
-        state.update { it.copy(address = value) }
-    }
+//    fun onShopNameChange(value: String) {
+//        state.update { it.copy(shopName = value) }
+//    }
+//
+//    fun onContactChange(value: String) {
+//        state.update { it.copy(contact = value) }
+//    }
+//
+//    fun onAddressChange(value: String) {
+//        state.update { it.copy(address = value) }
+//    }
 
     fun onDefaultRateChange(value: DropdownItem) {
         state.update { it.copy(defaultRate = value) }
@@ -399,9 +399,9 @@ class SettingsViewModel @Inject constructor(
     // region Methods
     private fun getFormDataSettings(): Settings {
         return Settings(
-            shopName = state.value.shopName,
-            contact = state.value.contact,
-            address = state.value.address,
+//            shopName = state.value.shopName,
+//            contact = state.value.contact,
+//            address = state.value.address,
 
             isDefaultRateRetail = state.value.defaultRate.id == 0L,
             isDefaultDiscRs = state.value.defaultDiscount.id == 0L,
@@ -458,9 +458,9 @@ class SettingsViewModel @Inject constructor(
     private fun setFormDataSettings(setting: Settings) {
         state.update {
             it.copy(
-                shopName = setting.shopName!!,
-                contact = setting.contact!!,
-                address = setting.address!!,
+//                shopName = setting.shopName!!,
+//                contact = setting.contact!!,
+//                address = setting.address!!,
 
                 defaultRate = HP.defaultRate[if (setting.isDefaultRateRetail!!) 0 else 1],
                 defaultDiscount = HP.defaultDiscount[if (setting.isDefaultDiscRs!!) 0 else 1],

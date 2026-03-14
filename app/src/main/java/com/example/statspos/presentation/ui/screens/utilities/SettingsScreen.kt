@@ -1,6 +1,7 @@
 package com.example.statspos.presentation.ui.screens.utilities
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -63,6 +64,9 @@ private sealed class Routes : NavKey {
     data object Home : Routes()
 
     @Serializable
+    data object AdminSettings : Routes()
+
+    @Serializable
     data object PrintSettings : Routes()
 }
 
@@ -90,9 +94,20 @@ fun SettingsScreen(
                     onBack = {
                         onBack()
                     },
+                    onAdminSettingsClick = {
+                        navigate(Routes.AdminSettings)
+                    },
                     onPrintSettingsClick = {
                         navigate(Routes.PrintSettings)
-                    }
+                    },
+                )
+            }
+            entry<Routes.AdminSettings> { key ->
+                AdminSettingsScreen (
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
                 )
             }
             entry<Routes.PrintSettings> { key ->
@@ -111,6 +126,7 @@ fun SettingsScreen(
 private fun Home(
     sharedViewModel: SharedViewModel,
     onBack: () -> Unit,
+    onAdminSettingsClick:() -> Unit,
     onPrintSettingsClick:() -> Unit,
 ) {
     val context = LocalContext.current
@@ -175,6 +191,7 @@ private fun Home(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.surface)
+                .padding(vertical = 8.dp)
         ) {
             Column(
                 Modifier
@@ -188,8 +205,6 @@ private fun Home(
                         .imePadding(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Spacer(Modifier.height(16.dp))
-
                     Basic(
                         defaultRate = state.defaultRate,
                         defaultDiscount = state.defaultDiscount,
@@ -283,25 +298,27 @@ private fun Home(
                         onUseDeleteEntryChange = viewModel::onUseDeleteEntryChange,
                     )
 
-                    ShopData(
-                        shopName = state.shopName,
-                        contact = state.contact,
-                        address = state.address,
-                        onShopNameChange = viewModel::onShopNameChange,
-                        onContactChange = viewModel::onContactChange,
-                        onAddressChange = viewModel::onAddressChange,
-                    )
-
                     Spacer(Modifier.height(12.dp))
-                    ReportButton("Print Settings") {
-                        onPrintSettingsClick()
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(ConstantPaddings.BODY_HORIZONTAL),
+                        horizontalArrangement = Arrangement.Start,
+                    ) {
+                        ReportButton("Other Settings") {
+                            onAdminSettingsClick()
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        ReportButton("Print Settings") {
+                            onPrintSettingsClick()
+                        }
                     }
+                    Spacer(Modifier.height(12.dp))
                 }
 
                 Box(
                     modifier = Modifier
                         .padding(ConstantPaddings.BODY_HORIZONTAL)
-                        .padding(vertical = 16.dp)
                 ) {
                     if (state.isLoading) {
                         AppCircularProgressIndicator()

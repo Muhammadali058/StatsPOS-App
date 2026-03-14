@@ -45,9 +45,9 @@ fun entryVoucher(
 
     // region Header
     // ---------------- Report Title ----------------
-    if(HP.settings.shopName.toString().isNotEmpty()) {
+    if(HP.printSettings.shopName.toString().isNotEmpty()) {
         document.add(
-            Paragraph(HP.settings.shopName.toString())
+            Paragraph(HP.printSettings.shopName.toString())
                 .setBold()
                 .setFontSize(18f)
                 .setTextAlignment(TextAlignment.CENTER)
@@ -109,7 +109,7 @@ fun entryVoucher(
                         Div()
                             .setWidth(UnitValue.createPointValue(210f))
                             .setBorderTop(SolidBorder(ColorConstants.BLACK, 1f))
-                    )
+                    ).setMarginTop(-5f)
 
             )
             .setFontSize(topFontSize)
@@ -141,7 +141,7 @@ fun entryVoucher(
                             )
                     )
             )
-            .setFontSize(12f)
+            .setFontSize(10f)
             .setBorder(null)
             .setTextAlignment(TextAlignment.RIGHT)
     )
@@ -160,7 +160,7 @@ fun entryVoucher(
                             )
                     )
             )
-            .setFontSize(12f)
+            .setFontSize(10f)
             .setBorder(null)
             .setTextAlignment(TextAlignment.RIGHT)
     )
@@ -179,7 +179,7 @@ fun entryVoucher(
                             )
                     )
             )
-            .setFontSize(12f)
+            .setFontSize(10f)
             .setBorder(null)
             .setTextAlignment(TextAlignment.RIGHT)
     )

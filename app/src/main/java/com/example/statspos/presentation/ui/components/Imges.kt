@@ -2,6 +2,7 @@ package com.example.statspos.presentation.ui.components
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -40,6 +41,7 @@ import com.example.statspos.utils.HP
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.time.LocalDate
 
 @Composable
 fun ImageView(
@@ -88,7 +90,7 @@ fun UploadImageView(
 ) {
     var selectedImageUri by rememberSaveable { mutableStateOf<Any?>(HP.getImageUrl(imageUrl)) }
     LaunchedEffect(imageUrl) {
-        selectedImageUri = HP.getImageUrl(imageUrl)
+        selectedImageUri = HP.getImageUrl(imageUrl) + "?${System.currentTimeMillis()}"
     }
 
     val context = LocalContext.current

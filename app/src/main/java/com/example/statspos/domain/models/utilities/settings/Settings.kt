@@ -36,9 +36,9 @@ data class Settings(
     var itemExistsInSalesWarning: Boolean? = null,
     var fullWindowReports: Boolean? = null,
 
-    var shopName: String? = null,
-    var address: String? = null,
-    var contact: String? = null,
+//    var shopName: String? = null,
+//    var address: String? = null,
+//    var contact: String? = null,
 
     val clientId:Int? = null,
     val branchId:Int? = null,

@@ -404,28 +404,17 @@ fun SalesPostedBillsBody(
                             }
                         },
                         onViewClick = onViewClick,
-                        onPrintClick = { salesBill ->
+                        onPrintClick = { salesBill, share ->
                             if (HP.adminPasswords.usePrintDuplicates == true) {
                                 bill = salesBill
-                                shareBill = false
+                                shareBill = share
                                 showPrintPasswordDialog = true
                             } else {
                                 bill = salesBill
-                                shareBill = false
+                                shareBill = share
                                 printBill()
                             }
                         },
-                        onShareClick = { salesBill ->
-                            if (HP.adminPasswords.usePrintDuplicates == true) {
-                                bill = salesBill
-                                shareBill = true
-                                showPrintPasswordDialog = true
-                            } else {
-                                bill = salesBill
-                                shareBill = true
-                                printBill()
-                            }
-                        }
                     )
                 }
 
@@ -508,8 +497,7 @@ private fun BodyList(
     items: List<SalesBills>,
     onItemClick: (SalesBills) -> Unit,
     onViewClick: (SalesBills) -> Unit,
-    onPrintClick: (SalesBills) -> Unit,
-    onShareClick: (SalesBills) -> Unit,
+    onPrintClick: (SalesBills, Boolean) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -533,7 +521,6 @@ private fun BodyList(
                 onItemClick = onItemClick,
                 onViewClick = onViewClick,
                 onPrintClick = onPrintClick,
-                onShareClick = onShareClick,
             )
         }
     }
@@ -545,8 +532,7 @@ private fun ListCard(
     item: SalesBills,
     onItemClick: (SalesBills) -> Unit,
     onViewClick: (SalesBills) -> Unit,
-    onPrintClick: (SalesBills) -> Unit,
-    onShareClick: (SalesBills) -> Unit,
+    onPrintClick: (SalesBills, Boolean) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -617,7 +603,7 @@ private fun ListCard(
                     AppIconButton(
                         icon = Icons.Default.Print,
                         onClick = {
-                            onPrintClick(item)
+                            onPrintClick(item, false)
                         },
                         buttonSize = 26.dp,
                         size = 20.dp,
@@ -625,7 +611,7 @@ private fun ListCard(
                     AppIconButton(
                         icon = Icons.Default.Share,
                         onClick = {
-                            onShareClick(item)
+                            onPrintClick(item, true)
                         },
                         buttonSize = 26.dp,
                         size = 20.dp,

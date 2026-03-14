@@ -168,8 +168,8 @@ fun NewPaymentEntryBody(
                         viewModel.passEntry {
                             context.showToast("Enter posted successfully")
                             sharedViewModel.notifyDataChanged()
-//                            keyboardController?.hide()
-                            accountFocusRequester.requestFocus()
+                            keyboardController?.hide()
+//                            accountFocusRequester.requestFocus()
                         }
                     }
                 }

@@ -62,26 +62,6 @@ class MainViewModel @Inject constructor(
     // endregion
 
     // region Network calls
-    fun loadMainData(onSuccess: () -> Unit){
-        viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
-            beforeRequest()
-
-            when (val result = mainRepository.loadData()) {
-                is Resource.Error -> resultError(result.error)
-                is Resource.Information -> resultInformation(result.message)
-                is Resource.Success -> {
-                    resultSuccess()
-
-                    HP.setDropdowns(result.data)
-
-                    onSuccess()
-                }
-            }
-        }
-    }
-
     fun uploadImage(multipart: MultipartBody.Part) {
         viewModelScope.launch {
             if (state.value.isLoading)

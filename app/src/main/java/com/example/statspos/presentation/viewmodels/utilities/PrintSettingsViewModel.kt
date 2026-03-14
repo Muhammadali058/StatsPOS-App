@@ -28,6 +28,11 @@ class PrintSettingsViewModel @Inject constructor(
     // region ScreenState
     data class ScreenState(
         val id: Long = 0L,
+
+        val shopName: String = "",
+        val contact: String = "",
+        val address: String = "",
+
         val showUrdu: Boolean = false,
         val showLogo: Boolean = false,
         val imageUrl: String = "",
@@ -98,6 +103,18 @@ class PrintSettingsViewModel @Inject constructor(
     // endregion
 
     // region onChangeMethods
+    fun onShopNameChange(value: String) {
+        state.update { it.copy(shopName = value) }
+    }
+
+    fun onContactChange(value: String) {
+        state.update { it.copy(contact = value) }
+    }
+
+    fun onAddressChange(value: String) {
+        state.update { it.copy(address = value) }
+    }
+
     fun onShowUrduChange(value: Boolean) {
         state.update { it.copy(showUrdu = value) }
     }
@@ -182,9 +199,12 @@ class PrintSettingsViewModel @Inject constructor(
     // region Methods
     private fun getFormData(): PrintSettings {
         return PrintSettings(
+            shopName = state.value.shopName,
+            contact = state.value.contact,
+            address = state.value.address,
+
             showUrdu = state.value.showUrdu,
             showLogo = state.value.showLogo,
-
             imageUrl = state.value.imageUrl,
         )
     }
@@ -192,9 +212,12 @@ class PrintSettingsViewModel @Inject constructor(
     private fun setFormData(printSettings: PrintSettings) {
         state.update {
             it.copy(
+                shopName = printSettings.shopName!!,
+                contact = printSettings.contact!!,
+                address = printSettings.address!!,
+
                 showUrdu = printSettings.showUrdu!!,
                 showLogo = printSettings.showLogo!!,
-
                 imageUrl = printSettings.imageUrl!!,
             )
         }

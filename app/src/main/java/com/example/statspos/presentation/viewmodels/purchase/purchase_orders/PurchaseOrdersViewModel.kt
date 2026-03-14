@@ -142,6 +142,8 @@ class PurchaseOrdersViewModel @Inject constructor(
             if (state.value.isLoading)
                 return@launch
 
+            beforeRequest()
+
             when (val result = api.getOrder(orderId)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)

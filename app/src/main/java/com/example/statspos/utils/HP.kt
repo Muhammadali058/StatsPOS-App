@@ -6,6 +6,7 @@ import com.example.statspos.domain.models.main.Branches
 import com.example.statspos.domain.models.main.LocalClients
 import com.example.statspos.domain.models.utilities.settings.AdminPasswords
 import com.example.statspos.domain.models.utilities.settings.AdminSettings
+import com.example.statspos.domain.models.utilities.settings.AppSettings
 import com.example.statspos.domain.models.utilities.settings.Passwords
 import com.example.statspos.domain.models.utilities.settings.PrintSettings
 import com.example.statspos.domain.models.utilities.settings.Settings
@@ -35,6 +36,7 @@ object HP {
     var user = Users(id = 1, clientId = 1, branchId = 1)
     var userRights = UserRights()
     var printSettings = PrintSettings()
+    var appSettings = AppSettings()
     var settings = Settings()
     var passwords = Passwords()
     var adminSettings = AdminSettings()
@@ -170,6 +172,7 @@ object HP {
 
     fun setDropdowns(jsonObject: JsonObject) {
         printSettings = Gson().get<PrintSettings>(jsonObject.get("printSettings").asJsonObject)
+        appSettings = Gson().get<AppSettings>(jsonObject.get("appSettings").asJsonObject)
         settings = Gson().get<Settings>(jsonObject.get("settings").asJsonObject)
         passwords = Gson().get<Passwords>(jsonObject.get("passwords").asJsonObject)
         adminSettings = Gson().get<AdminSettings>(jsonObject.get("adminSettings").asJsonObject)

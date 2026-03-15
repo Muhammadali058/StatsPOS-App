@@ -1,16 +1,15 @@
-package com.example.statspos.presentation.viewmodels.items.sub_barcodes
+package com.example.statspos.presentation.viewmodels.utilities
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.statspos.domain.models.items.SubBarcodes
-import com.example.statspos.domain.repository.items.SubBarcodesRepository
+import com.example.statspos.domain.models.utilities.settings.AppSettings
+import com.example.statspos.domain.repository.utilities.SettingsRepository
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
-import com.example.statspos.utils.getListOf
+import com.example.statspos.utils.get
 import com.google.gson.Gson
-import com.google.gson.JsonObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,19 +19,23 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SubBarcodesViewModel @Inject constructor(
-    private val api: SubBarcodesRepository
+class AppSettingsViewModel @Inject constructor(
+    private val api: SettingsRepository,
 ) : ViewModel() {
-
     // region ScreenState
     data class ScreenState(
-        val list: List<SubBarcodes> = emptyList(),
-        val totalSubBarcodes: Int = 0,
+        val id: Long = 0L,
 
-        val itemId: Long = 0L,
-        val search: String = "",
+        val instantSearch: Boolean = false,
+        val innerItemSearch: Boolean = false,
+        val itemSuggestions: Boolean = false,
+
+        // Extras
+        val hasLoadedOnce: Boolean = false,
 
         val isLoading: Boolean = false,
+        val isSaving: Boolean = false,
+        val message: String? = null,
         val error: String? = null,
     )
 
@@ -40,12 +43,7 @@ class SubBarcodesViewModel @Inject constructor(
         private set
 
     fun beforeRequest() {
-        state.update {
-            it.copy(
-                isLoading = true,
-                error = null,
-            )
-        }
+        state.update { it.copy(isLoading = true, error = null) }
     }
 
     private val _event = Channel<UiEvent>()
@@ -93,50 +91,85 @@ class SubBarcodesViewModel @Inject constructor(
         state.update { it.copy(error = error) }
         onEvent(UiEvent.ShowError(error ?: ""))
     }
+
     // endregion
 
     // region onChangeMethods
-    fun onSearchChange(value: String) {
-        state.update { it.copy(search = value) }
-
-        if(HP.appSettings.instantSearch == true)
-            loadData()
+    fun onInstantSearchChange(value: Boolean) {
+        state.update { it.copy(instantSearch = value) }
     }
+
+    fun onInnerItemSearchChange(value: Boolean) {
+        state.update { it.copy(innerItemSearch = value) }
+    }
+
+    fun onItemSuggestionsChange(value: Boolean) {
+        state.update { it.copy(itemSuggestions = value) }
+    }
+
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
+    }
+
     // endregion
 
     // region Network calls
-    fun loadData() {
+    fun updateAppSettings(onSuccess: () -> Unit) {
         viewModelScope.launch {
-//            if (state.value.isLoading)
-//                return@launch
+            if (state.value.isLoading)
+                return@launch
 
-            beforeRequest()
+            if (state.value.isSaving)
+                return@launch
 
-            val params = JsonObject().apply {
-                addProperty("itemId", state.value.itemId)
-                addProperty("text", state.value.search)
-            }
+            state.update { it.copy(isSaving = true) }
 
-            when (val result = api.loadSubBarcodes(params)) {
-                is Resource.Error -> resultError(result.error)
-                is Resource.Information -> resultInformation(result.message)
+            val appSettings = getFormData()
+            val result = api.updateAppSettings(appSettings)
+
+            state.update { it.copy(isSaving = false) }
+
+            when (result) {
+                is Resource.Error -> showError(result.error)
+                is Resource.Information -> showMessage(result.message)
                 is Resource.Success -> {
-                    resultSuccess()
 
-                    val resultTotal =
-                        result.data.get("total").asJsonObject.get("totalSubBarcodes").asInt
-                    val resultList =
-                        Gson().getListOf<SubBarcodes>(result.data.get("rows").asJsonArray)
-                    state.update {
-                        it.copy(
-                            list = resultList,
-                            totalSubBarcodes = resultTotal,
-                        )
-                    }
+                    HP.appSettings =
+                        Gson().get<AppSettings>(result.data.toString())
+
+                    onSuccess()
                 }
             }
         }
     }
+
+    fun editData() {
+        viewModelScope.launch {
+            setFormData(HP.appSettings)
+        }
+    }
+
+    // endregion
+
+    // region Methods
+    private fun getFormData(): AppSettings {
+        return AppSettings(
+            instantSearch = state.value.instantSearch,
+            innerItemSearch = state.value.innerItemSearch,
+            itemSuggestions = state.value.itemSuggestions,
+        )
+    }
+
+    private fun setFormData(appSettings: AppSettings) {
+        state.update {
+            it.copy(
+                instantSearch = appSettings.instantSearch!!,
+                innerItemSearch = appSettings.innerItemSearch!!,
+                itemSuggestions = appSettings.itemSuggestions!!,
+            )
+        }
+    }
+
     // endregion
 
     // region Others
@@ -151,11 +184,7 @@ class SubBarcodesViewModel @Inject constructor(
     }
 
     private fun resultSuccess() {
-        state.update { it.copy(isLoading = false, error = null) }
-    }
-
-    fun updateInitialState(itemId: Long) {
-        state.update { it.copy(itemId = itemId) }
+        state.update { it.copy(isLoading = false) }
     }
 
     // endregion

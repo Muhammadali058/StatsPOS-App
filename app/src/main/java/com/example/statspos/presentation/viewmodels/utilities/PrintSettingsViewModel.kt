@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.utilities.settings.PrintSettings
 import com.example.statspos.domain.repository.main.MainRepository
-import com.example.statspos.domain.repository.utilities.PrintSettingsRepository
+import com.example.statspos.domain.repository.utilities.SettingsRepository
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
@@ -22,7 +22,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PrintSettingsViewModel @Inject constructor(
-    private val api: PrintSettingsRepository,
+    private val api: SettingsRepository,
     private val mainRepo: MainRepository,
 ) : ViewModel() {
     // region ScreenState
@@ -135,7 +135,7 @@ class PrintSettingsViewModel @Inject constructor(
             if (state.value.isLoading)
                 return@launch
 
-            if (state.value.isLoading)
+            if (state.value.isSaving)
                 return@launch
 
             state.update { it.copy(isSaving = true) }

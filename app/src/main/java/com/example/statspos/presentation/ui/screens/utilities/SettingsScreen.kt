@@ -64,6 +64,9 @@ private sealed class Routes : NavKey {
     data object Home : Routes()
 
     @Serializable
+    data object AppSettings : Routes()
+
+    @Serializable
     data object AdminSettings : Routes()
 
     @Serializable
@@ -94,11 +97,22 @@ fun SettingsScreen(
                     onBack = {
                         onBack()
                     },
+                    onAppSettingsClick = {
+                        navigate(Routes.AppSettings)
+                    },
                     onAdminSettingsClick = {
                         navigate(Routes.AdminSettings)
                     },
                     onPrintSettingsClick = {
                         navigate(Routes.PrintSettings)
+                    },
+                )
+            }
+            entry<Routes.AppSettings> { key ->
+                AppSettingsScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
                     },
                 )
             }
@@ -126,6 +140,7 @@ fun SettingsScreen(
 private fun Home(
     sharedViewModel: SharedViewModel,
     onBack: () -> Unit,
+    onAppSettingsClick:() -> Unit,
     onAdminSettingsClick:() -> Unit,
     onPrintSettingsClick:() -> Unit,
 ) {
@@ -299,18 +314,25 @@ private fun Home(
                     )
 
                     Spacer(Modifier.height(12.dp))
-                    Row(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(ConstantPaddings.BODY_HORIZONTAL),
-                        horizontalArrangement = Arrangement.Start,
                     ) {
-                        ReportButton("Other Settings") {
-                            onAdminSettingsClick()
+                        Row {
+                            ReportButton("App Settings") {
+                                onAppSettingsClick()
+                            }
+                            Spacer(Modifier.width(12.dp))
+                            ReportButton("Print Settings") {
+                                onPrintSettingsClick()
+                            }
                         }
-                        Spacer(Modifier.width(12.dp))
-                        ReportButton("Print Settings") {
-                            onPrintSettingsClick()
+                        Spacer(Modifier.height(12.dp))
+                        Row {
+                            ReportButton("Other Settings") {
+                                onAdminSettingsClick()
+                            }
                         }
                     }
                     Spacer(Modifier.height(12.dp))
@@ -333,7 +355,6 @@ private fun Home(
                 }
             }
         }
-
     }
 }
 

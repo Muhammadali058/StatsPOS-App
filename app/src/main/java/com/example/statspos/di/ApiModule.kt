@@ -31,7 +31,6 @@ import com.example.statspos.data.repository.sales.SalesItemsRepositoryImpl
 import com.example.statspos.data.repository.sales.SalesRepositoryImpl
 import com.example.statspos.data.repository.utilities.AuditRepositoryImpl
 import com.example.statspos.data.repository.utilities.BarcodeLabelsRepositoryImpl
-import com.example.statspos.data.repository.utilities.PrintSettingsRepositoryImpl
 import com.example.statspos.data.repository.utilities.SettingsRepositoryImpl
 import com.example.statspos.data.repository.utilities.ShiftsRepositoryImpl
 import com.example.statspos.data.repository.utilities.UsersRepositoryImpl
@@ -70,7 +69,6 @@ import com.example.statspos.domain.repository.sales.SalesItemsRepository
 import com.example.statspos.domain.repository.sales.SalesRepository
 import com.example.statspos.domain.repository.utilities.AuditRepository
 import com.example.statspos.domain.repository.utilities.BarcodeLabelsRepository
-import com.example.statspos.domain.repository.utilities.PrintSettingsRepository
 import com.example.statspos.domain.repository.utilities.SettingsRepository
 import com.example.statspos.domain.repository.utilities.ShiftsRepository
 import com.example.statspos.domain.repository.utilities.UsersRepository
@@ -196,9 +194,6 @@ abstract class ApiModule {
 
     @Binds
     abstract fun bindsSettingsRepositoryImpl(settingsRepositoryImpl: SettingsRepositoryImpl): SettingsRepository
-
-    @Binds
-    abstract fun bindsPrintSettingsRepositoryImpl(printSettingsRepositoryImpl: PrintSettingsRepositoryImpl): PrintSettingsRepository
 
     @Binds
     abstract fun bindsShiftsRepositoryImpl(shiftsRepositoryImpl: ShiftsRepositoryImpl): ShiftsRepository

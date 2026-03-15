@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.accounts.AccountCategories
 import com.example.statspos.domain.models.accounts.Banks
 import com.example.statspos.domain.repository.accounts.AccountCategoriesRepository
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
@@ -101,14 +102,17 @@ class AccountCategoriesViewModel @Inject constructor(
     // region onChangeMethods
     fun onSearchChange(value: String) {
         state.update { it.copy(search = value) }
+
+        if(HP.appSettings.instantSearch == true)
+            loadData()
     }
     // endregion
 
     // region Network calls
     fun loadData() {
         viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
+//            if (state.value.isLoading)
+//                return@launch
 
             beforeRequest()
 

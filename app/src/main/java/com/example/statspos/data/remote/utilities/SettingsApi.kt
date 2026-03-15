@@ -11,4 +11,10 @@ interface SettingsApi {
 
     @POST("settings/updateAdminSettings")
     suspend fun updateAdminSettings(@Body body: JsonObject): Response<JsonObject>
+
+    @POST("settings/updatePrintSettings")
+    suspend fun updatePrintSettings(@Body body: JsonObject): Response<JsonObject>
+
+    @POST("settings/updateAppSettings")
+    suspend fun updateAppSettings(@Body body: JsonObject): Response<JsonObject>
 }

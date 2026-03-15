@@ -113,6 +113,9 @@ class SearchItemsViewModel @Inject constructor(
     // region onChangeMethods
     fun onSearchChange(value: String) {
         state.update { it.copy(search = value) }
+
+        if(HP.appSettings.instantSearch == true)
+            loadItems()
     }
 
     fun onCategoryNameChange(value: String) {
@@ -147,8 +150,8 @@ class SearchItemsViewModel @Inject constructor(
     // region Network calls
     fun loadItems() {
         viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
+//            if (state.value.isLoading)
+//                return@launch
 
             state.update {
                 it.copy(

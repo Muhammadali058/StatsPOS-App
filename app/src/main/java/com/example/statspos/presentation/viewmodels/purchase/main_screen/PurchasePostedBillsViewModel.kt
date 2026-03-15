@@ -115,6 +115,9 @@ class PurchasePostedBillsViewModel @Inject constructor(
     // region onChangeMethods
     fun onSearchChange(value: String) {
         state.update { it.copy(search = value) }
+
+        if(HP.appSettings.instantSearch == true)
+            loadData()
     }
     fun onFromDateChange(value: LocalDate) {
         state.update { it.copy(fromDate = value) }
@@ -142,11 +145,11 @@ class PurchasePostedBillsViewModel @Inject constructor(
     // region Network calls
     fun loadData() {
         viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
-
-            if (state.value.isLoadingNextPage)
-                return@launch
+//            if (state.value.isLoading)
+//                return@launch
+//
+//            if (state.value.isLoadingNextPage)
+//                return@launch
 
             state.update {
                 it.copy(

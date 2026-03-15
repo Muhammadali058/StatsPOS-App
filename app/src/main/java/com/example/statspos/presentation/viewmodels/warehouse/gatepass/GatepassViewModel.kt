@@ -105,6 +105,9 @@ class GatepassViewModel @Inject constructor(
     // region onChangeMethods
     fun onSearchChange(value: String) {
         state.update { it.copy(search = value) }
+
+        if(HP.appSettings.instantSearch == true)
+            loadData()
     }
 
     fun onDateChange(value: LocalDate) {
@@ -119,8 +122,8 @@ class GatepassViewModel @Inject constructor(
     // region Network calls
     fun loadData() {
         viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
+//            if (state.value.isLoading)
+//                return@launch
 
             beforeRequest()
 

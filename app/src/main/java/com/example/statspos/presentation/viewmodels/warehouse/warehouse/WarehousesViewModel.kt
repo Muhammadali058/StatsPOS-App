@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.warehouse.Warehouses
 import com.example.statspos.domain.repository.warehouse.WarehousesRepository
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
@@ -100,14 +101,17 @@ class WarehousesViewModel @Inject constructor(
     // region onChangeMethods
     fun onSearchChange(value: String) {
         state.update { it.copy(search = value) }
+
+        if(HP.appSettings.instantSearch == true)
+            loadData()
     }
     // endregion
 
     // region Network calls
     fun loadData() {
         viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
+//            if (state.value.isLoading)
+//                return@launch
 
             beforeRequest()
 

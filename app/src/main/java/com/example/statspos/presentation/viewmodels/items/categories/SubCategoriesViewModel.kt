@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.items.SubCategories
 import com.example.statspos.domain.repository.items.CategoriesRepository
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
@@ -98,6 +99,9 @@ class SubCategoriesViewModel @Inject constructor(
     // region onChangeMethods
     fun onSearchChange(value: String) {
         state.update { it.copy(search = value) }
+
+        if(HP.appSettings.instantSearch == true)
+            loadData()
     }
     fun onCategoryNameChange(value: String) {
         state.update { it.copy(categoryName = value) }
@@ -110,8 +114,8 @@ class SubCategoriesViewModel @Inject constructor(
     // region Network calls
     fun loadData() {
         viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
+//            if (state.value.isLoading)
+//                return@launch
 
             beforeRequest()
 

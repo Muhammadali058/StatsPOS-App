@@ -31,7 +31,6 @@ import com.example.statspos.data.remote.sales.SalesApi
 import com.example.statspos.data.remote.sales.SalesItemsApi
 import com.example.statspos.data.remote.utilities.AuditApi
 import com.example.statspos.data.remote.utilities.BarcodeLabelsApi
-import com.example.statspos.data.remote.utilities.PrintSettingsApi
 import com.example.statspos.data.remote.utilities.SettingsApi
 import com.example.statspos.data.remote.utilities.ShiftsApi
 import com.example.statspos.data.remote.utilities.UsersApi
@@ -217,11 +216,6 @@ class NetworkModule {
     @Provides
     fun provideBarcodeLabelsApi(retrofitInstance: Retrofit): BarcodeLabelsApi {
         return retrofitInstance.create(BarcodeLabelsApi::class.java)
-    }
-
-    @Provides
-    fun providePrintSettingsApi(retrofitInstance: Retrofit): PrintSettingsApi {
-        return retrofitInstance.create(PrintSettingsApi::class.java)
     }
 
     @Provides

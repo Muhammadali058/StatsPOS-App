@@ -100,6 +100,9 @@ class SubExpensesViewModel @Inject constructor(
     // region onChangeMethods
     fun onSearchChange(value: String) {
         state.update { it.copy(search = value) }
+
+        if(HP.appSettings.instantSearch == true)
+            loadData()
     }
     fun onExpenseSelected(value: DropdownItem) {
         state.update { it.copy(expense = value) }
@@ -109,8 +112,8 @@ class SubExpensesViewModel @Inject constructor(
     // region Network calls
     fun loadData() {
         viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
+//            if (state.value.isLoading)
+//                return@launch
 
             beforeRequest()
 

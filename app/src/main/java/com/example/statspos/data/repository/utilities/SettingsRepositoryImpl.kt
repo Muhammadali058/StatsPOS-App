@@ -3,7 +3,9 @@ package com.example.statspos.data.repository.utilities
 import com.example.statspos.data.remote.utilities.SettingsApi
 import com.example.statspos.domain.models.utilities.settings.AdminPasswords
 import com.example.statspos.domain.models.utilities.settings.AdminSettings
+import com.example.statspos.domain.models.utilities.settings.AppSettings
 import com.example.statspos.domain.models.utilities.settings.Passwords
+import com.example.statspos.domain.models.utilities.settings.PrintSettings
 import com.example.statspos.domain.models.utilities.settings.Settings
 import com.example.statspos.domain.repository.utilities.SettingsRepository
 import com.example.statspos.utils.DB
@@ -37,6 +39,26 @@ class SettingsRepositoryImpl @Inject constructor(
 
         return safeApiCall {
             api.updateAdminSettings(
+                DB.addParams(body)
+            )
+        }
+    }
+
+    override suspend fun updatePrintSettings(printSettings: PrintSettings): Resource<JsonObject> {
+        val body = DB.getJsonObject(printSettings)
+
+        return safeApiCall {
+            api.updatePrintSettings(
+                DB.addParams(body)
+            )
+        }
+    }
+
+    override suspend fun updateAppSettings(appSettings: AppSettings): Resource<JsonObject> {
+        val body = DB.getJsonObject(appSettings)
+
+        return safeApiCall {
+            api.updateAppSettings(
                 DB.addParams(body)
             )
         }

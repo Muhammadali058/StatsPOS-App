@@ -37,7 +37,8 @@ import com.example.statspos.presentation.ui.screens.reports.sales.SalesReportsSc
 import com.example.statspos.presentation.ui.screens.reports.stock.StockReportsScreen
 import com.example.statspos.presentation.ui.screens.sales.sales_bill.SalesBillScreen
 import com.example.statspos.presentation.ui.screens.sales.sales_bill.ViewSalesBillItemsScreen
-import com.example.statspos.presentation.ui.screens.utilities.SettingsScreen
+import com.example.statspos.presentation.ui.screens.utilities.settings.SettingsScreen
+import com.example.statspos.presentation.ui.screens.utilities.users.UpdateUserScreen
 import com.example.statspos.presentation.ui.screens.utilities.users.UsersScreen
 import com.example.statspos.presentation.ui.screens.warehouse.gatepass.GatepassScreen
 import com.example.statspos.presentation.ui.screens.warehouse.stock_transfer.StockTransferScreen
@@ -77,6 +78,14 @@ fun MainScreen() {
             }
             entry<TopRoutes.SearchItem> {
                 SearchItemsScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<TopRoutes.UpdateUser> {
+                UpdateUserScreen(
                     sharedViewModel = sharedViewModel,
                     onBack = {
                         backStack.removeLastOrNull()

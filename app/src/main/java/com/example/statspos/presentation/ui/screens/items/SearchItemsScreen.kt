@@ -45,6 +45,7 @@ import com.example.statspos.presentation.ui.components.AutoCompleteItemsTextbox
 import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
 import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.BottomSheet
+import com.example.statspos.presentation.ui.components.ChipsRow
 import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
@@ -54,6 +55,7 @@ import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.PullToRefreshList
+import com.example.statspos.presentation.ui.components.SubChipsRow
 import com.example.statspos.presentation.ui.components.SubDropdown
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
@@ -119,6 +121,9 @@ fun SearchItemsScreen(
         )
     }
 
+//    var selectedCategory by remember { mutableStateOf(HP.getNoneDropdownItem()) }
+//    var selectedSubCategory by remember { mutableStateOf(HP.getNoneDropdownItem()) }
+
     Scaffold(
         snackbarHost = {
             AppSnackbarHost(
@@ -142,29 +147,29 @@ fun SearchItemsScreen(
                     showBottomSheet = false
                 },
             ) {
-                Dropdown(
-                    value = state.categoryName,
-                    onValueChange = viewModel::onCategoryNameChange,
-                    items = HP.categories,
-                    onItemSelected = { dropdownItem ->
-                        viewModel.onCategoryIdChange(dropdownItem.id)
-                    },
-                    label = {
-                        Text(text = "Category")
-                    }
-                )
-                SubDropdown(
-                    value = state.subCategoryName,
-                    onValueChange = viewModel::onSubCategoryNameChange,
-                    items = HP.subCategories,
-                    mainId = state.categoryId,
-                    onItemSelected = { dropdownItem ->
-                        viewModel.onSubCategoryIdChange(dropdownItem.id)
-                    },
-                    label = {
-                        Text(text = "Sub-Category")
-                    }
-                )
+//                Dropdown(
+//                    value = state.categoryName,
+//                    onValueChange = viewModel::onCategoryNameChange,
+//                    items = HP.categories,
+//                    onItemSelected = { dropdownItem ->
+//                        viewModel.onCategoryIdChange(dropdownItem.id)
+//                    },
+//                    label = {
+//                        Text(text = "Category")
+//                    }
+//                )
+//                SubDropdown(
+//                    value = state.subCategoryName,
+//                    onValueChange = viewModel::onSubCategoryNameChange,
+//                    items = HP.subCategories,
+//                    mainId = state.categoryId,
+//                    onItemSelected = { dropdownItem ->
+//                        viewModel.onSubCategoryIdChange(dropdownItem.id)
+//                    },
+//                    label = {
+//                        Text(text = "Sub-Category")
+//                    }
+//                )
                 Dropdown(
                     value = state.vendorName,
                     onValueChange = viewModel::onVendorNameChange,
@@ -243,7 +248,31 @@ fun SearchItemsScreen(
                             showBottomSheet = true
                         }
                     )
-                    Spacer(Modifier.height(4.dp))
+                    ChipsRow(
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.surface)
+                            .padding(ConstantPaddings.BODY_HORIZONTAL)
+                            .padding(bottom = 8.dp),
+                        items = HP.categories,
+                        selectedItem = state.category,
+                        onItemSelected = {
+                            viewModel.onCategoryChange(it)
+                            viewModel.loadItems()
+                        }
+                    )
+                    SubChipsRow(
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.surface)
+                            .padding(ConstantPaddings.BODY_HORIZONTAL)
+                            .padding(bottom = 8.dp),
+                        items = HP.subCategories,
+                        selectedItem = state.subCategory,
+                        mainId = state.category.id,
+                        onItemSelected = {
+                            viewModel.onSubCategoryChange(it)
+                            viewModel.loadItems()
+                        },
+                    )
                     BodyList(
                         modifier = Modifier
                             .weight(1f)
@@ -343,6 +372,9 @@ private fun BodyList(
         onRefresh = onRefresh,
         isLoadingNextPage = isLoadingNextPage,
     ) {
+        item{
+            Spacer(Modifier.height(4.dp))
+        }
         items(items.size) { i ->
             val item = items[i]
 

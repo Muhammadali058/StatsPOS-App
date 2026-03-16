@@ -141,7 +141,6 @@ fun GatepassItemsBody(
                             },
                         )
                     }
-                    Spacer(Modifier.height(4.dp))
                     BodyList(
                         modifier = Modifier
                             .weight(1f)
@@ -167,31 +166,6 @@ fun GatepassItemsBody(
 }
 
 @Composable
-private fun SearchBox(
-    modifier: Modifier = Modifier,
-    value: String,
-    onValueChange: (String) -> Unit,
-    onSearchClick: (String) -> Unit,
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        SearchTextbox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            value = value,
-            onValueChange = onValueChange,
-            onEndIconClick = {
-                onValueChange("")
-            },
-            onSearchClick = onSearchClick,
-        )
-    }
-}
-
-@Composable
 private fun BodyList(
     modifier: Modifier = Modifier,
     isRefreshing: Boolean,
@@ -204,6 +178,9 @@ private fun BodyList(
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
     ) {
+        item{
+            Spacer(Modifier.height(4.dp))
+        }
         items(items) { item ->
             ListCard(item = item) {
                 onItemClick(it)

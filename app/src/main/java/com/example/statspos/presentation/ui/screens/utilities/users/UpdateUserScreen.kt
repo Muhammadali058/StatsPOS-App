@@ -1,21 +1,15 @@
-package com.example.statspos.presentation.ui.screens.utilities
+package com.example.statspos.presentation.ui.screens.utilities.users
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -30,14 +24,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
-import com.example.statspos.presentation.ui.components.AppSwitch
+import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.ExpandableSection
+import com.example.statspos.presentation.ui.components.PasswordTextbox
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.Textbox
@@ -45,22 +42,26 @@ import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.components.UploadImageView
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.utilities.PrintSettingsViewModel
+import com.example.statspos.presentation.viewmodels.utilities.users.UpdateUserViewModel
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import okhttp3.MultipartBody
+import java.time.LocalDate
 
 @Composable
-fun PrintSettingsScreen(
+fun UpdateUserScreen(
     sharedViewModel: SharedViewModel,
     onBack: () -> Unit,
 ) {
+    val context = LocalContext.current
+
     fun goBackWithResult() {
-//        sharedViewModel.notifyDataChanged()
+        sharedViewModel.notifyDataChanged()
         onBack()
     }
 
-    val viewModel = hiltViewModel<PrintSettingsViewModel>()
+    val viewModel = hiltViewModel<UpdateUserViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -81,8 +82,7 @@ fun PrintSettingsScreen(
     // Edit data when update
     LaunchedEffect(Unit) {
         if (!state.hasLoadedOnce) {
-            viewModel.editData()
-
+            viewModel.editData(HP.user.id!!)
             viewModel.setHasLoadedOnce(true)
         }
     }
@@ -96,9 +96,7 @@ fun PrintSettingsScreen(
         )
     }
 
-
     Scaffold(
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = {
             AppSnackbarHost(
                 snackbarHostState = snackbarHostState,
@@ -109,16 +107,15 @@ fun PrintSettingsScreen(
                 onNavigationClick = {
                     onBack()
                 },
-                title = "Print Settings",
+                title = "Update Profile",
             )
-        },
+        }
     ) { innerPadding ->
         Box(
             Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(ConstantPaddings.BODY_HORIZONTAL)
                 .padding(vertical = 8.dp)
         ) {
             Column(
@@ -129,25 +126,28 @@ fun PrintSettingsScreen(
                 Column(
                     Modifier
                         .weight(1f)
-                        .verticalScroll(scrollState),
+                        .verticalScroll(scrollState)
+                        .imePadding(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    ShopData(
-                        shopName = state.shopName,
+                    Basic(
+                        username = state.username,
+                        password = state.password,
+                        confirmPassword = state.confirmPassword,
                         contact = state.contact,
+                        email = state.email,
                         address = state.address,
-                        onShopNameChange = viewModel::onShopNameChange,
+                        dateOfBirth = state.dateOfBirth,
+
+                        onUsernameChange = viewModel::onUsernameChange,
+                        onPasswordChange = viewModel::onPasswordChange,
+                        onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
                         onContactChange = viewModel::onContactChange,
+                        onEmailChange = viewModel::onEmailChange,
                         onAddressChange = viewModel::onAddressChange,
+                        onDateOfBirthChange = viewModel::onDateOfBirthChange,
                     )
-                    Spacer(Modifier.height(12.dp))
-                    Body(
-                        showUrdu = state.showUrdu,
-                        showLogo = state.showLogo,
-                        onShowUrduChange = viewModel::onShowUrduChange,
-                        onShowLogoChange = viewModel::onShowLogoChange,
-                    )
-                    Spacer(Modifier.height(12.dp))
+
                     ImageExpandable(
                         isUploadingImage = state.isUploadingImage,
                         imageUrl = state.imageUrl,
@@ -155,21 +155,17 @@ fun PrintSettingsScreen(
                             viewModel.uploadImage(it)
                         }
                     )
-
                 }
 
                 Box(
                     modifier = Modifier
-                        .windowInsetsPadding(
-                            WindowInsets.navigationBars
-                                .union(WindowInsets.ime)
-                        )
+                        .padding(ConstantPaddings.BODY_HORIZONTAL)
                 ) {
                     if (state.isSaving) {
                         AppCircularProgressIndicator()
                     } else {
                         SaveButton {
-                            viewModel.updatePrintSettings {
+                            viewModel.updateUser {
                                 goBackWithResult()
                             }
                         }
@@ -186,70 +182,96 @@ fun PrintSettingsScreen(
 }
 
 @Composable
-private fun ShopData(
-    shopName: String,
+private fun Basic(
+    username: String,
+    password: String,
+    confirmPassword: String,
     contact: String,
+    email: String,
     address: String,
-    onShopNameChange: (String) -> Unit,
+    dateOfBirth: LocalDate,
+
+    onUsernameChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onConfirmPasswordChange: (String) -> Unit,
     onContactChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
     onAddressChange: (String) -> Unit,
+    onDateOfBirthChange: (LocalDate) -> Unit,
 ) {
-    Textbox(
-        value = shopName,
-        onValueChange = onShopNameChange,
-        modifier = Modifier
-            .fillMaxWidth(),
-        label = {
-            Text("Shop Name")
-        }
-    )
-    Textbox(
-        value = contact,
-        onValueChange = onContactChange,
-        modifier = Modifier
-            .fillMaxWidth(),
-        label = {
-            Text("Contact")
-        }
-    )
-    Textbox(
-        value = address,
-        onValueChange = onAddressChange,
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(84.dp),
-        label = {
-            Text("Address")
-        },
-        singleLine = false,
-    )
-}
-
-@Composable
-private fun Body(
-    showUrdu: Boolean,
-    showLogo: Boolean,
-    onShowUrduChange: (Boolean) -> Unit,
-    onShowLogoChange: (Boolean) -> Unit,
-) {
-    Row (
-        modifier = Modifier
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceAround,
-    ){
-        AppSwitch(
-            checked = showUrdu,
-            onCheckedChange = onShowUrduChange,
-            label = "Show Urdu"
+            .padding(ConstantPaddings.BODY_HORIZONTAL),
+    ) {
+        Textbox(
+            value = username,
+            onValueChange = onUsernameChange,
+            modifier = Modifier
+                .fillMaxWidth(),
+            label = {
+                Text("Username")
+            }
         )
-        AppSwitch(
-            checked = showLogo,
-            onCheckedChange = onShowLogoChange,
-            label = "Show Logo"
+        PasswordTextbox(
+            value = password,
+            onValueChange = onPasswordChange,
+            modifier = Modifier
+                .fillMaxWidth(),
+            label = {
+                Text("Password")
+            }
+        )
+        PasswordTextbox(
+            value = confirmPassword,
+            onValueChange = onConfirmPasswordChange,
+            modifier = Modifier
+                .fillMaxWidth(),
+            label = {
+                Text("Confirm Password")
+            }
+        )
+        Textbox(
+            value = contact,
+            onValueChange = onContactChange,
+            modifier = Modifier
+                .fillMaxWidth(),
+            label = {
+                Text("Contact")
+            }
+        )
+        Textbox(
+            value = email,
+            onValueChange = onEmailChange,
+            modifier = Modifier
+                .fillMaxWidth(),
+            label = {
+                Text("Email")
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+            )
+        )
+        DateTextbox(
+            modifier = Modifier
+                .weight(1f),
+            date = dateOfBirth,
+            onDateChange = onDateOfBirthChange,
+            label = "Date of Birth"
+        )
+        Textbox(
+            value = address,
+            onValueChange = onAddressChange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(84.dp),
+            label = {
+                Text("Address")
+            },
+            singleLine = false,
         )
     }
 }
-
 
 @Composable
 private fun ImageExpandable(
@@ -257,10 +279,10 @@ private fun ImageExpandable(
     imageUrl: String,
     onImageUrlChange: (MultipartBody.Part) -> Unit,
 ) {
-//    ExpandableSection(
-//        title = "Logo",
-//        initiallyExpanded = false,
-//    ) {
+    ExpandableSection(
+        title = "Image",
+        initiallyExpanded = false,
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -276,6 +298,5 @@ private fun ImageExpandable(
                 )
             }
         }
-//    }
+    }
 }
-

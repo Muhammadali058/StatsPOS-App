@@ -65,7 +65,7 @@ fun ReportCard(
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 3.dp
             ),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
             ),

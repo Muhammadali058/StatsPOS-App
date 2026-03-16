@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.ui.screens.utilities
+package com.example.statspos.presentation.ui.screens.utilities.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -33,12 +33,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.statspos.domain.models.utilities.settings.AppSettings
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.AppSwitch
 import com.example.statspos.presentation.ui.components.ErrorDialog
-import com.example.statspos.presentation.ui.components.ExpandableSection
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.Textbox
@@ -46,14 +44,13 @@ import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.components.UploadImageView
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.utilities.AppSettingsViewModel
-import com.example.statspos.presentation.viewmodels.utilities.PrintSettingsViewModel
+import com.example.statspos.presentation.viewmodels.utilities.settings.PrintSettingsViewModel
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import okhttp3.MultipartBody
 
 @Composable
-fun AppSettingsScreen(
+fun PrintSettingsScreen(
     sharedViewModel: SharedViewModel,
     onBack: () -> Unit,
 ) {
@@ -62,7 +59,7 @@ fun AppSettingsScreen(
         onBack()
     }
 
-    val viewModel = hiltViewModel<AppSettingsViewModel>()
+    val viewModel = hiltViewModel<PrintSettingsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -98,6 +95,7 @@ fun AppSettingsScreen(
         )
     }
 
+
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = {
@@ -110,7 +108,7 @@ fun AppSettingsScreen(
                 onNavigationClick = {
                     onBack()
                 },
-                title = "App Settings",
+                title = "Print Settings",
             )
         },
     ) { innerPadding ->
@@ -133,16 +131,30 @@ fun AppSettingsScreen(
                         .verticalScroll(scrollState),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Spacer(Modifier.height(12.dp))
-                    Body(
-                        instantSearch = state.instantSearch,
-                        onInstantSearchChange = viewModel::onInstantSearchChange,
-                        innerItemSearch = state.innerItemSearch,
-                        onInnerItemSearchChange = viewModel::onInnerItemSearchChange,
-                        itemSuggestions = state.itemSuggestions,
-                        onItemSuggestionsChange = viewModel::onItemSuggestionsChange,
+                    ShopData(
+                        shopName = state.shopName,
+                        contact = state.contact,
+                        address = state.address,
+                        onShopNameChange = viewModel::onShopNameChange,
+                        onContactChange = viewModel::onContactChange,
+                        onAddressChange = viewModel::onAddressChange,
                     )
                     Spacer(Modifier.height(12.dp))
+                    Body(
+                        showUrdu = state.showUrdu,
+                        showLogo = state.showLogo,
+                        onShowUrduChange = viewModel::onShowUrduChange,
+                        onShowLogoChange = viewModel::onShowLogoChange,
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    ImageExpandable(
+                        isUploadingImage = state.isUploadingImage,
+                        imageUrl = state.imageUrl,
+                        onImageUrlChange = {
+                            viewModel.uploadImage(it)
+                        }
+                    )
+
                 }
 
                 Box(
@@ -156,7 +168,7 @@ fun AppSettingsScreen(
                         AppCircularProgressIndicator()
                     } else {
                         SaveButton {
-                            viewModel.updateAppSettings {
+                            viewModel.updatePrintSettings {
                                 goBackWithResult()
                             }
                         }
@@ -173,35 +185,96 @@ fun AppSettingsScreen(
 }
 
 @Composable
-private fun Body(
-    instantSearch: Boolean,
-    onInstantSearchChange: (Boolean) -> Unit,
-    innerItemSearch: Boolean,
-    onInnerItemSearchChange: (Boolean) -> Unit,
-    itemSuggestions: Boolean,
-    onItemSuggestionsChange: (Boolean) -> Unit,
+private fun ShopData(
+    shopName: String,
+    contact: String,
+    address: String,
+    onShopNameChange: (String) -> Unit,
+    onContactChange: (String) -> Unit,
+    onAddressChange: (String) -> Unit,
 ) {
-    Row{
+    Textbox(
+        value = shopName,
+        onValueChange = onShopNameChange,
+        modifier = Modifier
+            .fillMaxWidth(),
+        label = {
+            Text("Shop Name")
+        }
+    )
+    Textbox(
+        value = contact,
+        onValueChange = onContactChange,
+        modifier = Modifier
+            .fillMaxWidth(),
+        label = {
+            Text("Contact")
+        }
+    )
+    Textbox(
+        value = address,
+        onValueChange = onAddressChange,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(84.dp),
+        label = {
+            Text("Address")
+        },
+        singleLine = false,
+    )
+}
+
+@Composable
+private fun Body(
+    showUrdu: Boolean,
+    showLogo: Boolean,
+    onShowUrduChange: (Boolean) -> Unit,
+    onShowLogoChange: (Boolean) -> Unit,
+) {
+    Row (
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceAround,
+    ){
         AppSwitch(
-            modifier = Modifier.weight(1f),
-            checked = instantSearch,
-            onCheckedChange = onInstantSearchChange,
-            label = "Instant Search"
+            checked = showUrdu,
+            onCheckedChange = onShowUrduChange,
+            label = "Show Urdu"
         )
         AppSwitch(
-            modifier = Modifier.weight(1f),
-            checked = innerItemSearch,
-            onCheckedChange = onInnerItemSearchChange,
-            label = "Inner Item Search"
-        )
-    }
-    Spacer(Modifier.height(24.dp))
-    Row{
-        AppSwitch(
-            modifier = Modifier.weight(1f),
-            checked = itemSuggestions,
-            onCheckedChange = onItemSuggestionsChange,
-            label = "Item Suggestions"
+            checked = showLogo,
+            onCheckedChange = onShowLogoChange,
+            label = "Show Logo"
         )
     }
 }
+
+
+@Composable
+private fun ImageExpandable(
+    isUploadingImage: Boolean,
+    imageUrl: String,
+    onImageUrlChange: (MultipartBody.Part) -> Unit,
+) {
+//    ExpandableSection(
+//        title = "Logo",
+//        initiallyExpanded = false,
+//    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            if (isUploadingImage) {
+                AppCircularProgressIndicator()
+            } else {
+                UploadImageView(
+                    imageUrl = imageUrl,
+                    onImageUrlChange = onImageUrlChange
+                )
+            }
+        }
+//    }
+}
+

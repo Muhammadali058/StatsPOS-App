@@ -1,23 +1,16 @@
-package com.example.statspos.presentation.viewmodels.utilities
+package com.example.statspos.presentation.viewmodels.utilities.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.utilities.settings.Passwords
 import com.example.statspos.domain.models.utilities.settings.Settings
-import com.example.statspos.domain.models.utilities.users.UserRights
-import com.example.statspos.domain.models.utilities.users.Users
-import com.example.statspos.domain.repository.main.MainRepository
 import com.example.statspos.domain.repository.utilities.SettingsRepository
-import com.example.statspos.domain.repository.utilities.UsersRepository
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
-import com.example.statspos.utils.UserTypes
 import com.example.statspos.utils.get
-import com.example.statspos.utils.getListOf
-import com.example.statspos.utils.getUserType
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -25,7 +18,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import okhttp3.MultipartBody
 import javax.inject.Inject
 
 @HiltViewModel

@@ -105,8 +105,11 @@ class PurchaseItemsViewModel @Inject constructor(
     // endregion
 
     // region onChangeMethods
-    fun onSearchChange(value: String) {
+    fun onSearchChange(value: String, updateTotal: (Double) -> Unit) {
         state.update { it.copy(search = value) }
+
+        if(HP.appSettings.instantSearch == true)
+            loadData(updateTotal)
     }
     // endregion
 

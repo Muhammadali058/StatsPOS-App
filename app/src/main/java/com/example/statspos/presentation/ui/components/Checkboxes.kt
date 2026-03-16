@@ -152,7 +152,7 @@ fun AppSwitch(
                 checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
                 uncheckedThumbColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 checkedTrackColor = MaterialTheme.colorScheme.primary,
-                uncheckedTrackColor = MaterialTheme.colorScheme.background,
+                uncheckedTrackColor = Color.Transparent,
                 uncheckedBorderColor = MaterialTheme.colorScheme.onPrimaryContainer,
             )
         )

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.sales.SalesBillItems
 import com.example.statspos.domain.repository.sales.SalesItemsRepository
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
@@ -106,8 +107,11 @@ class SalesItemsViewModel @Inject constructor(
     // endregion
 
     // region onChangeMethods
-    fun onSearchChange(value: String) {
+    fun onSearchChange(value: String, updateTotal: (Double, Double) -> Unit) {
         state.update { it.copy(search = value) }
+
+        if(HP.appSettings.instantSearch == true)
+            loadData(updateTotal)
     }
     // endregion
 

@@ -112,7 +112,7 @@ fun WarehouseEntryItemsBody(
                     modifier = Modifier
                         .weight(1f)
                 ) {
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(4.dp))
                     BodyList(
                         modifier = Modifier
                             .weight(1f)
@@ -159,6 +159,9 @@ private fun BodyList(
         isRefreshing = false,
         onRefresh = onRefresh,
     ) {
+        item{
+            Spacer(Modifier.height(4.dp))
+        }
         items(items) { item ->
             ListCard(item = item)
         }

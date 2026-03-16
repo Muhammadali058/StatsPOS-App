@@ -1,9 +1,13 @@
 package com.example.statspos.presentation.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -11,7 +15,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -21,6 +28,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -36,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -669,4 +679,141 @@ fun SubComboBox(
             }
         }
     }
+}
+
+@Composable
+fun ChipsRow(
+    modifier: Modifier = Modifier,
+    items: List<DropdownItem>,
+    selectedItem: DropdownItem,
+    onItemSelected: (DropdownItem) -> Unit,
+    shape: Shape = CircleShape,
+    addNone: Boolean = true,
+    noneText: String = "None",
+) {
+    val itemsWithNone by remember(items) {
+        derivedStateOf {
+            if (addNone) {
+                if (items.any { it.id == 0L }) {
+                    items
+                } else {
+                    listOf(DropdownItem(0L, noneText)) + items
+                }
+            } else
+                items
+        }
+    }
+
+
+    if (itemsWithNone.size > 1) {
+        LazyRow(
+            modifier = modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(itemsWithNone) { item ->
+                FilterChip(
+                    isSelected = item.id == selectedItem.id,
+                    item = item,
+                    onItemSelected = onItemSelected,
+                    shape = shape,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SubChipsRow(
+    modifier: Modifier = Modifier,
+    items: List<DropdownItem>,
+    selectedItem: DropdownItem,
+    onItemSelected: (DropdownItem) -> Unit,
+    mainId: Long = 0L,
+    shape: Shape = CircleShape,
+    addNone: Boolean = true,
+    noneText: String = "None",
+) {
+    val itemsWithNone by remember(items) {
+        derivedStateOf {
+            if (addNone) {
+                if (items.any { it.id == 0L }) {
+                    items
+                } else {
+                    listOf(DropdownItem(0L, noneText)) + items
+                }
+            } else
+                items
+        }
+    }
+
+    val filteredItems by remember(itemsWithNone, mainId) {
+        derivedStateOf {
+            if (mainId == 0L) {
+                listOf(DropdownItem(0L, noneText))
+            } else {
+                listOf(DropdownItem(0L, noneText)) + items.filter { it.mainId == mainId }
+            }
+        }
+    }
+
+    var isFirstRun by rememberSaveable { mutableStateOf(true) }
+    LaunchedEffect(mainId) {
+        if (isFirstRun) {
+            isFirstRun = false
+            return@LaunchedEffect
+        }
+
+        onItemSelected(DropdownItem(0L, noneText))
+    }
+
+    if (filteredItems.size > 1) {
+        LazyRow(
+            modifier = modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(filteredItems) { item ->
+                FilterChip(
+                    isSelected = item.id == selectedItem.id,
+                    item = item,
+                    onItemSelected = onItemSelected,
+                    shape = shape,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FilterChip(
+    isSelected: Boolean,
+    item:DropdownItem,
+    onItemSelected: (DropdownItem) -> Unit,
+    shape: Shape,
+) {
+    FilterChip(
+        modifier = Modifier
+            .height(30.dp),
+        selected = isSelected,
+        onClick = {
+            onItemSelected(item)
+        },
+        label = {
+            Text(
+                text = item.name,
+                style = MaterialTheme.typography.labelMedium,
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        },
+        shape = shape,
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimaryContainer
+        ),
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = MaterialTheme.colorScheme.primary,
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+        )
+    )
 }

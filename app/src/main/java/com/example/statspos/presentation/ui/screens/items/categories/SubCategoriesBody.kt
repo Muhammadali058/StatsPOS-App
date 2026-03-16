@@ -138,7 +138,6 @@ fun SubCategoriesBody(
                             },
                         )
                     }
-                    Spacer(Modifier.height(4.dp))
                     BodyList(
                         modifier = Modifier
                             .weight(1f)
@@ -176,6 +175,9 @@ private fun BodyList(
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
     ) {
+        item{
+            Spacer(Modifier.height(4.dp))
+        }
         items(items) { item ->
             ListCard(item = item) {
                 onItemClick(it)

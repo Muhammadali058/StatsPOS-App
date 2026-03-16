@@ -33,11 +33,9 @@ class ItemsViewModel @Inject constructor(
         val page: Int = 1,
         val endReached: Boolean = false,
         val search: String = "",
-        val categoryName: String = "",
-        val subCategoryName: String = "",
         val vendorName: String = "",
-        val categoryId: Long = 0L,
-        val subCategoryId: Long = 0L,
+        val category: DropdownItem = HP.getNoneDropdownItem(),
+        val subCategory: DropdownItem = HP.getNoneDropdownItem(),
         val vendorId: Long = 0L,
         val selectedSearchBy: DropdownItem? = HP.itemFilters[0],
 
@@ -118,24 +116,33 @@ class ItemsViewModel @Inject constructor(
             loadItems()
     }
 
-    fun onCategoryNameChange(value: String) {
-        state.update { it.copy(categoryName = value) }
+//    fun onCategoryNameChange(value: String) {
+//        state.update { it.copy(categoryName = value) }
+//    }
+//
+//    fun onSubCategoryNameChange(value: String) {
+//        state.update { it.copy(subCategoryName = value) }
+//    }
+
+    fun onCategoryChange(value: DropdownItem) {
+        state.update { it.copy(category = value) }
     }
 
-    fun onSubCategoryNameChange(value: String) {
-        state.update { it.copy(subCategoryName = value) }
+    fun onSubCategoryChange(value: DropdownItem) {
+        state.update { it.copy(subCategory = value) }
     }
 
     fun onVendorNameChange(value: String) {
         state.update { it.copy(vendorName = value) }
     }
-    fun onCategoryIdChange(value: Long) {
-        state.update { it.copy(categoryId = value) }
-    }
 
-    fun onSubCategoryIdChange(value: Long) {
-        state.update { it.copy(subCategoryId = value) }
-    }
+//    fun onCategoryIdChange(value: Long) {
+//        state.update { it.copy(categoryId = value) }
+//    }
+//
+//    fun onSubCategoryIdChange(value: Long) {
+//        state.update { it.copy(subCategoryId = value) }
+//    }
 
     fun onVendorIdChange(value: Long) {
         state.update { it.copy(vendorId = value) }
@@ -300,8 +307,8 @@ class ItemsViewModel @Inject constructor(
         addProperty("page", page)
         addProperty("itemsPerPage", HP.ITEMS_PER_PAGE)
         addProperty("searchBy", state.value.selectedSearchBy?.id ?: 0L)
-        addProperty("categoryId", state.value.categoryId)
-        addProperty("subCategoryId", state.value.subCategoryId)
+        addProperty("categoryId", state.value.category.id)
+        addProperty("subCategoryId", state.value.subCategory.id)
         addProperty("vendorId", state.value.vendorId)
         addProperty("text", state.value.search)
     }

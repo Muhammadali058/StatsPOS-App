@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Home
@@ -39,7 +40,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -79,6 +82,7 @@ import com.example.statspos.presentation.ui.utils.toEntries
 import com.example.statspos.presentation.ui.screens.BottomRoutes
 import com.example.statspos.presentation.ui.screens.TopRoutes
 import com.example.statspos.presentation.ui.screens.items.ItemsScreen
+import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
 import com.example.statspos.presentation.ui.screens.reports.ReportsScreen
 import com.example.statspos.presentation.ui.screens.sales.main_screen.SalesScreen
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
@@ -156,10 +160,14 @@ fun HomeScreen(
         drawerState = drawerState,
         drawerContent = {
             NavigationDrawer(
-                viewModel = viewModel
-            ) {
+                viewModel = viewModel,
+                onClick = {
 
-            }
+                },
+                onUserClick = {
+                    onTopRouteClick(TopRoutes.UpdateUser)
+                }
+            )
         },
     ) {
         Scaffold(
@@ -238,6 +246,12 @@ fun HomeScreen(
                                     onTopRouteClick(TopRoutes.AddUpdateItem(updateId, isUpdate))
                                 }
                             )
+//                            SearchItemsScreen(
+//                                sharedViewModel = sharedViewModel,
+//                                onBack = {
+//
+//                                }
+//                            )
                         }
                         entry<BottomRoutes.Sales> {
                             SalesScreen(
@@ -275,6 +289,7 @@ fun HomeScreen(
 fun NavigationDrawer(
     viewModel: LocalDataViewModel,
     onClick: (BottomNavItem) -> Unit,
+    onUserClick:() ->Unit,
 ) {
 //    val items = listOf(
 //        BottomNavItem(Icons.Default.Home, "Home"),
@@ -302,7 +317,7 @@ fun NavigationDrawer(
             )
             .width(280.dp),
         drawerShape = RectangleShape,
-        drawerContainerColor = MaterialTheme.colorScheme.primaryContainer
+        drawerContainerColor = MaterialTheme.colorScheme.surface
     ) {
         Column(
             Modifier
@@ -350,6 +365,27 @@ fun NavigationDrawer(
             color = MaterialTheme.colorScheme.primary,
         )
 
+//        NavigationDrawerItem(
+//            label = { Text("Profile") },
+//            selected = false,
+//            onClick = {
+//                onUserClick()
+//            },
+////            colors = navigationDrawerColors,
+//        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    onUserClick()
+                }
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            AppText("Profile")
+        }
+
         items.forEach { item ->
             Row(
                 modifier = Modifier
@@ -362,14 +398,6 @@ fun NavigationDrawer(
             ) {
                 AppText(item.title)
             }
-//            NavigationDrawerItem(
-//                label = { Text(item.title) },
-//                selected = false,
-//                onClick = {
-//                    onClick(item)
-//                },
-//                colors = navigationDrawerColors,
-//            )
         }
 
         Row(
@@ -490,6 +518,7 @@ private fun HomeGrid(
                 elevation = CardDefaults.cardElevation(
                     defaultElevation = 2.dp
                 ),
+                shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                 ),

@@ -49,6 +49,9 @@ sealed class TopRoutes : NavKey {
     @Serializable
     data object Settings : TopRoutes()
 
+    @Serializable
+    data object UpdateUser : TopRoutes()
+
     // endregion
     // region Sales
     @Serializable

@@ -318,7 +318,6 @@ fun PurchasePostedBillsBody(
                             },
                         )
                     }
-                    Spacer(Modifier.height(4.dp))
                     BodyList(
                         modifier = Modifier
                             .weight(1f)
@@ -484,6 +483,9 @@ private fun BodyList(
         onRefresh = onRefresh,
         isLoadingNextPage = isLoadingNextPage,
     ) {
+        item{
+            Spacer(Modifier.height(4.dp))
+        }
         items(items.size) { i ->
             val item = items[i]
 

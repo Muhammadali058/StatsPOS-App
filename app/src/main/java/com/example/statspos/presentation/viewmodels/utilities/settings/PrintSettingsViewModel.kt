@@ -1,4 +1,4 @@
-package com.example.statspos.presentation.viewmodels.utilities
+package com.example.statspos.presentation.viewmodels.utilities.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

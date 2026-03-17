@@ -38,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -300,16 +301,26 @@ fun SubDropdown(
         }
     }
 
-    var isFirstRun by rememberSaveable { mutableStateOf(true) }
+    var previousMainId by rememberSaveable { mutableLongStateOf(mainId) }
     LaunchedEffect(mainId) {
-        if (isFirstRun) {
-            isFirstRun = false
-            return@LaunchedEffect
-        }
+        if (previousMainId != mainId) {
+            previousMainId = mainId
 
-        onValueChange("")
-        onItemSelected(DropdownItem(0L, noneText))
+            onValueChange("")
+            onItemSelected(DropdownItem(0L, noneText))
+        }
     }
+
+//    var isFirstRun by rememberSaveable { mutableStateOf(true) }
+//    LaunchedEffect(mainId) {
+//        if (isFirstRun) {
+//            isFirstRun = false
+//            return@LaunchedEffect
+//        }
+//
+//        onValueChange("")
+//        onItemSelected(DropdownItem(0L, noneText))
+//    }
 
     var expanded by remember { mutableStateOf(false) }
     var textFieldSize by remember { mutableStateOf(IntSize.Zero) }
@@ -579,15 +590,23 @@ fun SubComboBox(
         }
     }
 
-    var isFirstRun by rememberSaveable { mutableStateOf(true) }
+    var previousMainId by rememberSaveable { mutableLongStateOf(mainId) }
     LaunchedEffect(mainId) {
-        if (isFirstRun) {
-            isFirstRun = false
-            return@LaunchedEffect
+        if (previousMainId != mainId) {
+            previousMainId = mainId
+            onItemSelected(DropdownItem(0L, noneText))
         }
-
-        onItemSelected(DropdownItem(0L, noneText))
     }
+
+//    var isFirstRun by rememberSaveable { mutableStateOf(true) }
+//    LaunchedEffect(mainId) {
+//        if (isFirstRun) {
+//            isFirstRun = false
+//            return@LaunchedEffect
+//        }
+//
+//        onItemSelected(DropdownItem(0L, noneText))
+//    }
 
     var expanded by remember { mutableStateOf(false) }
 
@@ -757,15 +776,23 @@ fun SubChipsRow(
         }
     }
 
-    var isFirstRun by rememberSaveable { mutableStateOf(true) }
+    var previousMainId by rememberSaveable { mutableLongStateOf(mainId) }
     LaunchedEffect(mainId) {
-        if (isFirstRun) {
-            isFirstRun = false
-            return@LaunchedEffect
+        if (previousMainId != mainId) {
+            previousMainId = mainId
+            onItemSelected(DropdownItem(0L, noneText))
         }
-
-        onItemSelected(DropdownItem(0L, noneText))
     }
+
+//    var isFirstRun by rememberSaveable { mutableStateOf(true) }
+//    LaunchedEffect(mainId) {
+//        if (isFirstRun) {
+//            isFirstRun = false
+//            return@LaunchedEffect
+//        }
+//
+//        onItemSelected(DropdownItem(0L, noneText))
+//    }
 
     if (filteredItems.size > 1) {
         LazyRow(

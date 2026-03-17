@@ -3,12 +3,14 @@ package com.example.statspos.presentation.ui.screens.utilities.users
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -130,6 +132,14 @@ fun UpdateUserScreen(
                         .imePadding(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
+                    ImageExpandable(
+                        isUploadingImage = state.isUploadingImage,
+                        imageUrl = state.imageUrl,
+                        onImageUrlChange = {
+                            viewModel.uploadImage(it)
+                        }
+                    )
+                    Spacer(Modifier.height(8.dp))
                     Basic(
                         username = state.username,
                         password = state.password,
@@ -146,14 +156,6 @@ fun UpdateUserScreen(
                         onEmailChange = viewModel::onEmailChange,
                         onAddressChange = viewModel::onAddressChange,
                         onDateOfBirthChange = viewModel::onDateOfBirthChange,
-                    )
-
-                    ImageExpandable(
-                        isUploadingImage = state.isUploadingImage,
-                        imageUrl = state.imageUrl,
-                        onImageUrlChange = {
-                            viewModel.uploadImage(it)
-                        }
                     )
                 }
 
@@ -279,24 +281,20 @@ private fun ImageExpandable(
     imageUrl: String,
     onImageUrlChange: (MultipartBody.Part) -> Unit,
 ) {
-    ExpandableSection(
-        title = "Image",
-        initiallyExpanded = false,
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            if (isUploadingImage) {
-                AppCircularProgressIndicator()
-            } else {
-                UploadImageView(
-                    imageUrl = imageUrl,
-                    onImageUrlChange = onImageUrlChange
-                )
-            }
+        if (isUploadingImage) {
+            AppCircularProgressIndicator()
+        } else {
+            UploadImageView(
+                imageUrl = imageUrl,
+                onImageUrlChange = onImageUrlChange,
+                shape = CircleShape
+            )
         }
     }
 }

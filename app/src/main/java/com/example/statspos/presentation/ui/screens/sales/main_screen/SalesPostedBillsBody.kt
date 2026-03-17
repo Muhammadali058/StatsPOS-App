@@ -82,7 +82,7 @@ fun SalesPostedBillsBody(
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     var showBottomSheet by remember { mutableStateOf(false) }
 
     val viewModel = hiltViewModel<SalesPostedBillsViewModel>()
@@ -237,6 +237,7 @@ fun SalesPostedBillsBody(
                         },
                         addNone = true,
                         noneText = "Both",
+                        showEndIcon = false,
                     )
                     Spacer(Modifier.width(8.dp))
                     ComboBox(
@@ -252,6 +253,7 @@ fun SalesPostedBillsBody(
                         },
                         addNone = true,
                         noneText = "Both",
+                        showEndIcon = false,
                     )
                 }
 
@@ -272,6 +274,7 @@ fun SalesPostedBillsBody(
                         },
                         addNone = true,
                         noneText = "Both",
+                        showEndIcon = false,
                     )
                     Spacer(Modifier.width(8.dp))
                     ComboBox(
@@ -287,6 +290,7 @@ fun SalesPostedBillsBody(
                         },
                         addNone = true,
                         noneText = "Both",
+                        showEndIcon = false,
                     )
                 }
                 Button(onClick = {

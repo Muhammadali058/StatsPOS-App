@@ -8,6 +8,7 @@ object DB {
     const val IS_ONLINE_MODE = true
 
     var HOST = "http://192.168.100.28:8000/"
+//    var HOST = "http://103.152.100.187:5000/"
     var API = "${HOST}api/"
 
     fun setBaseUrl(host: String){

@@ -28,6 +28,7 @@ import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
 import com.example.statspos.presentation.ui.screens.items.categories.CategoriesScreen
 import com.example.statspos.presentation.ui.screens.items.packages.PackagesScreen
 import com.example.statspos.presentation.ui.screens.purchase.main_screen.PurchaseScreen
+import com.example.statspos.presentation.ui.screens.purchase.purchase_bill.PurchaseBillScreen
 import com.example.statspos.presentation.ui.screens.purchase.purchase_orders.PurchaseOrdersScreen
 import com.example.statspos.presentation.ui.screens.reports.accounts.AccountsReportsScreen
 import com.example.statspos.presentation.ui.screens.reports.items.ItemsReportsScreen
@@ -142,14 +143,6 @@ fun MainScreen() {
                     }
                 )
             }
-            entry<TopRoutes.Purchase> {
-                PurchaseScreen(
-                    sharedViewModel = sharedViewModel,
-                    onBack = {
-                        backStack.removeLastOrNull()
-                    }
-                )
-            }
 
             // region Sales
             entry<TopRoutes.AddUpdateSales> { key ->
@@ -164,9 +157,32 @@ fun MainScreen() {
                     }
                 )
             }
-            entry<TopRoutes.ViewBillItems> { key ->
+            entry<TopRoutes.ViewSalesBillItems> { key ->
                 ViewSalesBillItemsScreen(
                     invoiceId = key.salesBill.id!!,
+                    isPostedBill = true,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            // endregion
+            // region Purchase
+            entry<TopRoutes.AddUpdatePurchase> { key ->
+                PurchaseBillScreen (
+                    sharedViewModel = sharedViewModel,
+                    invoiceId = key.updateId,
+                    isPendingBill = key.isPendingBill,
+                    isPostedBill = key.isPostedBill,
+                    purchaseBill = key.purchaseBill,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<TopRoutes.ViewPurchaseBillItems> { key ->
+                ViewSalesBillItemsScreen(
+                    invoiceId = key.purchaseBill.id!!,
                     isPostedBill = true,
                     onBack = {
                         backStack.removeLastOrNull()

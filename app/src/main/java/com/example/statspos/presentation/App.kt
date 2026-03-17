@@ -1,7 +1,6 @@
 package com.example.statspos.presentation
 
 import android.app.Activity
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
@@ -14,18 +13,15 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.example.statspos.presentation.ui.screens.TopRoutes
-import com.example.statspos.presentation.ui.screens.items.AddUpdateItemScreen
 import com.example.statspos.presentation.ui.screens.main.login.ClientLoginScreen
 import com.example.statspos.presentation.ui.screens.main.login.ClientSignupScreen
 import com.example.statspos.presentation.ui.screens.main.login.LoginScreen
+import com.example.statspos.presentation.ui.screens.main.main.MainScreen
 import com.example.statspos.presentation.ui.screens.main.main.SplashScreen
 import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
-import com.example.statspos.presentation.ui.screens.main.main.MainScreen
 import com.example.statspos.utils.DB
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.showToast
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.Serializable
 
@@ -40,7 +36,8 @@ private sealed class Screens : NavKey {
     data object ClientSignup : Screens()
 
     @Serializable
-    data class Login(val remember: Boolean, val username: String?, val password: String?) : Screens()
+    data class Login(val remember: Boolean, val username: String?, val password: String?) :
+        Screens()
 
     @Serializable
     data object Main : Screens()
@@ -52,6 +49,13 @@ fun App() {
     val backStack = rememberNavBackStack(Screens.Splash)
     val viewModel = hiltViewModel<LocalDataViewModel>()
 
+    fun navigate(key: NavKey) {
+        if (backStack.lastOrNull() != key) {
+            backStack.add(key)
+            backStack.removeFirstOrNull()
+        }
+    }
+
     LaunchedEffect(Unit) {
 //        return@LaunchedEffect
         if (DB.IS_ONLINE_MODE) {
@@ -60,12 +64,10 @@ fun App() {
             if (clientId != 0) {
                 viewModel.getLoginInfo { remember, username, password ->
                     HP.clientId = clientId
-                    backStack.add(Screens.Login(remember, username, password))
-                    backStack.removeFirstOrNull()
+                    navigate(Screens.Login(remember, username, password))
                 }
             } else {
-                backStack.add(Screens.ClientLogin)
-                backStack.removeFirstOrNull()
+                navigate(Screens.ClientLogin)
             }
         } else {
             val localClientId = viewModel.getLocalClientId().first()
@@ -76,12 +78,10 @@ fun App() {
 
                 viewModel.getLoginInfo { remember, username, password ->
                     HP.clientId = 1
-                    backStack.add(Screens.Login(remember, username, password))
-                    backStack.removeFirstOrNull()
+                    navigate(Screens.Login(remember, username, password))
                 }
             } else {
-                backStack.add(Screens.ClientLogin)
-                backStack.removeFirstOrNull()
+                navigate(Screens.ClientLogin)
             }
         }
     }
@@ -108,8 +108,7 @@ fun App() {
                         viewModel.setClientId(clientId)
 
                         HP.clientId = clientId
-                        backStack.add(Screens.Login( false, "", ""))
-                        backStack.removeFirstOrNull()
+                        navigate(Screens.Login(false, "", ""))
                     },
                     onLocalClientLogin = { localBranch ->
                         if (localBranch.localClientId != 0 && localBranch.baseUrl.isNotEmpty()) {
@@ -132,8 +131,7 @@ fun App() {
                         viewModel.setClientId(clientId)
 
                         HP.clientId = clientId
-                        backStack.add(Screens.Login( false,"", ""))
-                        backStack.removeFirstOrNull()
+                        navigate(Screens.Login(false, "", ""))
                     }
                 )
             }
@@ -141,16 +139,16 @@ fun App() {
                 LoginScreen(
                     remember = key.remember,
                     username = key.username,
-                    password = key.password
-                ) { remember, username, password ->
-                    if(remember)
-                        viewModel.saveLoginInfo(true, username, password)
-                    else
-                        viewModel.saveLoginInfo(false,"", "")
+                    password = key.password,
+                    onLogin = { remember, username, password ->
+                        if (remember)
+                            viewModel.saveLoginInfo(true, username, password)
+                        else
+                            viewModel.saveLoginInfo(false, "", "")
 
-                    backStack.add(Screens.Main)
-                    backStack.removeFirstOrNull()
-                }
+                        navigate(Screens.Main)
+                    }
+                )
             }
             entry<Screens.Main> {
                 MainScreen()

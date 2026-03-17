@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.DropdownMenu
@@ -83,6 +84,10 @@ val BOTTOM_DESTINATIONS = mapOf(
     BottomRoutes.Sales to BottomNavItem(
         icon = Icons.Default.ShoppingCart,
         title = "Sales"
+    ),
+    BottomRoutes.Purchase to BottomNavItem(
+        icon = Icons.Default.ShoppingBag,
+        title = "Purchase"
     ),
     BottomRoutes.Reports to BottomNavItem(
         icon = Icons.Default.AccountTree,
@@ -319,7 +324,7 @@ fun AppDropdownMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
-    containerColor: Color = MaterialTheme.colorScheme.background,
+    containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     DropdownMenu(

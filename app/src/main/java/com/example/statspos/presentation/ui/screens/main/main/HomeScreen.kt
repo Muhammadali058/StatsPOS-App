@@ -28,7 +28,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
@@ -40,9 +39,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -82,7 +79,7 @@ import com.example.statspos.presentation.ui.utils.toEntries
 import com.example.statspos.presentation.ui.screens.BottomRoutes
 import com.example.statspos.presentation.ui.screens.TopRoutes
 import com.example.statspos.presentation.ui.screens.items.ItemsScreen
-import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
+import com.example.statspos.presentation.ui.screens.purchase.main_screen.PurchaseScreen
 import com.example.statspos.presentation.ui.screens.reports.ReportsScreen
 import com.example.statspos.presentation.ui.screens.sales.main_screen.SalesScreen
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
@@ -96,7 +93,7 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 
 private val items = listOf(
-    TopItem("Purchase", TopRoutes.Purchase, R.drawable.purchase),
+//    TopItem("Purchase", TopRoutes.Purchase, R.drawable.purchase),
     TopItem("Categories", TopRoutes.Categories, R.drawable.categories),
     TopItem("Packages", TopRoutes.Packages, R.drawable.package_icon),
     TopItem("Purchase\nOrders", TopRoutes.PurchaseOrders, R.drawable.package_icon),
@@ -136,13 +133,14 @@ fun HomeScreen(
 
     // Navigation
     val navigationState = rememberNavigationState(
-        startRoute = BottomRoutes.Home,
+        startRoute = BottomRoutes.Sales,
         topLevelRoutes = BOTTOM_DESTINATIONS.keys,
         serializersModules = SerializersModule {
             polymorphic(NavKey::class) {
                 subclass(BottomRoutes.Home::class, BottomRoutes.Home.serializer())
                 subclass(BottomRoutes.Items::class, BottomRoutes.Items.serializer())
                 subclass(BottomRoutes.Sales::class, BottomRoutes.Sales.serializer())
+                subclass(BottomRoutes.Purchase::class, BottomRoutes.Purchase.serializer())
                 subclass(BottomRoutes.Reports::class, BottomRoutes.Reports.serializer())
             }
         }
@@ -166,6 +164,7 @@ fun HomeScreen(
                 },
                 onUserClick = {
                     onTopRouteClick(TopRoutes.UpdateUser)
+                    scope.launch { drawerState.close() }
                 }
             )
         },
@@ -257,7 +256,7 @@ fun HomeScreen(
                             SalesScreen(
                                 sharedViewModel = sharedViewModel,
                                 onViewClick = { salesBill ->
-                                    onTopRouteClick(TopRoutes.ViewBillItems(salesBill))
+                                    onTopRouteClick(TopRoutes.ViewSalesBillItems(salesBill))
                                 },
                                 onAddUpdateButtonClick = { updateId, isPendingBill, isPostedBill, salesBill ->
                                     onTopRouteClick(
@@ -266,6 +265,24 @@ fun HomeScreen(
                                             isPendingBill,
                                             isPostedBill,
                                             salesBill
+                                        )
+                                    )
+                                }
+                            )
+                        }
+                        entry<BottomRoutes.Purchase> {
+                            PurchaseScreen(
+                                sharedViewModel = sharedViewModel,
+                                onViewClick = { purchaseBill ->
+                                    onTopRouteClick(TopRoutes.ViewPurchaseBillItems(purchaseBill))
+                                },
+                                onAddUpdateButtonClick = { updateId, isPendingBill, isPostedBill, purchaseBill ->
+                                    onTopRouteClick(
+                                        TopRoutes.AddUpdatePurchase(
+                                            updateId,
+                                            isPendingBill,
+                                            isPostedBill,
+                                            purchaseBill
                                         )
                                     )
                                 }

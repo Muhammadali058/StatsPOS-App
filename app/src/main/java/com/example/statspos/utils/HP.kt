@@ -182,7 +182,6 @@ object HP {
             it.itemname!!
         }
 
-//        autoCompleteItems = Gson().getListOf<String>(jsonObject.get("items").asJsonArray)
         categories = Gson().getListOf<DropdownItem>(jsonObject.get("categories").asJsonArray)
         subCategories = jsonObject.get("subCategories").asJsonArray.map { obj ->
             DropdownItem(

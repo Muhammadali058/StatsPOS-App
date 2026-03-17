@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.Button
@@ -72,7 +73,7 @@ fun ItemsScreen(
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     var showBottomSheet by remember { mutableStateOf(false) }
     var showBarcodeScanner by remember { mutableStateOf(false) }
 
@@ -144,29 +145,6 @@ fun ItemsScreen(
                     showBottomSheet = false
                 },
             ) {
-//                Dropdown(
-//                    value = state.categoryName,
-//                    onValueChange = viewModel::onCategoryNameChange,
-//                    items = HP.categories,
-//                    onItemSelected = { dropdownItem ->
-//                        viewModel.onCategoryIdChange(dropdownItem.id)
-//                    },
-//                    label = {
-//                        Text(text = "Category")
-//                    }
-//                )
-//                SubDropdown(
-//                    value = state.subCategoryName,
-//                    onValueChange = viewModel::onSubCategoryNameChange,
-//                    items = HP.subCategories,
-//                    mainId = state.categoryId,
-//                    onItemSelected = { dropdownItem ->
-//                        viewModel.onSubCategoryIdChange(dropdownItem.id)
-//                    },
-//                    label = {
-//                        Text(text = "Sub-Category")
-//                    }
-//                )
                 Dropdown(
                     value = state.vendorName,
                     onValueChange = viewModel::onVendorNameChange,

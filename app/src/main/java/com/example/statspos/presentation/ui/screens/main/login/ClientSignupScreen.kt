@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.R
+import com.example.statspos.domain.models.main.Clients
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.ui.components.AppIcon
@@ -49,7 +50,7 @@ import com.example.statspos.utils.checkEvent
 
 @Composable
 fun ClientSignupScreen(
-    onSignup: (clientId: Int) -> Unit
+    onSignup: (client: Clients) -> Unit
 ) {
     val viewModel = hiltViewModel<ClientsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -99,8 +100,8 @@ fun ClientSignupScreen(
             onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
             isLoading = state.isLoading,
             onSignup = {
-                viewModel.clientSignup { clientId ->
-                    onSignup(clientId)
+                viewModel.clientSignup { client ->
+                    onSignup(client)
                 }
             }
         )

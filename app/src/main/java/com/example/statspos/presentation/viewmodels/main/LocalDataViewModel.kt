@@ -2,6 +2,8 @@ package com.example.statspos.presentation.viewmodels.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.main.Branches
+import com.example.statspos.domain.models.main.Clients
 import com.example.statspos.utils.LocalDataStore
 import com.example.statspos.utils.ThemeMode
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,25 +22,22 @@ class LocalDataViewModel @Inject constructor(
         return dataStore.getClientId()
     }
 
-    fun setClientId(value: Int){
-        viewModelScope.launch {
-            dataStore.setClientId(value)
-        }
+    fun getIsOnline(): Flow<Boolean> {
+        return dataStore.getIsOnline()
     }
 
-    // localClientId
-    fun getLocalClientId(): Flow<Int> {
-        return dataStore.getLocalClientId()
+    fun getBranches(): Flow<List<Branches>> {
+        return dataStore.getBranches()
     }
 
-    fun setLocalClientId(value: Int){
+    fun setClient(client: Clients, branches: List<Branches>){
         viewModelScope.launch {
-            dataStore.setLocalClientId(value)
+            dataStore.setClient(client, branches)
         }
     }
 
     // baseUrl
-    fun getBaseUrl(): Flow<String?> {
+    fun getBaseUrl(): Flow<String> {
         return dataStore.getBaseUrl()
     }
 

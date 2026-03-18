@@ -14,4 +14,7 @@ interface ClientsApi {
 
     @POST("clients/localClientLogin")
     suspend fun localClientLogin(@Body body: JsonObject): Response<JsonObject>
+
+    @POST("clients/getBranches")
+    suspend fun getBranches(@Body body: JsonObject): Response<JsonObject>
 }

@@ -2,6 +2,8 @@ package com.example.statspos.data.repository.main
 
 import com.example.statspos.data.remote.main.ClientsApi
 import com.example.statspos.domain.repository.main.ClientsRepository
+import com.example.statspos.utils.DB
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.safeApiCall
 import com.google.gson.JsonObject
@@ -29,4 +31,14 @@ class ClientsRepositoryImpl @Inject constructor(
 
     override suspend fun localClientLogin(body: JsonObject): Resource<JsonObject> =
         safeApiCall { api.localClientLogin(body) }
+
+
+    override suspend fun getBranches(): Resource<JsonObject> {
+        return safeApiCall {
+            api.getBranches(
+                DB.addParams(JsonObject())
+            )
+        }
+    }
+
 }

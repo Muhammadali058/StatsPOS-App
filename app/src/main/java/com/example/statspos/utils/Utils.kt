@@ -157,6 +157,9 @@ suspend fun checkEvent(
     }
 }
 
+inline fun <reified T> Gson.getListOf(jsonArray: String): List<T> =
+    fromJson(jsonArray, object : TypeToken<List<T>>() {}.type)
+
 inline fun <reified T> Gson.getListOf(jsonArray: JsonArray): List<T> =
     fromJson(jsonArray, object : TypeToken<List<T>>() {}.type)
 

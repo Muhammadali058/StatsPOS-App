@@ -63,6 +63,7 @@ import com.example.statspos.presentation.ui.components.ReportCard
 import com.example.statspos.presentation.ui.components.TopItem
 import com.example.statspos.presentation.ui.screens.TopRoutes
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
+import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.reports.ReportsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
@@ -80,6 +81,7 @@ private val reports = listOf(
 
 @Composable
 fun ReportsScreen(
+    sharedViewModel: SharedViewModel,
     onTopRouteClick: (NavKey) -> Unit,
 ) {
     val viewModel = hiltViewModel<ReportsViewModel>()
@@ -87,6 +89,7 @@ fun ReportsScreen(
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
+    val sharedViewModelState by sharedViewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(event) {
         checkEvent(
@@ -97,6 +100,14 @@ fun ReportsScreen(
                 showErrorDialog = true
             }
         )
+    }
+
+    // When branch changed
+    LaunchedEffect(sharedViewModelState.refreshReportsScreen) {
+        if (sharedViewModelState.refreshReportsScreen) {
+            viewModel.loadMainReport()
+            sharedViewModel.consumeRefreshReportsScreen()
+        }
     }
 
     if (showErrorDialog) {

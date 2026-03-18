@@ -1,12 +1,14 @@
 package com.example.statspos.presentation.ui.screens.main.main
 
 import android.app.Activity
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,10 +26,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
@@ -40,9 +42,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,24 +58,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.R
+import com.example.statspos.domain.models.main.Branches
 import com.example.statspos.presentation.ui.components.AppDropdownMenu
 import com.example.statspos.presentation.ui.components.BOTTOM_DESTINATIONS
 import com.example.statspos.presentation.ui.components.BottomBar
 import com.example.statspos.presentation.ui.components.AppIcon
+import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.AppSwitch
 import com.example.statspos.presentation.ui.components.AppText
 import com.example.statspos.presentation.ui.components.BottomNavItem
+import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.ImageView
+import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.components.TopItem
 import com.example.statspos.presentation.ui.utils.Navigator
@@ -85,15 +98,19 @@ import com.example.statspos.presentation.ui.screens.sales.main_screen.SalesScree
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
+import com.example.statspos.presentation.viewmodels.main.MainViewModel
+import com.example.statspos.utils.DB
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.ThemeMode
+import com.example.statspos.utils.UiEvent
+import com.example.statspos.utils.checkEvent
+import com.example.statspos.utils.showToast
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 
 private val items = listOf(
-//    TopItem("Purchase", TopRoutes.Purchase, R.drawable.purchase),
     TopItem("Categories", TopRoutes.Categories, R.drawable.categories),
     TopItem("Packages", TopRoutes.Packages, R.drawable.package_icon),
     TopItem("Purchase\nOrders", TopRoutes.PurchaseOrders, R.drawable.package_icon),
@@ -126,14 +143,42 @@ fun HomeScreen(
     sharedViewModel: SharedViewModel,
     onTopRouteClick: (NavKey) -> Unit,
 ) {
-    val viewModel = hiltViewModel<LocalDataViewModel>()
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val localDataViewModel = hiltViewModel<LocalDataViewModel>()
+    val viewModel = hiltViewModel<MainViewModel>()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val event by viewModel.event.collectAsState(UiEvent.Idle)
+    val snackbarHostState = remember { SnackbarHostState() }
+    var showErrorDialog by remember { mutableStateOf(false) }
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val activity = LocalActivity.current as Activity
+    var branches by remember { mutableStateOf<List<Branches>>(emptyList()) }
+    var showBranchesList by remember { mutableStateOf(false) }
+
+    LaunchedEffect(event) {
+        checkEvent(
+            event = event,
+            snackbarHostState = snackbarHostState,
+            viewModelIdleEvent = viewModel::onEvent,
+            onError = {
+                showErrorDialog = true
+            }
+        )
+    }
+
+    if (showErrorDialog) {
+        ErrorDialog(
+            error = state.error,
+            onDismiss = {
+                showErrorDialog = false
+            },
+        )
+    }
 
     // Navigation
     val navigationState = rememberNavigationState(
-        startRoute = BottomRoutes.Sales,
+        startRoute = BottomRoutes.Home,
         topLevelRoutes = BOTTOM_DESTINATIONS.keys,
         serializersModules = SerializersModule {
             polymorphic(NavKey::class) {
@@ -158,7 +203,7 @@ fun HomeScreen(
         drawerState = drawerState,
         drawerContent = {
             NavigationDrawer(
-                viewModel = viewModel,
+                viewModel = localDataViewModel,
                 onClick = {
 
                 },
@@ -170,6 +215,11 @@ fun HomeScreen(
         },
     ) {
         Scaffold(
+            snackbarHost = {
+                AppSnackbarHost(
+                    snackbarHostState = snackbarHostState,
+                )
+            },
             topBar = {
                 TopAppBar(
                     navigationIcon = Icons.Default.Menu,
@@ -199,11 +249,33 @@ fun HomeScreen(
                                 modifier = Modifier
                                     .width(200.dp),
                             ) {
+                                if (HP.user.isMainUser == true) {
+                                    DropdownMenuItem(
+                                        text = { AppText("Update Branches") },
+                                        onClick = {
+                                            menuExpanded = false
+
+                                            viewModel.updateBranches {
+                                                context.showToast("Branches updated successfully")
+                                            }
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { AppText("Change Branch") },
+                                        onClick = {
+                                            menuExpanded = false
+                                            scope.launch {
+                                                branches = localDataViewModel.getBranches().first()
+                                                showBranchesList = true
+                                            }
+                                        }
+                                    )
+                                }
                                 DropdownMenuItem(
                                     text = { AppText("Exit App") },
-                                    leadingIcon = {
-                                        AppIcon(Icons.Default.ExitToApp)
-                                    },
+//                                    leadingIcon = {
+//                                        AppIcon(Icons.Default.ExitToApp)
+//                                    },
                                     onClick = {
                                         menuExpanded = false
                                         activity.finish()
@@ -224,80 +296,120 @@ fun HomeScreen(
                 )
             }
         ) { innerPadding ->
-            NavDisplay(
-                modifier = Modifier
+            Box(
+                Modifier
                     .fillMaxSize()
-                    .padding(innerPadding),
-                onBack = bottomNavigator::goBack,
-                entries = navigationState.toEntries(
-                    entryProvider {
-                        entry<BottomRoutes.Home> {
-                            HomeBody(
-                                onTopRouteClick = { key ->
-                                    onTopRouteClick(key)
-                                }
-                            )
-                        }
-                        entry<BottomRoutes.Items> {
-                            ItemsScreen(
-                                sharedViewModel = sharedViewModel,
-                                onAddButtonClick = { updateId, isUpdate ->
-                                    onTopRouteClick(TopRoutes.AddUpdateItem(updateId, isUpdate))
-                                }
-                            )
-//                            SearchItemsScreen(
-//                                sharedViewModel = sharedViewModel,
-//                                onBack = {
-//
-//                                }
-//                            )
-                        }
-                        entry<BottomRoutes.Sales> {
-                            SalesScreen(
-                                sharedViewModel = sharedViewModel,
-                                onViewClick = { salesBill ->
-                                    onTopRouteClick(TopRoutes.ViewSalesBillItems(salesBill))
-                                },
-                                onAddUpdateButtonClick = { updateId, isPendingBill, isPostedBill, salesBill ->
-                                    onTopRouteClick(
-                                        TopRoutes.AddUpdateSales(
-                                            updateId,
-                                            isPendingBill,
-                                            isPostedBill,
-                                            salesBill
-                                        )
+                    .padding(innerPadding)
+            ) {
+                Column(
+                    Modifier
+                        .fillMaxSize(),
+                ) {
+                    NavDisplay(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        onBack = bottomNavigator::goBack,
+                        entries = navigationState.toEntries(
+                            entryProvider {
+                                entry<BottomRoutes.Home> {
+                                    HomeBody(
+                                        onTopRouteClick = { key ->
+                                            onTopRouteClick(key)
+                                        }
                                     )
                                 }
-                            )
-                        }
-                        entry<BottomRoutes.Purchase> {
-                            PurchaseScreen(
-                                sharedViewModel = sharedViewModel,
-                                onViewClick = { purchaseBill ->
-                                    onTopRouteClick(TopRoutes.ViewPurchaseBillItems(purchaseBill))
-                                },
-                                onAddUpdateButtonClick = { updateId, isPendingBill, isPostedBill, purchaseBill ->
-                                    onTopRouteClick(
-                                        TopRoutes.AddUpdatePurchase(
-                                            updateId,
-                                            isPendingBill,
-                                            isPostedBill,
-                                            purchaseBill
-                                        )
+                                entry<BottomRoutes.Items> {
+                                    ItemsScreen(
+                                        sharedViewModel = sharedViewModel,
+                                        onAddButtonClick = { updateId, isUpdate ->
+                                            onTopRouteClick(
+                                                TopRoutes.AddUpdateItem(
+                                                    updateId,
+                                                    isUpdate
+                                                )
+                                            )
+                                        }
                                     )
                                 }
-                            )
-                        }
-                        entry<BottomRoutes.Reports> {
-                            ReportsScreen(
-                                onTopRouteClick = { key ->
-                                    onTopRouteClick(key)
+                                entry<BottomRoutes.Sales> {
+                                    SalesScreen(
+                                        sharedViewModel = sharedViewModel,
+                                        onViewClick = { salesBill ->
+                                            onTopRouteClick(TopRoutes.ViewSalesBillItems(salesBill))
+                                        },
+                                        onAddUpdateButtonClick = { updateId, isPendingBill, isPostedBill, salesBill ->
+                                            onTopRouteClick(
+                                                TopRoutes.AddUpdateSales(
+                                                    updateId,
+                                                    isPendingBill,
+                                                    isPostedBill,
+                                                    salesBill
+                                                )
+                                            )
+                                        }
+                                    )
                                 }
-                            )
+                                entry<BottomRoutes.Purchase> {
+                                    PurchaseScreen(
+                                        sharedViewModel = sharedViewModel,
+                                        onViewClick = { purchaseBill ->
+                                            onTopRouteClick(
+                                                TopRoutes.ViewPurchaseBillItems(
+                                                    purchaseBill
+                                                )
+                                            )
+                                        },
+                                        onAddUpdateButtonClick = { updateId, isPendingBill, isPostedBill, purchaseBill ->
+                                            onTopRouteClick(
+                                                TopRoutes.AddUpdatePurchase(
+                                                    updateId,
+                                                    isPendingBill,
+                                                    isPostedBill,
+                                                    purchaseBill
+                                                )
+                                            )
+                                        }
+                                    )
+                                }
+                                entry<BottomRoutes.Reports> {
+                                    ReportsScreen(
+                                        sharedViewModel = sharedViewModel,
+                                        onTopRouteClick = { key ->
+                                            onTopRouteClick(key)
+                                        }
+                                    )
+                                }
+                            }
+                        )
+                    )
+                }
+
+                if (showBranchesList) {
+                    Log.d("TAG branches", branches.toString())
+
+                    BranchesList(
+                        branches = branches,
+                        onBranchClick = { branch ->
+                            showBranchesList = false
+
+                            if (DB.isOnlineMode) {
+                                HP.branchId = branch.id!!
+                                viewModel.loadMainData {
+                                    sharedViewModel.notifyBranchChanged()
+                                }
+                            } else {
+                                localDataViewModel.setBaseUrl(branch.baseUrl.toString())
+                                context.showToast("Branch changed restart app")
+                                activity.finish()
+                            }
                         }
-                    }
-                )
-            )
+                    )
+                }
+
+                if (state.isLoading) {
+                    ProgressBarLayout()
+                }
+            }
         }
     }
 }
@@ -306,7 +418,7 @@ fun HomeScreen(
 fun NavigationDrawer(
     viewModel: LocalDataViewModel,
     onClick: (BottomNavItem) -> Unit,
-    onUserClick:() ->Unit,
+    onUserClick: () -> Unit,
 ) {
 //    val items = listOf(
 //        BottomNavItem(Icons.Default.Home, "Home"),
@@ -560,6 +672,53 @@ private fun HomeGrid(
                         )
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BranchesList(
+    branches: List<Branches>,
+    onBranchClick: (Branches) -> Unit,
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        item {
+            Text(
+                text = "Select Branch:",
+                style = TextStyle(
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
+                modifier = Modifier
+                    .padding(16.dp)
+            )
+        }
+        items(branches) { branch ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .clickable {
+                        onBranchClick(branch)
+                    },
+
+                ) {
+                Text(
+                    text = branch.branchName.toString(),
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    ),
+                    maxLines = 1,
+                    modifier = Modifier
+                        .padding(16.dp)
+                )
             }
         }
     }

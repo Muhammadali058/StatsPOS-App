@@ -1,28 +1,31 @@
 package com.example.statspos.utils
 
+import com.example.statspos.domain.models.main.Branches
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import retrofit2.Response
 
 object DB {
-    const val IS_ONLINE_MODE = true
+    var isOnlineMode = true
+    var branches: List<Branches> = emptyList()
 
     var HOST = "http://192.168.100.28:8000/"
-//    var HOST = "http://103.152.100.187:5000/"
+
+    //    var HOST = "http://103.152.100.187:5000/"
     var API = "${HOST}api/"
 
-    fun setBaseUrl(host: String){
+    fun setBaseUrl(host: String) {
         HOST = host
         API = "${host}api/"
     }
 
-    fun addParams(jsonObject: JsonObject): JsonObject{
+    fun addParams(jsonObject: JsonObject): JsonObject {
         jsonObject.addProperty("clientId", HP.clientId)
         jsonObject.addProperty("branchId", HP.branchId)
         return jsonObject
     }
 
-    fun getJsonObject(jsonObject: Any): JsonObject{
+    fun getJsonObject(jsonObject: Any): JsonObject {
         val body = Gson().toJsonTree(jsonObject).asJsonObject
         return body
     }
@@ -56,7 +59,7 @@ suspend fun <T> safeApiCall(
             } else {
                 Resource.Information(
                     message = jsonObject.get("message").asString,
-                    data = if(jsonObject.has("data")) jsonObject.get("data").asJsonObject else null
+                    data = if (jsonObject.has("data")) jsonObject.get("data").asJsonObject else null
                 )
             }
         }

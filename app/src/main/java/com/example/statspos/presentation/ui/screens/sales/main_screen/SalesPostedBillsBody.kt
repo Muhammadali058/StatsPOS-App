@@ -113,6 +113,14 @@ fun SalesPostedBillsBody(
         }
     }
 
+    // When branch changed
+    LaunchedEffect(sharedViewModelState.refreshSalesScreen) {
+        if (sharedViewModelState.refreshSalesScreen) {
+            viewModel.loadData()
+            sharedViewModel.consumeRefreshSalesScreen()
+        }
+    }
+
     if (showErrorDialog) {
         ErrorDialog(
             error = state.error,

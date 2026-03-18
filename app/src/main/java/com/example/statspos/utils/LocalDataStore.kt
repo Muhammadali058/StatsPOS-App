@@ -5,10 +5,14 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.main.Branches
+import com.example.statspos.domain.models.main.Clients
+import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,7 +22,8 @@ class LocalDataStore @Inject constructor(
 ){
     companion object {
         private val clientIdKey = intPreferencesKey("clientId")
-        private val localClientIdKey = intPreferencesKey("localClientId")
+        private val isOnlineKey = booleanPreferencesKey("isOnline")
+        private val branchesKey = stringPreferencesKey("branches")
         private val baseUrlKey = stringPreferencesKey("baseUrl")
         private val rememberKey = booleanPreferencesKey("remember")
         private val usernameKey = stringPreferencesKey("username")
@@ -31,26 +36,38 @@ class LocalDataStore @Inject constructor(
         return dataStore.data.map { preferences -> preferences[clientIdKey] ?: 0 }
     }
 
-    suspend fun setClientId(value:Int){
-        dataStore.edit { settings ->
-            settings[clientIdKey] = value
+    fun getIsOnline(): Flow<Boolean> {
+        return dataStore.data.map { preferences -> preferences[isOnlineKey] ?: true }
+    }
+
+    fun getBranches(): Flow<List<Branches>> {
+        return dataStore.data.map { preferences ->
+            val json = preferences[branchesKey] ?: "[]"
+            Gson().getListOf<Branches>(json)
         }
     }
 
-    // localClientId
-    fun getLocalClientId(): Flow<Int>{
-        return dataStore.data.map { preferences -> preferences[localClientIdKey] ?: 0 }
+    suspend fun setBranches(branches: List<Branches>) {
+        dataStore.edit { settings ->
+            settings[branchesKey] = Gson().toJson(branches)
+        }
     }
 
-    suspend fun setLocalClientId(value: Int){
+    suspend fun setClient(client: Clients, branches: List<Branches>){
         dataStore.edit { settings ->
-            settings[localClientIdKey] = value
+            settings[clientIdKey] = client.id!!
+            settings[isOnlineKey] = client.isOnline!!
+            settings[branchesKey] = Gson().toJson(branches)
+
+            if(!client.isOnline!!){
+                settings[baseUrlKey] = branches[0].baseUrl!!
+            }
         }
     }
 
     // baseUrl
-    fun getBaseUrl(): Flow<String?>{
-        return dataStore.data.map { preferences -> preferences[baseUrlKey] }
+    fun getBaseUrl(): Flow<String>{
+        return dataStore.data.map { preferences -> preferences[baseUrlKey] ?: "" }
     }
 
     suspend fun setBaseUrl(value: String){
@@ -67,6 +84,14 @@ class LocalDataStore @Inject constructor(
     suspend fun setRemember(value: Boolean){
         dataStore.edit { settings ->
             settings[rememberKey] = value
+        }
+    }
+
+    suspend fun saveLoginInfo(remember: Boolean, username: String, password: String) {
+        dataStore.edit { settings ->
+            settings[rememberKey] = remember
+            settings[usernameKey] = username
+            settings[passwordKey] = password
         }
     }
 

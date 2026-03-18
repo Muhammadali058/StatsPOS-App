@@ -101,6 +101,14 @@ fun ItemsScreen(
         }
     }
 
+    // When branch changed
+    LaunchedEffect(sharedViewModelState.refreshItemsScreen) {
+        if (sharedViewModelState.refreshItemsScreen) {
+            viewModel.loadItems()
+            sharedViewModel.consumeRefreshItemsScreen()
+        }
+    }
+
     if (showErrorDialog) {
         ErrorDialog(
             error = state.error,

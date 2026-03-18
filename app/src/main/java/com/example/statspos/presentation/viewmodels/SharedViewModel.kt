@@ -15,6 +15,12 @@ class SharedViewModel @Inject constructor() : ViewModel() {
         val billSaved: Boolean = false,
         val billPosted: Boolean = false,
         val item: Items? = null,
+
+        // When branch change
+        val refreshItemsScreen: Boolean = false,
+        val refreshSalesScreen: Boolean = false,
+        val refreshPurchaseScreen: Boolean = false,
+        val refreshReportsScreen: Boolean = false,
     )
 
     var state = MutableStateFlow(ScreenState())
@@ -37,21 +43,54 @@ class SharedViewModel @Inject constructor() : ViewModel() {
     }
 
     fun consumeDataChanged() {
-        state.update { it.copy(
-            dataChanged = false,
-            item = null,
-        ) }
+        state.update {
+            it.copy(
+                dataChanged = false,
+                item = null,
+            )
+        }
     }
 
     fun consumeBillPosted() {
-        state.update { it.copy(
-            billPosted = false,
-        ) }
+        state.update {
+            it.copy(
+                billPosted = false,
+            )
+        }
     }
 
     fun consumeBillSaved() {
-        state.update { it.copy(
-           billSaved = false,
-        ) }
+        state.update {
+            it.copy(
+                billSaved = false,
+            )
+        }
+    }
+
+    fun notifyBranchChanged() {
+        state.update {
+            it.copy(
+                refreshItemsScreen = true,
+                refreshSalesScreen = true,
+                refreshPurchaseScreen = true,
+                refreshReportsScreen = true,
+            )
+        }
+    }
+
+    fun consumeRefreshItemsScreen() {
+        state.update { it.copy(refreshItemsScreen = false) }
+    }
+
+    fun consumeRefreshSalesScreen() {
+        state.update { it.copy(refreshSalesScreen = false) }
+    }
+
+    fun consumeRefreshPurchaseScreen() {
+        state.update { it.copy(refreshPurchaseScreen = false) }
+    }
+
+    fun consumeRefreshReportsScreen() {
+        state.update { it.copy(refreshReportsScreen = false) }
     }
 }

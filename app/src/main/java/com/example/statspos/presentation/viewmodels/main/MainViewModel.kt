@@ -2,11 +2,17 @@ package com.example.statspos.presentation.viewmodels.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.main.Branches
+import com.example.statspos.domain.repository.main.ClientsRepository
 import com.example.statspos.domain.repository.main.MainRepository
 import com.example.statspos.utils.HP
+import com.example.statspos.utils.LocalDataStore
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
+import com.example.statspos.utils.getListOf
+import com.example.statspos.utils.preloadImages
+import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +24,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val mainRepository: MainRepository
+    private val api: MainRepository,
+    private val clientsRepo: ClientsRepository,
+    private var dataStore: LocalDataStore,
 ) : ViewModel() {
     // region ScreenState
     data class ScreenState(
@@ -69,7 +77,7 @@ class MainViewModel @Inject constructor(
 
             beforeRequest()
 
-            when (val result = mainRepository.uploadImage(multipart)) {
+            when (val result = api.uploadImage(multipart)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
@@ -80,6 +88,48 @@ class MainViewModel @Inject constructor(
 //                        isUploadingImage = false,
 //                        imageUrl = fileName,
 //                    ) }
+                }
+            }
+        }
+    }
+
+    fun updateBranches(onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = clientsRepo.getBranches()) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val branches = Gson().getListOf<Branches>(result.data.get("branches").asJsonArray)
+                    dataStore.setBranches(branches)
+                    onSuccess()
+                }
+            }
+        }
+    }
+
+    fun loadMainData(onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+            beforeRequest()
+
+            when (val result = api.loadData()) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    HP.setDropdowns(result.data)
+                    preloadImages(listOf(HP.getImageUrl(HP.printSettings.imageUrl.toString())))
+
+                    onSuccess()
                 }
             }
         }

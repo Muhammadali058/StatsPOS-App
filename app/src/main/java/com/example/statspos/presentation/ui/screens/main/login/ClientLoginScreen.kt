@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.R
+import com.example.statspos.domain.models.main.Clients
 import com.example.statspos.domain.models.main.LocalBranches
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.components.AppIcon
@@ -60,8 +61,7 @@ import com.example.statspos.utils.checkEvent
 
 @Composable
 fun ClientLoginScreen(
-    onClientLogin: (clientId: Int) -> Unit,
-    onLocalClientLogin: (localBranch: LocalBranches) -> Unit,
+    onClientLogin: (client: Clients) -> Unit,
     onSignup: () -> Unit
 ) {
     val viewModel = hiltViewModel<ClientsViewModel>()
@@ -103,30 +103,21 @@ fun ClientLoginScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surface),
         ) {
-            if (state.localBranches.isEmpty()) {
-                Body(
-                    username = state.username,
-                    password = state.password,
-                    isLoading = state.isLoading,
-                    onUsernameChange = viewModel::onUsernameChange,
-                    onPasswordChange = viewModel::onPasswordChange,
-                    onClientLogin = {
-                        viewModel.clientLogin { clientId ->
-                            onClientLogin(clientId)
-                        }
-                    },
-                    onLocalClientLogin = {
-                        viewModel.localClientLogin()
-                    },
-                    onSignup = {
-                        onSignup()
+            Body(
+                username = state.username,
+                password = state.password,
+                isLoading = state.isLoading,
+                onUsernameChange = viewModel::onUsernameChange,
+                onPasswordChange = viewModel::onPasswordChange,
+                onClientLogin = {
+                    viewModel.clientLogin { client ->
+                        onClientLogin(client)
                     }
-                )
-            } else {
-                BranchesList(state.localBranches) { localBranch ->
-                    onLocalClientLogin(localBranch)
+                },
+                onSignup = {
+                    onSignup()
                 }
-            }
+            )
         }
     }
 }
@@ -139,7 +130,6 @@ private fun Body(
     onPasswordChange: (String) -> Unit,
     isLoading: Boolean,
     onClientLogin: () -> Unit,
-    onLocalClientLogin: () -> Unit,
     onSignup: () -> Unit,
 ) {
     Column(
@@ -199,11 +189,7 @@ private fun Body(
         } else {
             Button(
                 onClick = {
-                    if (DB.IS_ONLINE_MODE) {
-                        onClientLogin()
-                    } else {
-                        onLocalClientLogin()
-                    }
+                    onClientLogin()
                 },
                 modifier = Modifier
                     .width(120.dp)
@@ -212,35 +198,35 @@ private fun Body(
             }
         }
 
-        if (DB.IS_ONLINE_MODE) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Don't have account?",
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                )
-                TextButton(
-                    onClick = {
-                        onSignup()
-                    }
-                ) {
-                    Text(
-                        text = "Sign up",
-                        fontSize = 15.sp,
-                        textDecoration = TextDecoration.Underline,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-
-        }
+//        if (DB.isOnlineMode) {
+//            Row(
+//                modifier = Modifier
+//                    .fillMaxWidth(),
+//                horizontalArrangement = Arrangement.Center,
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                Text(
+//                    text = "Don't have account?",
+//                    style = TextStyle(
+//                        fontSize = 14.sp,
+//                        color = MaterialTheme.colorScheme.onPrimaryContainer
+//                    )
+//                )
+//                TextButton(
+//                    onClick = {
+//                        onSignup()
+//                    }
+//                ) {
+//                    Text(
+//                        text = "Sign up",
+//                        fontSize = 15.sp,
+//                        textDecoration = TextDecoration.Underline,
+//                        color = MaterialTheme.colorScheme.primary
+//                    )
+//                }
+//            }
+//
+//        }
     }
 }
 
@@ -299,7 +285,6 @@ private fun BodyPreview() {
             {},
             {},
             false,
-            {},
             {},
             {}
         )

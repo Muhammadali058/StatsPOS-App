@@ -53,7 +53,7 @@ fun LoginScreen(
     remember: Boolean,
     username: String?,
     password: String?,
-    onLogin: (remember: Boolean, username: String, password: String) -> Unit
+    onLogin: () -> Unit
 ) {
     val viewModel = hiltViewModel<LoginViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -66,11 +66,7 @@ fun LoginScreen(
 
 //        viewModel.test()
         viewModel.login{
-            onLogin(
-                state.remember,
-                state.username,
-                state.password
-            )
+            onLogin()
         }
     }
 
@@ -121,11 +117,7 @@ fun LoginScreen(
             isLoading = state.isLoading,
             onLogin = {
                 viewModel.login {
-                    onLogin(
-                        state.remember,
-                        state.username,
-                        state.password
-                    )
+                    onLogin()
                 }
             }
         )

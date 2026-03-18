@@ -89,6 +89,14 @@ fun SalesPendingBillsBody(
         }
     }
 
+    // When branch changed
+    LaunchedEffect(sharedViewModelState.refreshSalesScreen) {
+        if (sharedViewModelState.refreshSalesScreen) {
+            viewModel.loadData()
+            sharedViewModel.consumeRefreshSalesScreen()
+        }
+    }
+
     fun showBill(
         bill: List<SalesBill>,
         ledger: List<AccountReport>?,

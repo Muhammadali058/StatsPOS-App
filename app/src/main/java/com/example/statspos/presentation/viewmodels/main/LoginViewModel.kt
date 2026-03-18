@@ -7,6 +7,7 @@ import com.example.statspos.domain.models.utilities.users.Users
 import com.example.statspos.domain.repository.main.MainRepository
 import com.example.statspos.domain.repository.utilities.UsersRepository
 import com.example.statspos.utils.HP
+import com.example.statspos.utils.LocalDataStore
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
@@ -25,7 +26,8 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val usersRepository: UsersRepository,
-    private val mainRepository: MainRepository
+    private val mainRepository: MainRepository,
+    private var dataStore: LocalDataStore
 ) : ViewModel() {
     // region ScreenState
     data class ScreenState(
@@ -53,11 +55,13 @@ class LoginViewModel @Inject constructor(
                     _event.send(UiEvent.ShowSnackbar(event.message, event.type))
                 }
             }
+
             is UiEvent.ShowError -> {
                 viewModelScope.launch {
                     _event.send(UiEvent.ShowError(event.error))
                 }
             }
+
             else -> {
                 viewModelScope.launch {
                     _event.send(UiEvent.Idle)
@@ -125,14 +129,26 @@ class LoginViewModel @Inject constructor(
                     resultSuccess()
                     if (result.data.get("isExists").asBoolean) {
                         HP.user = Gson().get<Users>(result.data.get("user").asJsonObject)
-                        HP.userRights = Gson().get<UserRights>(result.data.get("userRights").asJsonObject)
+                        HP.userRights =
+                            Gson().get<UserRights>(result.data.get("userRights").asJsonObject)
 
                         HP.clientId = HP.user.clientId!!
                         HP.branchId = HP.user.branchId!!
                         HP.branchGroupId = HP.user.branchGroupId!!
 
                         loadMainData {
-                            onSuccess()
+                            viewModelScope.launch {
+                                if (state.value.remember)
+                                    dataStore.saveLoginInfo(
+                                        state.value.remember,
+                                        state.value.username,
+                                        state.value.password
+                                    )
+                                else
+                                    dataStore.saveLoginInfo(false, "", "")
+
+                                onSuccess()
+                            }
                         }
                     } else {
                         showSnackbar("Username or password incorrect")
@@ -142,7 +158,7 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun loadMainData(onSuccess: () -> Unit){
+    fun loadMainData(onSuccess: () -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch

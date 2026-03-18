@@ -2,14 +2,16 @@ package com.example.statspos.presentation.viewmodels.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.main.Branches
 import com.example.statspos.domain.models.main.Clients
 import com.example.statspos.domain.models.main.LocalBranches
-import com.example.statspos.domain.models.main.LocalClients
 import com.example.statspos.domain.repository.main.ClientsRepository
-import com.example.statspos.utils.HP
+import com.example.statspos.utils.LocalDataStore
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
+import com.example.statspos.utils.get
+import com.example.statspos.utils.getListOf
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,7 +24,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ClientsViewModel @Inject constructor(
-    private val clientsRepository: ClientsRepository
+    private val clientsRepository: ClientsRepository,
+    private var dataStore: LocalDataStore,
 ) : ViewModel() {
     // region ScreenState
     data class ScreenState(
@@ -96,7 +99,7 @@ class ClientsViewModel @Inject constructor(
     // endregion
 
     // region Network calls
-    fun clientLogin(onSuccess: (clientId: Int) -> Unit) {
+    fun clientLogin(onSuccess: (client: Clients) -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -116,8 +119,11 @@ class ClientsViewModel @Inject constructor(
                 is Resource.Success -> {
                     resultSuccess()
                     if (result.data.get("isExists").asBoolean) {
-                        val clientId = result.data.getAsJsonObject("data").get("id").asInt
-                        onSuccess(clientId)
+                        val client = Gson().get<Clients>(result.data.get("data").asJsonObject)
+                        val branches = Gson().getListOf<Branches>(result.data.get("branches").asJsonArray)
+
+                        dataStore.setClient(client, branches)
+                        onSuccess(client)
                     } else {
                         showSnackbar("Username or password incorrect")
                     }
@@ -126,7 +132,7 @@ class ClientsViewModel @Inject constructor(
         }
     }
 
-    fun clientSignup(onSuccess: (clientId: Int) -> Unit) {
+    fun clientSignup(onSuccess: (client: Clients) -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -148,53 +154,11 @@ class ClientsViewModel @Inject constructor(
                 is Resource.Success -> {
                     resultSuccess()
 
-                    val client = Gson().fromJson(result.data, Clients::class.java)
-                    onSuccess(client.id!!)
-                }
-            }
-        }
-    }
+                    val client = Gson().get<Clients>(result.data.get("client").asJsonObject)
+                    val branches = Gson().getListOf<Branches>(result.data.get("branches").asJsonArray)
 
-    fun localClientLogin() {
-        viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
-            if (!loginValidation()) {
-                return@launch
-            }
-            beforeRequest()
-
-            val params = JsonObject().apply {
-                addProperty("username", state.value.username)
-                addProperty("password", state.value.password)
-            }
-
-            when (val result = clientsRepository.localClientLogin(params)) {
-                is Resource.Error -> resultError(result.error)
-                is Resource.Information -> resultInformation(result.message)
-                is Resource.Success -> {
-                    resultSuccess()
-                    if (result.data.get("isExists").asBoolean) {
-                        HP.localClient = Gson().fromJson(
-                            result.data.getAsJsonObject("localClient"),
-                            LocalClients::class.java
-                        )
-
-                        val jsonArray = result.data.getAsJsonArray("localBranches") ?: emptyList()
-                        val localBranches = mutableListOf<LocalBranches>()
-                        for (a in jsonArray) {
-                            val branch = Gson().fromJson(a, LocalBranches::class.java)
-                            localBranches.add(branch)
-                        }
-
-                        state.update {
-                            it.copy(
-                                localBranches = localBranches
-                            )
-                        }
-                    } else {
-                        showSnackbar("Username or password incorrect")
-                    }
+                    dataStore.setClient(client, branches)
+                    onSuccess(client)
                 }
             }
         }

@@ -94,6 +94,14 @@ fun PurchasePendingBillsBody(
         }
     }
 
+    // When branch changed
+    LaunchedEffect(sharedViewModelState.refreshPurchaseScreen) {
+        if (sharedViewModelState.refreshPurchaseScreen) {
+            viewModel.loadData()
+            sharedViewModel.consumeRefreshPurchaseScreen()
+        }
+    }
+
     if (showErrorDialog) {
         ErrorDialog(
             error = state.error,

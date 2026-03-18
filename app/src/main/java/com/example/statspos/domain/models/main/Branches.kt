@@ -14,4 +14,5 @@ data class Branches(
     var cnic: String? = null,
 
     var taxRate: Double? = null,
+    var baseUrl: String? = null,
 )

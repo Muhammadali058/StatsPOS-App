@@ -55,6 +55,7 @@ import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.screens.accounts.entries.vouchers.entryVoucher
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
+import com.example.statspos.presentation.ui.utils.getImageFromPdf
 import com.example.statspos.presentation.ui.utils.openPdf
 import com.example.statspos.presentation.ui.utils.sharePdf
 import com.example.statspos.presentation.viewmodels.SharedViewModel
@@ -152,8 +153,10 @@ fun ReceiptPostedEntriesBody(
             ledger = ledger,
         )
 
-        if(share)
-            sharePdf(context, file)
+        if(share) {
+            val image = getImageFromPdf(context, file)
+            sharePdf(context, image)
+        }
         else
             openPdf(context, file)
     }

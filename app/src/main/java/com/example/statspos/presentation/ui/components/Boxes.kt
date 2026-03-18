@@ -2,6 +2,7 @@ package com.example.statspos.presentation.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.example.statspos.utils.HP
 
 @Composable
 fun BalanceBox(
@@ -34,6 +36,22 @@ fun BalanceBox(
             style = MaterialTheme.typography.labelSmall.copy(
                 color = MaterialTheme.colorScheme.onPrimary,
             ),
+        )
+    }
+}
+
+@Composable
+fun AccessDeniedBox(
+    text: String = "Access denied"
+) {
+    Box(
+        Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        AppText(
+            text = text,
+            style = MaterialTheme.typography.labelLarge
         )
     }
 }

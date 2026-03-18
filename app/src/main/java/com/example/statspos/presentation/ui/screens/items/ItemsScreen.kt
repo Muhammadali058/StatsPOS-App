@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,9 +39,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.R
 import com.example.statspos.domain.models.items.Items
+import com.example.statspos.presentation.ui.components.AccessDeniedBox
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
+import com.example.statspos.presentation.ui.components.AppText
 import com.example.statspos.presentation.ui.components.AutoCompleteItemsTextbox
 import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
 import com.example.statspos.presentation.ui.components.BottomHeading
@@ -138,8 +141,10 @@ fun ItemsScreen(
             )
         },
         floatingActionButton = {
-            AppFloatingActionButton {
-                onAddButtonClick(0L, false)
+            if (HP.userRights.items == true) {
+                AppFloatingActionButton {
+                    onAddButtonClick(0L, false)
+                }
             }
         },
     ) { innerPadding ->
@@ -196,89 +201,93 @@ fun ItemsScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
+            if (HP.userRights.items == true) {
                 Column(
                     modifier = Modifier
-                        .weight(1f)
+                        .fillMaxSize()
                 ) {
-                    SearchBox(
-                        modifier = Modifier
-                            .background(MaterialTheme.colorScheme.surface)
-                            .padding(ConstantPaddings.BODY_HORIZONTAL)
-                            .padding(vertical = 8.dp),
-                        value = state.search,
-                        onValueChange = viewModel::onSearchChange,
-                        onItemSelected = {
-                            viewModel.getItem(it)
-                            keyboardController?.hide()
-                        },
-                        onSearchClick = {
-                            viewModel.loadItems()
-                            keyboardController?.hide()
-                        },
-                        onEndIconClick = {
-                            viewModel.getItem(it)
-                            keyboardController?.hide()
-                        },
-                        onBarcodeClick = {
-                            showBarcodeScanner = true
-                        },
-                        onFilterClick = {
-                            showBottomSheet = true
-                        }
-                    )
-                    ChipsRow(
-                        modifier = Modifier
-                            .background(MaterialTheme.colorScheme.surface)
-                            .padding(ConstantPaddings.BODY_HORIZONTAL)
-                            .padding(bottom = 8.dp),
-                        items = HP.categories,
-                        selectedItem = state.category,
-                        onItemSelected = {
-                            viewModel.onCategoryChange(it)
-                            viewModel.loadItems()
-                        }
-                    )
-                    SubChipsRow(
-                        modifier = Modifier
-                            .background(MaterialTheme.colorScheme.surface)
-                            .padding(ConstantPaddings.BODY_HORIZONTAL)
-                            .padding(bottom = 8.dp),
-                        items = HP.subCategories,
-                        selectedItem = state.subCategory,
-                        mainId = state.category.id,
-                        onItemSelected = {
-                            viewModel.onSubCategoryChange(it)
-                            viewModel.loadItems()
-                        },
-                    )
-                    BodyList(
+                    Column(
                         modifier = Modifier
                             .weight(1f)
-                            .padding(ConstantPaddings.BODY_HORIZONTAL),
-                        isRefreshing = state.isLoading,
-                        onRefresh = {
-                            viewModel.loadItems()
-                        },
-                        isLoadingNextPage = state.isLoadingNextPage,
-                        endReached = state.endReached,
-                        loadNextItems = {
-                            viewModel.loadNextItems()
-                        },
-                        items = state.list,
-                        onItemClick = { item ->
-                            onAddButtonClick(item.id!!, true)
-                        }
+                    ) {
+                        SearchBox(
+                            modifier = Modifier
+                                .background(MaterialTheme.colorScheme.surface)
+                                .padding(ConstantPaddings.BODY_HORIZONTAL)
+                                .padding(vertical = 8.dp),
+                            value = state.search,
+                            onValueChange = viewModel::onSearchChange,
+                            onItemSelected = {
+                                viewModel.getItem(it)
+                                keyboardController?.hide()
+                            },
+                            onSearchClick = {
+                                viewModel.loadItems()
+                                keyboardController?.hide()
+                            },
+                            onEndIconClick = {
+                                viewModel.getItem(it)
+                                keyboardController?.hide()
+                            },
+                            onBarcodeClick = {
+                                showBarcodeScanner = true
+                            },
+                            onFilterClick = {
+                                showBottomSheet = true
+                            }
+                        )
+                        ChipsRow(
+                            modifier = Modifier
+                                .background(MaterialTheme.colorScheme.surface)
+                                .padding(ConstantPaddings.BODY_HORIZONTAL)
+                                .padding(bottom = 12.dp),
+                            items = HP.categories,
+                            selectedItem = state.category,
+                            onItemSelected = {
+                                viewModel.onCategoryChange(it)
+                                viewModel.loadItems()
+                            }
+                        )
+                        SubChipsRow(
+                            modifier = Modifier
+                                .background(MaterialTheme.colorScheme.surface)
+                                .padding(ConstantPaddings.BODY_HORIZONTAL)
+                                .padding(bottom = 12.dp),
+                            items = HP.subCategories,
+                            selectedItem = state.subCategory,
+                            mainId = state.category.id,
+                            onItemSelected = {
+                                viewModel.onSubCategoryChange(it)
+                                viewModel.loadItems()
+                            },
+                        )
+                        BodyList(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(ConstantPaddings.BODY_HORIZONTAL),
+                            isRefreshing = state.isLoading,
+                            onRefresh = {
+                                viewModel.loadItems()
+                            },
+                            isLoadingNextPage = state.isLoadingNextPage,
+                            endReached = state.endReached,
+                            loadNextItems = {
+                                viewModel.loadNextItems()
+                            },
+                            items = state.list,
+                            onItemClick = { item ->
+                                onAddButtonClick(item.id!!, true)
+                            }
+                        )
+                    }
+
+                    BottomHeading(
+                        text = "Total Items: ",
+                        value = state.totalItems.toString()
                     )
                 }
-
-                BottomHeading(
-                    text = "Total Items: ",
-                    value = state.totalItems.toString()
-                )
+            } else {
+                AccessDeniedBox()
             }
         }
     }
@@ -353,7 +362,7 @@ private fun BodyList(
         onRefresh = onRefresh,
         isLoadingNextPage = isLoadingNextPage,
     ) {
-        item{
+        item {
             Spacer(Modifier.height(4.dp))
         }
         items(items.size) { i ->

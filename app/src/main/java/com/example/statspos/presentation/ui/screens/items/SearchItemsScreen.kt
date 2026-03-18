@@ -252,7 +252,7 @@ fun SearchItemsScreen(
                         modifier = Modifier
                             .background(MaterialTheme.colorScheme.surface)
                             .padding(ConstantPaddings.BODY_HORIZONTAL)
-                            .padding(bottom = 8.dp),
+                            .padding(bottom = 12.dp),
                         items = HP.categories,
                         selectedItem = state.category,
                         onItemSelected = {
@@ -264,7 +264,7 @@ fun SearchItemsScreen(
                         modifier = Modifier
                             .background(MaterialTheme.colorScheme.surface)
                             .padding(ConstantPaddings.BODY_HORIZONTAL)
-                            .padding(bottom = 8.dp),
+                            .padding(bottom = 12.dp),
                         items = HP.subCategories,
                         selectedItem = state.subCategory,
                         mainId = state.category.id,

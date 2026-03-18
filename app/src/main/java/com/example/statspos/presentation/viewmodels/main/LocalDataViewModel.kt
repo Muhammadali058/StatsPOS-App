@@ -36,6 +36,12 @@ class LocalDataViewModel @Inject constructor(
         }
     }
 
+    fun setClientId(clientId: Int){
+        viewModelScope.launch {
+            dataStore.setClientId(clientId)
+        }
+    }
+
     // baseUrl
     fun getBaseUrl(): Flow<String> {
         return dataStore.getBaseUrl()

@@ -17,12 +17,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.ShoppingBag
@@ -65,6 +67,7 @@ data class TopItem(
     val text: String,
     val screen: TopRoutes,
     @DrawableRes val icon: Int? = null,
+    val access: Boolean = true,
 )
 
 data class BottomNavItem(
@@ -276,16 +279,8 @@ fun BottomSheet(
     modifier: Modifier = Modifier,
     sheetState: SheetState,
     onDismissRequest: () -> Unit,
-//    containerColor: Color = MaterialTheme.colorScheme.background,
-    containerColor: Color = MaterialTheme.colorScheme.surface,
-    contentColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
     tonalElevation: Dp = 0.dp,
     shape: Shape = BottomSheetDefaults.ExpandedShape,
-    dragHandle: @Composable (() -> Unit)? = {
-        BottomSheetDefaults.DragHandle(
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-        )
-    },
     content: @Composable ColumnScope.() -> Unit,
 ) {
     ModalBottomSheet(
@@ -294,12 +289,26 @@ fun BottomSheet(
         modifier = modifier
             .fillMaxHeight()
             .statusBarsPadding(),
-        containerColor = containerColor,
-        contentColor = contentColor,
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         tonalElevation = tonalElevation,
         shape = shape,
-//        scrimColor = MaterialTheme.colorScheme.surfaceVariant,
-        dragHandle = dragHandle,
+        dragHandle = {
+            BottomSheetDefaults.DragHandle(
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+//            Row(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(24.dp),
+//                horizontalArrangement = Arrangement.End,
+//            ) {
+//                AppIcon(
+//                    icon = Icons.Default.Clear,
+//                    modifier = Modifier.size(30.dp)
+//                )
+//            }
+        },
     ) {
         val systemUiController = rememberSystemUiController()
         SideEffect {

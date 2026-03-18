@@ -311,17 +311,6 @@ fun SubDropdown(
         }
     }
 
-//    var isFirstRun by rememberSaveable { mutableStateOf(true) }
-//    LaunchedEffect(mainId) {
-//        if (isFirstRun) {
-//            isFirstRun = false
-//            return@LaunchedEffect
-//        }
-//
-//        onValueChange("")
-//        onItemSelected(DropdownItem(0L, noneText))
-//    }
-
     var expanded by remember { mutableStateOf(false) }
     var textFieldSize by remember { mutableStateOf(IntSize.Zero) }
 

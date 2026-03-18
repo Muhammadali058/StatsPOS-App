@@ -50,6 +50,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import com.example.statspos.R
+import com.example.statspos.presentation.ui.components.AccessDeniedBox
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSwitch
@@ -71,12 +72,37 @@ import com.example.statspos.utils.checkEvent
 import java.time.LocalDate
 
 private val reports = listOf(
-    TopItem("Sales", TopRoutes.SalesReports, R.drawable.sales_report),
-    TopItem("Purchase", TopRoutes.PurchaseReports, R.drawable.purchase_report),
-    TopItem("Profit", TopRoutes.ProfitReports, R.drawable.profit_report),
-    TopItem("Stock", TopRoutes.StockReports, R.drawable.stock_report),
-    TopItem("Accounts", TopRoutes.AccountsReports, R.drawable.accounts_report),
-    TopItem("Items", TopRoutes.ItemsReports, R.drawable.items),
+    TopItem(
+        "Sales",
+        TopRoutes.SalesReports,
+        R.drawable.sales_report,
+        HP.userRights.salesReport == true
+    ),
+    TopItem(
+        "Purchase",
+        TopRoutes.PurchaseReports,
+        R.drawable.purchase_report,
+        HP.userRights.purchaseReport == true
+    ),
+    TopItem(
+        "Profit",
+        TopRoutes.ProfitReports,
+        R.drawable.profit_report,
+        HP.userRights.profitReport == true
+    ),
+    TopItem(
+        "Stock",
+        TopRoutes.StockReports,
+        R.drawable.stock_report,
+        HP.userRights.stockReport == true
+    ),
+    TopItem(
+        "Accounts",
+        TopRoutes.AccountsReports,
+        R.drawable.accounts_report,
+        HP.userRights.accountsReport == true
+    ),
+    TopItem("Items", TopRoutes.ItemsReports, R.drawable.items, HP.userRights.itemsReport == true),
 )
 
 @Composable
@@ -119,74 +145,90 @@ fun ReportsScreen(
         )
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(ConstantPaddings.BODY_HORIZONTAL),
-    ) {
-        Spacer(Modifier.height(8.dp))
-        ReportsGrid(reports, onTopRouteClick)
-        Spacer(Modifier.height(8.dp))
-
+    if (HP.userRights.reports == true) {
         Column(
             modifier = Modifier
-                .weight(1f)
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(ConstantPaddings.BODY_HORIZONTAL),
         ) {
-            PullToRefreshList(
-                modifier = Modifier,
-                isRefreshing = state.isLoading,
-                onRefresh = {
-                    viewModel.loadMainReport()
-                },
+            Spacer(Modifier.height(8.dp))
+            ReportsGrid(reports, onTopRouteClick)
+            Spacer(Modifier.height(8.dp))
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
             ) {
-                item {
-                    TodaySales(
-                        cashSales = state.mainReport.cashSales,
-                        creditSales = state.mainReport.creditSales,
-                        salesReturns = state.mainReport.salesReturns,
-                        totalSales = state.mainReport.totalSales,
-                        totalSalesBills = state.mainReport.totalSalesBills,
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    TodayPurchase(
-                        cashPurchase = state.mainReport.cashPurchase,
-                        creditPurchase = state.mainReport.creditPurchase,
-                        purchaseReturns = state.mainReport.purchaseReturns,
-                        totalPurchase = state.mainReport.totalPurchase,
-                        totalPurchaseBills = state.mainReport.totalPurchaseBills,
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    TodayProfit(
-                        grossProfit = state.mainReport.grossProfit,
-                        expenses = state.mainReport.expenses,
-                        margin = state.mainReport.margin,
-                        netProfit = state.mainReport.netProfit,
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    TodayStock(
-                        stockAtCost = state.mainReport.stockAtCost,
-                        stockAtRetail = state.mainReport.stockAtRetail,
-                        stockAtWholesale = state.mainReport.stockAtWholesale,
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    TodayAccounts(
-                        receipts = state.mainReport.receipts,
-                        payments = state.mainReport.payments,
-                        debtors = state.mainReport.debtors,
-                        creditors = state.mainReport.creditors,
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    TodayCashAccount(
-                        openingBalance = state.mainReport.openingBalance,
-                        cashIn = state.mainReport.cashIn,
-                        cashOut = state.mainReport.cashOut,
-                        closingBalance = state.mainReport.closingBalance,
-                    )
-                    Spacer(Modifier.height(12.dp))
+                PullToRefreshList(
+                    modifier = Modifier,
+                    isRefreshing = state.isLoading,
+                    onRefresh = {
+                        viewModel.loadMainReport()
+                    },
+                ) {
+                    item {
+                        if (HP.userRights.salesReport == true) {
+                            TodaySales(
+                                cashSales = state.mainReport.cashSales,
+                                creditSales = state.mainReport.creditSales,
+                                salesReturns = state.mainReport.salesReturns,
+                                totalSales = state.mainReport.totalSales,
+                                totalSalesBills = state.mainReport.totalSalesBills,
+                            )
+                            Spacer(Modifier.height(12.dp))
+                        }
+                        if (HP.userRights.purchaseReport == true) {
+                            TodayPurchase(
+                                cashPurchase = state.mainReport.cashPurchase,
+                                creditPurchase = state.mainReport.creditPurchase,
+                                purchaseReturns = state.mainReport.purchaseReturns,
+                                totalPurchase = state.mainReport.totalPurchase,
+                                totalPurchaseBills = state.mainReport.totalPurchaseBills,
+                            )
+                            Spacer(Modifier.height(12.dp))
+                        }
+                        if (HP.userRights.profitReport == true) {
+                            TodayProfit(
+                                grossProfit = state.mainReport.grossProfit,
+                                expenses = state.mainReport.expenses,
+                                margin = state.mainReport.margin,
+                                netProfit = state.mainReport.netProfit,
+                            )
+                            Spacer(Modifier.height(12.dp))
+                        }
+                        if (HP.userRights.stockReport == true) {
+                            TodayStock(
+                                stockAtCost = state.mainReport.stockAtCost,
+                                stockAtRetail = state.mainReport.stockAtRetail,
+                                stockAtWholesale = state.mainReport.stockAtWholesale,
+                            )
+                            Spacer(Modifier.height(12.dp))
+                        }
+                        if (HP.userRights.accountsReport == true) {
+                            TodayAccounts(
+                                receipts = state.mainReport.receipts,
+                                payments = state.mainReport.payments,
+                                debtors = state.mainReport.debtors,
+                                creditors = state.mainReport.creditors,
+                            )
+                            Spacer(Modifier.height(12.dp))
+                        }
+                        if (HP.userRights.accountsReport == true) {
+                            TodayCashAccount(
+                                openingBalance = state.mainReport.openingBalance,
+                                cashIn = state.mainReport.cashIn,
+                                cashOut = state.mainReport.cashOut,
+                                closingBalance = state.mainReport.closingBalance,
+                            )
+                            Spacer(Modifier.height(12.dp))
+                        }
+                    }
                 }
             }
         }
+    } else {
+        AccessDeniedBox()
     }
 }
 
@@ -718,7 +760,8 @@ private fun ReportsGrid(
             .heightIn(max = 400.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(items) { item ->
+        val filteredItems = items.filter { it.access }
+        items(filteredItems) { item ->
             Card(
                 modifier = Modifier
                     .width(100.dp)

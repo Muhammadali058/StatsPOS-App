@@ -1,7 +1,6 @@
 package com.example.statspos.presentation.ui.screens.main.main
 
 import android.app.Activity
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.DrawableRes
@@ -32,6 +31,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
@@ -111,31 +111,66 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 
 private val items = listOf(
-    TopItem("Categories", TopRoutes.Categories, R.drawable.categories),
-    TopItem("Packages", TopRoutes.Packages, R.drawable.package_icon),
-    TopItem("Purchase\nOrders", TopRoutes.PurchaseOrders, R.drawable.package_icon),
-    TopItem("Users", TopRoutes.Users, R.drawable.users),
-    TopItem("Settings", TopRoutes.Settings, R.drawable.settings),
+    TopItem(
+        "Categories",
+        TopRoutes.Categories,
+        R.drawable.categories,
+        HP.userRights.categories == true
+    ),
+    TopItem("Packages", TopRoutes.Packages, R.drawable.package_icon, HP.userRights.items == true),
+    TopItem(
+        "Purchase\nOrders",
+        TopRoutes.PurchaseOrders,
+        R.drawable.package_icon,
+        HP.userRights.purchase == true
+    ),
+    TopItem("Users", TopRoutes.Users, R.drawable.users, HP.userRights.users == true),
+    TopItem("Settings", TopRoutes.Settings, R.drawable.settings, HP.userRights.settings == true),
 )
 private val accounts = listOf(
-    TopItem("Customers", TopRoutes.Customers, R.drawable.customer_accounts),
-    TopItem("Vendors", TopRoutes.Vendors, R.drawable.vendor_accounts),
-    TopItem("Suppliers", TopRoutes.Suppliers, R.drawable.customer_accounts),
-    TopItem("Banks", TopRoutes.Banks, R.drawable.bank_accounts),
-    TopItem("Expenses", TopRoutes.Expenses, R.drawable.expense_accounts),
-    TopItem("Account\nCategories", TopRoutes.AccountCategories, R.drawable.categories),
+    TopItem(
+        "Customers",
+        TopRoutes.Customers,
+        R.drawable.customer_accounts,
+        HP.userRights.customers == true
+    ),
+    TopItem(
+        "Vendors",
+        TopRoutes.Vendors,
+        R.drawable.vendor_accounts,
+        HP.userRights.vendors == true
+    ),
+    TopItem(
+        "Suppliers",
+        TopRoutes.Suppliers,
+        R.drawable.customer_accounts,
+        HP.userRights.suppliers == true
+    ),
+    TopItem("Banks", TopRoutes.Banks, R.drawable.bank_accounts, HP.userRights.banks == true),
+    TopItem(
+        "Expenses",
+        TopRoutes.Expenses,
+        R.drawable.expense_accounts,
+        HP.userRights.expenses == true
+    ),
+    TopItem(
+        "Account\nCategories",
+        TopRoutes.AccountCategories,
+        R.drawable.categories,
+        (HP.userRights.customers == true || HP.userRights.vendors == true)
+    ),
 )
 private val entries = listOf(
-    TopItem("Receipt", TopRoutes.ReceiptEntry),
-    TopItem("Payment", TopRoutes.PaymentEntry),
-    TopItem("Expense", TopRoutes.ExpenseEntry),
-    TopItem("Journal", TopRoutes.JournalEntry),
-    TopItem("Stock", TopRoutes.StockEntry),
+    TopItem("Receipt", TopRoutes.ReceiptEntry, access = HP.userRights.entry == true),
+    TopItem("Payment", TopRoutes.PaymentEntry, access = HP.userRights.entry == true),
+    TopItem("Expense", TopRoutes.ExpenseEntry, access = HP.userRights.entry == true),
+    TopItem("Journal", TopRoutes.JournalEntry, access = HP.userRights.entry == true),
+    TopItem("Stock", TopRoutes.StockEntry, access = HP.userRights.entry == true),
 )
 private val warehouse = listOf(
-    TopItem("Warehouses", TopRoutes.Warehouses),
-    TopItem("Transfer Stock", TopRoutes.TransferStock),
-    TopItem("Gatepass", TopRoutes.Gatepass),
+    TopItem("Warehouses", TopRoutes.Warehouses, access = HP.userRights.warehouse == true),
+    TopItem("Transfer Stock", TopRoutes.TransferStock, access = HP.userRights.warehouse == true),
+    TopItem("Gatepass", TopRoutes.Gatepass, access = HP.userRights.warehouse == true),
 )
 
 @Composable
@@ -272,15 +307,25 @@ fun HomeScreen(
                                     )
                                 }
                                 DropdownMenuItem(
-                                    text = { AppText("Exit App") },
-//                                    leadingIcon = {
-//                                        AppIcon(Icons.Default.ExitToApp)
-//                                    },
+                                    text = { AppText("Reset") },
                                     onClick = {
                                         menuExpanded = false
-                                        activity.finish()
+                                        scope.launch {
+                                            localDataViewModel.setClientId(0)
+                                            activity.finish()
+                                        }
                                     }
                                 )
+//                                DropdownMenuItem(
+//                                    text = { AppText("Exit App") },
+////                                    leadingIcon = {
+////                                        AppIcon(Icons.Default.ExitToApp)
+////                                    },
+//                                    onClick = {
+//                                        menuExpanded = false
+//                                        activity.finish()
+//                                    }
+//                                )
                             }
                         }
                     },
@@ -385,10 +430,11 @@ fun HomeScreen(
                 }
 
                 if (showBranchesList) {
-                    Log.d("TAG branches", branches.toString())
-
                     BranchesList(
                         branches = branches,
+                        onDismiss = {
+                            showBranchesList = false
+                        },
                         onBranchClick = { branch ->
                             showBranchesList = false
 
@@ -573,21 +619,21 @@ private fun HomeBody(
         }
 
         item {
-            Title("Accounts", R.drawable.accounts)
+            Title("Accounts", R.drawable.accounts, HP.userRights.accounts == true)
         }
         item {
             HomeGrid(accounts, onTopRouteClick)
         }
 
         item {
-            Title("Entry")
+            Title("Entry", R.drawable.entry, HP.userRights.entry == true)
         }
         item {
             HomeGrid(entries, onTopRouteClick)
         }
 
         item {
-            Title("Warehouse", R.drawable.warehouse)
+            Title("Warehouse", R.drawable.warehouse, HP.userRights.warehouse == true)
         }
         item {
             HomeGrid(warehouse, onTopRouteClick)
@@ -603,14 +649,16 @@ private fun HomeBody(
 private fun Title(
     title: String,
     @DrawableRes icon: Int? = null,
+    access: Boolean = true,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start,
-    ) {
+    if (access) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start,
+        ) {
 //        if (icon != null) {
 //            AppIcon(
 //                icon = icon,
@@ -618,10 +666,11 @@ private fun Title(
 //            )
 //            Spacer(Modifier.width(16.dp))
 //        }
-        AppText(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-        )
+            AppText(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+            )
+        }
     }
 }
 
@@ -637,7 +686,8 @@ private fun HomeGrid(
             .heightIn(max = 400.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(items) { item ->
+        val filteredItems = items.filter { it.access }
+        items(filteredItems) { item ->
             Card(
                 modifier = Modifier
                     .width(100.dp)
@@ -681,45 +731,62 @@ private fun HomeGrid(
 private fun BranchesList(
     branches: List<Branches>,
     onBranchClick: (Branches) -> Unit,
+    onDismiss: () -> Unit,
 ) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        item {
-            Text(
-                text = "Select Branch:",
-                style = TextStyle(
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
-                modifier = Modifier
-                    .padding(16.dp)
-            )
-        }
-        items(branches) { branch ->
-            Card(
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+
+        },
+        title = { },
+        text = {
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
-                    .clickable {
-                        onBranchClick(branch)
-                    },
+            ) {
+                item {
+                    Text(
+                        text = "Select Branch:",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
+                        modifier = Modifier
+                            .padding(bottom = 16.dp)
+                    )
+                }
+                items(branches) { branch ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.primaryContainer)
+                            .padding(vertical = 8.dp)
+                            .clickable {
+                                onBranchClick(branch)
+                            },
 
-                ) {
-                Text(
-                    text = branch.branchName.toString(),
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    ),
-                    maxLines = 1,
-                    modifier = Modifier
-                        .padding(16.dp)
-                )
+                        ) {
+                        Text(
+                            text = branch.branchName.toString(),
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            ),
+                            maxLines = 1,
+                            modifier = Modifier
+                                .padding(16.dp)
+                        )
+                    }
+                }
             }
-        }
-    }
+        },
+        dismissButton = {
+
+        },
+        containerColor = MaterialTheme.colorScheme.background,
+        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        textContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    )
+
 }

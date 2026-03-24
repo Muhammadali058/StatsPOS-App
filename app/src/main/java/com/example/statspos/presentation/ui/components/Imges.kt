@@ -99,45 +99,6 @@ fun ImageView(
 }
 
 @Composable
-fun UploadImageView1(
-    imageUrl: String,
-    onImageUrlChange: (MultipartBody.Part) -> Unit,
-    modifier: Modifier = Modifier,
-    size: Dp = 200.dp,
-    shape: Shape = RectangleShape,
-) {
-    var selectedImageUri by rememberSaveable { mutableStateOf<Any?>(HP.getImageUrl(imageUrl)) }
-    LaunchedEffect(imageUrl) {
-        selectedImageUri = HP.getImageUrl(imageUrl) + "?${System.currentTimeMillis()}"
-    }
-
-    val context = LocalContext.current
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri ->
-        uri?.run {
-            selectedImageUri = uri
-            val multipart = uriToMultipart(context, uri)
-            onImageUrlChange(multipart)
-        }
-    }
-
-    AsyncImage(
-        model = selectedImageUri,
-        error = painterResource(R.drawable.select_image),
-        contentDescription = null,
-        modifier = modifier
-            .size(size)
-            .clip(shape)
-            .clickable {
-                launcher.launch("image/*")
-            },
-        contentScale = ContentScale.Crop
-    )
-}
-
-
-@Composable
 fun ListImageView(
     imageUrl: String?,
     modifier: Modifier = Modifier,
@@ -204,6 +165,7 @@ fun UploadImageView(
     modifier: Modifier = Modifier,
     size: Dp = 200.dp,
     shape: Shape = RectangleShape,
+    contentScale: ContentScale = ContentScale.Fit,
 ) {
     var selectedImageUri by rememberSaveable { mutableStateOf<Any?>(HP.getImageUrl(imageUrl)) }
     var showSheet by remember { mutableStateOf(false) }
@@ -282,7 +244,7 @@ fun UploadImageView(
             .size(size)
             .clip(shape)
             .clickable { showSheet = true },
-        contentScale = ContentScale.Crop
+        contentScale = contentScale
     )
 
     // 🔹 Bottom Sheet

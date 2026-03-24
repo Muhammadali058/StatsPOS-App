@@ -8,11 +8,7 @@ pluginManagement {
             }
         }
         mavenCentral()
-//        maven { url = uri("https://repo.itextsupport.com/releases") }
         gradlePluginPortal()
-//        flatDir {
-//            dirs("app/libs")
-//        }
     }
 }
 
@@ -21,9 +17,6 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-//        flatDir {
-//            dirs("app/libs")
-//        }
     }
 }
 

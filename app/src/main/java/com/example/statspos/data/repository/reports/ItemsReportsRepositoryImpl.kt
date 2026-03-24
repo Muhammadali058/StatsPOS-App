@@ -14,7 +14,7 @@ class ItemsReportsRepositoryImpl @Inject constructor(
 ) : ItemsReportsRepository {
     override suspend fun itemsList(body: JsonObject): Resource<JsonObject> {
         body.addProperty("branchGroupId", HP.branchGroupId)
-        body.addProperty("host", "${DB.HOST}${HP.clientId}/images/")
+        body.addProperty("host", "${DB.HOST}/${HP.clientId}/images/")
 
         return safeApiCall {
             api.itemsList(

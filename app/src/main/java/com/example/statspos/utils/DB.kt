@@ -9,14 +9,14 @@ object DB {
     var isOnlineMode = true
     var branches: List<Branches> = emptyList()
 
-    var HOST = "http://192.168.100.28:8000/"
+//    var HOST = "http://192.168.100.28:8000"
+    var HOST = "http://84.247.142.182:5000"
 
-    //    var HOST = "http://103.152.100.187:5000/"
-    var API = "${HOST}api/"
+    var API = "${HOST}/api/"
 
     fun setBaseUrl(host: String) {
         HOST = host
-        API = "${host}api/"
+        API = "${host}/api/"
     }
 
     fun addParams(jsonObject: JsonObject): JsonObject {

@@ -229,7 +229,7 @@ object HP {
     }
 
     fun getImageUrl(imageUrl: String): String {
-        return DB.HOST + clientId.toString() + "/images/" + imageUrl
+        return DB.HOST + "/" + clientId.toString() + "/images/" + imageUrl
     }
 
     fun formatDecimal(rate: Double?, numberOfDecimals: Int = 2, mustDecimals: Int = 0): String {

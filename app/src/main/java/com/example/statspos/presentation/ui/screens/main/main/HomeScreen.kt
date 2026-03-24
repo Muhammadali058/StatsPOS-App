@@ -758,15 +758,20 @@ private fun BranchesList(
                 }
                 items(branches) { branch ->
                     Card(
+                        elevation = CardDefaults.cardElevation(
+                            defaultElevation = 2.dp
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        ),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.primaryContainer)
                             .padding(vertical = 8.dp)
                             .clickable {
                                 onBranchClick(branch)
                             },
-
-                        ) {
+                    ) {
                         Text(
                             text = branch.branchName.toString(),
                             style = TextStyle(

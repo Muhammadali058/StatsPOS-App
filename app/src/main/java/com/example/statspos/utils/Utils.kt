@@ -29,12 +29,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.net.URL
-import android.graphics.Color
-import android.text.Layout
-import android.text.StaticLayout
-import android.text.TextPaint
-import androidx.core.graphics.withTranslation
-
 
 enum class ThemeMode {
     LIGHT,

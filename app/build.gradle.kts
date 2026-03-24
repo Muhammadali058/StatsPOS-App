@@ -2,13 +2,21 @@ import org.gradle.kotlin.dsl.implementation
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
+//    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 
     alias(libs.plugins.jetbrains.kotlin.serialization)
 
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+}
+
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.jetbrains.kotlin" && requested.name == "kotlin-metadata-jvm") {
+            useVersion("2.3.20") // Match your Kotlin version
+        }
+    }
 }
 
 android {
@@ -41,9 +49,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
+//    kotlinOptions {
+//        jvmTarget = "11"
+//    }
     buildFeatures {
         compose = true
     }
@@ -52,6 +60,12 @@ android {
         jniLibs {
             useLegacyPackaging = false
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
     }
 }
 
@@ -77,11 +91,11 @@ dependencies {
 
 
     // Others
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4")
-    implementation("com.squareup.retrofit2:retrofit:3.0.0")
-    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
-    implementation("com.google.code.gson:gson:2.13.2")
-    implementation("androidx.datastore:datastore-preferences:1.2.0")
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.gson)
+    implementation(libs.androidx.datastore.preferences)
 
     // Navigation 3
     implementation(libs.androidx.navigation3.ui)
@@ -91,34 +105,34 @@ dependencies {
     implementation(libs.kotlinx.serialization.core)
 
     // Hilt
-    implementation("com.google.dagger:hilt-android:2.57.1")
-    ksp("com.google.dagger:hilt-android-compiler:2.57.1")
+    implementation("com.google.dagger:hilt-android:2.59.2")
+    ksp("com.google.dagger:hilt-android-compiler:2.59.2")
     implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
 
     // Material Icons
-    implementation("androidx.compose.material:material-icons-extended:1.6.8")
+    implementation(libs.androidx.compose.material.icons.extended)
 
     // Coil to load images from url
-    implementation("io.coil-kt.coil3:coil-compose:3.3.0")
-    implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 
     // System ui controller
-    implementation("com.google.accompanist:accompanist-systemuicontroller:0.34.0")
+    implementation(libs.accompanist.systemuicontroller)
 
     // CameraX
-    implementation("androidx.camera:camera-core:1.3.1")
-    implementation("androidx.camera:camera-camera2:1.3.1")
-    implementation("androidx.camera:camera-lifecycle:1.3.1")
-    implementation("androidx.camera:camera-view:1.3.1")
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
 
     // ML Kit Barcode Scanning
-    implementation("com.google.mlkit:barcode-scanning:17.2.0")
+    implementation(libs.barcode.scanning)
 
 //    ExpressionBuilder
-    implementation("net.objecthunter:exp4j:0.4.8")
+    implementation(libs.exp4j)
 
 //    iText for Reports
-    implementation("com.itextpdf:itext7-core:7.2.5")
+    implementation(libs.itext7.core)
 
 //    Vico for charts
     implementation(libs.vico.compose)

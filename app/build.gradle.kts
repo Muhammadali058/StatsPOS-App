@@ -2,21 +2,12 @@ import org.gradle.kotlin.dsl.implementation
 
 plugins {
     alias(libs.plugins.android.application)
-//    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 
     alias(libs.plugins.jetbrains.kotlin.serialization)
 
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
-}
-
-configurations.all {
-    resolutionStrategy.eachDependency {
-        if (requested.group == "org.jetbrains.kotlin" && requested.name == "kotlin-metadata-jvm") {
-            useVersion("2.3.20") // Match your Kotlin version
-        }
-    }
 }
 
 android {
@@ -45,13 +36,12 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-//    kotlinOptions {
-//        jvmTarget = "11"
-//    }
+
     buildFeatures {
         compose = true
     }
@@ -64,8 +54,10 @@ android {
 }
 
 kotlin {
+    jvmToolchain(17)
+
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
@@ -105,9 +97,9 @@ dependencies {
     implementation(libs.kotlinx.serialization.core)
 
     // Hilt
-    implementation("com.google.dagger:hilt-android:2.59.2")
-    ksp("com.google.dagger:hilt-android-compiler:2.59.2")
-    implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
     // Material Icons
     implementation(libs.androidx.compose.material.icons.extended)
@@ -136,7 +128,5 @@ dependencies {
 
 //    Vico for charts
     implementation(libs.vico.compose)
-    implementation(libs.vico.compose.m2)
     implementation(libs.vico.compose.m3)
-    implementation(libs.vico.views)
 }

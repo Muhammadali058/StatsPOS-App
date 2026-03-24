@@ -11,6 +11,9 @@ converterGson = "3.0.0"
 datastorePreferences = "1.2.1"
 exp4j = "0.4.8"
 gson = "2.13.2"
+hiltAndroid = "2.59.2"
+hiltAndroidCompiler = "2.59.2"
+hiltNavigationCompose = "1.3.0"
 itext7Core = "7.2.5"
 kotlin = "2.3.20"
 coreKtx = "1.18.0"
@@ -22,16 +25,16 @@ activityCompose = "1.13.0"
 composeBom = "2026.03.00"
 materialIconsExtended = "1.7.8"
 retrofit = "3.0.0"
-vico = "3.0.2"
+vico = "3.0.3"
 
-nav3Core = "1.0.0"
+nav3Core = "1.0.1"
 lifecycleViewmodelNav3 = "2.10.0"
-kotlinSerialization = "2.2.21"
-kotlinxSerializationCore = "1.9.0"
-material3AdaptiveNav3 = "1.3.0-alpha05"
-ui = "1.10.0"
+kotlinSerialization = "2.3.20"
+kotlinxSerializationCore = "1.10.0"
+material3AdaptiveNav3 = "1.3.0-alpha09"
+ui = "1.10.5"
 material3 = "1.4.0"
-runtimeSaveable = "1.10.1"
+runtimeSaveable = "1.10.5"
 
 [libraries]
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
@@ -42,6 +45,7 @@ androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
 barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "barcodeScanning" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
@@ -49,6 +53,8 @@ coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version
 exp4j = { module = "net.objecthunter:exp4j", version.ref = "exp4j" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
+hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 itext7-core = { module = "com.itextpdf:itext7-core", version.ref = "itext7Core" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

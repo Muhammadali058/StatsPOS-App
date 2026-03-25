@@ -320,7 +320,7 @@ class AddUpdateSalesViewModel @Inject constructor(
         }
     }
 
-    fun editData(id: Long) {
+    fun editData(id: Long, onSuccess: () -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -335,6 +335,8 @@ class AddUpdateSalesViewModel @Inject constructor(
 
                     val sales = Gson().get<Sales>(result.data.asJsonObject)
                     setFormData(sales)
+
+                    onSuccess()
                 }
             }
         }
@@ -648,8 +650,6 @@ class AddUpdateSalesViewModel @Inject constructor(
                     isDiscRsPer = isDiscRsPer!!,
                     disc = disc.toString(),
                     totalDisc = totalDisc,
-
-//                    localTime = localDate.toString()
                 )
             }
         }

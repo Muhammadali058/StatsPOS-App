@@ -9,8 +9,8 @@ object DB {
     var isOnlineMode = true
     var branches: List<Branches> = emptyList()
 
-//    var HOST = "http://192.168.100.28:8000"
-    var HOST = "http://84.247.142.182:5000"
+    var HOST = "http://192.168.100.28:8000"
+//    var HOST = "http://84.247.142.182:5000"
 
     var API = "${HOST}/api/"
 

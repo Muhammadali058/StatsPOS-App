@@ -1,5 +1,8 @@
 package com.example.statspos.presentation.ui.screens.sales.sales_bill
 
+import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -46,6 +49,7 @@ import com.example.statspos.presentation.ui.components.AppText
 import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.PasswordDialog
+import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.TabLayout
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
@@ -122,6 +126,7 @@ fun SalesBillScreen(
     var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         if (!hasLoadedOnce) {
+
             salesViewModel.updateInitialState(
                 invoiceId = invoiceId,
                 isPendingBill = isPendingBill,
@@ -214,7 +219,7 @@ private fun Home(
     onBack: () -> Unit,
     goBackWithResult: () -> Unit,
 ) {
-    val tabs = listOf("Bill Details", "Bill Items")
+    val tabs = listOf("Bill Items", "Bill Details")
     val pagerState = rememberPagerState(
         initialPage = 0,
         pageCount = { tabs.size }
@@ -237,6 +242,15 @@ private fun Home(
                 showErrorDialog = true
             }
         )
+    }
+
+    // Edit data when update
+    LaunchedEffect(Unit) {
+        if (!state.hasLoadedOnce) {
+            salesViewModel.editData(invoiceId){
+                salesViewModel.setHasLoadedOnce(true)
+            }
+        }
     }
 
     if (showErrorDialog) {
@@ -293,7 +307,7 @@ private fun Home(
     }
 
     Scaffold(
-        contentWindowInsets = WindowInsets.safeDrawing,
+//        contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = {
             AppSnackbarHost(
                 snackbarHostState = snackbarHostState,
@@ -365,45 +379,57 @@ private fun Home(
             )
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
+        Box(
+            Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            TabLayout(
-                pagerState = pagerState,
-                tabs = tabs,
-            )
+            if (state.hasLoadedOnce) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    TabLayout(
+                        pagerState = pagerState,
+                        tabs = tabs,
+                    )
 
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier
-                    .fillMaxSize(),
-            ) { page ->
-                when (page) {
-                    0 ->
-                        AddUpdateSalesBillBody(
-                            sharedViewModel = sharedViewModel,
-                            salesViewModel = salesViewModel,
-                            salesItemsViewModel = salesItemsViewModel,
-                            snackbarHostState = snackbarHostState,
-                            invoiceId = invoiceId,
-                            isPendingBill = isPendingBill,
-                            isPostedBill = isPostedBill,
-                            onBack = onBack,
-                        )
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier
+                            .fillMaxSize(),
+                    ) { page ->
+                        when (page) {
+                            0 ->
+                                SalesBillItemsBody(
+                                    sharedViewModel = sharedViewModel,
+                                    salesViewModel = salesViewModel,
+                                    salesItemsViewModel = salesItemsViewModel,
+                                    snackbarHostState = snackbarHostState,
+                                    onAddButtonClick = { updateId, isUpdated, sales ->
+                                        onAddUpdateSalesItem(updateId, isUpdated, sales)
+                                    },
+                                    onBack = onBack,
+                                )
 
-                    1 ->
-                        SalesBillItemsBody(
-                            sharedViewModel = sharedViewModel,
-                            salesViewModel = salesViewModel,
-                            salesItemsViewModel = salesItemsViewModel,
-                            snackbarHostState = snackbarHostState,
-                            onAddButtonClick = { updateId, isUpdated, sales ->
-                                onAddUpdateSalesItem(updateId, isUpdated, sales)
-                            },
-                        )
+                            1 ->
+                                AddUpdateSalesBillBody(
+                                    sharedViewModel = sharedViewModel,
+                                    salesViewModel = salesViewModel,
+                                    salesItemsViewModel = salesItemsViewModel,
+                                    snackbarHostState = snackbarHostState,
+                                    invoiceId = invoiceId,
+                                    isPendingBill = isPendingBill,
+                                    isPostedBill = isPostedBill,
+                                    onBack = onBack,
+                                )
+                        }
+                    }
                 }
+            }
+
+            if (state.isLoading) {
+                ProgressBarLayout()
             }
         }
     }

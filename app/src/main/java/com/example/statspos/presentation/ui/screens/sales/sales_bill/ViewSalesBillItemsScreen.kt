@@ -84,7 +84,7 @@ fun ViewSalesBillItemsScreen(
     }
 
     fun loadData() {
-        viewModel.loadData { a, b ->
+        viewModel.loadData({ a, b -> }) {
 
         }
     }
@@ -135,7 +135,7 @@ fun ViewSalesBillItemsScreen(
                     SearchBox(
                         value = state.search,
                         onValueChange = {
-                            viewModel.onSearchChange(it, {a, b ->})
+                            viewModel.onSearchChange(it, { a, b -> })
                         },
                         onSearchClick = {
                             loadData()
@@ -195,7 +195,7 @@ private fun BodyList(
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
     ) {
-        item{
+        item {
             Spacer(Modifier.height(4.dp))
         }
         items(items) { item ->

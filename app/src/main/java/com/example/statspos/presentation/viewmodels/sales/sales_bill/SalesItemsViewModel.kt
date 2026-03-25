@@ -1,5 +1,6 @@
 package com.example.statspos.presentation.viewmodels.sales.sales_bill
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.sales.SalesBillItems
@@ -40,6 +41,8 @@ class SalesItemsViewModel @Inject constructor(
         val search: String = "",
         val invoiceId: Long = 0L,
         val isPostedBill: Boolean = false,
+
+        val hasLoadedOnce: Boolean = false,
 
         val isLoading: Boolean = false,
         val isDeleting: Boolean = false,
@@ -113,10 +116,15 @@ class SalesItemsViewModel @Inject constructor(
         if(HP.appSettings.instantSearch == true)
             loadData(updateTotal)
     }
+
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
+    }
+
     // endregion
 
     // region Network calls
-    fun loadData(updateTotal: (Double, Double) -> Unit) {
+    fun loadData(updateTotal: (Double, Double) -> Unit, onSuccess: () -> Unit = {}) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -171,6 +179,7 @@ class SalesItemsViewModel @Inject constructor(
                     }
 
                     updateTotal(totalBill, totalCost)
+                    onSuccess()
                 }
             }
         }

@@ -85,7 +85,7 @@ fun ViewSalesBillMarginScreen(
     }
 
     fun loadData() {
-        viewModel.loadData { a, b ->
+        viewModel.loadData({ a, b -> }) {
 
         }
     }

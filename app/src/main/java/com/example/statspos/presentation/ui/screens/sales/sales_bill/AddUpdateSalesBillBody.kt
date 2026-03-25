@@ -83,15 +83,15 @@ fun AddUpdateSalesBillBody(
     }
 
     // Edit data when update
-    LaunchedEffect(Unit) {
-        if (!state.hasLoadedOnce) {
-            if (isPendingBill || isPostedBill) {
-                salesViewModel.editData(invoiceId)
-            }
-
-            salesViewModel.setHasLoadedOnce(true)
-        }
-    }
+//    LaunchedEffect(Unit) {
+//        if (!state.hasLoadedOnce) {
+//            if (isPendingBill || isPostedBill) {
+//                salesViewModel.editData(invoiceId)
+//            }
+//
+//            salesViewModel.setHasLoadedOnce(true)
+//        }
+//    }
 
     if (showErrorDialog) {
         ErrorDialog(

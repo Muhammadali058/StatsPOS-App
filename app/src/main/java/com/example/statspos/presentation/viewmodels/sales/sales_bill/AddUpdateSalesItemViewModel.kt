@@ -85,6 +85,8 @@ class AddUpdateSalesItemViewModel @Inject constructor(
         val updateId: Long = 0L,
         val sales: Sales = Sales(),
 
+        val hasLoadedOnce: Boolean = false,
+
         val isLoading: Boolean = false,
         val isSaving: Boolean = false,
         val message: String? = null,
@@ -197,6 +199,10 @@ class AddUpdateSalesItemViewModel @Inject constructor(
     fun onIsDiscRsPerChange(value: Boolean) {
         state.update { it.copy(isDiscRsPer = value) }
         updateTotal()
+    }
+
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
     }
 
     // endregion

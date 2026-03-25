@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.sales.Sales
 import com.example.statspos.domain.models.sales.SalesBillItems
+import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingLarge
@@ -47,6 +49,7 @@ import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.ListImageView
 import com.example.statspos.presentation.ui.components.PullToRefreshList
+import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
@@ -64,6 +67,7 @@ fun SalesBillItemsBody(
     salesItemsViewModel: SalesItemsViewModel,
     snackbarHostState: SnackbarHostState,
     onAddButtonClick: (Long, Boolean, Sales) -> Unit,
+    onBack: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val salesState by salesViewModel.state.collectAsStateWithLifecycle()
@@ -81,12 +85,24 @@ fun SalesBillItemsBody(
         )
     }
 
+    fun getSalesObject(): Sales {
+        val sales = salesViewModel.getFormData()
+        sales.id = salesState.invoiceId
+        sales.isPostedBill = salesState.isPostedBill
+        sales.invoiceNo = salesState.invoiceNo
+        sales.totalItems = state.list.size
+        return sales
+    }
+
     // Edit data when update
-    var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        if (!hasLoadedOnce) {
-            salesItemsViewModel.loadData(salesViewModel::updateTotal)
-            hasLoadedOnce = true
+        if (!state.hasLoadedOnce) {
+            salesItemsViewModel.loadData(salesViewModel::updateTotal) {
+                if(salesItemsViewModel.state.value.list.isEmpty()) {
+                    onAddButtonClick(0L, false, getSalesObject())
+                }
+            }
+            salesItemsViewModel.setHasLoadedOnce(true)
         }
     }
 
@@ -107,18 +123,12 @@ fun SalesBillItemsBody(
         )
     }
 
-    fun getSalesObject(): Sales {
-        val sales = salesViewModel.getFormData()
-        sales.id = salesState.invoiceId
-        sales.isPostedBill = salesState.isPostedBill
-        sales.invoiceNo = salesState.invoiceNo
-        sales.totalItems = state.list.size
-        return sales
-    }
-
     Scaffold(
         floatingActionButton = {
-            AppFloatingActionButton {
+            AppFloatingActionButton(
+                modifier = Modifier
+                    .padding(bottom = 16.dp)
+            ) {
                 onAddButtonClick(0L, false, getSalesObject())
             }
         },
@@ -167,7 +177,8 @@ fun SalesBillItemsBody(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(MaterialTheme.colorScheme.surface)
-                        .padding(8.dp)
+                        .padding(ConstantPaddings.BODY_HORIZONTAL)
+                        .padding(vertical = 8.dp)
                 ) {
                     HeadingMedium(text = "Items: ")
                     LabelMedium(text = state.totalItems.toString())
@@ -183,6 +194,33 @@ fun SalesBillItemsBody(
                     HeadingMedium(text = "Disc: ")
                     LabelMedium(text = HP.formatDecimal(state.totalItemDisc))
                 }
+
+                // Post Button
+                if (state.list.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(ConstantPaddings.BODY_HORIZONTAL)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            if (salesState.isPosting) {
+                                AppCircularProgressIndicator()
+                            } else {
+                                SaveButton(text = "Post") {
+                                    salesViewModel.postBill {
+                                        sharedViewModel.notifyBillPosted()
+                                        onBack()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
             }
         }
     }
@@ -201,7 +239,7 @@ private fun BodyList(
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
     ) {
-        item{
+        item {
             Spacer(Modifier.height(4.dp))
         }
         items(items) { item ->

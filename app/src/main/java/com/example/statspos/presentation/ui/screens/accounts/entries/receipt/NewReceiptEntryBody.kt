@@ -50,6 +50,7 @@ import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.ExpandableSection
+import com.example.statspos.presentation.ui.components.MOPSection
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.SubComboBox
@@ -141,7 +142,7 @@ fun NewReceiptEntryBody(
                     onDateChanged = viewModel::onDateChange,
                     onNarationChanged = viewModel::onNarationChange,
                 )
-                MOP(
+                MOPSection(
                     mop = state.mop,
                     bank = state.bank,
                     subBank = state.subBank,
@@ -303,58 +304,6 @@ private fun Body(
     }
 }
 
-@Composable
-private fun MOP(
-    mop: DropdownItem,
-    bank: DropdownItem,
-    subBank: DropdownItem,
-    onMOPChange: (DropdownItem) -> Unit,
-    onBankSelected: (DropdownItem) -> Unit,
-    onSubBankSelected: (DropdownItem) -> Unit,
-) {
-    ExpandableSection(
-        title = "M.O.P Bank",
-        initiallyExpanded = false,
-    ) {
-        ComboBox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            items = HP.mop,
-            selectedItem = mop,
-            onItemSelected = onMOPChange,
-            label = {
-                Text("M.O.P")
-            }
-        )
-        ComboBox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            items = HP.banks,
-            selectedItem = bank,
-            onItemSelected = onBankSelected,
-            label = {
-                Text("Bank")
-            },
-            addNone = true,
-            enabled = mop.id == 2L,
-        )
-        SubComboBox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            items = HP.subBanks,
-            selectedItem = subBank,
-            onItemSelected = onSubBankSelected,
-            label = {
-                Text("Bank Account")
-            },
-            addNone = true,
-            enabled = mop.id == 2L,
-            mainId = bank.id
-        )
-        Spacer(Modifier.height(8.dp))
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 private fun Prev() {
@@ -382,7 +331,7 @@ private fun Prev() {
             {},
             {},
         )
-        MOP(
+        MOPSection(
             mop = HP.mop[0],
             bank = HP.getNoneDropdownItem(),
             subBank = HP.getNoneDropdownItem(),

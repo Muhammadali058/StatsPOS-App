@@ -39,6 +39,8 @@ class PurchaseItemsViewModel @Inject constructor(
         val invoiceId: Long = 0L,
         val isPostedBill: Boolean = false,
 
+        val hasLoadedOnce: Boolean = false,
+
         val isLoading: Boolean = false,
         val isDeleting: Boolean = false,
         val isPosting: Boolean = false,
@@ -111,10 +113,15 @@ class PurchaseItemsViewModel @Inject constructor(
         if(HP.appSettings.instantSearch == true)
             loadData(updateTotal)
     }
+
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
+    }
+
     // endregion
 
     // region Network calls
-    fun loadData(updateTotal: (Double) -> Unit) {
+    fun loadData(updateTotal: (Double) -> Unit, onSuccess: () -> Unit = {}) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -160,6 +167,7 @@ class PurchaseItemsViewModel @Inject constructor(
                     }
 
                     updateTotal(totalBill)
+                    onSuccess()
                 }
             }
         }

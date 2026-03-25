@@ -42,6 +42,7 @@ import com.example.statspos.presentation.ui.components.DiscountTextbox
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.ExpandableSection
+import com.example.statspos.presentation.ui.components.MOPSection
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.SubComboBox
@@ -61,10 +62,8 @@ fun AddUpdateSalesBillBody(
     salesViewModel: AddUpdateSalesViewModel,
     salesItemsViewModel: SalesItemsViewModel,
     snackbarHostState: SnackbarHostState,
-    invoiceId: Long,
     isPendingBill: Boolean,
     isPostedBill: Boolean,
-    onBack: () -> Unit,
 ) {
     val state by salesViewModel.state.collectAsStateWithLifecycle()
     val event by salesViewModel.event.collectAsState(UiEvent.Idle)
@@ -81,17 +80,6 @@ fun AddUpdateSalesBillBody(
             }
         )
     }
-
-    // Edit data when update
-//    LaunchedEffect(Unit) {
-//        if (!state.hasLoadedOnce) {
-//            if (isPendingBill || isPostedBill) {
-//                salesViewModel.editData(invoiceId)
-//            }
-//
-//            salesViewModel.setHasLoadedOnce(true)
-//        }
-//    }
 
     if (showErrorDialog) {
         ErrorDialog(
@@ -117,7 +105,6 @@ fun AddUpdateSalesBillBody(
                 Modifier
                     .weight(1f)
                     .verticalScroll(scrollState)
-//                    .imePadding()
                 ,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -145,7 +132,7 @@ fun AddUpdateSalesBillBody(
                     onDateChange = salesViewModel::onDateChange,
                     onDueDateChange = salesViewModel::onDueDateChange,
                 )
-                MOP(
+                MOPSection(
                     mop = state.mop,
                     bank = state.bank,
                     subBank = state.subBank,
@@ -186,49 +173,6 @@ fun AddUpdateSalesBillBody(
                     onRemarksChange = salesViewModel::onRemarksChange,
                 )
                 Spacer(Modifier.height(8.dp))
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(ConstantPaddings.BODY_HORIZONTAL)
-                    .padding(top = 8.dp)
-            ) {
-                if (!isPostedBill) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.5f),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        if (state.isSaving) {
-                            AppCircularProgressIndicator()
-                        } else {
-                            SaveButton(text = "Save") {
-                                salesViewModel.tempClose {
-                                    sharedViewModel.notifyBillSaved()
-                                    onBack()
-                                }
-                            }
-                        }
-                    }
-                    Spacer(Modifier.width(8.dp))
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    if (state.isPosting) {
-                        AppCircularProgressIndicator()
-                    } else {
-                        SaveButton(text = "Post") {
-                            salesViewModel.postBill {
-                                sharedViewModel.notifyBillPosted()
-                                onBack()
-                            }
-                        }
-                    }
-                }
             }
         }
 
@@ -369,58 +313,6 @@ private fun Basic(
 }
 
 @Composable
-private fun MOP(
-    mop: DropdownItem,
-    bank: DropdownItem,
-    subBank: DropdownItem,
-    onMOPChange: (DropdownItem) -> Unit,
-    onBankSelected: (DropdownItem) -> Unit,
-    onSubBankSelected: (DropdownItem) -> Unit,
-) {
-    ExpandableSection(
-        title = "M.O.P Bank",
-        initiallyExpanded = false,
-    ) {
-        ComboBox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            items = HP.mop,
-            selectedItem = mop,
-            onItemSelected = onMOPChange,
-            label = {
-                Text("M.O.P")
-            }
-        )
-        ComboBox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            items = HP.banks,
-            selectedItem = bank,
-            onItemSelected = onBankSelected,
-            label = {
-                Text("Bank")
-            },
-            addNone = true,
-            enabled = mop.id == 2L,
-        )
-        SubComboBox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            items = HP.subBanks,
-            selectedItem = subBank,
-            onItemSelected = onSubBankSelected,
-            label = {
-                Text("Bank Account")
-            },
-            addNone = true,
-            enabled = mop.id == 2L,
-            mainId = bank.id
-        )
-    }
-}
-
-
-@Composable
 private fun Others(
     isRetail: Boolean,
     supplier: DropdownItem?,
@@ -557,7 +449,7 @@ private fun BodyPrev() {
                 {},
                 {},
             )
-            MOP(
+            MOPSection(
                 mop = HP.mop[0],
                 bank = HP.getNoneDropdownItem(),
                 subBank = HP.getNoneDropdownItem(),

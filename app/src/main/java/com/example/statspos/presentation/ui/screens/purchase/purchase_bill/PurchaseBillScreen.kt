@@ -1,11 +1,13 @@
 package com.example.statspos.presentation.ui.screens.purchase.purchase_bill
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -22,8 +24,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -34,15 +38,18 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.domain.models.purchase.Purchase
 import com.example.statspos.domain.models.purchase.PurchaseBills
+import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.PasswordDialog
+import com.example.statspos.presentation.ui.components.ProgressBarLayout
+import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.TabLayout
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
-import com.example.statspos.presentation.ui.screens.sales.sales_bill.AddUpdateSalesBillBody
+import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.purchase.purchase_bill.AddUpdatePurchaseViewModel
 import com.example.statspos.presentation.viewmodels.purchase.purchase_bill.PurchaseItemsViewModel
@@ -191,13 +198,14 @@ private fun Home(
     onBack: () -> Unit,
     goBackWithResult: () -> Unit,
 ) {
-    val tabs = listOf("Bill Details", "Bill Items")
+    val tabs = listOf("Items", "Details")
     val pagerState = rememberPagerState(
         initialPage = 0,
         pageCount = { tabs.size }
     )
     val context = LocalContext.current
-    val state by purchaseViewModel.state.collectAsStateWithLifecycle()
+    val purchaseState by purchaseViewModel.state.collectAsStateWithLifecycle()
+    val purchaseItemsState by purchaseItemsViewModel.state.collectAsStateWithLifecycle()
     val event by purchaseViewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
@@ -215,9 +223,18 @@ private fun Home(
         )
     }
 
+    // Edit data when update
+    LaunchedEffect(Unit) {
+        if (!purchaseState.hasLoadedOnce) {
+            purchaseViewModel.editData(invoiceId) {
+                purchaseViewModel.setHasLoadedOnce(true)
+            }
+        }
+    }
+
     if (showErrorDialog) {
         ErrorDialog(
-            error = state.error,
+            error = purchaseState.error,
             onDismiss = {
                 showErrorDialog = false
             },
@@ -269,7 +286,6 @@ private fun Home(
     }
 
     Scaffold(
-        contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = {
             AppSnackbarHost(
                 snackbarHostState = snackbarHostState,
@@ -280,7 +296,7 @@ private fun Home(
                 onNavigationClick = {
                     goBackWithResult()
                 },
-                title = "Total: ${HP.formatDecimal(state.total, mustDecimals = 1)}",
+                title = "Total: ${HP.formatDecimal(purchaseState.total, mustDecimals = 1)}",
                 actions = {
                     Row {
                         if (isPendingBill) {
@@ -313,44 +329,103 @@ private fun Home(
             )
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
+        Box(
+            Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            TabLayout(
-                pagerState = pagerState,
-                tabs = tabs,
-            )
-
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier
+            Column(
+                Modifier
                     .fillMaxSize(),
-            ) { page ->
-                when (page) {
-                    0 ->
-                        AddUpdatePurchaseBillBody(
-                            sharedViewModel = sharedViewModel,
-                            purchaseViewModel = purchaseViewModel,
-                            snackbarHostState = snackbarHostState,
-                            invoiceId = invoiceId,
-                            isPendingBill = isPendingBill,
-                            isPostedBill = isPostedBill,
-                            onBack = onBack,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+
+                if (purchaseState.hasLoadedOnce) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                    ) {
+                        TabLayout(
+                            pagerState = pagerState,
+                            tabs = tabs,
                         )
 
-                    1 ->
-                        PurchaseBillItemsBody(
-                            sharedViewModel = sharedViewModel,
-                            purchaseViewModel = purchaseViewModel,
-                            purchaseItemsViewModel = purchaseItemsViewModel,
-                            snackbarHostState = snackbarHostState,
-                            onAddButtonClick = { updateId, isUpdated, sales ->
-                                onAddUpdatePurchaseItem(updateId, isUpdated, sales)
-                            },
-                        )
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier
+                                .fillMaxSize(),
+                        ) { page ->
+                            when (page) {
+                                0 ->
+                                    PurchaseBillItemsBody(
+                                        sharedViewModel = sharedViewModel,
+                                        purchaseViewModel = purchaseViewModel,
+                                        purchaseItemsViewModel = purchaseItemsViewModel,
+                                        snackbarHostState = snackbarHostState,
+                                        onAddButtonClick = { updateId, isUpdated, sales ->
+                                            onAddUpdatePurchaseItem(updateId, isUpdated, sales)
+                                        },
+                                    )
+
+                                1 ->
+                                    AddUpdatePurchaseBillBody(
+                                        sharedViewModel = sharedViewModel,
+                                        purchaseViewModel = purchaseViewModel,
+                                        snackbarHostState = snackbarHostState,
+                                    )
+                            }
+                        }
+                    }
                 }
+
+                // Save & Post Buttons
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(ConstantPaddings.BODY_HORIZONTAL)
+                ) {
+                    if (!isPostedBill) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.5f),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            if (purchaseState.isSaving) {
+                                AppCircularProgressIndicator()
+                            } else {
+                                SaveButton(text = "Save") {
+                                    purchaseViewModel.tempClose {
+                                        sharedViewModel.notifyBillSaved()
+                                        onBack()
+                                    }
+                                }
+                            }
+                        }
+                        Spacer(Modifier.width(8.dp))
+                    }
+                    if (purchaseItemsState.list.isNotEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            if (purchaseState.isPosting) {
+                                AppCircularProgressIndicator()
+                            } else {
+                                SaveButton(text = "Post") {
+                                    purchaseViewModel.postBill {
+                                        sharedViewModel.notifyBillPosted()
+                                        onBack()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (purchaseState.isLoading) {
+                ProgressBarLayout()
             }
         }
     }

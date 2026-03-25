@@ -313,7 +313,7 @@ class AddUpdatePurchaseViewModel @Inject constructor(
         }
     }
 
-    fun editData(id: Long) {
+    fun editData(id: Long, onSuccess: () -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -328,6 +328,8 @@ class AddUpdatePurchaseViewModel @Inject constructor(
 
                     val purchase = Gson().get<Purchase>(result.data.asJsonObject)
                     setFormData(purchase)
+
+                    onSuccess()
                 }
             }
         }

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
@@ -27,13 +26,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.DropdownItem
-import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
-import com.example.statspos.presentation.ui.components.AppSwitch
 import com.example.statspos.presentation.ui.components.BalanceBox
 import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.DateTextbox
@@ -41,14 +37,13 @@ import com.example.statspos.presentation.ui.components.DiscountTextbox
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.ExpandableSection
+import com.example.statspos.presentation.ui.components.MOPSection
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
-import com.example.statspos.presentation.ui.components.SubComboBox
 import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.purchase.purchase_bill.AddUpdatePurchaseViewModel
-import com.example.statspos.presentation.viewmodels.purchase.purchase_bill.PurchaseItemsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
@@ -59,10 +54,6 @@ fun AddUpdatePurchaseBillBody(
     sharedViewModel: SharedViewModel,
     purchaseViewModel: AddUpdatePurchaseViewModel,
     snackbarHostState: SnackbarHostState,
-    invoiceId: Long,
-    isPendingBill: Boolean,
-    isPostedBill: Boolean,
-    onBack: () -> Unit,
 ) {
     val state by purchaseViewModel.state.collectAsStateWithLifecycle()
     val event by purchaseViewModel.event.collectAsState(UiEvent.Idle)
@@ -78,17 +69,6 @@ fun AddUpdatePurchaseBillBody(
                 showErrorDialog = true
             }
         )
-    }
-
-    // Edit data when update
-    LaunchedEffect(Unit) {
-        if (!state.hasLoadedOnce) {
-            if (isPendingBill || isPostedBill) {
-                purchaseViewModel.editData(invoiceId)
-            }
-
-            purchaseViewModel.setHasLoadedOnce(true)
-        }
     }
 
     if (showErrorDialog) {
@@ -115,7 +95,6 @@ fun AddUpdatePurchaseBillBody(
                 Modifier
                     .weight(1f)
                     .verticalScroll(scrollState),
-//                    .imePadding()
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Basic(
@@ -137,7 +116,7 @@ fun AddUpdatePurchaseBillBody(
                     onPurchaseTypeChange = purchaseViewModel::onPurchaseTypeChange,
                     onDateChange = purchaseViewModel::onDateChange,
                 )
-                MOP(
+                MOPSection(
                     mop = state.mop,
                     bank = state.bank,
                     subBank = state.subBank,
@@ -155,49 +134,6 @@ fun AddUpdatePurchaseBillBody(
                     onRefInvoiceNoChange = purchaseViewModel::onRefInvoiceNoChange,
                 )
                 Spacer(Modifier.height(8.dp))
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(ConstantPaddings.BODY_HORIZONTAL)
-                    .padding(top = 8.dp)
-            ) {
-                if (!isPostedBill) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.5f),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        if (state.isSaving) {
-                            AppCircularProgressIndicator()
-                        } else {
-                            SaveButton(text = "Save") {
-                                purchaseViewModel.tempClose {
-                                    sharedViewModel.notifyBillSaved()
-                                    onBack()
-                                }
-                            }
-                        }
-                    }
-                    Spacer(Modifier.width(8.dp))
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    if (state.isPosting) {
-                        AppCircularProgressIndicator()
-                    } else {
-                        SaveButton(text = "Post") {
-                            purchaseViewModel.postBill {
-                                sharedViewModel.notifyBillPosted()
-                                onBack()
-                            }
-                        }
-                    }
-                }
             }
         }
 
@@ -311,58 +247,6 @@ private fun Basic(
 }
 
 @Composable
-private fun MOP(
-    mop: DropdownItem,
-    bank: DropdownItem,
-    subBank: DropdownItem,
-    onMOPChange: (DropdownItem) -> Unit,
-    onBankSelected: (DropdownItem) -> Unit,
-    onSubBankSelected: (DropdownItem) -> Unit,
-) {
-    ExpandableSection(
-        title = "M.O.P Bank",
-        initiallyExpanded = false,
-    ) {
-        ComboBox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            items = HP.mop,
-            selectedItem = mop,
-            onItemSelected = onMOPChange,
-            label = {
-                Text("M.O.P")
-            }
-        )
-        ComboBox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            items = HP.banks,
-            selectedItem = bank,
-            onItemSelected = onBankSelected,
-            label = {
-                Text("Bank")
-            },
-            addNone = true,
-            enabled = mop.id == 2L,
-        )
-        SubComboBox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            items = HP.subBanks,
-            selectedItem = subBank,
-            onItemSelected = onSubBankSelected,
-            label = {
-                Text("Bank Account")
-            },
-            addNone = true,
-            enabled = mop.id == 2L,
-            mainId = bank.id
-        )
-    }
-}
-
-
-@Composable
 private fun Others(
     remarks: String,
     expense: String,
@@ -376,7 +260,7 @@ private fun Others(
         title = "Others",
         initiallyExpanded = false,
     ) {
-        if(HP.adminSettings.showSuppliersInPurchase == true) {
+        if (HP.adminSettings.showSuppliersInPurchase == true) {
             ComboBox(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -447,11 +331,11 @@ private fun BodyPrev() {
                 "",
                 "",
                 HP.getNoneDropdownItem(),
-                {  },
-                {  },
-                {  },
+                { },
+                { },
+                { },
             )
-            MOP(
+            MOPSection(
                 mop = HP.mop[0],
                 bank = HP.getNoneDropdownItem(),
                 subBank = HP.getNoneDropdownItem(),

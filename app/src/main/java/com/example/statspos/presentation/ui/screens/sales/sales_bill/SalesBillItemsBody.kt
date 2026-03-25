@@ -125,10 +125,7 @@ fun SalesBillItemsBody(
 
     Scaffold(
         floatingActionButton = {
-            AppFloatingActionButton(
-                modifier = Modifier
-                    .padding(bottom = 16.dp)
-            ) {
+            AppFloatingActionButton{
                 onAddButtonClick(0L, false, getSalesObject())
             }
         },
@@ -194,33 +191,6 @@ fun SalesBillItemsBody(
                     HeadingMedium(text = "Disc: ")
                     LabelMedium(text = HP.formatDecimal(state.totalItemDisc))
                 }
-
-                // Post Button
-                if (state.list.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(ConstantPaddings.BODY_HORIZONTAL)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            if (salesState.isPosting) {
-                                AppCircularProgressIndicator()
-                            } else {
-                                SaveButton(text = "Post") {
-                                    salesViewModel.postBill {
-                                        sharedViewModel.notifyBillPosted()
-                                        onBack()
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
             }
         }
     }

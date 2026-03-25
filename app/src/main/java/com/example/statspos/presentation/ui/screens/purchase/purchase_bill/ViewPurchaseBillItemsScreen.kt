@@ -86,9 +86,7 @@ fun ViewPurchaseBillItemsScreen(
     }
 
     fun loadData() {
-        viewModel.loadData { a ->
-
-        }
+        viewModel.loadData({ a -> })
     }
 
     // Edit data when update

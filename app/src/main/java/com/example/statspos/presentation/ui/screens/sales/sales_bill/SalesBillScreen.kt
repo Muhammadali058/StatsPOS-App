@@ -1,14 +1,12 @@
 package com.example.statspos.presentation.ui.screens.sales.sales_bill
 
-import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -28,6 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -39,9 +38,9 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.example.statspos.R
 import com.example.statspos.domain.models.sales.Sales
 import com.example.statspos.domain.models.sales.SalesBills
+import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.components.AppDropdownMenu
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
@@ -50,9 +49,11 @@ import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.PasswordDialog
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
+import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.TabLayout
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
+import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.sales.sales_bill.AddUpdateSalesViewModel
 import com.example.statspos.presentation.viewmodels.sales.sales_bill.SalesItemsViewModel
@@ -126,7 +127,6 @@ fun SalesBillScreen(
     var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         if (!hasLoadedOnce) {
-
             salesViewModel.updateInitialState(
                 invoiceId = invoiceId,
                 isPendingBill = isPendingBill,
@@ -219,13 +219,14 @@ private fun Home(
     onBack: () -> Unit,
     goBackWithResult: () -> Unit,
 ) {
-    val tabs = listOf("Bill Items", "Bill Details")
+    val tabs = listOf("Items", "Details")
     val pagerState = rememberPagerState(
         initialPage = 0,
         pageCount = { tabs.size }
     )
     val context = LocalContext.current
-    val state by salesViewModel.state.collectAsStateWithLifecycle()
+    val salesState by salesViewModel.state.collectAsStateWithLifecycle()
+    val salesItemsState by salesItemsViewModel.state.collectAsStateWithLifecycle()
     val event by salesViewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
@@ -246,7 +247,7 @@ private fun Home(
 
     // Edit data when update
     LaunchedEffect(Unit) {
-        if (!state.hasLoadedOnce) {
+        if (!salesState.hasLoadedOnce) {
             salesViewModel.editData(invoiceId){
                 salesViewModel.setHasLoadedOnce(true)
             }
@@ -255,7 +256,7 @@ private fun Home(
 
     if (showErrorDialog) {
         ErrorDialog(
-            error = state.error,
+            error = salesState.error,
             onDismiss = {
                 showErrorDialog = false
             },
@@ -307,7 +308,6 @@ private fun Home(
     }
 
     Scaffold(
-//        contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = {
             AppSnackbarHost(
                 snackbarHostState = snackbarHostState,
@@ -318,7 +318,7 @@ private fun Home(
                 onNavigationClick = {
                     goBackWithResult()
                 },
-                title = "Total: ${HP.formatDecimal(state.total, mustDecimals = 1)}",
+                title = "Total: ${HP.formatDecimal(salesState.total, mustDecimals = 1)}",
                 actions = {
                     Row {
                         if (isPendingBill) {
@@ -369,7 +369,7 @@ private fun Home(
                                     text = { AppText("Margin") },
                                     onClick = {
                                         menuExpanded = false
-                                        onMarginClick(state.totalDisc)
+                                        onMarginClick(salesState.totalDisc)
                                     }
                                 )
                             }
@@ -384,51 +384,100 @@ private fun Home(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            if (state.hasLoadedOnce) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    TabLayout(
-                        pagerState = pagerState,
-                        tabs = tabs,
-                    )
-
-                    HorizontalPager(
-                        state = pagerState,
+            Column(
+                Modifier
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                if (salesState.hasLoadedOnce) {
+                    Column(
                         modifier = Modifier
-                            .fillMaxSize(),
-                    ) { page ->
-                        when (page) {
-                            0 ->
-                                SalesBillItemsBody(
-                                    sharedViewModel = sharedViewModel,
-                                    salesViewModel = salesViewModel,
-                                    salesItemsViewModel = salesItemsViewModel,
-                                    snackbarHostState = snackbarHostState,
-                                    onAddButtonClick = { updateId, isUpdated, sales ->
-                                        onAddUpdateSalesItem(updateId, isUpdated, sales)
-                                    },
-                                    onBack = onBack,
-                                )
+                            .weight(1f)
+                    ) {
+                        TabLayout(
+                            pagerState = pagerState,
+                            tabs = tabs,
+                        )
 
-                            1 ->
-                                AddUpdateSalesBillBody(
-                                    sharedViewModel = sharedViewModel,
-                                    salesViewModel = salesViewModel,
-                                    salesItemsViewModel = salesItemsViewModel,
-                                    snackbarHostState = snackbarHostState,
-                                    invoiceId = invoiceId,
-                                    isPendingBill = isPendingBill,
-                                    isPostedBill = isPostedBill,
-                                    onBack = onBack,
-                                )
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier
+                                .fillMaxSize(),
+                        ) { page ->
+                            when (page) {
+                                0 ->
+                                    SalesBillItemsBody(
+                                        sharedViewModel = sharedViewModel,
+                                        salesViewModel = salesViewModel,
+                                        salesItemsViewModel = salesItemsViewModel,
+                                        snackbarHostState = snackbarHostState,
+                                        onAddButtonClick = { updateId, isUpdated, sales ->
+                                            onAddUpdateSalesItem(updateId, isUpdated, sales)
+                                        },
+                                        onBack = onBack,
+                                    )
+
+                                1 ->
+                                    AddUpdateSalesBillBody(
+                                        sharedViewModel = sharedViewModel,
+                                        salesViewModel = salesViewModel,
+                                        salesItemsViewModel = salesItemsViewModel,
+                                        snackbarHostState = snackbarHostState,
+                                        isPendingBill = isPendingBill,
+                                        isPostedBill = isPostedBill,
+                                    )
+                            }
+                        }
+                    }
+                }
+
+                // Save & Post Buttons
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(ConstantPaddings.BODY_HORIZONTAL)
+                ) {
+                    if (!isPostedBill) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.5f),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            if (salesState.isSaving) {
+                                AppCircularProgressIndicator()
+                            } else {
+                                SaveButton(text = "Save") {
+                                    salesViewModel.tempClose {
+                                        sharedViewModel.notifyBillSaved()
+                                        onBack()
+                                    }
+                                }
+                            }
+                        }
+                        Spacer(Modifier.width(8.dp))
+                    }
+                    if (salesItemsState.list.isNotEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            if (salesState.isPosting) {
+                                AppCircularProgressIndicator()
+                            } else {
+                                SaveButton(text = "Post") {
+                                    salesViewModel.postBill {
+                                        sharedViewModel.notifyBillPosted()
+                                        onBack()
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
 
-            if (state.isLoading) {
+            if (salesState.isLoading) {
                 ProgressBarLayout()
             }
         }

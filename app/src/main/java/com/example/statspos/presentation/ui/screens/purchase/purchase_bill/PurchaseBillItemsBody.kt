@@ -74,12 +74,24 @@ fun PurchaseBillItemsBody(
         )
     }
 
+    fun getPurchaseObject(): Purchase {
+        val purchase = purchaseViewModel.getFormData()
+        purchase.id = salesState.invoiceId
+        purchase.isPostedBill = salesState.isPostedBill
+        purchase.invoiceNo = salesState.invoiceNo
+        purchase.totalItems = state.list.size
+        return purchase
+    }
+
     // Edit data when update
-    var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        if (!hasLoadedOnce) {
-            purchaseItemsViewModel.loadData(purchaseViewModel::updateTotal)
-            hasLoadedOnce = true
+        if (!state.hasLoadedOnce) {
+            purchaseItemsViewModel.loadData(purchaseViewModel::updateTotal){
+                if(purchaseItemsViewModel.state.value.list.isEmpty()) {
+                    onAddButtonClick(0L, false, getPurchaseObject())
+                }
+            }
+            purchaseItemsViewModel.setHasLoadedOnce(true)
         }
     }
 
@@ -98,15 +110,6 @@ fun PurchaseBillItemsBody(
                 showErrorDialog = false
             },
         )
-    }
-
-    fun getPurchaseObject(): Purchase {
-        val purchase = purchaseViewModel.getFormData()
-        purchase.id = salesState.invoiceId
-        purchase.isPostedBill = salesState.isPostedBill
-        purchase.invoiceNo = salesState.invoiceNo
-        purchase.totalItems = state.list.size
-        return purchase
     }
 
     Scaffold(
@@ -160,7 +163,8 @@ fun PurchaseBillItemsBody(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(MaterialTheme.colorScheme.surface)
-                        .padding(8.dp)
+                        .padding(ConstantPaddings.BODY_HORIZONTAL)
+                        .padding(vertical = 8.dp)
                 ) {
                     HeadingMedium(text = "Items: ")
                     LabelMedium(text = state.totalItems.toString())

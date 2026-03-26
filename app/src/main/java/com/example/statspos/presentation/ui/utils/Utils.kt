@@ -90,23 +90,21 @@ fun sharePdf(context: Context, file: File) {
     val intent = Intent(Intent.ACTION_SEND).apply {
         type = "application/pdf"
         putExtra(Intent.EXTRA_STREAM, uri)
-//        putExtra(Intent.EXTRA_SUBJECT, "Sales Report")
-//        putExtra(Intent.EXTRA_TEXT, "Please find attached sales report.")
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        `package` = "com.whatsapp" // To share only with WhatsApp
+//        `package` = "com.whatsapp" // To share only with WhatsApp
     }
 
     // To share only with WhatsApp
-    try {
-        context.startActivity(intent)
-    } catch (e: ActivityNotFoundException) {
-        Toast.makeText(context, "WhatsApp not installed", Toast.LENGTH_SHORT).show()
-    }
+//    try {
+//        context.startActivity(intent)
+//    } catch (e: ActivityNotFoundException) {
+//        Toast.makeText(context, "WhatsApp not installed", Toast.LENGTH_SHORT).show()
+//    }
 
     // Share
-//    context.startActivity(
-//        Intent.createChooser(intent, "Share Report")
-//    )
+    context.startActivity(
+        Intent.createChooser(intent, "Share Report")
+    )
 
     // Delete
     Handler(Looper.getMainLooper()).postDelayed({

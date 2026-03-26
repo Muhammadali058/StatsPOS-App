@@ -441,7 +441,7 @@ private fun Home(
                         if (!isPostedBill) {
                             Box(
                                 modifier = Modifier
-                                    .fillMaxWidth(0.5f),
+                                    .fillMaxWidth(if(salesItemsState.list.isNotEmpty()) 0.5f else 1f),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 if (salesState.isSaving) {

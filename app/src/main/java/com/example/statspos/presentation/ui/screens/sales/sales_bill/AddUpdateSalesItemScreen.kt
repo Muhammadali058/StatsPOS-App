@@ -403,6 +403,20 @@ private fun Body(
             ),
             enabled = qtyEnabled,
             focusRequester = qtyFocusRequester,
+            trailingIcon = {
+                AppIconButton(
+                    icon = R.drawable.calculate,
+                    onClick = {
+                        val tempQty = HP.getDoubleValue(qty)
+                        val tempRate = HP.getDoubleValue(rate)
+                        if(tempQty != 0.0 && tempRate != 0.0) {
+                            val grams = tempQty / tempRate
+                            onQtyChange(HP.formatDecimal(grams, 3))
+                        }
+                    },
+                    size = 20.dp,
+                )
+            },
         )
         Spacer(Modifier.width(8.dp))
         TextboxCB(

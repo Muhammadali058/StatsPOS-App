@@ -16,27 +16,16 @@ class ClientsRepositoryImpl @Inject constructor(
     override suspend fun clientLogin(body: JsonObject): Resource<JsonObject> =
         safeApiCall { api.clientLogin(body) }
 
-    //    {
-//        return safeApiCall { api.clientLogin(body) }
-////        val result = safeApiCall { api.clientLogin(body) }
-////
-////        return when (result) {
-////            is Resource.Error -> Resource.Error(result.message)
-////            is Resource.Information -> Resource.Information(result.infoMessage)
-////            is Resource.Success -> Resource.Success(result.data)
-////        }
-//    }
-
     override suspend fun clientSignup(body: JsonObject): Resource<JsonObject>  = safeApiCall { api.clientSignup(body) }
 
-    override suspend fun localClientLogin(body: JsonObject): Resource<JsonObject> =
-        safeApiCall { api.localClientLogin(body) }
+    override suspend fun getBranches(clientId: Int): Resource<JsonObject> {
+        val body = JsonObject().apply {
+            addProperty("clientId", clientId)
+        }
 
-
-    override suspend fun getBranches(): Resource<JsonObject> {
         return safeApiCall {
             api.getBranches(
-                DB.addParams(JsonObject())
+                body
             )
         }
     }

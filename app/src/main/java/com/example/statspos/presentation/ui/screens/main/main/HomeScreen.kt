@@ -1,6 +1,7 @@
 package com.example.statspos.presentation.ui.screens.main.main
 
 import android.app.Activity
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.DrawableRes
@@ -109,6 +110,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
+import kotlin.system.exitProcess
 
 private val items = listOf(
     TopItem(
@@ -450,7 +452,7 @@ fun HomeScreen(
                             } else {
                                 localDataViewModel.setBaseUrl(branch.baseUrl.toString())
                                 context.showToast("Branch changed restart app")
-                                activity.finish()
+                                onTopRouteClick(TopRoutes.CloseApp)
                             }
                         }
                     )
@@ -568,7 +570,7 @@ fun NavigationDrawer(
             AppText("Profile")
         }
 
-        if(HP.userRights.settings == true) {
+        if (HP.userRights.settings == true) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

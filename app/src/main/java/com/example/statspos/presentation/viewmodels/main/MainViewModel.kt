@@ -1,5 +1,6 @@
 package com.example.statspos.presentation.viewmodels.main
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.main.Branches
@@ -16,6 +17,7 @@ import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -100,7 +102,9 @@ class MainViewModel @Inject constructor(
 
             beforeRequest()
 
-            when (val result = clientsRepo.getBranches()) {
+            val clientId = dataStore.getClientId().first()
+
+            when (val result = clientsRepo.getBranches(clientId)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {

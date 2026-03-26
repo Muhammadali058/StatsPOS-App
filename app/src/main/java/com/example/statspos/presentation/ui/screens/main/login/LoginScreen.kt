@@ -1,6 +1,9 @@
 package com.example.statspos.presentation.ui.screens.main.login
 
+import android.app.Activity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,21 +13,26 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -44,29 +52,35 @@ import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.ui.utils.ConstantSize
+import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
 import com.example.statspos.presentation.viewmodels.main.LoginViewModel
+import com.example.statspos.presentation.viewmodels.main.MainViewModel
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
+import com.example.statspos.utils.showToast
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
     remember: Boolean,
     username: String?,
     password: String?,
-    onLogin: () -> Unit
+    onLogin: () -> Unit,
+    onReset: () -> Unit,
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel = hiltViewModel<LoginViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
 
     LaunchedEffect(Unit) {
         viewModel.onRememberCheckedChange(remember)
-        viewModel.onUsernameChange(username?: "")
-        viewModel.onPasswordChange(password?: "")
+        viewModel.onUsernameChange(username ?: "")
+        viewModel.onPasswordChange(password ?: "")
 
-        viewModel.login{
-            onLogin()
-        }
+//        viewModel.login{
+//            onLogin()
+//        }
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -87,7 +101,7 @@ fun LoginScreen(
         )
     }
 
-    if(showErrorDialog){
+    if (showErrorDialog) {
         ErrorDialog(
             error = state.error,
             onDismiss = {
@@ -115,10 +129,12 @@ fun LoginScreen(
             onRememberCheckedChange = viewModel::onRememberCheckedChange,
             isLoading = state.isLoading,
             onLogin = {
+                keyboardController?.hide()
                 viewModel.login {
                     onLogin()
                 }
-            }
+            },
+            onResetClick = onReset
         )
     }
 }
@@ -133,7 +149,8 @@ private fun Body(
     onPasswordChange: (String) -> Unit,
     onRememberCheckedChange: (Boolean) -> Unit,
     isLoading: Boolean,
-    onLogin: () -> Unit
+    onLogin: () -> Unit,
+    onResetClick: () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -142,90 +159,106 @@ private fun Body(
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween,
     ) {
-        Spacer(
-            Modifier.height(32.dp)
-        )
-        AppIcon(
-            icon = R.drawable.statspos,
-            modifier = Modifier
-                .size(140.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-        Spacer(
-            Modifier.height(16.dp)
-        )
-        Text(
-            text = "Welcome Back!",
-            style = TextStyle(
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.SemiBold
+        Column(
+            modifier = modifier
+                .weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Spacer(Modifier.height(32.dp))
+            AppIcon(
+                icon = R.drawable.statspos,
+                modifier = Modifier
+                    .size(140.dp),
+                tint = MaterialTheme.colorScheme.primary
             )
-        )
-        Text(
-            text = "Let's Start Today's Business",
-            style = TextStyle(
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                fontSize = 18.sp,
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = "Welcome Back!",
+                style = TextStyle(
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
             )
-        )
-        Spacer(
-            Modifier.height(16.dp)
-        )
-        Textbox(
-            value = username,
-            onValueChange = onUsernameChange,
-            label = {
-                Text("Username")
-            },
-            modifier = Modifier
-                .fillMaxWidth(),
-            leadingIcon = {
-                AppIcon(icon = R.drawable.ic_user)
-            },
-            height = ConstantSize.ORIGINAL_TEXTBOX_HEIGHT,
-            contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
-        )
-        PasswordTextbox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            value = password,
-            onValueChange = onPasswordChange,
-            label = {
-                Text("Password")
-            },
-            leadingIcon = {
-                AppIcon(icon = R.drawable.ic_password)
-            },
-            height = ConstantSize.ORIGINAL_TEXTBOX_HEIGHT,
-            contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
-            imeAction = ImeAction.Done
-        )
-        Spacer(
-            Modifier.height(8.dp)
-        )
-        AppCheckbox(
-            modifier = Modifier.fillMaxWidth(),
-            label = "Remember",
-            checked = remember,
-            onCheckedChange = onRememberCheckedChange
-        )
-        Spacer(
-            Modifier.height(8.dp)
-        )
-        if (isLoading) {
-            AppCircularProgressIndicator()
-        } else {
-            Button(
-                onClick = {
-                    onLogin()
+            Text(
+                text = "Let's Start Today's Business",
+                style = TextStyle(
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    fontSize = 18.sp,
+                )
+            )
+            Spacer(Modifier.height(16.dp))
+            Textbox(
+                value = username,
+                onValueChange = onUsernameChange,
+                label = {
+                    Text("Username")
                 },
                 modifier = Modifier
-                    .width(120.dp)
-            ) {
-                Text("Login")
+                    .fillMaxWidth(),
+                leadingIcon = {
+                    AppIcon(icon = R.drawable.ic_user)
+                },
+                height = ConstantSize.ORIGINAL_TEXTBOX_HEIGHT,
+                contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
+            )
+            PasswordTextbox(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                value = password,
+                onValueChange = onPasswordChange,
+                label = {
+                    Text("Password")
+                },
+                leadingIcon = {
+                    AppIcon(icon = R.drawable.ic_password)
+                },
+                height = ConstantSize.ORIGINAL_TEXTBOX_HEIGHT,
+                contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
+                imeAction = ImeAction.Go,
+                keyboardActions = KeyboardActions(
+                    onGo = {
+                        onLogin()
+                    }
+                )
+            )
+            Spacer(Modifier.height(8.dp))
+            AppCheckbox(
+                modifier = Modifier.fillMaxWidth(),
+                label = "Remember",
+                checked = remember,
+                onCheckedChange = onRememberCheckedChange
+            )
+            Spacer(Modifier.height(8.dp))
+            if (isLoading) {
+                AppCircularProgressIndicator()
+            } else {
+                Button(
+                    onClick = {
+                        onLogin()
+                    },
+                    modifier = Modifier
+                        .width(120.dp)
+                ) {
+                    Text("Login")
+                }
             }
+        }
+
+        TextButton(
+            onClick = {
+                onResetClick()
+            },
+        ) {
+            Text(
+                text = "Reset",
+                modifier = Modifier,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    color = MaterialTheme.colorScheme.primary,
+                ),
+            )
         }
     }
 }
@@ -244,6 +277,7 @@ private fun BodyPreview() {
             {},
             {},
             isLoading = false,
+            {},
             {}
         )
     }

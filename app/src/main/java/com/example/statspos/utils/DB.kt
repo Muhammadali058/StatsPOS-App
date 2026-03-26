@@ -9,9 +9,10 @@ object DB {
     var isOnlineMode = true
     var branches: List<Branches> = emptyList()
 
-    var HOST = "http://192.168.100.28:8000"
-//    var HOST = "http://84.247.142.182:5000"
+//    const val MAIN_HOST = "http://192.168.100.28:8000"
+    const val MAIN_HOST = "http://84.247.142.182:5000"
 
+    var HOST = MAIN_HOST
     var API = "${HOST}/api/"
 
     fun setBaseUrl(host: String) {

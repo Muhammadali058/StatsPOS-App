@@ -20,11 +20,26 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Qualifier
 import javax.inject.Singleton
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class MainApi
 
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule{
+
+    @MainApi
+    @Provides
+    @Singleton
+    fun provideRetrofitMainApi(): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(DB.MAIN_HOST+"/api/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
 
     @Provides
     @Singleton
@@ -43,10 +58,4 @@ object AppModule{
             produceFile = { context.preferencesDataStoreFile("prefs") }
         )
     }
-
-//    @Provides
-//    @Singleton
-//    fun provideCategoriesApi(retrofitInstance: Retrofit): CategoriesApi {
-//        return retrofitInstance.create(CategoriesApi::class.java)
-//    }
 }

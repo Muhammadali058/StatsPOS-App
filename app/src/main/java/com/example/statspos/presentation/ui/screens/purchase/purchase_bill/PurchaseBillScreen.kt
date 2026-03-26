@@ -339,7 +339,6 @@ private fun Home(
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-
                 if (purchaseState.hasLoadedOnce) {
                     Column(
                         modifier = Modifier
@@ -379,43 +378,45 @@ private fun Home(
                 }
 
                 // Save & Post Buttons
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(ConstantPaddings.BODY_HORIZONTAL)
-                ) {
-                    if (!isPostedBill) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(0.5f),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            if (purchaseState.isSaving) {
-                                AppCircularProgressIndicator()
-                            } else {
-                                SaveButton(text = "Save") {
-                                    purchaseViewModel.tempClose {
-                                        sharedViewModel.notifyBillSaved()
-                                        onBack()
+                if (purchaseState.hasLoadedOnce) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(ConstantPaddings.BODY_HORIZONTAL)
+                    ) {
+                        if (!isPostedBill) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.5f),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                if (purchaseState.isSaving) {
+                                    AppCircularProgressIndicator()
+                                } else {
+                                    SaveButton(text = "Save") {
+                                        purchaseViewModel.tempClose {
+                                            sharedViewModel.notifyBillSaved()
+                                            onBack()
+                                        }
                                     }
                                 }
                             }
+                            Spacer(Modifier.width(8.dp))
                         }
-                        Spacer(Modifier.width(8.dp))
-                    }
-                    if (purchaseItemsState.list.isNotEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            if (purchaseState.isPosting) {
-                                AppCircularProgressIndicator()
-                            } else {
-                                SaveButton(text = "Post") {
-                                    purchaseViewModel.postBill {
-                                        sharedViewModel.notifyBillPosted()
-                                        onBack()
+                        if (purchaseItemsState.list.isNotEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                if (purchaseState.isPosting) {
+                                    AppCircularProgressIndicator()
+                                } else {
+                                    SaveButton(text = "Post") {
+                                        purchaseViewModel.postBill {
+                                            sharedViewModel.notifyBillPosted()
+                                            onBack()
+                                        }
                                     }
                                 }
                             }

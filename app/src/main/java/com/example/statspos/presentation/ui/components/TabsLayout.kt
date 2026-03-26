@@ -61,6 +61,7 @@ fun TabLayout(
                 text = {
                     Text(
                         text = title,
+                        style = MaterialTheme.typography.labelMedium,
                     )
                 }
             )

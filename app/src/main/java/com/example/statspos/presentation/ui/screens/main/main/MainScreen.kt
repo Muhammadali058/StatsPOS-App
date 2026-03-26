@@ -27,7 +27,7 @@ import com.example.statspos.presentation.ui.screens.items.AddUpdateItemScreen
 import com.example.statspos.presentation.ui.screens.items.SearchItemsScreen
 import com.example.statspos.presentation.ui.screens.items.categories.CategoriesScreen
 import com.example.statspos.presentation.ui.screens.items.packages.PackagesScreen
-import com.example.statspos.presentation.ui.screens.purchase.main_screen.PurchaseScreen
+import com.example.statspos.presentation.ui.screens.main.login.CloseAppScreen
 import com.example.statspos.presentation.ui.screens.purchase.purchase_bill.PurchaseBillScreen
 import com.example.statspos.presentation.ui.screens.purchase.purchase_orders.PurchaseOrdersScreen
 import com.example.statspos.presentation.ui.screens.reports.accounts.AccountsReportsScreen
@@ -76,6 +76,9 @@ fun MainScreen() {
                         navigate(key)
                     }
                 )
+            }
+            entry<TopRoutes.CloseApp> {
+                CloseAppScreen()
             }
             entry<TopRoutes.SearchItem> {
                 SearchItemsScreen(

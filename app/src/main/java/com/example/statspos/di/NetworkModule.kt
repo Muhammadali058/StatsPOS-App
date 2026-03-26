@@ -124,7 +124,7 @@ class NetworkModule {
 
     // region Main
     @Provides
-    fun provideClientsApi(retrofitInstance: Retrofit): ClientsApi {
+    fun provideClientsApi(@com.example.statspos.di.MainApi retrofitInstance: Retrofit): ClientsApi {
         return retrofitInstance.create(ClientsApi::class.java)
     }
 

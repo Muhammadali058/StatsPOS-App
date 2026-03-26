@@ -432,43 +432,45 @@ private fun Home(
                 }
 
                 // Save & Post Buttons
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(ConstantPaddings.BODY_HORIZONTAL)
-                ) {
-                    if (!isPostedBill) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(0.5f),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            if (salesState.isSaving) {
-                                AppCircularProgressIndicator()
-                            } else {
-                                SaveButton(text = "Save") {
-                                    salesViewModel.tempClose {
-                                        sharedViewModel.notifyBillSaved()
-                                        onBack()
+                if (salesState.hasLoadedOnce) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(ConstantPaddings.BODY_HORIZONTAL)
+                    ) {
+                        if (!isPostedBill) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.5f),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                if (salesState.isSaving) {
+                                    AppCircularProgressIndicator()
+                                } else {
+                                    SaveButton(text = "Save") {
+                                        salesViewModel.tempClose {
+                                            sharedViewModel.notifyBillSaved()
+                                            onBack()
+                                        }
                                     }
                                 }
                             }
+                            Spacer(Modifier.width(8.dp))
                         }
-                        Spacer(Modifier.width(8.dp))
-                    }
-                    if (salesItemsState.list.isNotEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            if (salesState.isPosting) {
-                                AppCircularProgressIndicator()
-                            } else {
-                                SaveButton(text = "Post") {
-                                    salesViewModel.postBill {
-                                        sharedViewModel.notifyBillPosted()
-                                        onBack()
+                        if (salesItemsState.list.isNotEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                if (salesState.isPosting) {
+                                    AppCircularProgressIndicator()
+                                } else {
+                                    SaveButton(text = "Post") {
+                                        salesViewModel.postBill {
+                                            sharedViewModel.notifyBillPosted()
+                                            onBack()
+                                        }
                                     }
                                 }
                             }

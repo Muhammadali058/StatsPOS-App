@@ -4,16 +4,10 @@ import android.app.Activity
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
@@ -22,17 +16,15 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.domain.models.main.Clients
-import com.example.statspos.presentation.ui.components.AppText
 import com.example.statspos.presentation.ui.screens.main.login.ClientLoginScreen
 import com.example.statspos.presentation.ui.screens.main.login.ClientSignupScreen
+import com.example.statspos.presentation.ui.screens.main.login.CloseAppScreen
 import com.example.statspos.presentation.ui.screens.main.login.LoginScreen
 import com.example.statspos.presentation.ui.screens.main.main.MainScreen
 import com.example.statspos.presentation.ui.screens.main.main.SplashScreen
 import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
 import com.example.statspos.utils.DB
 import com.example.statspos.utils.HP
-import com.example.statspos.utils.showToast
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -55,7 +47,7 @@ private sealed class Screens : NavKey {
     data object Main : Screens()
 
     @Serializable
-    data object FirstClientLogin : Screens()
+    data object CloseApp : Screens()
 
 }
 
@@ -86,11 +78,11 @@ fun App() {
                 DB.branches = branches
 
                 if(!isOnline){
-
                     HP.clientId = 1
                     DB.setBaseUrl(baseUrl)
                 }
 
+                Log.d("TAG Base Url", baseUrl)
                 navigate(Screens.Login(remember, username, password))
             }
         } else {
@@ -116,7 +108,7 @@ fun App() {
                 HP.clientId = 1
                 DB.setBaseUrl(baseUrl)
 
-                navigate(Screens.FirstClientLogin)
+                navigate(Screens.CloseApp)
             }
         }else{
             navigate(Screens.Login(false, "", ""))
@@ -141,7 +133,7 @@ fun App() {
                     onSignup = {
                         backStack.add(Screens.ClientSignup)
 //                        backStack.removeFirstOrNull()
-                    }
+                    },
                 )
             }
             entry<Screens.ClientSignup> {
@@ -158,29 +150,20 @@ fun App() {
                     password = key.password,
                     onLogin = {
                         navigate(Screens.Main)
+                    },
+                    onReset = {
+                        scope.launch {
+                            viewModel.setClientId(0)
+                            backStack.add(Screens.CloseApp)
+                        }
                     }
                 )
             }
             entry<Screens.Main> {
                 MainScreen()
             }
-            entry<Screens.FirstClientLogin> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ){
-//                    LaunchedEffect(Unit) {
-//                        delay(5000)
-//                        activity.finish()
-//                    }
-                    AppText(
-                        text = "First time login successfully.\nCompletely close this app and login again.",
-                        style = TextStyle(
-                            textAlign = TextAlign.Center,
-                        )
-                    )
-                }
+            entry<Screens.CloseApp> {
+                CloseAppScreen()
             }
         }
     )

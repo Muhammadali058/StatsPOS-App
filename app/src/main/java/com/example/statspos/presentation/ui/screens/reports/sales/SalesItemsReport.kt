@@ -86,7 +86,7 @@ fun salesItemsReport(
     // region Details
     // ---------------- Table ----------------
     val columnWidths = if (HP.settings.saleCartons == true)
-        floatArrayOf(1f, 0.5f, 2f, 2f, 0.5f, 0.5f, 0.5f, 0.5f, 1f)
+        floatArrayOf(1f, 0.5f, 2f, 2f, 0.5f, 0.5f, 0.5f, 0.6f, 1f)
     else
         floatArrayOf(1f, 0.5f, 2f, 2f, 0.5f, 0.5f, 0.5f, 1f)
 

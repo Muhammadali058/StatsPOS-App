@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -20,19 +21,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.statspos.domain.models.items.Categories
 import com.example.statspos.domain.models.items.PackageItems
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.BottomHeading
+import com.example.statspos.presentation.ui.components.ConfirmDialog
+import com.example.statspos.presentation.ui.components.DeleteIcon
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
@@ -48,6 +54,7 @@ import com.example.statspos.presentation.viewmodels.items.packages.PackageItemsV
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
+import com.example.statspos.utils.showToast
 
 @Composable
 fun PackageItemsBody(
@@ -55,11 +62,14 @@ fun PackageItemsBody(
     snackbarHostState: SnackbarHostState,
     onAddButtonClick: (Long, Boolean, Long) -> Unit,
 ) {
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel = hiltViewModel<PackageItemsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     var showErrorDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var selectedId by remember { mutableLongStateOf(0L) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
@@ -85,6 +95,22 @@ fun PackageItemsBody(
             onDismiss = {
                 showErrorDialog = false
             },
+        )
+    }
+
+    if (showDeleteDialog) {
+        ConfirmDialog(
+            text = "Are you sure to delete this package item",
+            onDismiss = {
+                showDeleteDialog = false
+            },
+            onConfirm = {
+                showDeleteDialog = false
+                viewModel.deleteData(selectedId) {
+                    selectedId = 0L
+                    context.showToast("Package item deleted successfully")
+                }
+            }
         )
     }
 
@@ -147,7 +173,11 @@ fun PackageItemsBody(
                         items = state.list,
                         onItemClick = { packageItem ->
                             onAddButtonClick(packageItem.id!!, true, state.packageId)
-                        }
+                        },
+                        onDeleteClick = { packageItem ->
+                            selectedId = packageItem.id!!
+                            showDeleteDialog = true
+                        },
                     )
                 }
 
@@ -167,6 +197,7 @@ private fun BodyList(
     onRefresh: () -> Unit,
     items: List<PackageItems>,
     onItemClick: (PackageItems) -> Unit,
+    onDeleteClick: (PackageItems) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -177,9 +208,11 @@ private fun BodyList(
             Spacer(Modifier.height(4.dp))
         }
         items(items) { item ->
-            ListCard(item = item) {
-                onItemClick(it)
-            }
+            ListCard(
+                item = item,
+                onItemClick = onItemClick,
+                onDeleteClick = onDeleteClick,
+            )
         }
     }
 }
@@ -188,7 +221,8 @@ private fun BodyList(
 private fun ListCard(
     modifier: Modifier = Modifier,
     item: PackageItems,
-    onItemClick: (PackageItems) -> Unit
+    onItemClick: (PackageItems) -> Unit,
+    onDeleteClick: (PackageItems) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -204,24 +238,42 @@ private fun ListCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            LabelLarge(item.itemname.toString())
-        }
-        Spacer(Modifier.height(2.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-        ) {
-            HeadingMedium("Qty", Modifier.weight(1f))
-            HeadingMedium("Rate", Modifier.weight(1f))
-            HeadingMedium("Total", Modifier.weight(1f))
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-        ) {
-            LabelMedium(HP.formatDecimal(item.qty), Modifier.weight(1f))
-            LabelMedium(HP.formatDecimal(item.rate), Modifier.weight(1f))
-            LabelMedium(HP.formatDecimal(item.total), Modifier.weight(1f))
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    LabelLarge(item.itemname.toString())
+                }
+                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    HeadingMedium("Qty", Modifier.weight(1f))
+                    HeadingMedium("Rate", Modifier.weight(1f))
+                    HeadingMedium("Total", Modifier.weight(1f))
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    LabelMedium(HP.formatDecimal(item.qty), Modifier.weight(1f))
+                    LabelMedium(HP.formatDecimal(item.rate), Modifier.weight(1f))
+                    LabelMedium(HP.formatDecimal(item.total), Modifier.weight(1f))
+                }
+            }
+
+            if (HP.userRights.deleteAnything == true) {
+                Spacer(Modifier.width(8.dp))
+                DeleteIcon {
+                    onDeleteClick(item)
+                }
+            }
         }
     }
 }

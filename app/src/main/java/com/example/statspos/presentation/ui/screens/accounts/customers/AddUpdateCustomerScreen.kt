@@ -166,26 +166,26 @@ fun AddUpdateCustomerScreen(
                     onBack()
                 },
                 title = if (isUpdate) "Update Customer" else "Add Customer",
-                actions = {
-                    Row {
-                        if (isUpdate) {
-                            if (HP.userRights.deleteAnything == true) {
-                                IconButton(onClick = {
-                                    if (HP.passwords.useDeleteAccount == true) {
-                                        showPasswordDialog = true
-                                    } else {
-                                        showDeleteDialog = true
-                                    }
-                                }) {
-                                    AppIcon(
-                                        icon = Icons.Default.Delete,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+//                actions = {
+//                    Row {
+//                        if (isUpdate) {
+//                            if (HP.userRights.deleteAnything == true) {
+//                                IconButton(onClick = {
+//                                    if (HP.passwords.useDeleteAccount == true) {
+//                                        showPasswordDialog = true
+//                                    } else {
+//                                        showDeleteDialog = true
+//                                    }
+//                                }) {
+//                                    AppIcon(
+//                                        icon = Icons.Default.Delete,
+//                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+//                                    )
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
             )
         }
     ) { innerPadding ->

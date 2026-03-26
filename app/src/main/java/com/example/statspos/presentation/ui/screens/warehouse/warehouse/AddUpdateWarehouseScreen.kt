@@ -139,20 +139,20 @@ fun AddUpdateWarehouseScreen(
                     onBack()
                 },
                 title = if (isUpdate) "Update Warehouse" else "Add Warehouse",
-                actions = {
-                    Row {
-                        if (isUpdate && HP.userRights.deleteAnything == true) {
-                            IconButton(onClick = {
-                                showDeleteDialog = true
-                            }) {
-                                AppIcon(
-                                    icon = Icons.Default.Delete,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
-                    }
-                }
+//                actions = {
+//                    Row {
+//                        if (isUpdate && HP.userRights.deleteAnything == true) {
+//                            IconButton(onClick = {
+//                                showDeleteDialog = true
+//                            }) {
+//                                AppIcon(
+//                                    icon = Icons.Default.Delete,
+//                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
             )
         }
     ) { innerPadding ->

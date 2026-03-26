@@ -4,6 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.Icon
@@ -141,4 +142,17 @@ fun ShowReportIcon(
     ) {
         ShowReportIcon()
     }
+}
+
+@Composable
+fun DeleteIcon(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    AppIconButton(
+        icon = Icons.Default.Delete,
+        onClick = onClick,
+        modifier = modifier,
+        size = 22.dp
+    )
 }

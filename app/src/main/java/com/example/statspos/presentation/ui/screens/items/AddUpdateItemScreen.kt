@@ -331,20 +331,20 @@ private fun Home(
                 actions = {
                     Row {
                         if (isUpdate) {
-                            if (HP.userRights.deleteAnything == true) {
-                                IconButton(onClick = {
-                                    if (HP.passwords.useDeleteItem == true) {
-                                        showPasswordDialog = true
-                                    } else {
-                                        showDeleteDialog = true
-                                    }
-                                }) {
-                                    AppIcon(
-                                        icon = Icons.Default.Delete,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                            }
+//                            if (HP.userRights.deleteAnything == true) {
+//                                IconButton(onClick = {
+//                                    if (HP.passwords.useDeleteItem == true) {
+//                                        showPasswordDialog = true
+//                                    } else {
+//                                        showDeleteDialog = true
+//                                    }
+//                                }) {
+//                                    AppIcon(
+//                                        icon = Icons.Default.Delete,
+//                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+//                                    )
+//                                }
+//                            }
 
                             IconButton(
                                 onClick = {

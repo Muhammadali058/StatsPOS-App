@@ -146,22 +146,22 @@ fun AddUpdateUserScreen(
                     onBack()
                 },
                 title = if (isUpdate) "Update User" else "Add User",
-                actions = {
-                    Row {
-                        if (isUpdate) {
-                            if (HP.userRights.deleteAnything == true) {
-                                IconButton(onClick = {
-                                    showDeleteDialog = true
-                                }) {
-                                    AppIcon(
-                                        icon = Icons.Default.Delete,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+//                actions = {
+//                    Row {
+//                        if (isUpdate) {
+//                            if (HP.userRights.deleteAnything == true) {
+//                                IconButton(onClick = {
+//                                    showDeleteDialog = true
+//                                }) {
+//                                    AppIcon(
+//                                        icon = Icons.Default.Delete,
+//                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+//                                    )
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
             )
         }
     ) { innerPadding ->

@@ -496,7 +496,10 @@ private fun Home(
                                         keyboardController?.hide()
                                     },
                                     onEndIconClick = {
-                                        viewModel.onItemnameChange("")
+//                                        viewModel.onItemnameChange("")
+                                        viewModel.onItemClick { salesItemsReport, totalReport ->
+                                            showItemsReport(salesItemsReport, totalReport)
+                                        }
                                     },
                                     onBarcodeClick = {
                                         showBarcodeScanner = true

@@ -2,6 +2,7 @@ package com.example.statspos.presentation.viewmodels.purchase.purchase_orders
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.purchase.PurchaseOrderVoucher
 import com.example.statspos.domain.models.purchase.PurchaseOrders
 import com.example.statspos.domain.repository.purchase.PurchaseOrdersRepository
@@ -136,6 +137,36 @@ class PurchaseOrdersViewModel @Inject constructor(
                             totalPurchaseOrders = resultTotal,
                         )
                     }
+                }
+            }
+        }
+    }
+
+    fun deleteData(id: Long, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if (id == 0L)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.deletePurchaseOrder(id)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    state.update {
+                        it.copy(
+                            list = state.value.list.filter { it.id != id },
+                            totalPurchaseOrders = state.value.totalPurchaseOrders - 1,
+                        )
+                    }
+
+                    HP.purchaseOrders = Gson().getListOf<DropdownItem>(result.data.get("purchaseOrders").asJsonArray)
+                    onSuccess()
                 }
             }
         }

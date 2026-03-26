@@ -21,19 +21,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.statspos.domain.models.items.Categories
 import com.example.statspos.domain.models.items.SubCategories
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.BottomHeading
+import com.example.statspos.presentation.ui.components.ConfirmDialog
+import com.example.statspos.presentation.ui.components.DeleteIcon
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
@@ -50,6 +55,7 @@ import com.example.statspos.presentation.viewmodels.items.categories.SubCategori
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
+import com.example.statspos.utils.showToast
 
 @Composable
 fun SubCategoriesBody(
@@ -57,11 +63,14 @@ fun SubCategoriesBody(
     snackbarHostState: SnackbarHostState,
     onAddButtonClick: (Long, Boolean, Long) -> Unit,
 ) {
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel = hiltViewModel<SubCategoriesViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     var showErrorDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var selectedId by remember { mutableLongStateOf(0L) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
@@ -87,6 +96,23 @@ fun SubCategoriesBody(
             onDismiss = {
                 showErrorDialog = false
             },
+        )
+    }
+
+    if (showDeleteDialog) {
+        ConfirmDialog(
+            text = "Are you sure to delete this sub-category",
+            onDismiss = {
+                showDeleteDialog = false
+            },
+            onConfirm = {
+                showDeleteDialog = false
+                viewModel.deleteData(selectedId) {
+//                    viewModel.loadData()
+                    selectedId = 0L
+                    context.showToast("Sub-Category deleted successfully")
+                }
+            }
         )
     }
 
@@ -149,7 +175,11 @@ fun SubCategoriesBody(
                         items = state.list,
                         onItemClick = { subCategory ->
                             onAddButtonClick(subCategory.id!!, true, state.categoryId)
-                        }
+                        },
+                        onDeleteClick = { subCategory ->
+                            selectedId = subCategory.id!!
+                            showDeleteDialog = true
+                        },
                     )
                 }
 
@@ -169,6 +199,7 @@ private fun BodyList(
     onRefresh: () -> Unit,
     items: List<SubCategories>,
     onItemClick: (SubCategories) -> Unit,
+    onDeleteClick: (SubCategories) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -179,9 +210,11 @@ private fun BodyList(
             Spacer(Modifier.height(4.dp))
         }
         items(items) { item ->
-            ListCard(item = item) {
-                onItemClick(it)
-            }
+            ListCard(
+                item = item,
+                onItemClick = onItemClick,
+                onDeleteClick = onDeleteClick,
+            )
         }
     }
 }
@@ -190,7 +223,8 @@ private fun BodyList(
 private fun ListCard(
     modifier: Modifier = Modifier,
     item: SubCategories,
-    onItemClick: (SubCategories) -> Unit
+    onItemClick: (SubCategories) -> Unit,
+    onDeleteClick: (SubCategories) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -215,7 +249,18 @@ private fun ListCard(
                 Spacer(Modifier.width(8.dp))
             }
 
-            LabelLarge(item.subCategoryName.toString())
+            LabelLarge(
+                modifier = Modifier
+                    .weight(1f),
+                text=item.subCategoryName.toString()
+            )
+
+            if (HP.userRights.deleteAnything == true) {
+                Spacer(Modifier.width(8.dp))
+                DeleteIcon {
+                    onDeleteClick(item)
+                }
+            }
         }
     }
 }

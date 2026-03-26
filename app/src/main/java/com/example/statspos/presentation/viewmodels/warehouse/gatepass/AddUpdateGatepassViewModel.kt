@@ -172,14 +172,6 @@ class AddUpdateGatepassViewModel @Inject constructor(
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
-
-//                    HP.subExpenses = result.data.get("subExpenses").asJsonArray.map { obj ->
-//                        DropdownItem(
-//                            id = obj.asJsonObject.get("id").asLong,
-//                            name = obj.asJsonObject.get("name").asString,
-//                            mainId = obj.asJsonObject.get("expenseId").asLong,
-//                        )
-//                    }
                     onSuccess()
                 }
             }

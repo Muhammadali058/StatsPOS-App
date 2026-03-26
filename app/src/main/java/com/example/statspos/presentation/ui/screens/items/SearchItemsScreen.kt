@@ -417,7 +417,7 @@ private fun ListCard(
                 imageUrl = item.imageUrl,
                 modifier = Modifier
                     .size(60.dp),
-                showIfNull = false,
+                showIfNull = true,
             ) {
                 Spacer(Modifier.width(8.dp))
             }

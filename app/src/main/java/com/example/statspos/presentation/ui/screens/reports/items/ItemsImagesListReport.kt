@@ -111,37 +111,34 @@ fun itemsImagesListReport(
 
     var counter = 0
     itemsReport.forEach { item ->
-        // Itemname & Urduname
-//        val image = urduTextToPdfImage(context, item.urduname.toString())
-//        image.setHorizontalAlignment(HorizontalAlignment.RIGHT)
-//
-//        val innerTable = Table(floatArrayOf(1f, 1f))
-//        innerTable.setWidth(UnitValue.createPercentValue(100f))
-//
-//        innerTable.addCell(
-//            Cell().add(Paragraph(item.itemname.toString()))
-//                .setTextAlignment(TextAlignment.LEFT)
-//                .setBorder(null)
-//        )
-//
-//        innerTable.addCell(
-//            Cell().add(image)
-//                .setTextAlignment(TextAlignment.RIGHT)
-//                .setBorder(null)
-//        )
-//
-//        bodyTable.addCell(
-//            Cell().add(innerTable).setFontSize(REPORT_BODY_FONT_SIZE)
-//        )
 
+        // region Itemname & Urduname
+        val itemnameTable =
+            Table(if (HP.printSettings.showUrdu == true) floatArrayOf(1f, 1f) else floatArrayOf(1f))
+        itemnameTable.setWidth(UnitValue.createPercentValue(100f))
 
-        // Itemname
-        bodyTable.addCell(
-            Cell().add(
-                Paragraph(item.itemname)
-                    .setFontSize(REPORT_BODY_FONT_SIZE)
-            ).setTextAlignment(TextAlignment.LEFT)
+        itemnameTable.addCell(
+            Cell().add(Paragraph(item.itemname.toString()))
+                .setTextAlignment(TextAlignment.LEFT)
+                .setBorder(null)
         )
+
+        if (HP.printSettings.showUrdu == true) {
+            val image = urduTextToPdfImage(context, item.urduname.toString())
+            image.setHorizontalAlignment(HorizontalAlignment.RIGHT)
+
+            itemnameTable.addCell(
+                Cell().add(image)
+                    .setTextAlignment(TextAlignment.RIGHT)
+                    .setBorder(null)
+            )
+        }
+
+        bodyTable.addCell(
+            Cell().add(itemnameTable)
+                .setFontSize(REPORT_BODY_FONT_SIZE)
+        )
+        // endregion
 
         // Retail
         bodyTable.addCell(

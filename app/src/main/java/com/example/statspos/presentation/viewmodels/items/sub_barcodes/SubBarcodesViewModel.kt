@@ -137,6 +137,36 @@ class SubBarcodesViewModel @Inject constructor(
             }
         }
     }
+
+    fun deleteData(id: Long, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if (id == 0L)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.deleteSubBarcode(id)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    state.update {
+                        it.copy(
+                            list = state.value.list.filter { it.id != id },
+                            totalSubBarcodes = state.value.totalSubBarcodes - 1,
+                        )
+                    }
+
+                    onSuccess()
+                }
+            }
+        }
+    }
+
     // endregion
 
     // region Others

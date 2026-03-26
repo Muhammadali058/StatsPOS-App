@@ -163,24 +163,24 @@ fun AddUpdateSubBankScreen(
                     onBack()
                 },
                 title = if (isUpdate) "Update Bank Account" else "Add Bank Account",
-                actions = {
-                    Row {
-                        if (isUpdate && HP.userRights.deleteAnything == true) {
-                            IconButton(onClick = {
-                                if (HP.passwords.useDeleteAccount == true) {
-                                    showPasswordDialog = true
-                                } else {
-                                    showDeleteDialog = true
-                                }
-                            }) {
-                                AppIcon(
-                                    icon = Icons.Default.Delete,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
-                    }
-                }
+//                actions = {
+//                    Row {
+//                        if (isUpdate && HP.userRights.deleteAnything == true) {
+//                            IconButton(onClick = {
+//                                if (HP.passwords.useDeleteAccount == true) {
+//                                    showPasswordDialog = true
+//                                } else {
+//                                    showDeleteDialog = true
+//                                }
+//                            }) {
+//                                AppIcon(
+//                                    icon = Icons.Default.Delete,
+//                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
             )
         }
     ) { innerPadding ->

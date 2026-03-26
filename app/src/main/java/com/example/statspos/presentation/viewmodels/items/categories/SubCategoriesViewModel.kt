@@ -2,6 +2,7 @@ package com.example.statspos.presentation.viewmodels.items.categories
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.items.SubCategories
 import com.example.statspos.domain.repository.items.CategoriesRepository
 import com.example.statspos.utils.HP
@@ -144,6 +145,37 @@ class SubCategoriesViewModel @Inject constructor(
             }
         }
     }
+
+    fun deleteData(id: Long, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if (id == 0L)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.deleteSubCategory(id)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    state.update {
+                        it.copy(
+                            list = state.value.list.filter { it.id != id },
+                            totalSubCategories = state.value.totalSubCategories - 1,
+                        )
+                    }
+
+                    HP.subCategories = Gson().getListOf<DropdownItem>(result.data.get("subCategories").asJsonArray)
+                    onSuccess()
+                }
+            }
+        }
+    }
+
     // endregion
 
     // region Others

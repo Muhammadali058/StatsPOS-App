@@ -2,6 +2,7 @@ package com.example.statspos.presentation.viewmodels.utilities.users
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.utilities.users.Users
 import com.example.statspos.domain.repository.utilities.UsersRepository
 import com.example.statspos.utils.HP
@@ -139,6 +140,38 @@ class UsersViewModel @Inject constructor(
             }
         }
     }
+
+    fun deleteData(id: Long, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if (id == 0L)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.deleteUser(id)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    state.update {
+                        it.copy(
+                            list = state.value.list.filter { it.id != id },
+                            totalusers = state.value.totalusers - 1,
+                        )
+                    }
+
+                    HP.users =
+                        Gson().getListOf<DropdownItem>(result.data.get("users").asJsonArray)
+                    onSuccess()
+                }
+            }
+        }
+    }
+
     // endregion
 
     // region Others

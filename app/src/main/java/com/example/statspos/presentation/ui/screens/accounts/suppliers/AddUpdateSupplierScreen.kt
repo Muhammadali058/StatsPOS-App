@@ -168,26 +168,26 @@ fun AddUpdateSupplierScreen(
                     onBack()
                 },
                 title = if (isUpdate) "Update Supplier" else "Add Supplier",
-                actions = {
-                    Row {
-                        if (isUpdate) {
-                            if (HP.userRights.deleteAnything == true) {
-                                IconButton(onClick = {
-                                    if (HP.passwords.useDeleteAccount == true) {
-                                        showPasswordDialog = true
-                                    } else {
-                                        showDeleteDialog = true
-                                    }
-                                }) {
-                                    AppIcon(
-                                        icon = Icons.Default.Delete,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+//                actions = {
+//                    Row {
+//                        if (isUpdate) {
+//                            if (HP.userRights.deleteAnything == true) {
+//                                IconButton(onClick = {
+//                                    if (HP.passwords.useDeleteAccount == true) {
+//                                        showPasswordDialog = true
+//                                    } else {
+//                                        showDeleteDialog = true
+//                                    }
+//                                }) {
+//                                    AppIcon(
+//                                        icon = Icons.Default.Delete,
+//                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+//                                    )
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
             )
         }
     ) { innerPadding ->

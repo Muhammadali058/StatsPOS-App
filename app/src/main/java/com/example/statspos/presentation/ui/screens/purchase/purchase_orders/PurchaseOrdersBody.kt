@@ -1,6 +1,7 @@
 package com.example.statspos.presentation.ui.screens.purchase.purchase_orders
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,6 +33,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.statspos.domain.models.items.Categories
 import com.example.statspos.domain.models.items.Packages
 import com.example.statspos.domain.models.purchase.PurchaseOrderVoucher
 import com.example.statspos.domain.models.purchase.PurchaseOrders
@@ -40,6 +43,8 @@ import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.BottomHeading
+import com.example.statspos.presentation.ui.components.ConfirmDialog
+import com.example.statspos.presentation.ui.components.DeleteIcon
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
@@ -57,6 +62,7 @@ import com.example.statspos.presentation.viewmodels.purchase.purchase_orders.Pur
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
+import com.example.statspos.utils.showToast
 
 @Composable
 fun PurchaseOrdersBody(
@@ -70,6 +76,8 @@ fun PurchaseOrdersBody(
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var selectedId by remember { mutableLongStateOf(0L) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
@@ -95,6 +103,22 @@ fun PurchaseOrdersBody(
             onDismiss = {
                 showErrorDialog = false
             },
+        )
+    }
+
+    if (showDeleteDialog) {
+        ConfirmDialog(
+            text = "Are you sure to delete this Order",
+            onDismiss = {
+                showDeleteDialog = false
+            },
+            onConfirm = {
+                showDeleteDialog = false
+                viewModel.deleteData(selectedId) {
+                    selectedId = 0L
+                    context.showToast("Order deleted successfully")
+                }
+            }
         )
     }
 
@@ -163,7 +187,11 @@ fun PurchaseOrdersBody(
                                     showVoucher(order)
                                 }
                             )
-                        }
+                        },
+                        onDeleteClick = { purchaseOrder ->
+                            selectedId = purchaseOrder.id!!
+                            showDeleteDialog = true
+                        },
                     )
                 }
 
@@ -184,13 +212,14 @@ private fun BodyList(
     items: List<PurchaseOrders>,
     onItemClick: (PurchaseOrders) -> Unit,
     onPrintClick: (PurchaseOrders) -> Unit,
+    onDeleteClick: (PurchaseOrders) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
     ) {
-        item{
+        item {
             Spacer(Modifier.height(4.dp))
         }
         items(items) { item ->
@@ -198,6 +227,7 @@ private fun BodyList(
                 item = item,
                 onItemClick = onItemClick,
                 onPrintClick = onPrintClick,
+                onDeleteClick = onDeleteClick,
             )
         }
     }
@@ -209,6 +239,7 @@ private fun ListCard(
     item: PurchaseOrders,
     onItemClick: (PurchaseOrders) -> Unit,
     onPrintClick: (PurchaseOrders) -> Unit,
+    onDeleteClick: (PurchaseOrders) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -224,18 +255,18 @@ private fun ListCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column {
+            Column(
+                modifier = Modifier
+                    .weight(1f),
+            ) {
                 LabelLarge(item.purchaseOrderName.toString())
-                Spacer(Modifier.height(2.dp))
+                Spacer(Modifier.height(4.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .weight(1f),
-                    ) {
+                    Column {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth(),
@@ -243,27 +274,32 @@ private fun ListCard(
                             HeadingMedium("Total: ")
                             LabelMedium(HP.formatDecimal(item.total))
                         }
-                        item.remarks?.let {
-                            if (it.isNotEmpty()) {
-                                Spacer(Modifier.height(2.dp))
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth(),
-                                ) {
-                                    HeadingMedium("Remarks: ")
-                                    LabelMedium(item.remarks.toString())
-                                }
-                            }
+                        Spacer(Modifier.height(2.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                        ) {
+                            HeadingMedium("Remarks: ")
+                            LabelMedium(item.remarks.toString())
                         }
                     }
+                }
+            }
 
+            Spacer(Modifier.width(8.dp))
+            Column {
+                AppIconButton(
+                    icon = Icons.Default.Print,
+                    onClick = {
+                        onPrintClick(item)
+                    }
+                )
+                Spacer(Modifier.height(8.dp))
+                if (HP.userRights.deleteAnything == true) {
                     Spacer(Modifier.width(8.dp))
-                    AppIconButton(
-                        icon = Icons.Default.Print,
-                        onClick = {
-                            onPrintClick(item)
-                        }
-                    )
+                    DeleteIcon {
+                        onDeleteClick(item)
+                    }
                 }
             }
         }

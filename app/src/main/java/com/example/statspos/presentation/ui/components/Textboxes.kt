@@ -331,9 +331,12 @@ fun AutoCompleteItemsTextbox(
             keyboardActions = KeyboardActions(
                 onSearch = {
                     onSearchClick(value)
+                    expanded = false
                 },
                 onGo = {
                     onSearchClick(value)
+                    expanded = false
+
                 }
             ),
             focusRequester = focusRequester,

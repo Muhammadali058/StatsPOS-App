@@ -327,7 +327,10 @@ private fun Home(
                                         keyboardController?.hide()
                                     },
                                     onEndIconClick = {
-                                        viewModel.onItemnameChange("")
+//                                        viewModel.onItemnameChange("")
+                                        viewModel.onItemClick { stockItemsReport, totalReport ->
+                                            showItemsReport(stockItemsReport, totalReport)
+                                        }
                                     },
                                     onBarcodeClick = {
                                         showBarcodeScanner = true
@@ -420,26 +423,29 @@ private fun ItemnameBox(
                         )
                     },
                     trailingIcon = {
-                        IconButton(onClick = {
+                        ShowReportIcon {
                             onEndIconClick(value)
-                        }) {
-                            AppIcon(
-                                icon = Icons.Default.Clear,
-                                size = 20.dp
-                            )
                         }
+//                        IconButton(onClick = {
+//                            onEndIconClick(value)
+//                        }) {
+//                            AppIcon(
+//                                icon = Icons.Default.Clear,
+//                                size = 20.dp
+//                            )
+//                        }
                     },
                     keyboardOptions = KeyboardOptions(
                         imeAction = ImeAction.Go
                     ),
                     padding = PaddingValues(top = 4.dp),
                 )
-                ReportButton(
-                    modifier = Modifier.offset(y = (-1).dp),
-                    shape = RoundedCornerShape(bottomEnd = 4.dp, bottomStart = 4.dp)
-                ) {
-                    onItemClick()
-                }
+//                ReportButton(
+//                    modifier = Modifier.offset(y = (-1).dp),
+//                    shape = RoundedCornerShape(bottomEnd = 4.dp, bottomStart = 4.dp)
+//                ) {
+//                    onItemClick()
+//                }
             }
             Column {
                 Row {

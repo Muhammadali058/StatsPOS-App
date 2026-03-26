@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,20 +21,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.statspos.domain.models.items.Categories
 import com.example.statspos.domain.models.items.SubBarcodes
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.BottomHeading
+import com.example.statspos.presentation.ui.components.ConfirmDialog
+import com.example.statspos.presentation.ui.components.DeleteIcon
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
@@ -46,8 +52,10 @@ import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.items.sub_barcodes.SubBarcodesViewModel
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
+import com.example.statspos.utils.showToast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,12 +65,15 @@ fun SubBarcodesScreen(
     onBack: () -> Unit,
     onAddButtonClick: (Long, Boolean, Long) -> Unit,
 ) {
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel = hiltViewModel<SubBarcodesViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var selectedId by remember { mutableLongStateOf(0L) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
@@ -93,6 +104,22 @@ fun SubBarcodesScreen(
             onDismiss = {
                 showErrorDialog = false
             },
+        )
+    }
+
+    if (showDeleteDialog) {
+        ConfirmDialog(
+            text = "Are you sure to delete this barcode",
+            onDismiss = {
+                showDeleteDialog = false
+            },
+            onConfirm = {
+                showDeleteDialog = false
+                viewModel.deleteData(selectedId) {
+                    selectedId = 0L
+                    context.showToast("Barcode deleted successfully")
+                }
+            }
         )
     }
 
@@ -150,9 +177,13 @@ fun SubBarcodesScreen(
                             viewModel.loadData()
                         },
                         items = state.list,
-                        onItemClick = { item ->
-                            onAddButtonClick(item.id!!, true, itemId)
-                        }
+                        onItemClick = { subBarcode ->
+                            onAddButtonClick(subBarcode.id!!, true, itemId)
+                        },
+                        onDeleteClick = { subBarcode ->
+                            selectedId = subBarcode.id!!
+                            showDeleteDialog = true
+                        },
                     )
                 }
 
@@ -172,19 +203,22 @@ private fun BodyList(
     onRefresh: () -> Unit,
     items: List<SubBarcodes>,
     onItemClick: (SubBarcodes) -> Unit,
+    onDeleteClick: (SubBarcodes) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
     ) {
-        item{
+        item {
             Spacer(Modifier.height(4.dp))
         }
         items(items) { item ->
-            ListCard(item = item) {
-                onItemClick(it)
-            }
+            ListCard(
+                item = item,
+                onItemClick = onItemClick,
+                onDeleteClick = onDeleteClick,
+            )
         }
     }
 }
@@ -193,65 +227,35 @@ private fun BodyList(
 private fun ListCard(
     modifier: Modifier = Modifier,
     item: SubBarcodes,
-    onItemClick: (SubBarcodes) -> Unit
+    onItemClick: (SubBarcodes) -> Unit,
+    onDeleteClick: (SubBarcodes) -> Unit,
 ) {
     ListCard(
         modifier = modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .padding(vertical = ConstantPaddings.LIST_PADDING_VERTICAL),
         shape = RoundedCornerShape(6.dp),
         onClick = {
             onItemClick(item)
         }
     ) {
-        LabelLarge(item.subBarcode.toString())
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-private fun Prev() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-    ) {
-        Spacer(Modifier.height(8.dp))
-        SearchBox(
-            value = "",
-            onValueChange = {},
-            onSearchClick = {},
-        )
-
-        BodyList(
-            modifier = Modifier
-                .weight(1f),
-            isRefreshing = false,
-            onRefresh = {
-
-            },
-            items = (1..50).map {
-                SubBarcodes(
-                    id = it.toLong(),
-                    subBarcode = "$it"
-                )
-            },
-            onItemClick = { item ->
-
-            }
-        )
-
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            HeadingMedium(
-                text = "Total Sub-Barcodes: ",
+            LabelLarge(
+                modifier = Modifier
+                    .weight(1f),
+                text = item.subBarcode.toString()
             )
-            LabelMedium(
-                text = "50.0",
-            )
+
+            if (HP.userRights.deleteAnything == true) {
+                Spacer(Modifier.width(8.dp))
+                DeleteIcon {
+                    onDeleteClick(item)
+                }
+            }
         }
     }
 }

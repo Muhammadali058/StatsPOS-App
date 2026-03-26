@@ -172,6 +172,28 @@ class PurchaseItemsViewModel @Inject constructor(
             }
         }
     }
+
+    fun deleteData(id: Long, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if (id == 0L)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.deletePurchaseItem(id, state.value.isPostedBill)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+                    onSuccess()
+                }
+            }
+        }
+    }
+
     // endregion
 
     // region Others

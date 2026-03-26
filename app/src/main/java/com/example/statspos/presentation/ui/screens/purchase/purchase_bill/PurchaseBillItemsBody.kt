@@ -20,18 +20,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.purchase.Purchase
 import com.example.statspos.domain.models.purchase.PurchaseBillItems
+import com.example.statspos.domain.models.sales.SalesBillItems
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
+import com.example.statspos.presentation.ui.components.ConfirmDialog
+import com.example.statspos.presentation.ui.components.DeleteIcon
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingLarge
 import com.example.statspos.presentation.ui.components.HeadingMedium
@@ -49,6 +54,7 @@ import com.example.statspos.presentation.viewmodels.purchase.purchase_bill.Purch
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
+import com.example.statspos.utils.showToast
 
 @Composable
 fun PurchaseBillItemsBody(
@@ -58,11 +64,14 @@ fun PurchaseBillItemsBody(
     snackbarHostState: SnackbarHostState,
     onAddButtonClick: (Long, Boolean, Purchase) -> Unit,
 ) {
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val salesState by purchaseViewModel.state.collectAsStateWithLifecycle()
     val state by purchaseItemsViewModel.state.collectAsStateWithLifecycle()
     val event by purchaseItemsViewModel.event.collectAsState(UiEvent.Idle)
     var showErrorDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var selectedId by remember { mutableLongStateOf(0L) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
@@ -112,6 +121,22 @@ fun PurchaseBillItemsBody(
         )
     }
 
+    if (showDeleteDialog) {
+        ConfirmDialog(
+            text = "Are you sure to delete this item",
+            onDismiss = {
+                showDeleteDialog = false
+            },
+            onConfirm = {
+                showDeleteDialog = false
+                purchaseItemsViewModel.deleteData(selectedId) {
+                    purchaseItemsViewModel.loadData(purchaseViewModel::updateTotal)
+                    context.showToast("Item deleted successfully")
+                }
+            }
+        )
+    }
+
     Scaffold(
         floatingActionButton = {
             AppFloatingActionButton {
@@ -155,7 +180,11 @@ fun PurchaseBillItemsBody(
                         items = state.list,
                         onItemClick = { purchaseBillItem ->
                             onAddButtonClick(purchaseBillItem.id!!, true, getPurchaseObject())
-                        }
+                        },
+                        onDeleteClick = { purchaseBillItem ->
+                            selectedId = purchaseBillItem.id!!
+                            showDeleteDialog = true
+                        },
                     )
                 }
 
@@ -189,6 +218,7 @@ private fun BodyList(
     onRefresh: () -> Unit,
     items: List<PurchaseBillItems>,
     onItemClick: (PurchaseBillItems) -> Unit,
+    onDeleteClick: (PurchaseBillItems) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -199,9 +229,11 @@ private fun BodyList(
             Spacer(Modifier.height(4.dp))
         }
         items(items) { item ->
-            ListCard(item = item) {
-                onItemClick(it)
-            }
+            ListCard(
+                item = item,
+                onItemClick = onItemClick,
+                onDeleteClick = onDeleteClick,
+            )
         }
     }
 }
@@ -211,7 +243,8 @@ private fun BodyList(
 private fun ListCard(
     modifier: Modifier = Modifier,
     item: PurchaseBillItems,
-    onItemClick: (PurchaseBillItems) -> Unit
+    onItemClick: (PurchaseBillItems) -> Unit,
+    onDeleteClick: (PurchaseBillItems) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -225,7 +258,7 @@ private fun ListCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Top,
         ) {
             // Image
             ListImageView(
@@ -242,7 +275,20 @@ private fun ListCard(
                     .weight(1f),
             ) {
                 // Itemname
-                LabelLarge(item.itemname.toString())
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    LabelLarge(
+                        modifier = Modifier
+                            .weight(1f),
+                        text = item.itemname.toString()
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    DeleteIcon {
+                        onDeleteClick(item)
+                    }
+                }
                 Spacer(Modifier.height(2.dp))
                 Row(
                     modifier = Modifier

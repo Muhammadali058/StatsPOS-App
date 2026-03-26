@@ -38,8 +38,6 @@ class StockEntriesViewModel @Inject constructor(
         val selectedMOP: DropdownItem? = null,
 
 //        Extras
-        val deleteId: Long = 0L,
-        val isDeleting: Boolean = false,
         val isLoading: Boolean = false,
         val error: String? = null,
     )
@@ -120,9 +118,6 @@ class StockEntriesViewModel @Inject constructor(
         state.update { it.copy(selectedMOP = value) }
     }
 
-    fun setDeleteIdChange(value: Long) {
-        state.update { it.copy(deleteId = value) }
-    }
     // endregion
 
     // region Network calls

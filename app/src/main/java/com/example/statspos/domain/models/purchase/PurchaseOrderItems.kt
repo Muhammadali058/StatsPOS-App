@@ -18,4 +18,5 @@ data class PurchaseOrderItems(
     var stockPcs: Double? = null,
     var stockCrtn: Long? = null,
     val crtnSize:Int? = null,
+    var imageUrl: String? = null,
 )

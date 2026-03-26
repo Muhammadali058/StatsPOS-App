@@ -146,20 +146,20 @@ fun AddUpdateGatepassScreen(
                     onBack()
                 },
                 title = if (isUpdate) "Update Gatepass" else "Add Gatepass",
-                actions = {
-                    Row {
-                        if (isUpdate && HP.userRights.deleteAnything == true) {
-                            IconButton(onClick = {
-                                showDeleteDialog = true
-                            }) {
-                                AppIcon(
-                                    icon = Icons.Default.Delete,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
-                    }
-                }
+//                actions = {
+//                    Row {
+//                        if (isUpdate && HP.userRights.deleteAnything == true) {
+//                            IconButton(onClick = {
+//                                showDeleteDialog = true
+//                            }) {
+//                                AppIcon(
+//                                    icon = Icons.Default.Delete,
+//                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
             )
         }
     ) { innerPadding ->

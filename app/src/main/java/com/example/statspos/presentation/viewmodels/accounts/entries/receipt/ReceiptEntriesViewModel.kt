@@ -42,8 +42,6 @@ class ReceiptEntriesViewModel @Inject constructor(
         val selectedMOP: DropdownItem? = null,
 
 //        Extras
-        val deleteId: Long = 0L,
-        val isDeleting: Boolean = false,
         val isLoading: Boolean = false,
         val error: String? = null,
     )
@@ -115,7 +113,7 @@ class ReceiptEntriesViewModel @Inject constructor(
     fun onSearchChange(value: String) {
         state.update { it.copy(search = value) }
 
-        if(HP.appSettings.instantSearch == true)
+        if (HP.appSettings.instantSearch == true)
             loadEntries()
     }
 
@@ -131,9 +129,6 @@ class ReceiptEntriesViewModel @Inject constructor(
         state.update { it.copy(selectedMOP = value) }
     }
 
-    fun setDeleteIdChange(value: Long) {
-        state.update { it.copy(deleteId = value) }
-    }
     // endregion
 
     // region Network calls
@@ -173,30 +168,36 @@ class ReceiptEntriesViewModel @Inject constructor(
         }
     }
 
-    fun deleteEntry(onSuccess: () -> Unit) {
+    fun deleteEntry(id: Long, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            if (state.value.isDeleting)
+            if (state.value.isLoading)
                 return@launch
 
-            if (state.value.deleteId == 0L)
+            if (id == 0L)
                 return@launch
 
-            state.update { it.copy(isDeleting = true) }
-            val result = api.deleteEntry(state.value.deleteId)
-            state.update { it.copy(isDeleting = false) }
+            beforeRequest()
 
-            when (result) {
+            when (val result = api.deleteEntry(id)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
+
+                    state.update {
+                        it.copy(
+                            list = state.value.list.filter { it.id != id },
+                            totalEntries = state.value.totalEntries - 1,
+                        )
+                    }
+
                     onSuccess()
                 }
             }
         }
     }
 
-    fun getEntry(entryId:Long, onSuccess: (EntryVoucher, List<AccountReport>?) -> Unit) {
+    fun getEntry(entryId: Long, onSuccess: (EntryVoucher, List<AccountReport>?) -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -209,11 +210,13 @@ class ReceiptEntriesViewModel @Inject constructor(
                 is Resource.Success -> {
                     resultSuccess()
 
-                    val entryVoucher = Gson().get<EntryVoucher>(result.data.get("entry").asJsonArray.get(0).asJsonObject)
+                    val entryVoucher =
+                        Gson().get<EntryVoucher>(result.data.get("entry").asJsonArray.get(0).asJsonObject)
                     var ledger: List<AccountReport>? = null
 
-                    if(HP.settings.showLedgerInVoucher == true){
-                        ledger = Gson().getListOf<AccountReport>(result.data.get("ledger").asJsonArray)
+                    if (HP.settings.showLedgerInVoucher == true) {
+                        ledger =
+                            Gson().getListOf<AccountReport>(result.data.get("ledger").asJsonArray)
                     }
 
                     onSuccess(entryVoucher, ledger)

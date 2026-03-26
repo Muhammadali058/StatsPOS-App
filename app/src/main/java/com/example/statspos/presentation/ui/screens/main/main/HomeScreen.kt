@@ -125,7 +125,7 @@ private val items = listOf(
         HP.userRights.purchase == true
     ),
     TopItem("Users", TopRoutes.Users, R.drawable.users, HP.userRights.users == true),
-//    TopItem("Settings", TopRoutes.Settings, R.drawable.settings, HP.userRights.settings == true),
+    TopItem("Settings", TopRoutes.Settings, R.drawable.settings, HP.userRights.settings == true),
 )
 private val accounts = listOf(
     TopItem(
@@ -561,7 +561,6 @@ fun NavigationDrawer(
                     onUserClick()
                 }
                 .padding(16.dp),
-//            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             AppIcon(R.drawable.ic_user)
@@ -569,19 +568,20 @@ fun NavigationDrawer(
             AppText("Profile")
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    onSettingsClick()
-                }
-                .padding(16.dp),
-//            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            AppIcon(R.drawable.settings, size = 20.dp)
-            Spacer(Modifier.width(16.dp))
-            AppText("Settings")
+        if(HP.userRights.settings == true) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        onSettingsClick()
+                    }
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AppIcon(R.drawable.settings, size = 20.dp)
+                Spacer(Modifier.width(16.dp))
+                AppText("Settings")
+            }
         }
 
         items.forEach { item ->

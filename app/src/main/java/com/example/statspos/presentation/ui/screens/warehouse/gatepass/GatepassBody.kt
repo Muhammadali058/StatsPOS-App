@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -33,13 +34,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.DropdownItem
+import com.example.statspos.domain.models.items.Categories
 import com.example.statspos.domain.models.warehouse.GatepassVoucher
 import com.example.statspos.domain.models.warehouse.Gatepasses
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.ComboBox
+import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.DateTextbox
+import com.example.statspos.presentation.ui.components.DeleteIcon
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
@@ -55,6 +59,7 @@ import com.example.statspos.presentation.viewmodels.warehouse.gatepass.GatepassV
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
+import com.example.statspos.utils.showToast
 import java.time.LocalDate
 
 @Composable
@@ -69,6 +74,8 @@ fun GatepassBody(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     var showErrorDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var selectedId by remember { mutableLongStateOf(0L) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
@@ -94,6 +101,22 @@ fun GatepassBody(
             onDismiss = {
                 showErrorDialog = false
             },
+        )
+    }
+
+    if (showDeleteDialog) {
+        ConfirmDialog(
+            text = "Are you sure to delete this gatepass",
+            onDismiss = {
+                showDeleteDialog = false
+            },
+            onConfirm = {
+                showDeleteDialog = false
+                viewModel.deleteData(selectedId) {
+                    selectedId = 0L
+                    context.showToast("Gatepass deleted successfully")
+                }
+            }
         )
     }
 
@@ -178,7 +201,11 @@ fun GatepassBody(
                                     showVoucher(gatepasses)
                                 }
                             )
-                        }
+                        },
+                        onDeleteClick = { gatepass ->
+                            selectedId = gatepass.id!!
+                            showDeleteDialog = true
+                        },
                     )
                 }
 
@@ -240,6 +267,7 @@ private fun BodyList(
     items: List<Gatepasses>,
     onItemClick: (Gatepasses) -> Unit,
     onPrintClick: (Gatepasses) -> Unit,
+    onDeleteClick: (Gatepasses) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -254,6 +282,7 @@ private fun BodyList(
                 item = item,
                 onItemClick = onItemClick,
                 onPrintClick = onPrintClick,
+                onDeleteClick = onDeleteClick,
             )
         }
     }
@@ -265,6 +294,7 @@ private fun ListCard(
     item: Gatepasses,
     onItemClick: (Gatepasses) -> Unit,
     onPrintClick: (Gatepasses) -> Unit,
+    onDeleteClick: (Gatepasses) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -280,7 +310,10 @@ private fun ListCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column {
+            Column (
+                modifier = Modifier
+                    .weight(1f)
+            ) {
                 LabelLarge(item.gatepassName.toString())
                 Spacer(Modifier.height(2.dp))
                 Row(
@@ -315,6 +348,13 @@ private fun ListCard(
                             onPrintClick(item)
                         }
                     )
+                }
+            }
+
+            if (HP.userRights.deleteAnything == true) {
+                Spacer(Modifier.width(8.dp))
+                DeleteIcon {
+                    onDeleteClick(item)
                 }
             }
         }

@@ -22,20 +22,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.statspos.domain.models.items.Categories
 import com.example.statspos.domain.models.items.LinkedItems
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.BottomHeading
+import com.example.statspos.presentation.ui.components.ConfirmDialog
+import com.example.statspos.presentation.ui.components.DeleteIcon
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
@@ -49,8 +54,10 @@ import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.items.linked_items.LinkedItemsViewModel
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
+import com.example.statspos.utils.showToast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,12 +68,15 @@ fun LinkedItemsScreen(
     onBack: () -> Unit,
     onAddButtonClick: (Long, Boolean, Long, Int) -> Unit,
 ) {
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel = hiltViewModel<LinkedItemsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var selectedId by remember { mutableLongStateOf(0L) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
@@ -97,6 +107,22 @@ fun LinkedItemsScreen(
             onDismiss = {
                 showErrorDialog = false
             },
+        )
+    }
+
+    if (showDeleteDialog) {
+        ConfirmDialog(
+            text = "Are you sure to delete this linked item",
+            onDismiss = {
+                showDeleteDialog = false
+            },
+            onConfirm = {
+                showDeleteDialog = false
+                viewModel.deleteData(selectedId) {
+                    selectedId = 0L
+                    context.showToast("Linked item deleted successfully")
+                }
+            }
         )
     }
 
@@ -156,7 +182,11 @@ fun LinkedItemsScreen(
                         items = state.list,
                         onItemClick = { item ->
                             onAddButtonClick(item.id!!, true, itemId, crtnSize)
-                        }
+                        },
+                        onDeleteClick = { item ->
+                            selectedId = item.id!!
+                            showDeleteDialog = true
+                        },
                     )
                 }
 
@@ -176,6 +206,7 @@ private fun BodyList(
     onRefresh: () -> Unit,
     items: List<LinkedItems>,
     onItemClick: (LinkedItems) -> Unit,
+    onDeleteClick: (LinkedItems) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -186,9 +217,11 @@ private fun BodyList(
             Spacer(Modifier.height(4.dp))
         }
         items(items) { item ->
-            ListCard(item = item) {
-                onItemClick(it)
-            }
+            ListCard(
+                item = item,
+                onItemClick = onItemClick,
+                onDeleteClick = onDeleteClick,
+            )
         }
     }
 }
@@ -197,7 +230,8 @@ private fun BodyList(
 private fun ListCard(
     modifier: Modifier = Modifier,
     item: LinkedItems,
-    onItemClick: (LinkedItems) -> Unit
+    onItemClick: (LinkedItems) -> Unit,
+    onDeleteClick: (LinkedItems) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -222,56 +256,18 @@ private fun ListCard(
                 Spacer(Modifier.width(8.dp))
             }
 
-            LabelLarge(item.itemname.toString())
-        }
-    }
-}
+            LabelLarge(
+                modifier = Modifier
+                    .weight(1f),
+                text = item.itemname.toString()
+            )
 
-
-@Preview(showBackground = true)
-@Composable
-private fun Prev() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-    ) {
-        Spacer(Modifier.height(8.dp))
-        SearchBox(
-            value = "",
-            onValueChange = {},
-            onSearchClick = {},
-        )
-
-        BodyList(
-            modifier = Modifier
-                .weight(1f),
-            isRefreshing = false,
-            onRefresh = {
-
-            },
-            items = (1..50).map {
-                LinkedItems(
-                    id = it.toLong(),
-                    itemname = "Item $it"
-                )
-            },
-            onItemClick = { item ->
-
+            if (HP.userRights.deleteAnything == true) {
+                Spacer(Modifier.width(8.dp))
+                DeleteIcon {
+                    onDeleteClick(item)
+                }
             }
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            HeadingMedium(
-                text = "Total Linked Items: ",
-            )
-            LabelMedium(
-                text = "50.0",
-            )
         }
     }
 }

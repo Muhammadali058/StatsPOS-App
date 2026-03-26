@@ -142,20 +142,20 @@ fun AddUpdatePurchaseOrderScreen(
                     onBack()
                 },
                 title = if (isUpdate) "Update Order" else "Add Order",
-                actions = {
-                    Row {
-                        if (isUpdate && HP.userRights.deleteAnything == true) {
-                            IconButton(onClick = {
-                                showDeleteDialog = true
-                            }) {
-                                AppIcon(
-                                    icon = Icons.Default.Delete,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
-                    }
-                }
+//                actions = {
+//                    Row {
+//                        if (isUpdate && HP.userRights.deleteAnything == true) {
+//                            IconButton(onClick = {
+//                                showDeleteDialog = true
+//                            }) {
+//                                AppIcon(
+//                                    icon = Icons.Default.Delete,
+//                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
             )
         }
     ) { innerPadding ->

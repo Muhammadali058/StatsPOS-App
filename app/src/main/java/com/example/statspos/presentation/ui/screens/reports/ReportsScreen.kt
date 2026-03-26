@@ -61,6 +61,7 @@ import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.ReportButton
 import com.example.statspos.presentation.ui.components.ReportCard
+import com.example.statspos.presentation.ui.components.ShowReportIcon
 import com.example.statspos.presentation.ui.components.TopItem
 import com.example.statspos.presentation.ui.screens.TopRoutes
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
@@ -350,26 +351,29 @@ fun ReportsItemnameBox(
                         )
                     },
                     trailingIcon = {
-                        IconButton(onClick = {
+                        ShowReportIcon {
                             onEndIconClick(value)
-                        }) {
-                            AppIcon(
-                                icon = Icons.Default.Clear,
-                                size = 20.dp
-                            )
                         }
+//                        IconButton(onClick = {
+//                            onEndIconClick(value)
+//                        }) {
+//                            AppIcon(
+//                                icon = Icons.Default.Clear,
+//                                size = 20.dp
+//                            )
+//                        }
                     },
                     keyboardOptions = KeyboardOptions(
                         imeAction = ImeAction.Go
                     ),
                     padding = PaddingValues(top = 4.dp),
                 )
-                ReportButton(
-                    modifier = Modifier.offset(y = (-1).dp),
-                    shape = RoundedCornerShape(bottomEnd = 4.dp, bottomStart = 4.dp)
-                ) {
-                    onItemClick()
-                }
+//                ReportButton(
+//                    modifier = Modifier.offset(y = (-1).dp),
+//                    shape = RoundedCornerShape(bottomEnd = 4.dp, bottomStart = 4.dp)
+//                ) {
+//                    onItemClick()
+//                }
             }
             Column {
                 Row {

@@ -25,8 +25,6 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 
 object HP {
-    var localClient: LocalClients? = null
-
     const val ITEMS_PER_PAGE = 50
 
     var clientId: Int = 1

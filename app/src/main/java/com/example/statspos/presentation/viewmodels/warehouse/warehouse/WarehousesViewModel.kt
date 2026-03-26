@@ -2,6 +2,7 @@ package com.example.statspos.presentation.viewmodels.warehouse.warehouse
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.warehouse.Warehouses
 import com.example.statspos.domain.repository.warehouse.WarehousesRepository
 import com.example.statspos.utils.HP
@@ -139,6 +140,37 @@ class WarehousesViewModel @Inject constructor(
             }
         }
     }
+
+    fun deleteData(id: Long, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if (id == 0L)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.deleteWarehouse(id)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    state.update {
+                        it.copy(
+                            list = state.value.list.filter { it.id != id },
+                            totalWarehouses = state.value.totalWarehouses - 1,
+                        )
+                    }
+
+                    HP.warehouses = Gson().getListOf<DropdownItem>(result.data.get("warehouses").asJsonArray)
+                    onSuccess()
+                }
+            }
+        }
+    }
+
     // endregion
 
     // region Others

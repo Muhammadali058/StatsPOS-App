@@ -149,20 +149,20 @@ fun AddUpdateSubBarcodeScreen(
                     onBack()
                 },
                 title = if (isUpdate) "Update Sub-Barcode" else "Add Sub-Barcode",
-                actions = {
-                    Row {
-                        if (isUpdate && HP.userRights.deleteAnything == true) {
-                            IconButton(onClick = {
-                                showDeleteDialog = true
-                            }) {
-                                AppIcon(
-                                    icon = Icons.Default.Delete,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
-                    }
-                }
+//                actions = {
+//                    Row {
+//                        if (isUpdate && HP.userRights.deleteAnything == true) {
+//                            IconButton(onClick = {
+//                                showDeleteDialog = true
+//                            }) {
+//                                AppIcon(
+//                                    icon = Icons.Default.Delete,
+//                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
             )
         }
     ) { innerPadding ->

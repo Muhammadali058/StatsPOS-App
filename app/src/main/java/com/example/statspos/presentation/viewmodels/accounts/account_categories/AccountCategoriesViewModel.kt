@@ -2,6 +2,7 @@ package com.example.statspos.presentation.viewmodels.accounts.account_categories
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.accounts.AccountCategories
 import com.example.statspos.domain.models.accounts.Banks
 import com.example.statspos.domain.repository.accounts.AccountCategoriesRepository
@@ -140,6 +141,38 @@ class AccountCategoriesViewModel @Inject constructor(
             }
         }
     }
+
+    fun deleteData(id: Long, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if (id == 0L)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.deleteAccountCategory(id)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    state.update {
+                        it.copy(
+                            list = state.value.list.filter { it.id != id },
+                            totalAccountCategories = state.value.totalAccountCategories - 1,
+                        )
+                    }
+
+                    HP.accountCategories =
+                        Gson().getListOf<DropdownItem>(result.data.get("accountCategories").asJsonArray)
+                    onSuccess()
+                }
+            }
+        }
+    }
+
     // endregion
 
     // region Others

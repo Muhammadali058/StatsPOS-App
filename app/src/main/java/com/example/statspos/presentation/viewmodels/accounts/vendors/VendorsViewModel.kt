@@ -2,6 +2,7 @@ package com.example.statspos.presentation.viewmodels.accounts.vendors
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.accounts.Accounts
 import com.example.statspos.domain.repository.accounts.VendorsRepository
 import com.example.statspos.utils.HP
@@ -208,6 +209,38 @@ class VendorsViewModel @Inject constructor(
             }
         }
     }
+
+    fun deleteData(id: Long, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if (id == 0L)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.deleteVendor(id)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    state.update {
+                        it.copy(
+                            list = state.value.list.filter { it.id != id },
+                            totalVendors = state.value.totalVendors - 1,
+                        )
+                    }
+
+                    HP.vendors =
+                        Gson().getListOf<DropdownItem>(result.data.get("vendors").asJsonArray)
+                    onSuccess()
+                }
+            }
+        }
+    }
+
     // endregion
 
     // region Others

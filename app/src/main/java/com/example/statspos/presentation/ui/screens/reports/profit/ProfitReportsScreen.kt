@@ -467,15 +467,18 @@ private fun Home(
                                         keyboardController?.hide()
                                     },
                                     onEndIconClick = {
-                                        viewModel.onItemnameChange("")
+//                                        viewModel.onItemnameChange("")
+                                        viewModel.onItemClick { profitItemsReport, totalReport ->
+                                            showItemsReport(profitItemsReport, totalReport)
+                                        }
                                     },
                                     onBarcodeClick = {
                                         showBarcodeScanner = true
                                     },
                                     onSearchItemClick = onSearchItemClick,
                                     onItemClick = {
-                                        viewModel.onItemClick { salesItemsReport, totalReport ->
-                                            showItemsReport(salesItemsReport, totalReport)
+                                        viewModel.onItemClick { profitItemsReport, totalReport ->
+                                            showItemsReport(profitItemsReport, totalReport)
                                         }
                                     },
                                     sum = state.sum,

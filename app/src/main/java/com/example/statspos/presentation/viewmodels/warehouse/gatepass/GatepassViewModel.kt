@@ -158,6 +158,35 @@ class GatepassViewModel @Inject constructor(
         }
     }
 
+    fun deleteData(id: Long, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if (id == 0L)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.deleteGatepass(id)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    state.update {
+                        it.copy(
+                            list = state.value.list.filter { it.id != id },
+                            totalGatepasses = state.value.totalGatepasses - 1,
+                        )
+                    }
+
+                    onSuccess()
+                }
+            }
+        }
+    }
+
     fun getGatepass(gatepassId:Long, onSuccess: (List<GatepassVoucher>) -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)

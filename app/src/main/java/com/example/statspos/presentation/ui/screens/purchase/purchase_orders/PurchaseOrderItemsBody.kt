@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -19,26 +21,32 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.statspos.domain.models.items.Categories
 import com.example.statspos.domain.models.items.PackageItems
 import com.example.statspos.domain.models.purchase.PurchaseOrderItems
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.BottomHeading
+import com.example.statspos.presentation.ui.components.ConfirmDialog
+import com.example.statspos.presentation.ui.components.DeleteIcon
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListImageView
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
@@ -48,6 +56,7 @@ import com.example.statspos.presentation.viewmodels.purchase.purchase_orders.Pur
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
+import com.example.statspos.utils.showToast
 
 @Composable
 fun PurchaseOrderItemsBody(
@@ -55,11 +64,14 @@ fun PurchaseOrderItemsBody(
     snackbarHostState: SnackbarHostState,
     onAddButtonClick: (Long, Boolean, Long) -> Unit,
 ) {
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel = hiltViewModel<PurchaseOrderItemsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     var showErrorDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var selectedId by remember { mutableLongStateOf(0L) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
@@ -85,6 +97,22 @@ fun PurchaseOrderItemsBody(
             onDismiss = {
                 showErrorDialog = false
             },
+        )
+    }
+
+    if (showDeleteDialog) {
+        ConfirmDialog(
+            text = "Are you sure to delete this order item",
+            onDismiss = {
+                showDeleteDialog = false
+            },
+            onConfirm = {
+                showDeleteDialog = false
+                viewModel.deleteData(selectedId) {
+                    selectedId = 0L
+                    context.showToast("Order item deleted successfully")
+                }
+            }
         )
     }
 
@@ -147,7 +175,11 @@ fun PurchaseOrderItemsBody(
                         items = state.list,
                         onItemClick = { purchaseOrderItem ->
                             onAddButtonClick(purchaseOrderItem.id!!, true, state.purchaseOrderId)
-                        }
+                        },
+                        onDeleteClick = { purchaseOrderItem ->
+                            selectedId = purchaseOrderItem.id!!
+                            showDeleteDialog = true
+                        },
                     )
                 }
 
@@ -192,19 +224,22 @@ private fun BodyList(
     onRefresh: () -> Unit,
     items: List<PurchaseOrderItems>,
     onItemClick: (PurchaseOrderItems) -> Unit,
+    onDeleteClick: (PurchaseOrderItems) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
     ) {
-        item{
+        item {
             Spacer(Modifier.height(4.dp))
         }
         items(items) { item ->
-            ListCard(item = item) {
-                onItemClick(it)
-            }
+            ListCard(
+                item = item,
+                onItemClick = onItemClick,
+                onDeleteClick = onDeleteClick,
+            )
         }
     }
 }
@@ -213,7 +248,8 @@ private fun BodyList(
 private fun ListCard(
     modifier: Modifier = Modifier,
     item: PurchaseOrderItems,
-    onItemClick: (PurchaseOrderItems) -> Unit
+    onItemClick: (PurchaseOrderItems) -> Unit,
+    onDeleteClick: (PurchaseOrderItems) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -224,35 +260,60 @@ private fun ListCard(
             onItemClick(item)
         }
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            LabelLarge(item.itemname.toString())
-        }
-        Spacer(Modifier.height(2.dp))
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            HeadingMedium("Qty", Modifier.weight(1f))
-            if (HP.settings.saleCartons == true) {
-                HeadingMedium("Crtn", Modifier.weight(1f))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                // Image
+                ListImageView(
+                    imageUrl = item.imageUrl,
+                    modifier = Modifier
+                        .size(60.dp),
+                ) {
+                    Spacer(Modifier.width(8.dp))
+                }
+
+                LabelLarge(
+                    modifier = Modifier
+                        .weight(1f),
+                    text = item.itemname.toString()
+                )
+
+                if (HP.userRights.deleteAnything == true) {
+                    Spacer(Modifier.width(8.dp))
+                    DeleteIcon {
+                        onDeleteClick(item)
+                    }
+                }
             }
-            HeadingMedium("Cost", Modifier.weight(1f))
-            HeadingMedium("Total", Modifier.weight(1f))
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-        ) {
-            LabelMedium(HP.formatDecimal(item.qty), Modifier.weight(1f))
-            if (HP.settings.saleCartons == true) {
-                LabelMedium(item.crtn.toString(), Modifier.weight(1f))
+            Spacer(Modifier.height(2.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                HeadingMedium("Qty", Modifier.weight(1f))
+                if (HP.settings.saleCartons == true) {
+                    HeadingMedium("Crtn", Modifier.weight(1f))
+                }
+                HeadingMedium("Cost", Modifier.weight(1f))
+                HeadingMedium("Total", Modifier.weight(1f))
             }
-            LabelMedium(HP.formatDecimal(item.cost), Modifier.weight(1f))
-            LabelMedium(HP.formatDecimal(item.total), Modifier.weight(1f))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                LabelMedium(HP.formatDecimal(item.qty), Modifier.weight(1f))
+                if (HP.settings.saleCartons == true) {
+                    LabelMedium(item.crtn.toString(), Modifier.weight(1f))
+                }
+                LabelMedium(HP.formatDecimal(item.cost), Modifier.weight(1f))
+                LabelMedium(HP.formatDecimal(item.total), Modifier.weight(1f))
+            }
         }
     }
 }

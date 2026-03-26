@@ -2,6 +2,7 @@ package com.example.statspos.presentation.viewmodels.items.packages
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.items.Categories
 import com.example.statspos.domain.models.items.Packages
 import com.example.statspos.domain.repository.items.PackagesRepository
@@ -140,6 +141,37 @@ class PackagesViewModel @Inject constructor(
             }
         }
     }
+
+    fun deleteData(id: Long, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if (id == 0L)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.deletePackage(id)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    state.update {
+                        it.copy(
+                            list = state.value.list.filter { it.id != id },
+                            totalPackages = state.value.totalPackages - 1,
+                        )
+                    }
+
+                    HP.packages = Gson().getListOf<DropdownItem>(result.data.get("packages").asJsonArray)
+                    onSuccess()
+                }
+            }
+        }
+    }
+
     // endregion
 
     // region Others

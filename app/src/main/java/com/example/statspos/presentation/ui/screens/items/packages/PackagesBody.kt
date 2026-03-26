@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -18,19 +19,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.statspos.domain.models.items.Categories
 import com.example.statspos.domain.models.items.Packages
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.BottomHeading
+import com.example.statspos.presentation.ui.components.ConfirmDialog
+import com.example.statspos.presentation.ui.components.DeleteIcon
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
@@ -45,18 +51,22 @@ import com.example.statspos.presentation.viewmodels.items.packages.PackagesViewM
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
+import com.example.statspos.utils.showToast
 
 @Composable
 fun PackagesBody(
     sharedViewModel: SharedViewModel,
     onAddButtonClick: (Long, Boolean) -> Unit,
 ) {
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel = hiltViewModel<PackagesViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var selectedId by remember { mutableLongStateOf(0L) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
@@ -82,6 +92,22 @@ fun PackagesBody(
             onDismiss = {
                 showErrorDialog = false
             },
+        )
+    }
+
+    if (showDeleteDialog) {
+        ConfirmDialog(
+            text = "Are you sure to delete this package",
+            onDismiss = {
+                showDeleteDialog = false
+            },
+            onConfirm = {
+                showDeleteDialog = false
+                viewModel.deleteData(selectedId) {
+                    selectedId = 0L
+                    context.showToast("Package deleted successfully")
+                }
+            }
         )
     }
 
@@ -131,7 +157,11 @@ fun PackagesBody(
                         items = state.list,
                         onItemClick = { packages ->
                             onAddButtonClick(packages.id!!, true)
-                        }
+                        },
+                        onDeleteClick = { packages ->
+                            selectedId = packages.id!!
+                            showDeleteDialog = true
+                        },
                     )
                 }
 
@@ -151,6 +181,7 @@ private fun BodyList(
     onRefresh: () -> Unit,
     items: List<Packages>,
     onItemClick: (Packages) -> Unit,
+    onDeleteClick: (Packages) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -161,9 +192,11 @@ private fun BodyList(
             Spacer(Modifier.height(4.dp))
         }
         items(items) { item ->
-            ListCard(item = item) {
-                onItemClick(it)
-            }
+            ListCard(
+                item = item,
+                onItemClick = onItemClick,
+                onDeleteClick = onDeleteClick,
+            )
         }
     }
 }
@@ -172,7 +205,8 @@ private fun BodyList(
 private fun ListCard(
     modifier: Modifier = Modifier,
     item: Packages,
-    onItemClick: (Packages) -> Unit
+    onItemClick: (Packages) -> Unit,
+    onDeleteClick: (Packages) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -188,7 +222,10 @@ private fun ListCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column{
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+            ) {
                 LabelLarge(item.packageName.toString())
                 Spacer(Modifier.height(2.dp))
                 Row(
@@ -210,6 +247,11 @@ private fun ListCard(
                         }
                     }
                 }
+            }
+
+            Spacer(Modifier.width(8.dp))
+            DeleteIcon {
+                onDeleteClick(item)
             }
         }
     }

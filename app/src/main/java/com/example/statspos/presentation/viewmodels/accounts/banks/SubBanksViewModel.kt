@@ -141,6 +141,43 @@ class SubBanksViewModel @Inject constructor(
             }
         }
     }
+
+    fun deleteData(id: Long, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if (id == 0L)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.deleteSubBank(id)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    state.update {
+                        it.copy(
+                            list = state.value.list.filter { it.id != id },
+                            totalSubBanks = state.value.totalSubBanks - 1,
+                        )
+                    }
+
+                    HP.subBanks = result.data.get("subBanks").asJsonArray.map { obj ->
+                        DropdownItem(
+                            id = obj.asJsonObject.get("id").asLong,
+                            name = obj.asJsonObject.get("name").asString,
+                            mainId = obj.asJsonObject.get("bankId").asLong,
+                        )
+                    }
+                    onSuccess()
+                }
+            }
+        }
+    }
+
     // endregion
 
     // region Others

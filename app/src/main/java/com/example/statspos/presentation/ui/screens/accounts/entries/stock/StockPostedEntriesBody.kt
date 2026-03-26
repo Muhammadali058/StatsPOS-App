@@ -141,11 +141,6 @@ fun StockPostedEntriesBody(
                 value = state.totalEntries.toString()
             )
         }
-
-        // Delete progress bar
-        if (state.isDeleting) {
-            ProgressBarLayout()
-        }
     }
 }
 

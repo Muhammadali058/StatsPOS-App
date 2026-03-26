@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,6 +45,7 @@ import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.DateTextbox
+import com.example.statspos.presentation.ui.components.DeleteIcon
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
@@ -77,6 +79,7 @@ fun JournalPostedEntriesBody(
     var showErrorDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
+    var selectedId by remember { mutableLongStateOf(0L) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
@@ -113,9 +116,9 @@ fun JournalPostedEntriesBody(
             },
             onConfirm = {
                 showDeleteDialog = false
-                viewModel.deleteEntry() {
+                viewModel.deleteEntry(selectedId) {
+                    selectedId = 0L
                     context.showToast("Entry deleted successfully")
-                    viewModel.loadEntries()
                 }
             }
         )
@@ -129,9 +132,9 @@ fun JournalPostedEntriesBody(
             },
             onConfirm = {
                 showPasswordDialog = false
-                viewModel.deleteEntry() {
+                viewModel.deleteEntry(selectedId) {
+                    selectedId = 0L
                     context.showToast("Entry deleted successfully")
-                    viewModel.loadEntries()
                 }
             }
         )
@@ -174,13 +177,12 @@ fun JournalPostedEntriesBody(
                     },
                     items = state.list,
                     onDeleteClick = { entry ->
-                        if (HP.userRights.deleteAnything == true) {
-                            viewModel.setDeleteIdChange(entry.id!!)
-                            if (HP.passwords.useDeleteAccount == true) {
-                                showPasswordDialog = true
-                            } else {
-                                showDeleteDialog = true
-                            }
+                        selectedId = entry.id!!
+
+                        if (HP.passwords.useDeleteAccount == true) {
+                            showPasswordDialog = true
+                        } else {
+                            showDeleteDialog = true
                         }
                     }
                 )
@@ -192,11 +194,6 @@ fun JournalPostedEntriesBody(
                 text = "Total Entries: ",
                 value = state.totalEntries.toString()
             )
-        }
-
-        // Delete progress bar
-        if (state.isDeleting) {
-            ProgressBarLayout()
         }
     }
 }
@@ -334,13 +331,10 @@ private fun ListCard(
 
             // Delete button
             if (HP.userRights.deleteAnything == true) {
-                Spacer(Modifier.width(8.dp))
-                AppIconButton(
-                    icon = Icons.Default.Delete,
-                    onClick = {
-                        onDeleteClick(item)
-                    }
-                )
+                Spacer(Modifier.height(8.dp))
+                DeleteIcon {
+                    onDeleteClick(item)
+                }
             }
         }
     }

@@ -2,6 +2,7 @@ package com.example.statspos.presentation.viewmodels.accounts.expenses
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.accounts.Expenses
 import com.example.statspos.domain.repository.accounts.ExpensesRepository
 import com.example.statspos.utils.HP
@@ -139,6 +140,37 @@ class ExpensesViewModel @Inject constructor(
             }
         }
     }
+
+    fun deleteData(id: Long, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if (id == 0L)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.deleteExpense(id)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    state.update {
+                        it.copy(
+                            list = state.value.list.filter { it.id != id },
+                            totalExpenses = state.value.totalExpenses - 1,
+                        )
+                    }
+
+                    HP.expenses = Gson().getListOf<DropdownItem>(result.data.get("expenses").asJsonArray)
+                    onSuccess()
+                }
+            }
+        }
+    }
+
     // endregion
 
     // region Others

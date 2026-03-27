@@ -59,8 +59,11 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import com.example.statspos.R
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @Composable
 fun Dropdown(
@@ -804,7 +807,7 @@ fun SubChipsRow(
 @Composable
 private fun FilterChip(
     isSelected: Boolean,
-    item:DropdownItem,
+    item: DropdownItem,
     onItemSelected: (DropdownItem) -> Unit,
     shape: Shape,
 ) {
@@ -831,5 +834,25 @@ private fun FilterChip(
             selectedContainerColor = MaterialTheme.colorScheme.primary,
             containerColor = MaterialTheme.colorScheme.primaryContainer,
         )
+    )
+}
+
+@Composable
+fun DropdownItem(
+    modifier: Modifier = Modifier,
+    text: String,
+    icon: @Composable (() -> Unit)? = null,
+    onClick: () -> Unit,
+) {
+    DropdownMenuItem(
+        modifier = modifier,
+        text = {
+            AppText(
+                text = text,
+                style = MaterialTheme.typography.labelMedium,
+            )
+        },
+        leadingIcon = icon,
+        onClick = onClick
     )
 }

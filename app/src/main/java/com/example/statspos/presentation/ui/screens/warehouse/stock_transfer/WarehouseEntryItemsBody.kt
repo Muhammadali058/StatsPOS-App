@@ -38,7 +38,10 @@ import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListHeading
 import com.example.statspos.presentation.ui.components.ListImageView
+import com.example.statspos.presentation.ui.components.ListLabel
+import com.example.statspos.presentation.ui.components.ListMainLabel
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.TopAppBar
@@ -206,24 +209,24 @@ private fun ListCard(
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    LabelLarge(item.itemname.toString())
+                    ListMainLabel(item.itemname.toString())
                 }
                 Spacer(Modifier.height(2.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    HeadingMedium("Qty", Modifier.weight(1f))
+                    ListHeading("Qty", Modifier.weight(1f))
                     if (HP.settings.saleCartons == true)
-                        HeadingMedium("Crtn", Modifier.weight(1f))
+                        ListHeading("Crtn", Modifier.weight(1f))
                 }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    LabelMedium(HP.formatDecimal(item.qty), Modifier.weight(1f))
+                    ListLabel(HP.formatDecimal(item.qty), Modifier.weight(1f))
                     if (HP.settings.saleCartons == true)
-                        LabelMedium(item.crtn.toString(), Modifier.weight(1f))
+                        ListLabel(item.crtn.toString(), Modifier.weight(1f))
                 }
             }
         }

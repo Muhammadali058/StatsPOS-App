@@ -46,6 +46,9 @@ import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListHeading
+import com.example.statspos.presentation.ui.components.ListLabel
+import com.example.statspos.presentation.ui.components.ListMainLabel
 import com.example.statspos.presentation.ui.components.PasswordDialog
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
@@ -271,10 +274,10 @@ private fun ListCard(
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    HeadingMedium("Bill No. ")
-                    LabelMedium(item.id.toString())
+                    ListHeading("Bill No. ")
+                    ListLabel(item.id.toString())
                     Spacer(Modifier.width(8.dp))
-                    LabelLarge(item.vendorName.toString().ifEmpty { "Vendor not selected" })
+                    ListMainLabel(item.vendorName.toString().ifEmpty { "Vendor not selected" })
                 }
                 Spacer(Modifier.height(2.dp))
                 Row(
@@ -282,8 +285,8 @@ private fun ListCard(
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    HeadingMedium("Date: ")
-                    LabelLarge(item.date.toString())
+                    ListHeading("Date: ")
+                    ListLabel(item.date.toString())
                 }
                 if(item.warehouseName.toString().isNotEmpty()) {
                     Spacer(Modifier.height(2.dp))
@@ -292,8 +295,8 @@ private fun ListCard(
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        HeadingMedium("Warehouse: ")
-                        LabelLarge(item.warehouseName.toString())
+                        ListHeading("Warehouse: ")
+                        ListLabel(item.warehouseName.toString())
                     }
                 }
             }
@@ -314,19 +317,19 @@ private fun ListCard(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            HeadingLarge("Total", Modifier.weight(1f))
-            HeadingMedium("On", Modifier.weight(.5f))
-            HeadingMedium("Type", Modifier.weight(.5f))
-            HeadingMedium("MOP", Modifier.weight(.5f))
+            ListHeading("Total", Modifier.weight(1f))
+            ListHeading("On", Modifier.weight(.5f))
+            ListHeading("Type", Modifier.weight(.5f))
+            ListHeading("MOP", Modifier.weight(.5f))
         }
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            LabelLarge(HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)), Modifier.weight(1f))
-            LabelMedium(item.purchaseOn.toString(), Modifier.weight(.5f))
-            LabelMedium(item.purchaseType.toString(), Modifier.weight(.5f))
-            LabelMedium(item.mop.toString(), Modifier.weight(.5f))
+            ListLabel(HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)), Modifier.weight(1f))
+            ListLabel(item.purchaseOn.toString(), Modifier.weight(.5f))
+            ListLabel(item.purchaseType.toString(), Modifier.weight(.5f))
+            ListLabel(item.mop.toString(), Modifier.weight(.5f))
         }
     }
 }

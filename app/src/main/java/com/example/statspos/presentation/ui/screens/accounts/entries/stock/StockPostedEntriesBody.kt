@@ -5,17 +5,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -39,10 +34,9 @@ import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.ErrorDialog
-import com.example.statspos.presentation.ui.components.HeadingMedium
-import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
-import com.example.statspos.presentation.ui.components.ProgressBarLayout
+import com.example.statspos.presentation.ui.components.ListHeading
+import com.example.statspos.presentation.ui.components.ListLabel
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
@@ -244,33 +238,33 @@ private fun ListCard(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    HeadingMedium("Amount", Modifier.width(120.dp))
-                    HeadingMedium("MOP", Modifier.width(50.dp))
-                    HeadingMedium("Date", Modifier.weight(1f))
+                    ListHeading("Amount", Modifier.width(120.dp))
+                    ListHeading("MOP", Modifier.width(50.dp))
+                    ListHeading("Date", Modifier.weight(1f))
                 }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    LabelMedium(HP.formatDecimal(item.amount), Modifier.width(120.dp))
-                    LabelMedium(item.mop.toString(), Modifier.width(50.dp))
-                    LabelMedium(item.date.toString(), Modifier.weight(1f))
-                }
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    HeadingMedium("User: ")
-                    LabelMedium(item.username.toString())
+                    ListLabel(HP.formatDecimal(item.amount), Modifier.width(120.dp))
+                    ListLabel(item.mop.toString(), Modifier.width(50.dp))
+                    ListLabel(item.date.toString(), Modifier.weight(1f))
                 }
                 Spacer(Modifier.height(2.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    HeadingMedium("Naration: ")
-                    LabelMedium(item.naration.toString())
+                    ListHeading("User: ")
+                    ListLabel(item.username.toString())
+                }
+                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    ListHeading("Naration: ")
+                    ListLabel(item.naration.toString())
                 }
             }
         }

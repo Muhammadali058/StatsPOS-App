@@ -57,7 +57,10 @@ import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListHeading
 import com.example.statspos.presentation.ui.components.ListImageView
+import com.example.statspos.presentation.ui.components.ListLabel
+import com.example.statspos.presentation.ui.components.ListMainLabel
 import com.example.statspos.presentation.ui.components.PasswordDialog
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
@@ -401,7 +404,7 @@ private fun ListCard(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                LabelLarge(item.vendorName.toString())
+                ListMainLabel(item.vendorName.toString())
 
                 // Contact
                 item.contact?.let {
@@ -411,8 +414,8 @@ private fun ListCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                         ) {
-                            HeadingMedium("Contact: ")
-                            LabelMedium(item.contact.toString())
+                            ListHeading("Contact: ")
+                            ListLabel(item.contact.toString())
                         }
                     }
                 }
@@ -425,8 +428,8 @@ private fun ListCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                         ) {
-                            HeadingMedium("City: ")
-                            LabelMedium(item.city.toString())
+                            ListHeading("City: ")
+                            ListLabel(item.city.toString())
                         }
                     }
                 }
@@ -448,8 +451,8 @@ private fun ListCard(
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    HeadingMedium("Category: ")
-                    LabelMedium(item.categoryName.toString())
+                    ListHeading("Category: ")
+                    ListLabel(item.categoryName.toString())
                 }
             }
         }

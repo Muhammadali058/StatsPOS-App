@@ -1,7 +1,6 @@
 package com.example.statspos.presentation.ui.screens.main.main
 
 import android.app.Activity
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.DrawableRes
@@ -81,7 +80,7 @@ import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.AppSwitch
 import com.example.statspos.presentation.ui.components.AppText
-import com.example.statspos.presentation.ui.components.BottomNavItem
+import com.example.statspos.presentation.ui.components.DropdownItem
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.ImageView
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
@@ -110,7 +109,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
-import kotlin.system.exitProcess
 
 private val items = listOf(
     TopItem(
@@ -126,7 +124,7 @@ private val items = listOf(
         R.drawable.purchase_orders,
         HP.userRights.purchase == true
     ),
-    TopItem("Users", TopRoutes.Users, R.drawable.users, HP.userRights.users == true),
+//    TopItem("Users", TopRoutes.Users, R.drawable.users, HP.userRights.users == true),
     TopItem("Settings", TopRoutes.Settings, R.drawable.settings, HP.userRights.settings == true),
 )
 private val accounts = listOf(
@@ -163,16 +161,56 @@ private val accounts = listOf(
     ),
 )
 private val entries = listOf(
-    TopItem("Receipt", TopRoutes.ReceiptEntry, R.drawable.receipt_entry, access = HP.userRights.entry == true),
-    TopItem("Payment", TopRoutes.PaymentEntry, R.drawable.payment_entry, access = HP.userRights.entry == true),
-    TopItem("Expense", TopRoutes.ExpenseEntry, R.drawable.expense_entry, access = HP.userRights.entry == true),
-    TopItem("Journal", TopRoutes.JournalEntry, R.drawable.journal_entry, access = HP.userRights.entry == true),
-    TopItem("Stock", TopRoutes.StockEntry, R.drawable.stock_entry, access = HP.userRights.entry == true),
+    TopItem(
+        "Receipt",
+        TopRoutes.ReceiptEntry,
+        R.drawable.receipt_entry,
+        access = HP.userRights.entry == true
+    ),
+    TopItem(
+        "Payment",
+        TopRoutes.PaymentEntry,
+        R.drawable.payment_entry,
+        access = HP.userRights.entry == true
+    ),
+    TopItem(
+        "Expense",
+        TopRoutes.ExpenseEntry,
+        R.drawable.expense_entry,
+        access = HP.userRights.entry == true
+    ),
+    TopItem(
+        "Journal",
+        TopRoutes.JournalEntry,
+        R.drawable.journal_entry,
+        access = HP.userRights.entry == true
+    ),
+    TopItem(
+        "Stock",
+        TopRoutes.StockEntry,
+        R.drawable.stock_entry,
+        access = HP.userRights.entry == true
+    ),
 )
 private val warehouse = listOf(
-    TopItem("Warehouses", TopRoutes.Warehouses, R.drawable.warehouses, access = HP.userRights.warehouse == true),
-    TopItem("Transfer Stock", TopRoutes.TransferStock, R.drawable.transfer_stock, access = HP.userRights.warehouse == true),
-    TopItem("Gatepass", TopRoutes.Gatepass, R.drawable.gatepass, access = HP.userRights.warehouse == true),
+    TopItem(
+        "Warehouses",
+        TopRoutes.Warehouses,
+        R.drawable.warehouses,
+        HP.userRights.warehouse == true
+    ),
+    TopItem(
+        "Transfer\nStock",
+        TopRoutes.TransferStock,
+        R.drawable.transfer_stock,
+        HP.userRights.warehouse == true
+    ),
+    TopItem(
+        "Gatepass",
+        TopRoutes.Gatepass,
+        R.drawable.gatepass,
+        HP.userRights.warehouse == true
+    ),
 )
 
 @Composable
@@ -241,15 +279,8 @@ fun HomeScreen(
         drawerContent = {
             NavigationDrawer(
                 viewModel = localDataViewModel,
-                onClick = {
-
-                },
-                onUserClick = {
-                    onTopRouteClick(TopRoutes.UpdateUser)
-                    scope.launch { drawerState.close() }
-                },
-                onSettingsClick = {
-                    onTopRouteClick(TopRoutes.Settings)
+                onClick = { key ->
+                    onTopRouteClick(key)
                     scope.launch { drawerState.close() }
                 },
             )
@@ -291,8 +322,11 @@ fun HomeScreen(
                                     .width(200.dp),
                             ) {
                                 if (HP.user.isMainUser == true) {
-                                    DropdownMenuItem(
-                                        text = { AppText("Update Branches") },
+                                    DropdownItem(
+                                        text = "Update branches",
+                                        icon = {
+                                            AppIcon(R.drawable.update, size = 20.dp)
+                                        },
                                         onClick = {
                                             menuExpanded = false
 
@@ -301,8 +335,11 @@ fun HomeScreen(
                                             }
                                         }
                                     )
-                                    DropdownMenuItem(
-                                        text = { AppText("Change Branch") },
+                                    DropdownItem(
+                                        text = "Change branch",
+                                        icon = {
+                                            AppIcon(R.drawable.branch, size = 20.dp)
+                                        },
                                         onClick = {
                                             menuExpanded = false
                                             scope.launch {
@@ -312,8 +349,12 @@ fun HomeScreen(
                                         }
                                     )
                                 }
-                                DropdownMenuItem(
-                                    text = { AppText("Reset") },
+
+                                DropdownItem(
+                                    text = "Reset",
+                                    icon = {
+                                        AppIcon(R.drawable.reset, size = 20.dp)
+                                    },
                                     onClick = {
                                         menuExpanded = false
                                         scope.launch {
@@ -322,16 +363,6 @@ fun HomeScreen(
                                         }
                                     }
                                 )
-//                                DropdownMenuItem(
-//                                    text = { AppText("Exit App") },
-////                                    leadingIcon = {
-////                                        AppIcon(Icons.Default.ExitToApp)
-////                                    },
-//                                    onClick = {
-//                                        menuExpanded = false
-//                                        activity.finish()
-//                                    }
-//                                )
                             }
                         }
                     },
@@ -469,19 +500,9 @@ fun HomeScreen(
 @Composable
 fun NavigationDrawer(
     viewModel: LocalDataViewModel,
-    onClick: (BottomNavItem) -> Unit,
-    onUserClick: () -> Unit,
-    onSettingsClick: () -> Unit,
+    onClick: (NavKey) -> Unit,
 ) {
-//    val items = listOf(
-//        BottomNavItem(Icons.Default.Home, "Home"),
-//        BottomNavItem(Icons.Default.Home, "Users"),
-//        BottomNavItem(Icons.Default.Home, "Settings"),
-//    )
-    val items = emptyList<BottomNavItem>()
-
     var darkModeChecked by remember { mutableStateOf(false) }
-
     LaunchedEffect(Unit) {
         val theme = viewModel.getTheme().first()
         darkModeChecked = when (theme) {
@@ -515,12 +536,8 @@ fun NavigationDrawer(
                 modifier = Modifier
                     .size(150.dp)
                     .clip(CircleShape),
-//                    .border(
-//                        width = 2.dp,
-//                        color = MaterialTheme.colorScheme.primary,
-//                        shape = CircleShape
-//                    )
             )
+
             Spacer(Modifier.height(16.dp))
             Column(
                 modifier = Modifier,
@@ -547,56 +564,46 @@ fun NavigationDrawer(
             color = MaterialTheme.colorScheme.primary,
         )
 
-//        NavigationDrawerItem(
-//            label = { Text("Profile") },
-//            selected = false,
-//            onClick = {
-//                onUserClick()
-//            },
-////            colors = navigationDrawerColors,
-//        )
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    onUserClick()
+                    onClick(TopRoutes.UpdateUser)
                 }
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            AppIcon(R.drawable.ic_user)
+            AppIcon(R.drawable.profile, size = 18.dp)
             Spacer(Modifier.width(16.dp))
-            AppText("Profile")
+            AppText(
+                text = "Profile",
+                style = TextStyle(
+                    fontSize = 14.sp
+                )
+            )
         }
 
-        if (HP.userRights.settings == true) {
+        if (HP.userRights.users == true) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        onSettingsClick()
+                        onClick(TopRoutes.Users)
                     }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                AppIcon(R.drawable.settings, size = 20.dp)
-                Spacer(Modifier.width(16.dp))
-                AppText("Settings")
-            }
-        }
-
-        items.forEach { item ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        onClick(item)
-                    }
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                AppText(item.title)
+                AppIcon(
+                    icon = R.drawable.users,
+                    size = 22.dp,
+                )
+                Spacer(Modifier.width(12.dp))
+                AppText(
+                    text = "Users",
+                    style = TextStyle(
+                        fontSize = 14.sp
+                    )
+                )
             }
         }
 
@@ -604,11 +611,19 @@ fun NavigationDrawer(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            AppText("Dark mode")
-
+            Row {
+                AppIcon(R.drawable.dark_mode, size = 18.dp)
+                Spacer(Modifier.width(16.dp))
+                AppText(
+                    text = "Night mode",
+                    style = TextStyle(
+                        fontSize = 14.sp
+                    )
+                )
+            }
             AppSwitch(
                 label = "",
                 checked = darkModeChecked,
@@ -685,23 +700,27 @@ private fun Title(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start,
         ) {
-//        if (icon != null) {
-//            AppIcon(
-//                icon = icon,
-//                size = 24.dp,
-//            )
-//            Spacer(Modifier.width(16.dp))
-//        }
-            AppText(
+            if (icon != null) {
+                AppIcon(
+                    icon = icon,
+                    size = 22.dp,
+                )
+                Spacer(Modifier.width(8.dp))
+            }
+            Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
             )
         }
     }
 }
 
 @Composable
-private fun HomeGrid(
+private fun HomeGrid3Icons(
     items: List<TopItem>,
     onClick: (TopRoutes) -> Unit
 ) {
@@ -734,17 +753,85 @@ private fun HomeGrid(
                     verticalArrangement = Arrangement.SpaceEvenly,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
+                    Spacer(Modifier.height(12.dp))
                     item.icon?.run {
                         AppIcon(
+                            modifier = Modifier
+                                .weight(1f),
                             icon = item.icon,
-                            size = 30.dp,
+                            size = 26.dp,
                         )
                     }
-//                    Spacer(Modifier.height(4.dp))
-                    AppText(
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        modifier = Modifier
+                            .weight(1f),
                         text = item.text,
                         style = TextStyle(
                             textAlign = TextAlign.Center,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun HomeGrid(
+    items: List<TopItem>,
+    onClick: (TopRoutes) -> Unit
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(4),
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(max = 400.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        val filteredItems = items.filter { it.access }
+        items(filteredItems) { item ->
+            Card(
+                modifier = Modifier
+                    .width(80.dp)
+                    .height(92.dp)
+                    .padding(vertical = 5.dp),
+                onClick = { onClick(item.screen) },
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 2.dp
+                ),
+                shape = RoundedCornerShape(8.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                ),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.SpaceEvenly,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Spacer(Modifier.height(8.dp))
+                    item.icon?.run {
+                        AppIcon(
+                            modifier = Modifier
+                                .weight(1f),
+                            icon = item.icon,
+                            size = 20.dp,
+                        )
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        modifier = Modifier
+                            .weight(1f),
+                        text = item.text,
+                        style = TextStyle(
+                            textAlign = TextAlign.Center,
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
                         )
                     )
                 }
@@ -821,3 +908,4 @@ private fun BranchesList(
     )
 
 }
+

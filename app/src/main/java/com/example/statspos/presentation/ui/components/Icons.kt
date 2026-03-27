@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.example.statspos.R
 import com.example.statspos.presentation.ui.utils.ConstantSize
 
 @Composable
@@ -154,5 +155,19 @@ fun DeleteIcon(
         onClick = onClick,
         modifier = modifier,
         size = 22.dp
+    )
+}
+
+@Composable
+fun FilterIcon(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    AppIconButton(
+        icon = R.drawable.filter1,
+        onClick = onClick,
+        modifier = modifier,
+        size = 18.dp,
+        buttonSize = 26.dp,
     )
 }

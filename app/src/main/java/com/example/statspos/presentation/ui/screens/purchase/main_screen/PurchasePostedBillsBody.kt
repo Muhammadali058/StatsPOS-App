@@ -48,11 +48,15 @@ import com.example.statspos.presentation.ui.components.BottomSheet
 import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.ErrorDialog
+import com.example.statspos.presentation.ui.components.FilterIcon
 import com.example.statspos.presentation.ui.components.HeadingLarge
 import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListHeading
+import com.example.statspos.presentation.ui.components.ListLabel
+import com.example.statspos.presentation.ui.components.ListMainLabel
 import com.example.statspos.presentation.ui.components.PasswordDialog
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
@@ -444,14 +448,9 @@ private fun SearchBox(
             onSearchClick = onSearchClick,
         )
         Spacer(Modifier.width(4.dp))
-        AppIconButton(
-            onClick = {
-                onFilterClick()
-            },
-            icon = Icons.Default.FilterList,
-            buttonSize = 32.dp,
-            size = 26.dp
-        )
+        FilterIcon{
+            onFilterClick()
+        }
     }
     Row(
         modifier = Modifier
@@ -548,7 +547,7 @@ private fun ListCard(
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    LabelLarge(item.vendorName.toString())
+                    ListMainLabel(item.vendorName.toString())
                 }
                 Spacer(Modifier.height(2.dp))
                 Row(
@@ -556,15 +555,15 @@ private fun ListCard(
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    HeadingMedium("Sr. ")
-                    LabelMedium(item.id.toString())
+                    ListHeading("Sr. ")
+                    ListLabel(item.id.toString())
                     Spacer(Modifier.width(16.dp))
-                    HeadingMedium("Inv No. ")
-                    LabelMedium(item.invoiceNo.toString())
+                    ListHeading("Inv No. ")
+                    ListLabel(item.invoiceNo.toString())
                     if (item.refInvoiceNo.toString().isNotEmpty()) {
                         Spacer(Modifier.width(16.dp))
-                        HeadingMedium("Ref Inv No. ")
-                        LabelMedium(item.refInvoiceNo.toString())
+                        ListHeading("Ref Inv No. ")
+                        ListLabel(item.refInvoiceNo.toString())
                     }
                 }
                 Spacer(Modifier.height(2.dp))
@@ -573,8 +572,8 @@ private fun ListCard(
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    HeadingMedium("Date: ")
-                    LabelLarge(item.date.toString())
+                    ListHeading("Date: ")
+                    ListLabel(item.date.toString())
                 }
                 Spacer(Modifier.height(2.dp))
                 Row(
@@ -582,8 +581,8 @@ private fun ListCard(
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    HeadingMedium("User: ")
-                    LabelLarge(item.username.toString())
+                    ListHeading("User: ")
+                    ListLabel(item.username.toString())
                 }
                 if (item.warehouseName.toString().isNotEmpty()) {
                     Spacer(Modifier.height(2.dp))
@@ -592,8 +591,8 @@ private fun ListCard(
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        HeadingMedium("Warehouse: ")
-                        LabelLarge(item.warehouseName.toString())
+                        ListHeading("Warehouse: ")
+                        ListLabel(item.warehouseName.toString())
                     }
                 }
             }
@@ -632,22 +631,22 @@ private fun ListCard(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            HeadingLarge("Total", Modifier.weight(1f))
-            HeadingMedium("On", Modifier.weight(.5f))
-            HeadingMedium("Type", Modifier.weight(.5f))
-            HeadingMedium("MOP", Modifier.weight(.5f))
+            ListHeading("Total", Modifier.weight(1f))
+            ListHeading("On", Modifier.weight(.5f))
+            ListHeading("Type", Modifier.weight(.5f))
+            ListHeading("MOP", Modifier.weight(.5f))
         }
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            LabelLarge(
+            ListMainLabel(
                 HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)),
                 Modifier.weight(1f)
             )
-            LabelMedium(item.purchaseOn.toString(), Modifier.weight(.5f))
-            LabelMedium(item.purchaseType.toString(), Modifier.weight(.5f))
-            LabelMedium(item.mop.toString(), Modifier.weight(.5f))
+            ListLabel(item.purchaseOn.toString(), Modifier.weight(.5f))
+            ListLabel(item.purchaseType.toString(), Modifier.weight(.5f))
+            ListLabel(item.mop.toString(), Modifier.weight(.5f))
         }
     }
 }

@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -45,9 +43,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.accounts.Accounts
-import com.example.statspos.domain.models.accounts.Banks
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
-import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.BottomSheet
@@ -57,14 +53,15 @@ import com.example.statspos.presentation.ui.components.DeleteIcon
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
-import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListHeading
 import com.example.statspos.presentation.ui.components.ListImageView
+import com.example.statspos.presentation.ui.components.ListLabel
+import com.example.statspos.presentation.ui.components.ListMainLabel
 import com.example.statspos.presentation.ui.components.PasswordDialog
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
-import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
@@ -421,7 +418,7 @@ private fun ListCard(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                LabelLarge(item.customerName.toString())
+                ListMainLabel(item.customerName.toString())
 
                 // Contact
                 item.contact?.let {
@@ -431,8 +428,8 @@ private fun ListCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                         ) {
-                            HeadingMedium("Contact: ")
-                            LabelMedium(item.contact.toString())
+                            ListHeading("Contact: ")
+                            ListLabel(item.contact.toString())
                         }
                     }
                 }
@@ -445,8 +442,8 @@ private fun ListCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                         ) {
-                            HeadingMedium("City: ")
-                            LabelMedium(item.city.toString())
+                            ListHeading("City: ")
+                            ListLabel(item.city.toString())
                         }
                     }
                 }
@@ -468,8 +465,8 @@ private fun ListCard(
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    HeadingMedium("Category: ")
-                    LabelMedium(item.categoryName.toString())
+                    ListHeading("Category: ")
+                    ListLabel(item.categoryName.toString())
                 }
             }
         }

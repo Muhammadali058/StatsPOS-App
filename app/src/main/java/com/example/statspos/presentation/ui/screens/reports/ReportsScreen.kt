@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -22,12 +21,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -58,6 +54,7 @@ import com.example.statspos.presentation.ui.components.AppText
 import com.example.statspos.presentation.ui.components.AutoCompleteItemsTextbox
 import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.ErrorDialog
+import com.example.statspos.presentation.ui.components.FilterIcon
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.ReportButton
 import com.example.statspos.presentation.ui.components.ReportCard
@@ -103,7 +100,12 @@ private val reports = listOf(
         R.drawable.accounts_report,
         HP.userRights.accountsReport == true
     ),
-    TopItem("Items", TopRoutes.ItemsReports, R.drawable.items, HP.userRights.itemsReport == true),
+    TopItem(
+        "Items",
+        TopRoutes.ItemsReports,
+        R.drawable.items_report,
+        HP.userRights.itemsReport == true
+    ),
 )
 
 @Composable
@@ -300,14 +302,9 @@ fun ReportsDateBox(
                 label = "To Date"
             )
             Spacer(Modifier.width(4.dp))
-            AppIconButton(
-                onClick = {
-                    onFilterClick()
-                },
-                icon = Icons.Default.FilterList,
-                buttonSize = 32.dp,
-                size = 26.dp
-            )
+            FilterIcon {
+                onFilterClick()
+            }
         }
     }
 }
@@ -328,86 +325,66 @@ fun ReportsItemnameBox(
     Column(
         modifier = Modifier
             .fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            Column(
+            AutoCompleteItemsTextbox(
                 modifier = Modifier
                     .weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                AutoCompleteItemsTextbox(
-                    value = value,
-                    onValueChange = onValueChange,
-                    onItemSelected = onItemSelected,
-                    onEndIconClick = onEndIconClick,
-                    onSearchClick = onSearchClick,
-                    label = {
-                        Text(
-                            text = "Select Item"
-                        )
+                value = value,
+                onValueChange = onValueChange,
+                onItemSelected = onItemSelected,
+                onEndIconClick = onEndIconClick,
+                onSearchClick = onSearchClick,
+                label = {
+                    Text(
+                        text = "Select Item"
+                    )
+                },
+                trailingIcon = {
+                    ShowReportIcon {
+                        onEndIconClick(value)
+                    }
+                },
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Go
+                ),
+                padding = PaddingValues(top = 4.dp),
+            )
+            Row {
+                Spacer(Modifier.width(4.dp))
+                AppIconButton(
+                    modifier = Modifier
+                        .padding(top = 8.dp),
+                    onClick = {
+                        onBarcodeClick()
                     },
-                    trailingIcon = {
-                        ShowReportIcon {
-                            onEndIconClick(value)
-                        }
-//                        IconButton(onClick = {
-//                            onEndIconClick(value)
-//                        }) {
-//                            AppIcon(
-//                                icon = Icons.Default.Clear,
-//                                size = 20.dp
-//                            )
-//                        }
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Go
-                    ),
-                    padding = PaddingValues(top = 4.dp),
+                    icon = R.drawable.ic_barcode,
+                    buttonSize = 32.dp,
+                    size = 26.dp
                 )
-//                ReportButton(
-//                    modifier = Modifier.offset(y = (-1).dp),
-//                    shape = RoundedCornerShape(bottomEnd = 4.dp, bottomStart = 4.dp)
-//                ) {
-//                    onItemClick()
-//                }
-            }
-            Column {
-                Row {
-                    Spacer(Modifier.width(4.dp))
-                    AppIconButton(
-                        modifier = Modifier
-                            .padding(top = 8.dp),
-                        onClick = {
-                            onBarcodeClick()
-                        },
-                        icon = R.drawable.ic_barcode,
-                        buttonSize = 32.dp,
-                        size = 26.dp
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    AppIconButton(
-                        modifier = Modifier
-                            .padding(top = 8.dp),
-                        onClick = {
-                            onSearchItemClick()
-                        },
-                        icon = Icons.Default.Search,
-                        buttonSize = 32.dp,
-                        size = 26.dp
-                    )
-                }
-                Spacer(Modifier.height(16.dp))
-                AppSwitch(
-                    checked = sum,
-                    onCheckedChange = onSumChange,
-                    label = "Sum"
+                Spacer(Modifier.width(4.dp))
+                AppIconButton(
+                    modifier = Modifier
+                        .padding(top = 8.dp),
+                    onClick = {
+                        onSearchItemClick()
+                    },
+                    icon = Icons.Default.Search,
+                    buttonSize = 32.dp,
+                    size = 26.dp
                 )
             }
         }
+
+        Spacer(Modifier.height(16.dp))
+        AppSwitch(
+            checked = sum,
+            onCheckedChange = onSumChange,
+            label = "Sum"
+        )
     }
 }
 
@@ -753,7 +730,7 @@ fun TodayBox(
 }
 
 @Composable
-private fun ReportsGrid(
+private fun ReportsGrid1(
     items: List<TopItem>,
     onClick: (TopRoutes) -> Unit
 ) {
@@ -797,6 +774,67 @@ private fun ReportsGrid(
                         text = item.text,
                         style = TextStyle(
                             textAlign = TextAlign.Center,
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun ReportsGrid(
+    items: List<TopItem>,
+    onClick: (TopRoutes) -> Unit
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(3),
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(max = 400.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        val filteredItems = items.filter { it.access }
+        items(filteredItems) { item ->
+            Card(
+                modifier = Modifier
+                    .width(100.dp)
+                    .height(112.dp)
+                    .padding(vertical = 6.dp),
+                onClick = { onClick(item.screen) },
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 2.dp
+                ),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                ),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.SpaceEvenly,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Spacer(Modifier.height(12.dp))
+                    item.icon?.run {
+                        AppIcon(
+                            modifier = Modifier
+                                .weight(1f),
+                            icon = item.icon,
+                            size = 26.dp,
+                        )
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        modifier = Modifier
+                            .weight(1f),
+                        text = item.text,
+                        style = TextStyle(
+                            textAlign = TextAlign.Center,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
                         )
                     )
                 }

@@ -5,24 +5,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -34,31 +26,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.accounts.Entries
-import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.BottomHeading
-import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.DeleteIcon
 import com.example.statspos.presentation.ui.components.ErrorDialog
-import com.example.statspos.presentation.ui.components.HeadingMedium
-import com.example.statspos.presentation.ui.components.LabelLarge
-import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListHeading
+import com.example.statspos.presentation.ui.components.ListLabel
 import com.example.statspos.presentation.ui.components.PasswordDialog
-import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
-import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.accounts.entries.expense.ExpenseEntriesViewModel
 import com.example.statspos.presentation.viewmodels.accounts.entries.journal.JournalEntriesViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.PasswordFor
@@ -285,47 +269,47 @@ private fun ListCard(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    HeadingMedium("Debit: ")
-                    LabelMedium(item.debitAccountName.toString())
+                    ListHeading("Debit: ")
+                    ListLabel(item.debitAccountName.toString())
                 }
                 Spacer(Modifier.height(2.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    HeadingMedium("Credit: ")
-                    LabelMedium(item.creditAccountName.toString())
+                    ListHeading("Credit: ")
+                    ListLabel(item.creditAccountName.toString())
                 }
                 Spacer(Modifier.height(2.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    HeadingMedium("Amount", Modifier.width(150.dp))
-                    HeadingMedium("Date", Modifier.weight(1f))
+                    ListHeading("Amount", Modifier.width(150.dp))
+                    ListHeading("Date", Modifier.weight(1f))
                 }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    LabelMedium(HP.formatDecimal(item.amount), Modifier.width(150.dp))
-                    LabelMedium(item.date.toString(), Modifier.weight(1f))
-                }
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    HeadingMedium("User: ")
-                    LabelMedium(item.username.toString())
+                    ListLabel(HP.formatDecimal(item.amount), Modifier.width(150.dp))
+                    ListLabel(item.date.toString(), Modifier.weight(1f))
                 }
                 Spacer(Modifier.height(2.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    HeadingMedium("Naration: ")
-                    LabelMedium(item.naration.toString())
+                    ListHeading("User: ")
+                    ListLabel(item.username.toString())
+                }
+                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    ListHeading("Naration: ")
+                    ListLabel(item.naration.toString())
                 }
             }
 

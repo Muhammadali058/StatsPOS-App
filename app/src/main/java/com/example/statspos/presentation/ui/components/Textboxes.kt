@@ -718,14 +718,9 @@ fun SearchBox(
         )
         if (showFilterIcon) {
             Spacer(Modifier.width(4.dp))
-            AppIconButton(
-                onClick = {
-                    onFilterClick()
-                },
-                icon = Icons.Default.FilterList,
-                buttonSize = 32.dp,
-                size = 26.dp
-            )
+            FilterIcon{
+                onFilterClick()
+            }
         }
     }
 }

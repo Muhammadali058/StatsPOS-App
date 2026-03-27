@@ -26,6 +26,7 @@ import kotlin.math.abs
 
 object HP {
     const val ITEMS_PER_PAGE = 50
+    var darkTheme = false
 
     var clientId: Int = 1
     var branchId: Int = 1

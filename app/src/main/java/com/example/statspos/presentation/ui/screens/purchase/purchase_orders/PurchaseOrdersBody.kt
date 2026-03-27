@@ -50,6 +50,9 @@ import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListHeading
+import com.example.statspos.presentation.ui.components.ListLabel
+import com.example.statspos.presentation.ui.components.ListMainLabel
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
@@ -259,7 +262,7 @@ private fun ListCard(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                LabelLarge(item.purchaseOrderName.toString())
+                ListMainLabel(item.purchaseOrderName.toString())
                 Spacer(Modifier.height(4.dp))
                 Row(
                     modifier = Modifier
@@ -271,16 +274,16 @@ private fun ListCard(
                             modifier = Modifier
                                 .fillMaxWidth(),
                         ) {
-                            HeadingMedium("Total: ")
-                            LabelMedium(HP.formatDecimal(item.total))
+                            ListHeading("Total: ")
+                            ListLabel(HP.formatDecimal(item.total))
                         }
                         Spacer(Modifier.height(2.dp))
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth(),
                         ) {
-                            HeadingMedium("Remarks: ")
-                            LabelMedium(item.remarks.toString())
+                            ListHeading("Remarks: ")
+                            ListLabel(item.remarks.toString())
                         }
                     }
                 }

@@ -37,7 +37,6 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.example.statspos.domain.models.items.Categories
 import com.example.statspos.domain.models.warehouse.Warehouses
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
@@ -45,13 +44,12 @@ import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.DeleteIcon
 import com.example.statspos.presentation.ui.components.ErrorDialog
-import com.example.statspos.presentation.ui.components.HeadingMedium
-import com.example.statspos.presentation.ui.components.LabelLarge
-import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListHeading
+import com.example.statspos.presentation.ui.components.ListLabel
+import com.example.statspos.presentation.ui.components.ListMainLabel
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
-import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
@@ -297,14 +295,14 @@ private fun ListCard(
                 modifier = Modifier
                     .weight(1f)
             ) {
-                LabelLarge(item.warehouseName.toString())
+                ListMainLabel(item.warehouseName.toString())
                 Spacer(Modifier.height(2.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    HeadingMedium("Remarks: ")
-                    LabelMedium(item.remarks.toString())
+                    ListHeading("Remarks: ")
+                    ListLabel(item.remarks.toString())
                 }
             }
 

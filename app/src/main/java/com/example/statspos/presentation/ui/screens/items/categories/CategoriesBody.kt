@@ -38,14 +38,13 @@ import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.DeleteIcon
 import com.example.statspos.presentation.ui.components.ErrorDialog
-import com.example.statspos.presentation.ui.components.HeadingMedium
-import com.example.statspos.presentation.ui.components.LabelLarge
-import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListHeading
 import com.example.statspos.presentation.ui.components.ListImageView
+import com.example.statspos.presentation.ui.components.ListLabel
+import com.example.statspos.presentation.ui.components.ListMainLabel
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
-import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.items.categories.CategoriesViewModel
@@ -237,7 +236,7 @@ private fun ListCard(
                 modifier = Modifier
                     .weight(1f)
             ) {
-                LabelLarge(item.categoryName.toString())
+                ListMainLabel(item.categoryName.toString())
 
                 item.remarks?.let {
                     if (it.isNotEmpty()) {
@@ -246,8 +245,8 @@ private fun ListCard(
                             modifier = Modifier
                                 .fillMaxWidth(),
                         ) {
-                            HeadingMedium("Remarks: ")
-                            LabelMedium(item.remarks.toString())
+                            ListHeading("Remarks: ")
+                            ListLabel(item.remarks.toString())
                         }
                     }
                 }

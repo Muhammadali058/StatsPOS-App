@@ -38,6 +38,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.example.statspos.R
 import com.example.statspos.domain.models.sales.Sales
 import com.example.statspos.domain.models.sales.SalesBills
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
@@ -46,6 +47,7 @@ import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.AppText
 import com.example.statspos.presentation.ui.components.ConfirmDialog
+import com.example.statspos.presentation.ui.components.DropdownItem
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.PasswordDialog
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
@@ -365,8 +367,11 @@ private fun Home(
                                 modifier = Modifier
                                     .width(200.dp),
                             ) {
-                                DropdownMenuItem(
-                                    text = { AppText("Margin") },
+                                DropdownItem(
+                                    text = "Margin",
+                                    icon = {
+                                        AppIcon(R.drawable.margin, size = 16.dp)
+                                    },
                                     onClick = {
                                         menuExpanded = false
                                         onMarginClick(salesState.totalDisc)

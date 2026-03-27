@@ -49,6 +49,9 @@ import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListHeading
+import com.example.statspos.presentation.ui.components.ListLabel
+import com.example.statspos.presentation.ui.components.ListMainLabel
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
@@ -314,7 +317,7 @@ private fun ListCard(
                 modifier = Modifier
                     .weight(1f)
             ) {
-                LabelLarge(item.gatepassName.toString())
+                ListMainLabel(item.gatepassName.toString())
                 Spacer(Modifier.height(2.dp))
                 Row(
                     modifier = Modifier
@@ -329,16 +332,16 @@ private fun ListCard(
                             modifier = Modifier
                                 .fillMaxWidth(),
                         ) {
-                            HeadingMedium("Date: ")
-                            LabelMedium(item.date.toString())
+                            ListHeading("Date: ")
+                            ListLabel(item.date.toString())
                         }
                         Spacer(Modifier.height(2.dp))
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth(),
                         ) {
-                            HeadingMedium("Remarks: ")
-                            LabelMedium(item.remarks.toString())
+                            ListHeading("Remarks: ")
+                            ListLabel(item.remarks.toString())
                         }
                     }
                     Spacer(Modifier.width(8.dp))

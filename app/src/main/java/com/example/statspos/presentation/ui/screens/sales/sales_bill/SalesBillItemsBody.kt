@@ -53,7 +53,11 @@ import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListHeading
 import com.example.statspos.presentation.ui.components.ListImageView
+import com.example.statspos.presentation.ui.components.ListLabel
+import com.example.statspos.presentation.ui.components.ListMainHeading
+import com.example.statspos.presentation.ui.components.ListMainLabel
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.SearchBox
@@ -293,7 +297,7 @@ private fun ListCard(
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    LabelLarge(
+                    ListMainLabel(
                         modifier = Modifier
                             .weight(1f),
                         text = item.itemname.toString()
@@ -313,15 +317,15 @@ private fun ListCard(
                         modifier = Modifier
                             .weight(.7f)
                     ) {
-                        HeadingMedium(text = "Qty: ")
-                        LabelMedium(text = HP.formatDecimal(item.qty))
+                        ListHeading(text = "Qty: ")
+                        ListLabel(text = HP.formatDecimal(item.qty))
                     }
                     Row(
                         modifier = Modifier
                             .weight(1f)
                     ) {
-                        HeadingMedium(text = "Rate: ")
-                        LabelMedium(text = HP.formatDecimal(item.rate))
+                        ListHeading(text = "Rate: ")
+                        ListLabel(text = HP.formatDecimal(item.rate))
                     }
                 }
                 if (HP.settings.saleCartons == true) {
@@ -356,15 +360,15 @@ private fun ListCard(
                         modifier = Modifier
                             .weight(.7f)
                     ) {
-                        HeadingMedium(text = "Disc: ")
-                        LabelMedium(text = HP.formatDecimal(item.disc))
+                        ListHeading(text = "Disc: ")
+                        ListLabel(text = HP.formatDecimal(item.disc))
                     }
                     Row(
                         modifier = Modifier
                             .weight(1f)
                     ) {
-                        HeadingLarge(text = "Total: ")
-                        LabelLarge(text = HP.formatDecimal(item.total))
+                        ListMainHeading(text = "Total: ")
+                        ListMainLabel(text = HP.formatDecimal(item.total))
                     }
                 }
             }

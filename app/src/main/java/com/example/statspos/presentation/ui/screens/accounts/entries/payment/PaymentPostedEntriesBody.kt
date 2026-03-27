@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.MaterialTheme
@@ -37,8 +36,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.accounts.Entries
-import com.example.statspos.domain.models.reports.accounts.AccountReport
 import com.example.statspos.domain.models.accounts.EntryVoucher
+import com.example.statspos.domain.models.reports.accounts.AccountReport
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.ComboBox
@@ -46,12 +45,11 @@ import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.DeleteIcon
 import com.example.statspos.presentation.ui.components.ErrorDialog
-import com.example.statspos.presentation.ui.components.HeadingMedium
-import com.example.statspos.presentation.ui.components.LabelLarge
-import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListHeading
+import com.example.statspos.presentation.ui.components.ListLabel
+import com.example.statspos.presentation.ui.components.ListMainLabel
 import com.example.statspos.presentation.ui.components.PasswordDialog
-import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
@@ -356,39 +354,39 @@ private fun ListCard(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                LabelLarge(item.accountName.toString())
+                ListMainLabel(item.accountName.toString())
                 Spacer(Modifier.height(2.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    HeadingMedium("Amount", Modifier.width(120.dp))
-                    HeadingMedium("MOP", Modifier.width(50.dp))
-                    HeadingMedium("Date", Modifier.weight(1f))
+                    ListHeading("Amount", Modifier.width(120.dp))
+                    ListHeading("MOP", Modifier.width(50.dp))
+                    ListHeading("Date", Modifier.weight(1f))
                 }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    LabelMedium(HP.formatDecimal(item.amount), Modifier.width(120.dp))
-                    LabelMedium(item.mop.toString(), Modifier.width(50.dp))
-                    LabelMedium(item.date.toString(), Modifier.weight(1f))
-                }
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    HeadingMedium("User: ")
-                    LabelMedium(item.username.toString())
+                    ListLabel(HP.formatDecimal(item.amount), Modifier.width(120.dp))
+                    ListLabel(item.mop.toString(), Modifier.width(50.dp))
+                    ListLabel(item.date.toString(), Modifier.weight(1f))
                 }
                 Spacer(Modifier.height(2.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    HeadingMedium("Naration: ")
-                    LabelMedium(item.naration.toString())
+                    ListHeading("User: ")
+                    ListLabel(item.username.toString())
+                }
+                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    ListHeading("Naration: ")
+                    ListLabel(item.naration.toString())
                 }
             }
             Spacer(Modifier.width(8.dp))

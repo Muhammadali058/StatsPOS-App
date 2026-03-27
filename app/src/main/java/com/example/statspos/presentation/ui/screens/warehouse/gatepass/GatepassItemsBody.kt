@@ -32,21 +32,18 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.statspos.domain.models.items.Categories
-import com.example.statspos.domain.models.items.PackageItems
 import com.example.statspos.domain.models.warehouse.GatepassItems
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
-import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.DeleteIcon
 import com.example.statspos.presentation.ui.components.ErrorDialog
-import com.example.statspos.presentation.ui.components.HeadingMedium
-import com.example.statspos.presentation.ui.components.LabelLarge
-import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListHeading
 import com.example.statspos.presentation.ui.components.ListImageView
+import com.example.statspos.presentation.ui.components.ListLabel
+import com.example.statspos.presentation.ui.components.ListMainLabel
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
@@ -255,7 +252,7 @@ private fun ListCard(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                LabelLarge(item.itemname.toString())
+                ListMainLabel(item.itemname.toString())
                 Spacer(Modifier.height(2.dp))
                 Row(
                     modifier = Modifier
@@ -265,8 +262,8 @@ private fun ListCard(
                         modifier = Modifier
                             .weight(1f),
                     ) {
-                        HeadingMedium("Qty: ")
-                        LabelMedium(HP.formatDecimal(item.qty))
+                        ListHeading("Qty: ")
+                        ListLabel(HP.formatDecimal(item.qty))
                     }
                     if (HP.settings.saleCartons == true) {
                         Spacer(Modifier.height(2.dp))
@@ -274,8 +271,8 @@ private fun ListCard(
                             modifier = Modifier
                                 .weight(1f),
                         ) {
-                            HeadingMedium("Crtn: ")
-                            LabelMedium(item.crtn.toString())
+                            ListHeading("Crtn: ")
+                            ListLabel(item.crtn.toString())
                         }
                     }
                 }

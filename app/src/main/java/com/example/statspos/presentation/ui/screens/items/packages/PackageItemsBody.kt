@@ -45,6 +45,9 @@ import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListHeading
+import com.example.statspos.presentation.ui.components.ListLabel
+import com.example.statspos.presentation.ui.components.ListMainLabel
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
@@ -247,24 +250,24 @@ private fun ListCard(
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    LabelLarge(item.itemname.toString())
+                    ListMainLabel(item.itemname.toString())
                 }
                 Spacer(Modifier.height(2.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    HeadingMedium("Qty", Modifier.weight(1f))
-                    HeadingMedium("Rate", Modifier.weight(1f))
-                    HeadingMedium("Total", Modifier.weight(1f))
+                    ListHeading("Qty", Modifier.weight(1f))
+                    ListHeading("Rate", Modifier.weight(1f))
+                    ListHeading("Total", Modifier.weight(1f))
                 }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    LabelMedium(HP.formatDecimal(item.qty), Modifier.weight(1f))
-                    LabelMedium(HP.formatDecimal(item.rate), Modifier.weight(1f))
-                    LabelMedium(HP.formatDecimal(item.total), Modifier.weight(1f))
+                    ListLabel(HP.formatDecimal(item.qty), Modifier.weight(1f))
+                    ListLabel(HP.formatDecimal(item.rate), Modifier.weight(1f))
+                    ListLabel(HP.formatDecimal(item.total), Modifier.weight(1f))
                 }
             }
 

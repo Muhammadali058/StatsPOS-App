@@ -2,6 +2,7 @@
 
 package com.example.statspos.presentation.ui.components
 
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -51,15 +52,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.NavKey
+import com.example.statspos.R
 import com.example.statspos.presentation.ui.screens.BottomRoutes
 import com.example.statspos.presentation.ui.screens.TopRoutes
 import com.example.statspos.presentation.ui.theme.backgroundLight
 import com.example.statspos.presentation.ui.theme.dividerLight
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.SnackbarType
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
@@ -71,29 +75,29 @@ data class TopItem(
 )
 
 data class BottomNavItem(
-    val icon: ImageVector,
+    @DrawableRes val icon: Int,
     val title: String,
 )
 
 val BOTTOM_DESTINATIONS = mapOf(
     BottomRoutes.Home to BottomNavItem(
-        icon = Icons.Default.Home,
+        icon = R.drawable.home,
         title = "Home"
     ),
     BottomRoutes.Items to BottomNavItem(
-        icon = Icons.Default.List,
+        icon = R.drawable.items,
         title = "Items"
     ),
     BottomRoutes.Sales to BottomNavItem(
-        icon = Icons.Default.ShoppingCart,
+        icon = R.drawable.sales,
         title = "Sales"
     ),
     BottomRoutes.Purchase to BottomNavItem(
-        icon = Icons.Default.ShoppingBag,
+        icon = R.drawable.purchase,
         title = "Purchase"
     ),
     BottomRoutes.Reports to BottomNavItem(
-        icon = Icons.Default.AccountTree,
+        icon = R.drawable.reports,
         title = "Reports"
     ),
 )
@@ -134,9 +138,13 @@ fun BottomBar(
     onSelectKey: (NavKey) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val selectedColor = MaterialTheme.colorScheme.primary
     val backgroundColor = MaterialTheme.colorScheme.surface
     val foregroundColor = MaterialTheme.colorScheme.onSurface
-    val selectedColor = MaterialTheme.colorScheme.primary
+//    val foregroundColor = if (HP.darkTheme)
+//        MaterialTheme.colorScheme.onSurface.copy(0.5f)
+//    else
+//        MaterialTheme.colorScheme.onSurface
 
 
 //    NavigationBar
@@ -218,12 +226,14 @@ fun BottomBar(
                 Spacer(Modifier.height(6.dp))
 
                 Icon(
-                    imageVector = data.icon,
+                    painter = painterResource(data.icon),
                     contentDescription = data.title,
                     tint = if (selected)
                         selectedColor
                     else
-                        foregroundColor
+                        foregroundColor,
+                    modifier = Modifier
+                        .size(20.dp)
                 )
 
                 Text(

@@ -39,11 +39,11 @@ import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.ErrorDialog
-import com.example.statspos.presentation.ui.components.HeadingLarge
-import com.example.statspos.presentation.ui.components.HeadingMedium
-import com.example.statspos.presentation.ui.components.LabelLarge
-import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListHeading
+import com.example.statspos.presentation.ui.components.ListLabel
+import com.example.statspos.presentation.ui.components.ListMainHeading
+import com.example.statspos.presentation.ui.components.ListMainLabel
 import com.example.statspos.presentation.ui.components.PasswordDialog
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
@@ -268,10 +268,10 @@ private fun ListCard(
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    HeadingMedium("Bill No. ")
-                    LabelMedium(item.id.toString())
+                    ListHeading("Bill No. ")
+                    ListLabel(item.id.toString())
                     Spacer(Modifier.width(8.dp))
-                    LabelLarge(item.customerName.toString())
+                    ListMainLabel(item.customerName.toString())
                 }
                 Spacer(Modifier.height(2.dp))
                 Row(
@@ -279,8 +279,8 @@ private fun ListCard(
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    HeadingMedium("Date: ")
-                    LabelLarge(item.date.toString())
+                    ListHeading("Date: ")
+                    ListLabel(item.date.toString())
                 }
             }
             if(HP.userRights.printDuplicates == true) {
@@ -300,24 +300,24 @@ private fun ListCard(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            HeadingLarge("Total", Modifier.weight(1f))
-            HeadingMedium("On", Modifier.weight(.5f))
-            HeadingMedium("Type", Modifier.weight(.5f))
-            HeadingMedium("MOP", Modifier.weight(.5f))
-            HeadingMedium("R/W", Modifier.weight(.5f))
+            ListMainHeading("Total", Modifier.weight(1f))
+            ListHeading("On", Modifier.weight(.5f))
+            ListHeading("Type", Modifier.weight(.5f))
+            ListHeading("MOP", Modifier.weight(.5f))
+            ListHeading("R/W", Modifier.weight(.5f))
         }
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            LabelLarge(
+            ListMainLabel(
                 HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)),
                 Modifier.weight(1f)
             )
-            LabelMedium(item.salesOn.toString(), Modifier.weight(.5f))
-            LabelMedium(item.salesType.toString(), Modifier.weight(.5f))
-            LabelMedium(item.mop.toString(), Modifier.weight(.5f))
-            LabelMedium(item.type.toString(), Modifier.weight(.5f))
+            ListLabel(item.salesOn.toString(), Modifier.weight(.5f))
+            ListLabel(item.salesType.toString(), Modifier.weight(.5f))
+            ListLabel(item.mop.toString(), Modifier.weight(.5f))
+            ListLabel(item.type.toString(), Modifier.weight(.5f))
         }
     }
 }

@@ -12,6 +12,7 @@ import com.example.statspos.presentation.ui.screens.items.AddUpdateItemScreen
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.ThemeMode
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -30,6 +31,8 @@ class MainActivity : ComponentActivity() {
                 ThemeMode.DARK -> true
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
             }
+
+            HP.darkTheme = darkTheme
 
             StatsPOSTheme(
                 darkTheme = darkTheme

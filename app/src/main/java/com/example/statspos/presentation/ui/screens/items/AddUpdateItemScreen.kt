@@ -69,6 +69,7 @@ import com.example.statspos.presentation.ui.components.CustomDatePickerDialog
 import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.DiscountTextbox
 import com.example.statspos.presentation.ui.components.Dropdown
+import com.example.statspos.presentation.ui.components.DropdownItem
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.ExpandableSection
 import com.example.statspos.presentation.ui.components.PasswordDialog
@@ -363,21 +364,20 @@ private fun Home(
                                 modifier = Modifier
                                     .width(200.dp),
                             ) {
-                                DropdownMenuItem(
-                                    text = { AppText("Linked Items") },
-                                    leadingIcon = {
-                                        AppIcon(R.drawable.linked)
+                                DropdownItem(
+                                    text = "Linked Items",
+                                    icon = {
+                                        AppIcon(R.drawable.linked, size = 20.dp)
                                     },
                                     onClick = {
                                         menuExpanded = false
                                         onLinkedItemsClick(HP.getIntValue(state.crtnSize))
                                     }
                                 )
-
-                                DropdownMenuItem(
-                                    text = { AppText("Sub Barcodes") },
-                                    leadingIcon = {
-                                        AppIcon(R.drawable.sub)
+                                DropdownItem(
+                                    text = "Sub Barcodes",
+                                    icon = {
+                                        AppIcon(R.drawable.sub, size = 20.dp)
                                     },
                                     onClick = {
                                         menuExpanded = false

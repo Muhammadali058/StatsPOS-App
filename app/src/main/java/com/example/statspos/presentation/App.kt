@@ -82,7 +82,6 @@ fun App() {
                     DB.setBaseUrl(baseUrl)
                 }
 
-                Log.d("TAG Base Url", baseUrl)
                 navigate(Screens.Login(remember, username, password))
             }
         } else {

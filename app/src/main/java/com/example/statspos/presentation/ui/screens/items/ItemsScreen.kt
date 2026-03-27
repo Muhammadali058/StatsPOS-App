@@ -5,16 +5,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -40,13 +36,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.R
-import com.example.statspos.domain.models.accounts.Accounts
 import com.example.statspos.domain.models.items.Items
 import com.example.statspos.presentation.ui.components.AccessDeniedBox
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
-import com.example.statspos.presentation.ui.components.AppText
 import com.example.statspos.presentation.ui.components.AutoCompleteItemsTextbox
 import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
 import com.example.statspos.presentation.ui.components.BottomHeading
@@ -57,18 +51,20 @@ import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.DeleteIcon
 import com.example.statspos.presentation.ui.components.Dropdown
 import com.example.statspos.presentation.ui.components.ErrorDialog
+import com.example.statspos.presentation.ui.components.FilterIcon
 import com.example.statspos.presentation.ui.components.HeadingMedium
-import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListHeading
 import com.example.statspos.presentation.ui.components.ListImageView
+import com.example.statspos.presentation.ui.components.ListLabel
+import com.example.statspos.presentation.ui.components.ListMainLabel
 import com.example.statspos.presentation.ui.components.PasswordDialog
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SubChipsRow
-import com.example.statspos.presentation.ui.components.SubDropdown
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
-import com.example.statspos.presentation.viewmodels.items.ItemsViewModel
 import com.example.statspos.presentation.viewmodels.SharedViewModel
+import com.example.statspos.presentation.viewmodels.items.ItemsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.PasswordFor
 import com.example.statspos.utils.UiEvent
@@ -387,14 +383,9 @@ private fun SearchBox(
             size = 26.dp
         )
         Spacer(Modifier.width(4.dp))
-        AppIconButton(
-            onClick = {
-                onFilterClick()
-            },
-            icon = Icons.Default.FilterList,
-            buttonSize = 32.dp,
-            size = 26.dp
-        )
+        FilterIcon{
+            onFilterClick()
+        }
     }
 }
 
@@ -480,7 +471,7 @@ private fun ListCard(
                         .fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    LabelLarge(
+                    ListMainLabel(
                         modifier = Modifier
                             .weight(1f),
                         text = item.itemname.toString()
@@ -493,31 +484,28 @@ private fun ListCard(
                         }
                     }
                 }
-                // Itemname
-//                LabelLarge(item.itemname.toString())
                 Spacer(Modifier.height(2.dp))
-
                 // Rows when fourRateSystem
                 if (HP.settings.fourRateSystem == true) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
                     ) {
-                        HeadingMedium("Cost", Modifier.weight(1f))
-                        HeadingMedium("Rate 1", Modifier.weight(1f))
-                        HeadingMedium("Rate 2", Modifier.weight(1f))
-                        HeadingMedium("Rate 3", Modifier.weight(1f))
-                        HeadingMedium("Rate 4", Modifier.weight(1f))
+                        ListHeading("Cost", Modifier.weight(1f))
+                        ListHeading("Rate 1", Modifier.weight(1f))
+                        ListHeading("Rate 2", Modifier.weight(1f))
+                        ListHeading("Rate 3", Modifier.weight(1f))
+                        ListHeading("Rate 4", Modifier.weight(1f))
                     }
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
                     ) {
-                        LabelMedium(HP.formatDecimal(item.cost), Modifier.weight(1f))
-                        LabelMedium(HP.formatDecimal(item.retail), Modifier.weight(1f))
-                        LabelMedium(HP.formatDecimal(item.wholesale), Modifier.weight(1f))
-                        LabelMedium(HP.formatDecimal(item.rate3), Modifier.weight(1f))
-                        LabelMedium(HP.formatDecimal(item.rate4), Modifier.weight(1f))
+                        ListLabel(HP.formatDecimal(item.cost), Modifier.weight(1f))
+                        ListLabel(HP.formatDecimal(item.retail), Modifier.weight(1f))
+                        ListLabel(HP.formatDecimal(item.wholesale), Modifier.weight(1f))
+                        ListLabel(HP.formatDecimal(item.rate3), Modifier.weight(1f))
+                        ListLabel(HP.formatDecimal(item.rate4), Modifier.weight(1f))
                     }
                 } else
                 {
@@ -526,19 +514,19 @@ private fun ListCard(
                         modifier = Modifier
                             .fillMaxWidth(),
                     ) {
-                        HeadingMedium(
+                        ListHeading(
                             text = "Cost",
                             Modifier.weight(1f)
                         )
-                        HeadingMedium(
+                        ListHeading(
                             text = "Retail",
                             Modifier.weight(1f)
                         )
-                        HeadingMedium(
+                        ListHeading(
                             text = "W.Sale",
                             Modifier.weight(1f)
                         )
-                        HeadingMedium(
+                        ListHeading(
                             text = if (HP.settings.saleCartons == true) "C.Rate" else "MP",
                             Modifier.weight(1f)
                         )
@@ -547,19 +535,19 @@ private fun ListCard(
                         modifier = Modifier
                             .fillMaxWidth(),
                     ) {
-                        LabelMedium(
+                        ListLabel(
                             text = HP.formatDecimal(item.cost),
                             Modifier.weight(1f)
                         )
-                        LabelMedium(
+                        ListLabel(
                             text = HP.formatDecimal(item.retail),
                             Modifier.weight(1f)
                         )
-                        LabelMedium(
+                        ListLabel(
                             text = HP.formatDecimal(item.wholesale),
                             Modifier.weight(1f)
                         )
-                        LabelMedium(
+                        ListLabel(
                             text = if (HP.settings.saleCartons == true) HP.formatDecimal(item.crtnRate) else HP.formatDecimal(
                                 item.marketPrice
                             ),
@@ -581,16 +569,16 @@ private fun ListCard(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                HeadingMedium("Stock Pcs: ")
-                LabelMedium(HP.formatDecimal(item.stockPcs))
+                ListHeading("Stock Pcs: ")
+                ListLabel(HP.formatDecimal(item.stockPcs))
             }
             if (HP.settings.saleCartons == true) {
                 Row(
                     modifier = Modifier
                         .weight(1f),
                 ) {
-                    HeadingMedium("Stock Crtn: ")
-                    LabelMedium(item.stockCrtn.toString())
+                    ListHeading("Stock Crtn: ")
+                    ListLabel(item.stockCrtn.toString())
                 }
             }
         }
@@ -603,8 +591,8 @@ private fun ListCard(
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    HeadingMedium("Category: ")
-                    LabelMedium(item.categoryName.toString())
+                    ListHeading("Category: ")
+                    ListLabel(item.categoryName.toString())
                 }
             }
         }
@@ -617,8 +605,8 @@ private fun ListCard(
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    HeadingMedium("Sub-Category: ")
-                    LabelMedium(item.subCategoryName.toString())
+                    ListHeading("Sub-Category: ")
+                    ListLabel(item.subCategoryName.toString())
                 }
             }
         }
@@ -631,8 +619,8 @@ private fun ListCard(
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    HeadingMedium("Vendor: ")
-                    LabelMedium(item.vendorName.toString())
+                    ListHeading("Vendor: ")
+                    ListLabel(item.vendorName.toString())
                 }
             }
         }

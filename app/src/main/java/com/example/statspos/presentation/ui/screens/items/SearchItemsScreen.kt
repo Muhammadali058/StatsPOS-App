@@ -31,6 +31,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -54,6 +55,7 @@ import com.example.statspos.presentation.ui.components.ImageView
 import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
+import com.example.statspos.presentation.ui.components.ListImageView
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SubChipsRow
 import com.example.statspos.presentation.ui.components.SubDropdown
@@ -82,12 +84,12 @@ fun SearchItemsScreen(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     var showBottomSheet by remember { mutableStateOf(false) }
     var showBarcodeScanner by remember { mutableStateOf(false) }
-
     val viewModel = hiltViewModel<SearchItemsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
+    val itemFocusRequester = remember { FocusRequester() }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
@@ -97,6 +99,14 @@ fun SearchItemsScreen(
                 showErrorDialog = true
             }
         )
+    }
+
+    // Edit data when update
+    LaunchedEffect(Unit) {
+        if (!state.hasLoadedOnce) {
+            itemFocusRequester.requestFocus()
+            viewModel.setHasLoadedOnce(true)
+        }
     }
 
     if (showErrorDialog) {
@@ -120,9 +130,6 @@ fun SearchItemsScreen(
             }
         )
     }
-
-//    var selectedCategory by remember { mutableStateOf(HP.getNoneDropdownItem()) }
-//    var selectedSubCategory by remember { mutableStateOf(HP.getNoneDropdownItem()) }
 
     Scaffold(
         snackbarHost = {
@@ -227,6 +234,7 @@ fun SearchItemsScreen(
                             .background(MaterialTheme.colorScheme.surface)
                             .padding(ConstantPaddings.BODY_HORIZONTAL)
                             .padding(vertical = 8.dp),
+                        itemFocusRequester = itemFocusRequester,
                         value = state.search,
                         onValueChange = viewModel::onSearchChange,
                         onItemSelected = {
@@ -306,6 +314,7 @@ fun SearchItemsScreen(
 @Composable
 private fun SearchBox(
     modifier: Modifier = Modifier,
+    itemFocusRequester: FocusRequester? = null,
     value: String,
     onValueChange: (String) -> Unit,
     onItemSelected: (String) -> Unit,
@@ -333,6 +342,7 @@ private fun SearchBox(
                     text = "Search"
                 )
             },
+            focusRequester = itemFocusRequester,
         )
         Spacer(Modifier.width(4.dp))
         AppIconButton(
@@ -413,7 +423,7 @@ private fun ListCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // Image
-            ImageView(
+            ListImageView(
                 imageUrl = item.imageUrl,
                 modifier = Modifier
                     .size(60.dp),

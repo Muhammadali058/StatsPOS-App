@@ -1,6 +1,7 @@
 package com.example.statspos.presentation.ui.screens.purchase.purchase_bill
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -284,10 +285,10 @@ private fun ListCard(
                             .weight(1f),
                         text = item.itemname.toString()
                     )
-                    Spacer(Modifier.width(8.dp))
-                    DeleteIcon {
-                        onDeleteClick(item)
-                    }
+//                    Spacer(Modifier.width(8.dp))
+//                    DeleteIcon {
+//                        onDeleteClick(item)
+//                    }
                 }
                 Spacer(Modifier.height(2.dp))
                 Row(
@@ -348,7 +349,9 @@ private fun ListCard(
                 Spacer(Modifier.height(2.dp))
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Row(
                         modifier = Modifier
@@ -356,6 +359,10 @@ private fun ListCard(
                     ) {
                         HeadingLarge(text = "Total: ")
                         LabelLarge(text = HP.formatDecimal(item.total))
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    DeleteIcon {
+                        onDeleteClick(item)
                     }
                 }
             }

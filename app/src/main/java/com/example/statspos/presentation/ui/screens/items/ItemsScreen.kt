@@ -475,7 +475,26 @@ private fun ListCard(
                     .weight(1f),
             ) {
                 // Itemname
-                LabelLarge(item.itemname.toString())
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    LabelLarge(
+                        modifier = Modifier
+                            .weight(1f),
+                        text = item.itemname.toString()
+                    )
+
+                    if (HP.userRights.deleteAnything == true) {
+                        Spacer(Modifier.width(8.dp))
+                        DeleteIcon {
+                            onDeleteClick(item)
+                        }
+                    }
+                }
+                // Itemname
+//                LabelLarge(item.itemname.toString())
                 Spacer(Modifier.height(2.dp))
 
                 // Rows when fourRateSystem
@@ -572,13 +591,6 @@ private fun ListCard(
                 ) {
                     HeadingMedium("Stock Crtn: ")
                     LabelMedium(item.stockCrtn.toString())
-                }
-            }
-
-            if (HP.userRights.deleteAnything == true) {
-                Spacer(Modifier.width(8.dp))
-                DeleteIcon {
-                    onDeleteClick(item)
                 }
             }
         }

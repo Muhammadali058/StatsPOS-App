@@ -39,6 +39,8 @@ class SearchItemsViewModel @Inject constructor(
         val vendorId: Long = 0L,
         val selectedSearchBy: DropdownItem? = HP.itemFilters[0],
 
+        val hasLoadedOnce: Boolean = false,
+
         val isLoading: Boolean = false,
         val isLoadingNextPage: Boolean = false,
         val error: String? = null,
@@ -135,6 +137,11 @@ class SearchItemsViewModel @Inject constructor(
     fun onSelectedSearchByChange(value: DropdownItem) {
         state.update { it.copy(selectedSearchBy = value) }
     }
+
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
+    }
+
     // endregion
 
     // region Network calls

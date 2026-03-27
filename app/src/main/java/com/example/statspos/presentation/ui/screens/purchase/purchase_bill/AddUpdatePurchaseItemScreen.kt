@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -109,7 +110,7 @@ fun AddUpdatePurchaseItemScreen(
     var showErrorDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var confirmDialogText by remember { mutableStateOf("") }
-    var confirmDialogType by remember { mutableStateOf(0) }
+    var confirmDialogType by remember { mutableIntStateOf(0) }
     var showConfirmDialog by remember { mutableStateOf(false) }
     var showBarcodeScanner by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
@@ -143,9 +144,8 @@ fun AddUpdatePurchaseItemScreen(
     }
 
     // Edit data when update
-    var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        if (!hasLoadedOnce) {
+        if (!state.hasLoadedOnce) {
             viewModel.updateInitialState(
                 isUpdate = isUpdate,
                 updateId = updateId,
@@ -156,7 +156,8 @@ fun AddUpdatePurchaseItemScreen(
                 viewModel.editData(updateId)
             }
 
-            hasLoadedOnce = true
+            itemFocusRequester.requestFocus()
+            viewModel.setHasLoadedOnce(true)
         }
     }
 

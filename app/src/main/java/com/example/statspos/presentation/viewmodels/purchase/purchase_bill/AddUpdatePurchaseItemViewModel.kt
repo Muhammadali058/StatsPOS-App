@@ -89,6 +89,8 @@ class AddUpdatePurchaseItemViewModel @Inject constructor(
         val updateId: Long = 0L,
         val purchase: Purchase = Purchase(),
 
+        val hasLoadedOnce: Boolean = false,
+
         val isLoading: Boolean = false,
         val isSaving: Boolean = false,
         val message: String? = null,
@@ -249,6 +251,10 @@ class AddUpdatePurchaseItemViewModel @Inject constructor(
 
     fun onFreezeTaxChange(value: Boolean) {
         state.update { it.copy(freezeTax = value) }
+    }
+
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
     }
 
     // endregion

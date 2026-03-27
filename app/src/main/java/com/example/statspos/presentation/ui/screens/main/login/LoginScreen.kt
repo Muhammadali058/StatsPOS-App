@@ -78,9 +78,9 @@ fun LoginScreen(
         viewModel.onUsernameChange(username ?: "")
         viewModel.onPasswordChange(password ?: "")
 
-//        viewModel.login{
-//            onLogin()
-//        }
+        viewModel.login{
+            onLogin()
+        }
     }
 
     val snackbarHostState = remember { SnackbarHostState() }

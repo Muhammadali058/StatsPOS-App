@@ -147,6 +147,7 @@ fun AddUpdateSalesItemScreen(
                 viewModel.editData(updateId)
             }
 
+            itemFocusRequester.requestFocus()
             viewModel.setHasLoadedOnce(true)
         }
     }

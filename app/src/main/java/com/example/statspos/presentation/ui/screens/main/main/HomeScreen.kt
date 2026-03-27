@@ -119,11 +119,11 @@ private val items = listOf(
         R.drawable.categories,
         HP.userRights.categories == true
     ),
-    TopItem("Packages", TopRoutes.Packages, R.drawable.package_icon, HP.userRights.items == true),
+    TopItem("Packages", TopRoutes.Packages, R.drawable.packages, HP.userRights.items == true),
     TopItem(
         "Purchase\nOrders",
         TopRoutes.PurchaseOrders,
-        R.drawable.package_icon,
+        R.drawable.purchase_orders,
         HP.userRights.purchase == true
     ),
     TopItem("Users", TopRoutes.Users, R.drawable.users, HP.userRights.users == true),
@@ -133,46 +133,46 @@ private val accounts = listOf(
     TopItem(
         "Customers",
         TopRoutes.Customers,
-        R.drawable.customer_accounts,
+        R.drawable.customers,
         HP.userRights.customers == true
     ),
     TopItem(
         "Vendors",
         TopRoutes.Vendors,
-        R.drawable.vendor_accounts,
+        R.drawable.vendors,
         HP.userRights.vendors == true
     ),
     TopItem(
         "Suppliers",
         TopRoutes.Suppliers,
-        R.drawable.customer_accounts,
+        R.drawable.suppliers,
         HP.userRights.suppliers == true
     ),
-    TopItem("Banks", TopRoutes.Banks, R.drawable.bank_accounts, HP.userRights.banks == true),
+    TopItem("Banks", TopRoutes.Banks, R.drawable.banks, HP.userRights.banks == true),
     TopItem(
         "Expenses",
         TopRoutes.Expenses,
-        R.drawable.expense_accounts,
+        R.drawable.expenses,
         HP.userRights.expenses == true
     ),
     TopItem(
         "Account\nCategories",
         TopRoutes.AccountCategories,
-        R.drawable.categories,
+        R.drawable.account_categories,
         (HP.userRights.customers == true || HP.userRights.vendors == true)
     ),
 )
 private val entries = listOf(
-    TopItem("Receipt", TopRoutes.ReceiptEntry, access = HP.userRights.entry == true),
-    TopItem("Payment", TopRoutes.PaymentEntry, access = HP.userRights.entry == true),
-    TopItem("Expense", TopRoutes.ExpenseEntry, access = HP.userRights.entry == true),
-    TopItem("Journal", TopRoutes.JournalEntry, access = HP.userRights.entry == true),
-    TopItem("Stock", TopRoutes.StockEntry, access = HP.userRights.entry == true),
+    TopItem("Receipt", TopRoutes.ReceiptEntry, R.drawable.receipt_entry, access = HP.userRights.entry == true),
+    TopItem("Payment", TopRoutes.PaymentEntry, R.drawable.payment_entry, access = HP.userRights.entry == true),
+    TopItem("Expense", TopRoutes.ExpenseEntry, R.drawable.expense_entry, access = HP.userRights.entry == true),
+    TopItem("Journal", TopRoutes.JournalEntry, R.drawable.journal_entry, access = HP.userRights.entry == true),
+    TopItem("Stock", TopRoutes.StockEntry, R.drawable.stock_entry, access = HP.userRights.entry == true),
 )
 private val warehouse = listOf(
-    TopItem("Warehouses", TopRoutes.Warehouses, access = HP.userRights.warehouse == true),
-    TopItem("Transfer Stock", TopRoutes.TransferStock, access = HP.userRights.warehouse == true),
-    TopItem("Gatepass", TopRoutes.Gatepass, access = HP.userRights.warehouse == true),
+    TopItem("Warehouses", TopRoutes.Warehouses, R.drawable.warehouses, access = HP.userRights.warehouse == true),
+    TopItem("Transfer Stock", TopRoutes.TransferStock, R.drawable.transfer_stock, access = HP.userRights.warehouse == true),
+    TopItem("Gatepass", TopRoutes.Gatepass, R.drawable.gatepass, access = HP.userRights.warehouse == true),
 )
 
 @Composable

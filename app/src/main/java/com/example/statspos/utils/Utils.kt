@@ -29,6 +29,9 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.net.URL
+import io.socket.client.IO
+import io.socket.client.Socket
+import io.socket.engineio.client.transports.WebSocket
 
 enum class ThemeMode {
     LIGHT,
@@ -163,6 +166,35 @@ inline fun <reified T> Gson.get(jsonObject: JsonObject): T =
 inline fun <reified T> Gson.get(jsonObject: String): T =
     fromJson(jsonObject, object : TypeToken<T>() {}.type)
 
+object SocketManager {
+
+    private lateinit var socket: Socket
+
+    fun init() {
+        val options = IO.Options().apply {
+            transports = arrayOf(WebSocket.NAME)
+            reconnection = true
+            forceNew = true
+        }
+        socket = IO.socket(DB.socketUrl, options)
+    }
+
+    fun connect() {
+        socket.connect()
+    }
+
+    fun printCommand(data: JsonObject) {
+        socket.emit("printCommand", data)
+    }
+
+    fun join() {
+        socket.emit("join", HP.user.id)
+    }
+
+    fun disconnect() {
+        socket.disconnect()
+    }
+}
 
 object ImageCache {
 

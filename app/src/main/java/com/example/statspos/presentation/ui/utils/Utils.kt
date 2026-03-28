@@ -74,10 +74,10 @@ fun openPdf(context: Context, file: File) {
     context.startActivity(intent)
 
     // Delete
-    Handler(Looper.getMainLooper()).postDelayed({
-        file.delete()
-    }, 10_000)
-//    file.deleteOnExit()
+//    Handler(Looper.getMainLooper()).postDelayed({
+//        file.delete()
+//    }, 10_000)
+    file.deleteOnExit()
 }
 
 fun sharePdf(context: Context, file: File) {
@@ -107,10 +107,10 @@ fun sharePdf(context: Context, file: File) {
     )
 
     // Delete
-    Handler(Looper.getMainLooper()).postDelayed({
-        file.delete()
-    }, 10_000)
-//    file.deleteOnExit()
+//    Handler(Looper.getMainLooper()).postDelayed({
+//        file.delete()
+//    }, 10_000)
+    file.deleteOnExit()
 }
 
 fun openWhatsAppChat(context: Context, phone: String, message: String) {

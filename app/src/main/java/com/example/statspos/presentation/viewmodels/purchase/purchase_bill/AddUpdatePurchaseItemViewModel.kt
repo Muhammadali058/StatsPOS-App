@@ -79,6 +79,8 @@ class AddUpdatePurchaseItemViewModel @Inject constructor(
         val crtnRateEnabled: Boolean = true,
         val freezeDisc: Boolean = true,
         val freezeTax: Boolean = true,
+        val location: String = "",
+        val packing: String = "",
 
         val isExists: Boolean = false,
         val isExistsResult: Boolean = false,
@@ -408,6 +410,9 @@ class AddUpdatePurchaseItemViewModel @Inject constructor(
                 lockCrtn = item.lockCrtn!!,
                 expiry = HP.toLocalDate(item.expiry!!),
 
+                location = item.location.toString(),
+                packing = item.packing.toString(),
+
                 // Extras
                 itemCost = item.cost!!,
                 isExists = item.isExists!!,
@@ -493,6 +498,9 @@ class AddUpdatePurchaseItemViewModel @Inject constructor(
                 lockPcs = purchaseItem.lockPcs!!,
                 lockCrtn = purchaseItem.lockCrtn!!,
 
+                location = item.location.toString(),
+                packing = item.packing.toString(),
+
                 // Extras
                 itemCost = purchaseItem.cost!!,
                 stockPcs = item.stockPcs!!,
@@ -534,6 +542,8 @@ class AddUpdatePurchaseItemViewModel @Inject constructor(
 //                tax = "",
                 calculatedTax = 0.0,
                 totalTax = 0.0,
+                location = "",
+                packing = "",
 
                 grossTotal = 0.0,
                 total = 0.0,

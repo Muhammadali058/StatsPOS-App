@@ -61,6 +61,7 @@ import com.example.statspos.presentation.ui.components.AppSwitch
 import com.example.statspos.presentation.ui.components.AutoCompleteItemsTextbox
 import com.example.statspos.presentation.ui.components.BalanceBox
 import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
+import com.example.statspos.presentation.ui.components.CalculatorTB
 import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.DiscountTextbox
@@ -338,6 +339,8 @@ fun AddUpdatePurchaseItemScreen(
                         calculatedTax = state.calculatedTax,
                         freezeDisc = state.freezeDisc,
                         freezeTax = state.freezeTax,
+                        location = state.location,
+                        packing = state.packing,
                         onQtyChange = viewModel::onQtyChange,
                         onCostChange = viewModel::onCostChange,
                         onCrtnChange = viewModel::onCrtnChange,
@@ -427,6 +430,8 @@ private fun Body(
     calculatedTax: Double,
     freezeDisc: Boolean,
     freezeTax: Boolean,
+    location:String,
+    packing:String,
     onQtyChange: (String) -> Unit,
     onCostChange: (String) -> Unit,
     onCrtnChange: (String) -> Unit,
@@ -442,7 +447,7 @@ private fun Body(
             .padding(ConstantPaddings.BODY_HORIZONTAL),
     ) {
         Row {
-            Textbox(
+            CalculatorTB(
                 value = qty,
                 onValueChange = onQtyChange,
                 modifier = Modifier
@@ -457,20 +462,20 @@ private fun Body(
                 focusRequester = qtyFocusRequester,
             )
             Spacer(Modifier.width(8.dp))
-            Textbox(
+            CalculatorTB(
                 value = cost,
                 onValueChange = onCostChange,
                 modifier = Modifier
                     .weight(1f),
-                trailingIcon = {
-                    AppIconButton(
-                        icon = R.drawable.calculate,
-                        onClick = {
-                            onCostChange(HP.evaluateExpression(cost))
-                        },
-                        size = 20.dp,
-                    )
-                },
+//                trailingIcon = {
+//                    AppIconButton(
+//                        icon = R.drawable.calculate,
+//                        onClick = {
+//                            onCostChange(HP.evaluateExpression(cost))
+//                        },
+//                        size = 20.dp,
+//                    )
+//                },
                 label = {
                     Text("Cost")
                 },
@@ -478,7 +483,7 @@ private fun Body(
         }
         if (HP.settings.saleCartons == true) {
             Row {
-                Textbox(
+                CalculatorTB(
                     value = if (HP.getIntValue(crtn) > 0) crtn else "",
                     onValueChange = onCrtnChange,
                     modifier = Modifier
@@ -492,7 +497,7 @@ private fun Body(
                     enabled = crtnEnabled,
                 )
                 Spacer(Modifier.width(8.dp))
-                Textbox(
+                CalculatorTB(
                     value = crtnSize.toString(),
                     onValueChange = {},
                     modifier = Modifier
@@ -649,6 +654,26 @@ private fun Body(
                 }
             }
         }
+        if(location.isNotEmpty()) {
+            Spacer(Modifier.height(8.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                HeadingMedium("Location: ")
+                LabelMedium(location)
+            }
+        }
+        if(packing.isNotEmpty()) {
+            Spacer(Modifier.height(8.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                HeadingMedium("Packing: ")
+                LabelMedium(packing)
+            }
+        }
         if (warehouseStock.isNotEmpty()) {
             Spacer(Modifier.height(8.dp))
             Column(
@@ -695,7 +720,7 @@ private fun SaleRates(
 ) {
     ExpandableSection(
         title = "Sale Rates",
-        initiallyExpanded = false,
+        initiallyExpanded = true,
     ) {
         Spacer(Modifier.height(8.dp))
         // Retail & Wholesale
@@ -805,7 +830,7 @@ private fun Others(
 ) {
     ExpandableSection(
         title = "Others",
-        initiallyExpanded = false,
+        initiallyExpanded = true,
     ) {
         Spacer(Modifier.height(8.dp))
         AppSwitch(

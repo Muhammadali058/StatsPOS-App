@@ -129,4 +129,6 @@ dependencies {
 //    Vico for charts
     implementation(libs.vico.compose)
     implementation(libs.vico.compose.m3)
+
+    implementation(libs.socket.io.client)
 }

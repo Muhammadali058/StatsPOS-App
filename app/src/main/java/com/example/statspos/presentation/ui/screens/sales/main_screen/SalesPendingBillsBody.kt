@@ -53,8 +53,10 @@ import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.sales.main_screen.SalesPendingBillsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.PasswordFor
+import com.example.statspos.utils.SocketManager
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
+import com.google.gson.JsonObject
 
 @Composable
 fun SalesPendingBillsBody(
@@ -111,11 +113,16 @@ fun SalesPendingBillsBody(
     }
 
     fun printBill() {
-        bill?.run {
-            viewModel.getBill(id!!) { bill, ledger ->
-                showBill(bill, ledger)
-            }
+//        bill?.run {
+//            viewModel.getBill(id!!) { bill, ledger ->
+//                showBill(bill, ledger)
+//            }
+//        }
+
+        val json = JsonObject().apply {
+            addProperty("userId", "userId1")
         }
+        SocketManager.printCommand(json)
     }
 
     if (showErrorDialog) {

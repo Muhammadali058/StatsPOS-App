@@ -25,6 +25,7 @@ activityCompose = "1.13.0"
 composeBom = "2026.03.00"
 materialIconsExtended = "1.7.8"
 retrofit = "3.0.0"
+socketIoClient = "2.1.2"
 vico = "3.0.3"
 
 nav3Core = "1.0.1"
@@ -81,6 +82,7 @@ androidx-compose-runtime-saveable = { group = "androidx.compose.runtime", name =
 
 # Compose Multiplatform
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+socket-io-client = { module = "io.socket:socket.io-client", version.ref = "socketIoClient" }
 vico-compose = { group = "com.patrykandpatrick.vico", name = "compose", version.ref = "vico" }
 
 # Material 2 theming in Compose Multiplatform

@@ -64,6 +64,7 @@ import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.AppSwitch
 import com.example.statspos.presentation.ui.components.AppText
 import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
+import com.example.statspos.presentation.ui.components.CalculatorTB
 import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.CustomDatePickerDialog
 import com.example.statspos.presentation.ui.components.DateTextbox
@@ -638,37 +639,37 @@ private fun Basic(
 
         // Cost & Market Price
         Row {
-            Textbox(
+            CalculatorTB(
                 value = cost,
                 onValueChange = onCostChange,
                 modifier = Modifier.weight(1f),
-                trailingIcon = {
-                    AppIconButton(
-                        icon = R.drawable.calculate,
-                        onClick = {
-                            onCostChange(HP.evaluateExpression(cost))
-                        },
-                        size = 20.dp,
-                    )
-                },
+//                trailingIcon = {
+//                    AppIconButton(
+//                        icon = R.drawable.calculate,
+//                        onClick = {
+//                            onCostChange(HP.evaluateExpression(cost))
+//                        },
+//                        size = 20.dp,
+//                    )
+//                },
                 label = {
                     Text("Cost")
                 },
             )
             Spacer(Modifier.width(8.dp))
-            Textbox(
+            CalculatorTB(
                 value = marketPrice,
                 onValueChange = onMarketPriceChange,
                 modifier = Modifier.weight(1f),
-                trailingIcon = {
-                    AppIconButton(
-                        icon = R.drawable.calculate,
-                        onClick = {
-                            onMarketPriceChange(HP.evaluateExpression(marketPrice))
-                        },
-                        size = 20.dp,
-                    )
-                },
+//                trailingIcon = {
+//                    AppIconButton(
+//                        icon = R.drawable.calculate,
+//                        onClick = {
+//                            onMarketPriceChange(HP.evaluateExpression(marketPrice))
+//                        },
+//                        size = 20.dp,
+//                    )
+//                },
                 label = {
                     Text("Market Price")
                 }
@@ -677,19 +678,19 @@ private fun Basic(
 
         // Retail & Wholesale
         Row {
-            Textbox(
+            CalculatorTB(
                 value = retail,
                 onValueChange = onRetailChange,
                 modifier = Modifier.weight(1f),
-                trailingIcon = {
-                    AppIconButton(
-                        icon = R.drawable.calculate,
-                        onClick = {
-                            onRetailChange(HP.evaluateExpression(retail))
-                        },
-                        size = 20.dp,
-                    )
-                },
+//                trailingIcon = {
+//                    AppIconButton(
+//                        icon = R.drawable.calculate,
+//                        onClick = {
+//                            onRetailChange(HP.evaluateExpression(retail))
+//                        },
+//                        size = 20.dp,
+//                    )
+//                },
                 label = {
                     Text(
                         text = if (HP.settings.fourRateSystem == true) "Rate 1" else "Retail"
@@ -697,19 +698,19 @@ private fun Basic(
                 }
             )
             Spacer(Modifier.width(8.dp))
-            Textbox(
+            CalculatorTB(
                 value = wholesale,
                 onValueChange = onWholesaleChange,
                 modifier = Modifier.weight(1f),
-                trailingIcon = {
-                    AppIconButton(
-                        icon = R.drawable.calculate,
-                        onClick = {
-                            onWholesaleChange(HP.evaluateExpression(wholesale))
-                        },
-                        size = 20.dp,
-                    )
-                },
+//                trailingIcon = {
+//                    AppIconButton(
+//                        icon = R.drawable.calculate,
+//                        onClick = {
+//                            onWholesaleChange(HP.evaluateExpression(wholesale))
+//                        },
+//                        size = 20.dp,
+//                    )
+//                },
                 label = {
                     Text(
                         text = if (HP.settings.fourRateSystem == true) "Rate 2" else "Wholesale"
@@ -721,37 +722,37 @@ private fun Basic(
         // Rate3 & Rate4
         if (HP.settings.fourRateSystem == true) {
             Row {
-                Textbox(
+                CalculatorTB(
                     value = rate3,
                     onValueChange = onRate3Change,
                     modifier = Modifier.weight(1f),
-                    trailingIcon = {
-                        AppIconButton(
-                            icon = R.drawable.calculate,
-                            onClick = {
-                                onRate3Change(HP.evaluateExpression(rate3))
-                            },
-                            size = 20.dp,
-                        )
-                    },
+//                    trailingIcon = {
+//                        AppIconButton(
+//                            icon = R.drawable.calculate,
+//                            onClick = {
+//                                onRate3Change(HP.evaluateExpression(rate3))
+//                            },
+//                            size = 20.dp,
+//                        )
+//                    },
                     label = {
                         Text("Rate 3")
                     }
                 )
                 Spacer(Modifier.width(8.dp))
-                Textbox(
+                CalculatorTB(
                     value = rate4,
                     onValueChange = onRate4Change,
                     modifier = Modifier.weight(1f),
-                    trailingIcon = {
-                        AppIconButton(
-                            icon = R.drawable.calculate,
-                            onClick = {
-                                onRate4Change(HP.evaluateExpression(rate4))
-                            },
-                            size = 20.dp,
-                        )
-                    },
+//                    trailingIcon = {
+//                        AppIconButton(
+//                            icon = R.drawable.calculate,
+//                            onClick = {
+//                                onRate4Change(HP.evaluateExpression(rate4))
+//                            },
+//                            size = 20.dp,
+//                        )
+//                    },
                     label = {
                         Text("Rate 3")
                     }
@@ -762,22 +763,25 @@ private fun Basic(
         // Carton Rate & PCS in Carton
         if (HP.settings.saleCartons == true) {
             Row {
-                Textbox(
+                CalculatorTB(
                     value = crtnRate,
                     onValueChange = onCrtnRateChange,
                     modifier = Modifier.weight(1f),
-                    trailingIcon = {
-                        AppIconButton(
-                            icon = R.drawable.calculate,
-                            onClick = {
-                                onCrtnRateChange(HP.evaluateExpression(crtnRate))
-                            },
-                            size = 20.dp,
-                        )
-                    },
+//                    trailingIcon = {
+//                        AppIconButton(
+//                            icon = R.drawable.calculate,
+//                            onClick = {
+//                                onCrtnRateChange(HP.evaluateExpression(crtnRate))
+//                            },
+//                            size = 20.dp,
+//                        )
+//                    },
                     label = {
                         Text("Crtn Rate")
-                    }
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal
+                    ),
                 )
                 Spacer(Modifier.width(8.dp))
                 Textbox(

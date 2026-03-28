@@ -5,22 +5,25 @@ package com.example.statspos.presentation.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -29,8 +32,8 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -40,6 +43,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -60,10 +64,13 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -275,12 +282,12 @@ fun AutoCompleteItemsTextbox(
     contentPadding: PaddingValues = ConstantPaddings.CUSTOM_TEXTBOX_INSIDE,
     padding: PaddingValues = ConstantPaddings.CUSTOM_TEXTBOX_OUTSIDE,
 ) {
-    var items by remember { mutableStateOf(if(HP.appSettings.itemSuggestions == true) HP.autoCompleteItems else emptyList()) }
+    var items by remember { mutableStateOf(if (HP.appSettings.itemSuggestions == true) HP.autoCompleteItems else emptyList()) }
     var expanded by remember { mutableStateOf(false) }
 
     val filteredItems = remember(value) {
         items.filter {
-            if(HP.appSettings.innerItemSearch == true)
+            if (HP.appSettings.innerItemSearch == true)
                 it.contains(value, ignoreCase = true)
             else
                 it.startsWith(value, ignoreCase = true)
@@ -718,7 +725,7 @@ fun SearchBox(
         )
         if (showFilterIcon) {
             Spacer(Modifier.width(4.dp))
-            FilterIcon{
+            FilterIcon {
                 onFilterClick()
             }
         }
@@ -804,5 +811,229 @@ fun SearchItemBox(
             buttonSize = 32.dp,
             size = 26.dp
         )
+    }
+}
+
+@Composable
+fun CalculatorTB(
+    modifier: Modifier = Modifier,
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: @Composable (() -> Unit)? = null,
+    placeholder: @Composable (() -> Unit)? = null,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    singleLine: Boolean = true,
+    showBorder: Boolean = true,
+    focusRequester: FocusRequester? = null,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions(
+        keyboardType = KeyboardType.Decimal
+    ),
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    contentPadding: PaddingValues = ConstantPaddings.CUSTOM_TEXTBOX_INSIDE,
+    padding: PaddingValues = ConstantPaddings.CUSTOM_TEXTBOX_OUTSIDE,
+) {
+    var showCalculator by remember { mutableStateOf(false) }
+    var result by remember { mutableStateOf("0") }
+
+    Textbox(
+        modifier = modifier,
+        value = value,
+        onValueChange = onValueChange,
+        label = label,
+        placeholder = placeholder,
+        shape = OutlinedTextFieldDefaults.shape,
+        enabled = enabled,
+        readOnly = readOnly,
+        singleLine = singleLine,
+        showBorder = showBorder,
+        focusRequester = focusRequester,
+        visualTransformation = visualTransformation,
+        leadingIcon = leadingIcon,
+        trailingIcon = {
+            AppIconButton(
+                icon = R.drawable.calculate,
+                onClick = {
+                    showCalculator = true
+                },
+                size = 20.dp,
+            )
+        },
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
+        contentPadding = contentPadding,
+        padding = padding,
+    )
+
+    if (showCalculator) {
+        AlertDialog(
+            onDismissRequest = {
+                showCalculator = false
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onValueChange(result)
+                        result = "0"
+                        showCalculator = false
+                    }
+                ) {
+                    Text("OK")
+                }
+            },
+            title = { },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    AppText(
+                        text = "Calculator",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                        ),
+                        modifier = Modifier,
+                    )
+                    CalculatorScreen(
+                        result = result,
+                        onResultChange = {
+                            result = it
+                        }
+                    )
+                }
+            },
+            dismissButton = {
+
+            },
+            containerColor = MaterialTheme.colorScheme.background,
+            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            textContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        )
+    }
+}
+
+@Composable
+private fun CalculatorScreen(
+    result:String,
+    onResultChange: (String) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.SpaceBetween,
+    ) {
+        // Display
+        Text(
+            text = result,
+            fontSize = 36.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            textAlign = TextAlign.End,
+            maxLines = 1,
+            overflow = TextOverflow.Clip,
+        )
+
+        // Buttons
+        val buttons = listOf(
+            listOf("7", "8", "9", "/"),
+            listOf("4", "5", "6", "*"),
+            listOf("1", "2", "3", "-"),
+            listOf("C", "0", ".", "+"),
+        )
+
+        Column {
+            buttons.forEach { row ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    row.forEach { label ->
+                        CalculatorButton(label) {
+                            onResultChange(handleInput(result, label))
+                        }
+                    }
+                }
+            }
+            CalculatorButton("=", fillMaxWidth = true) {
+                onResultChange(handleInput(result, "="))
+            }
+        }
+    }
+}
+
+@Composable
+private fun CalculatorButton(
+    text: String,
+    fillMaxWidth: Boolean = false,
+    onClick: () -> Unit,
+) {
+    val modifier = if (fillMaxWidth) Modifier
+        .fillMaxWidth()
+        .height(70.dp)
+        .padding(8.dp)
+    else Modifier
+        .size(70.dp)
+        .padding(8.dp)
+
+    Card(
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp
+        ),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
+        modifier = modifier,
+        onClick = onClick,
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ){
+            Text(
+                text = text,
+                style = TextStyle(
+                    fontSize = 20.sp,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
+                maxLines = 1,
+                modifier = Modifier
+            )
+        }
+    }
+}
+
+private fun handleInput(current: String, input: String): String {
+    return when (input) {
+        "C" -> "0"
+        "=" -> calculateResult(current)
+        "." -> {
+            if (current.isEmpty() || current.last() in listOf('+','-','*','/')) {
+                current + "0."
+            } else {
+                val lastNumber = current.split("+", "-", "*", "/").last()
+                if (lastNumber.contains(".")) current else "$current."
+            }
+        }
+        else -> {
+            if(current == "0")
+                input
+            else
+                current + input
+        }
+    }
+}
+
+private fun calculateResult(expression: String): String {
+    return try {
+        val temp = HP.evaluateExpression(expression)
+        return HP.formatDecimal(HP.getDoubleValue(temp), 4)
+    } catch (e: Exception) {
+        "Error"
     }
 }

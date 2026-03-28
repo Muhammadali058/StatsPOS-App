@@ -1,7 +1,5 @@
 package com.example.statspos.presentation.ui.screens.main.login
 
-import android.app.Activity
-import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -27,11 +26,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -46,19 +43,17 @@ import com.example.statspos.presentation.ui.components.AppCheckbox
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
+import com.example.statspos.presentation.ui.components.CalculatorTB
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.PasswordTextbox
 import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.ui.utils.ConstantSize
-import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
 import com.example.statspos.presentation.viewmodels.main.LoginViewModel
-import com.example.statspos.presentation.viewmodels.main.MainViewModel
+import com.example.statspos.utils.SocketManager
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
-import com.example.statspos.utils.showToast
-import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -78,7 +73,11 @@ fun LoginScreen(
         viewModel.onUsernameChange(username ?: "")
         viewModel.onPasswordChange(password ?: "")
 
+        SocketManager.init()
+        SocketManager.connect()
+
         viewModel.login{
+            SocketManager.join()
             onLogin()
         }
     }

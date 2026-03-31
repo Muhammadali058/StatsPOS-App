@@ -167,15 +167,21 @@ fun PurchasePostedBillsBody(
 
     fun printBill() {
         bill?.run {
-            if (HP.appSettings.onlinePrints == true) {
-                SocketManager.printPurchaseBill(
-                    invoiceId = id!!,
-                    isPendingBill = false,
-                    billType = 1
-                )
-            } else {
-                viewModel.getBill(id!!) { bill->
+            if (shareBill) {
+                viewModel.getBill(id!!) { bill ->
                     showBill(bill)
+                }
+            } else {
+                if (HP.appSettings.onlinePrints == true) {
+                    SocketManager.printPurchaseBill(
+                        invoiceId = id!!,
+                        isPendingBill = false,
+                        billType = 1
+                    )
+                } else {
+                    viewModel.getBill(id!!) { bill ->
+                        showBill(bill)
+                    }
                 }
             }
         }
@@ -458,7 +464,7 @@ private fun SearchBox(
             onSearchClick = onSearchClick,
         )
         Spacer(Modifier.width(4.dp))
-        FilterIcon{
+        FilterIcon {
             onFilterClick()
         }
     }
@@ -503,7 +509,7 @@ private fun BodyList(
         onRefresh = onRefresh,
         isLoadingNextPage = isLoadingNextPage,
     ) {
-        item{
+        item {
             Spacer(Modifier.height(4.dp))
         }
         items(items.size) { i ->
@@ -607,7 +613,7 @@ private fun ListCard(
                 }
             }
             Spacer(Modifier.width(8.dp))
-            Column{
+            Column {
                 AppIconButton(
                     icon = Icons.Default.List,
                     onClick = {

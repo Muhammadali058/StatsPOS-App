@@ -38,6 +38,7 @@ class AddUpdateUserViewModel @Inject constructor(
         val confirmPassword: String = "",
         val userType: DropdownItem = HP.userTypes[0],
         val shift: DropdownItem = HP.shifts[0],
+        val isMainUser: Boolean = false,
 
         val imageUrl: String = "",
 
@@ -178,6 +179,10 @@ class AddUpdateUserViewModel @Inject constructor(
 
     fun onShiftSelected(value: DropdownItem) {
         state.update { it.copy(shift = value) }
+    }
+
+    fun onIsMainUserChange(value: Boolean) {
+        state.update { it.copy(isMainUser = value) }
     }
 
     //    User Rights
@@ -510,6 +515,7 @@ class AddUpdateUserViewModel @Inject constructor(
             password = state.value.password,
             userType = state.value.userType.id.toInt(),
             shift = state.value.shift.id.toInt(),
+            isMainUser = state.value.isMainUser,
 
             imageUrl = state.value.imageUrl,
         )
@@ -574,6 +580,7 @@ class AddUpdateUserViewModel @Inject constructor(
                 confirmPassword = user.password.toString(),
                 userType = HP.getDropdownById(user.userType?.toLong() ?: 0, HP.userTypes)!!,
                 shift = HP.getDropdownById(user.shift?.toLong() ?: 0, HP.shifts)!!,
+                isMainUser = user.isMainUser!!,
 
                 imageUrl = user.imageUrl!!,
             )

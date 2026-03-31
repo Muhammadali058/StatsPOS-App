@@ -24,6 +24,7 @@ import com.example.statspos.presentation.ui.screens.main.main.MainScreen
 import com.example.statspos.presentation.ui.screens.main.main.SplashScreen
 import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
 import com.example.statspos.utils.DB
+import com.example.statspos.utils.DB.socketUrl
 import com.example.statspos.utils.HP
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -53,7 +54,6 @@ private sealed class Screens : NavKey {
 
 @Composable
 fun App() {
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val backStack = rememberNavBackStack(Screens.Splash)
     val viewModel = hiltViewModel<LocalDataViewModel>()
@@ -80,6 +80,7 @@ fun App() {
                 if(!isOnline){
                     HP.clientId = 1
                     DB.setBaseUrl(baseUrl)
+                    DB.setWebSocketUrl(baseUrl)
                 }
 
                 navigate(Screens.Login(remember, username, password))

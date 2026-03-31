@@ -29,7 +29,7 @@ sealed class TopRoutes : NavKey {
 
     // region Top
     @Serializable
-    data object SearchItem : BottomRoutes()
+    data object SearchItem : TopRoutes()
 
     @Serializable
     data class AddUpdateItem(val updateId: Long, val isUpdate: Boolean) : TopRoutes()

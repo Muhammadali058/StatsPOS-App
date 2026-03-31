@@ -409,11 +409,7 @@ private fun Home(
 //                            )
 //                            Spacer(Modifier.height(8.dp))
 //                        }
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(ConstantPaddings.BODY_HORIZONTAL)
-                        ) {
+                        Row{
                             if (!isPostedBill) {
                                 Box(
                                     modifier = Modifier

@@ -27,6 +27,11 @@ object DB {
         API = "${host}/api/"
     }
 
+    fun setWebSocketUrl(baseUrl: String) {
+        val urls = baseUrl.split(":")
+        socketUrl = "${urls[0]}:${urls[1]}:5100"
+    }
+
     fun addParams(jsonObject: JsonObject): JsonObject {
         jsonObject.addProperty("clientId", HP.clientId)
         jsonObject.addProperty("branchId", HP.branchId)

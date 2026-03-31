@@ -173,18 +173,25 @@ fun SalesPostedBillsBody(
 
     fun printBill() {
         bill?.run {
-            if (HP.appSettings.onlinePrints == true) {
-                SocketManager.printSalesBill(
-                    invoiceId = id!!,
-                    isPendingBill = false,
-                    billType = 2
-                )
-            } else {
+            if (shareBill) {
                 viewModel.getBill(id!!) { bill, ledger ->
                     showBill(bill, ledger)
                 }
+            } else {
+                if (HP.appSettings.onlinePrints == true) {
+                    SocketManager.printSalesBill(
+                        invoiceId = id!!,
+                        isPendingBill = false,
+                        billType = 2
+                    )
+                } else {
+                    viewModel.getBill(id!!) { bill, ledger ->
+                        showBill(bill, ledger)
+                    }
+                }
             }
         }
+
     }
 
     if (showPrintPasswordDialog) {
@@ -480,7 +487,7 @@ private fun SearchBox(
             onSearchClick = onSearchClick,
         )
         Spacer(Modifier.width(4.dp))
-        FilterIcon{
+        FilterIcon {
             onFilterClick()
         }
     }
@@ -525,7 +532,7 @@ private fun BodyList(
         onRefresh = onRefresh,
         isLoadingNextPage = isLoadingNextPage,
     ) {
-        item{
+        item {
             Spacer(Modifier.height(4.dp))
         }
         items(items.size) { i ->

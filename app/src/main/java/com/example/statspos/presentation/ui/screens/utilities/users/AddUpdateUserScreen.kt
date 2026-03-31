@@ -190,12 +190,14 @@ fun AddUpdateUserScreen(
                         confirmPassword = state.confirmPassword,
                         userType = state.userType,
                         shift = state.shift,
+                        isMainUser = state.isMainUser,
 
                         onUsernameChange = viewModel::onUsernameChange,
                         onPasswordChange = viewModel::onPasswordChange,
                         onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
                         onUserTypeSelected = viewModel::onUserTypeSelected,
                         onShiftSelected = viewModel::onShiftSelected,
+                        onIsMainUserChange = viewModel::onIsMainUserChange,
                     )
 
                     ImageExpandable(
@@ -324,12 +326,14 @@ private fun Basic(
     confirmPassword: String,
     userType: DropdownItem,
     shift: DropdownItem,
+    isMainUser: Boolean,
 
     onUsernameChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onConfirmPasswordChange: (String) -> Unit,
     onUserTypeSelected: (DropdownItem) -> Unit,
     onShiftSelected: (DropdownItem) -> Unit,
+    onIsMainUserChange: (Boolean) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -385,6 +389,16 @@ private fun Basic(
             },
             showEndIcon = false,
         )
+        if(HP.user.isMainUser == true) {
+            Spacer(Modifier.height(8.dp))
+            AppSwitch(
+                modifier = Modifier,
+                checked = isMainUser,
+                onCheckedChange = onIsMainUserChange,
+                label = "Is Main User"
+            )
+            Spacer(Modifier.height(8.dp))
+        }
     }
 }
 
@@ -857,6 +871,8 @@ private fun BodyPrev() {
                 "",
                 DropdownItem(0L, "None"),
                 DropdownItem(0L, "None"),
+                false,
+                {},
                 {},
                 {},
                 {},

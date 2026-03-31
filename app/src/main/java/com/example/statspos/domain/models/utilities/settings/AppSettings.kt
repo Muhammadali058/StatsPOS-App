@@ -6,6 +6,8 @@ data class AppSettings(
     var instantSearch: Boolean? = null,
     var innerItemSearch: Boolean? = null,
     var itemSuggestions: Boolean? = null,
+    var onlinePrints: Boolean? = null,
+    var defaultPrintOn: Boolean? = null,
 
     val clientId:Int? = null,
     val branchId:Int? = null,

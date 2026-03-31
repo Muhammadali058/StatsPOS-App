@@ -29,6 +29,7 @@ import com.example.statspos.presentation.ui.screens.items.categories.CategoriesS
 import com.example.statspos.presentation.ui.screens.items.packages.PackagesScreen
 import com.example.statspos.presentation.ui.screens.main.login.CloseAppScreen
 import com.example.statspos.presentation.ui.screens.purchase.purchase_bill.PurchaseBillScreen
+import com.example.statspos.presentation.ui.screens.purchase.purchase_bill.ViewPurchaseBillItemsScreen
 import com.example.statspos.presentation.ui.screens.purchase.purchase_orders.PurchaseOrdersScreen
 import com.example.statspos.presentation.ui.screens.reports.accounts.AccountsReportsScreen
 import com.example.statspos.presentation.ui.screens.reports.items.ItemsReportsScreen
@@ -184,7 +185,7 @@ fun MainScreen() {
                 )
             }
             entry<TopRoutes.ViewPurchaseBillItems> { key ->
-                ViewSalesBillItemsScreen(
+                ViewPurchaseBillItemsScreen(
                     invoiceId = key.purchaseBill.id!!,
                     isPostedBill = true,
                     onBack = {

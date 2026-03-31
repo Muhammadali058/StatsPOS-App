@@ -113,16 +113,19 @@ fun SalesPendingBillsBody(
     }
 
     fun printBill() {
-//        bill?.run {
-//            viewModel.getBill(id!!) { bill, ledger ->
-//                showBill(bill, ledger)
-//            }
-//        }
-
-        val json = JsonObject().apply {
-            addProperty("userId", "userId1")
+        bill?.run {
+            if (HP.appSettings.onlinePrints == true) {
+                SocketManager.printSalesBill(
+                    invoiceId = id!!,
+                    isPendingBill = true,
+                    billType = 3
+                )
+            } else {
+                viewModel.getBill(id!!) { bill, ledger ->
+                    showBill(bill, ledger)
+                }
+            }
         }
-        SocketManager.printCommand(json)
     }
 
     if (showErrorDialog) {
@@ -232,7 +235,7 @@ private fun BodyList(
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
     ) {
-        item{
+        item {
             Spacer(Modifier.height(4.dp))
         }
         items(items) { item ->
@@ -290,7 +293,7 @@ private fun ListCard(
                     ListLabel(item.date.toString())
                 }
             }
-            if(HP.userRights.printDuplicates == true) {
+            if (HP.userRights.printDuplicates == true) {
                 Spacer(Modifier.width(8.dp))
                 Column {
                     AppIconButton(

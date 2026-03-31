@@ -68,6 +68,7 @@ import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.purchase.main_screen.PurchasePostedBillsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.PasswordFor
+import com.example.statspos.utils.SocketManager
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import kotlinx.coroutines.launch
@@ -166,11 +167,20 @@ fun PurchasePostedBillsBody(
 
     fun printBill() {
         bill?.run {
-            viewModel.getBill(id!!) { bill->
-                showBill(bill)
+            if (HP.appSettings.onlinePrints == true) {
+                SocketManager.printPurchaseBill(
+                    invoiceId = id!!,
+                    isPendingBill = false,
+                    billType = 1
+                )
+            } else {
+                viewModel.getBill(id!!) { bill->
+                    showBill(bill)
+                }
             }
         }
     }
+
 
     if (showPrintPasswordDialog) {
         PasswordDialog(

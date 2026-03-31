@@ -29,6 +29,8 @@ class AppSettingsViewModel @Inject constructor(
         val instantSearch: Boolean = false,
         val innerItemSearch: Boolean = false,
         val itemSuggestions: Boolean = false,
+        val onlinePrints: Boolean = false,
+        val defaultPrintOn: Boolean = false,
 
         // Extras
         val hasLoadedOnce: Boolean = false,
@@ -107,6 +109,14 @@ class AppSettingsViewModel @Inject constructor(
         state.update { it.copy(itemSuggestions = value) }
     }
 
+    fun onOnlinePrintsChange(value: Boolean) {
+        state.update { it.copy(onlinePrints = value) }
+    }
+
+    fun onDefaultPrintOnChange(value: Boolean) {
+        state.update { it.copy(defaultPrintOn = value) }
+    }
+
     fun setHasLoadedOnce(value: Boolean) {
         state.update { it.copy(hasLoadedOnce = value) }
     }
@@ -157,6 +167,8 @@ class AppSettingsViewModel @Inject constructor(
             instantSearch = state.value.instantSearch,
             innerItemSearch = state.value.innerItemSearch,
             itemSuggestions = state.value.itemSuggestions,
+            onlinePrints = state.value.onlinePrints,
+            defaultPrintOn = state.value.defaultPrintOn,
         )
     }
 
@@ -166,6 +178,8 @@ class AppSettingsViewModel @Inject constructor(
                 instantSearch = appSettings.instantSearch!!,
                 innerItemSearch = appSettings.innerItemSearch!!,
                 itemSuggestions = appSettings.itemSuggestions!!,
+                onlinePrints = appSettings.onlinePrints!!,
+                defaultPrintOn = appSettings.defaultPrintOn!!,
             )
         }
     }

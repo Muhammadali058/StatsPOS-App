@@ -61,6 +61,7 @@ import com.example.statspos.presentation.viewmodels.purchase.main_screen.Purchas
 import com.example.statspos.presentation.viewmodels.sales.main_screen.SalesPendingBillsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.PasswordFor
+import com.example.statspos.utils.SocketManager
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
@@ -127,11 +128,20 @@ fun PurchasePendingBillsBody(
 
     fun printBill() {
         bill?.run {
-            viewModel.getBill(id!!) { bill->
-                showBill(bill)
+            if (HP.appSettings.onlinePrints == true) {
+                SocketManager.printPurchaseBill(
+                    invoiceId = id!!,
+                    isPendingBill = true,
+                    billType = 2
+                )
+            } else {
+                viewModel.getBill(id!!) { bill->
+                    showBill(bill)
+                }
             }
         }
     }
+
 
     if (showPrintPasswordDialog) {
         PasswordDialog(

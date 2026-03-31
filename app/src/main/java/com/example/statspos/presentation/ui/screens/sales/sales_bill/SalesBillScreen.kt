@@ -1,11 +1,13 @@
 package com.example.statspos.presentation.ui.screens.sales.sales_bill
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
@@ -45,6 +47,7 @@ import com.example.statspos.presentation.ui.components.AppCircularProgressIndica
 import com.example.statspos.presentation.ui.components.AppDropdownMenu
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
+import com.example.statspos.presentation.ui.components.AppSwitch
 import com.example.statspos.presentation.ui.components.AppText
 import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.DropdownItem
@@ -61,6 +64,7 @@ import com.example.statspos.presentation.viewmodels.sales.sales_bill.AddUpdateSa
 import com.example.statspos.presentation.viewmodels.sales.sales_bill.SalesItemsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.PasswordFor
+import com.example.statspos.utils.SocketManager
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import com.example.statspos.utils.showToast
@@ -250,7 +254,7 @@ private fun Home(
     // Edit data when update
     LaunchedEffect(Unit) {
         if (!salesState.hasLoadedOnce) {
-            salesViewModel.editData(invoiceId){
+            salesViewModel.editData(invoiceId) {
                 salesViewModel.setHasLoadedOnce(true)
             }
         }
@@ -307,6 +311,16 @@ private fun Home(
                 }
             }
         )
+    }
+
+    fun printBill(id: Long) {
+        if (HP.appSettings.onlinePrints == true && salesState.print) {
+            SocketManager.printSalesBill(
+                invoiceId = id,
+                isPendingBill = false,
+                billType = 1
+            )
+        }
     }
 
     Scaffold(
@@ -370,7 +384,7 @@ private fun Home(
                                 DropdownItem(
                                     text = "Margin",
                                     icon = {
-                                        AppIcon(R.drawable.margin, size = 16.dp)
+                                        AppIcon(R.drawable.margin, size = 14.dp)
                                     },
                                     onClick = {
                                         menuExpanded = false
@@ -438,43 +452,57 @@ private fun Home(
 
                 // Save & Post Buttons
                 if (salesState.hasLoadedOnce) {
-                    Row(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surface)
                             .padding(ConstantPaddings.BODY_HORIZONTAL)
                     ) {
-                        if (!isPostedBill) {
-                            Box(
+                        if(HP.appSettings.onlinePrints == true) {
+                            AppSwitch(
                                 modifier = Modifier
-                                    .fillMaxWidth(if(salesItemsState.list.isNotEmpty()) 0.5f else 1f),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                if (salesState.isSaving) {
-                                    AppCircularProgressIndicator()
-                                } else {
-                                    SaveButton(text = "Save") {
-                                        salesViewModel.tempClose {
-                                            sharedViewModel.notifyBillSaved()
-                                            onBack()
+                                    .fillMaxWidth(),
+                                checked = salesState.print,
+                                onCheckedChange = salesViewModel::onPrintChange,
+                                label = "Print"
+                            )
+                            Spacer(Modifier.height(8.dp))
+                        }
+                        Row {
+                            if (!isPostedBill) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(if (salesItemsState.list.isNotEmpty()) 0.5f else 1f),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    if (salesState.isSaving) {
+                                        AppCircularProgressIndicator()
+                                    } else {
+                                        SaveButton(text = "Save") {
+                                            salesViewModel.tempClose {
+                                                sharedViewModel.notifyBillSaved()
+                                                onBack()
+                                            }
                                         }
                                     }
                                 }
+                                Spacer(Modifier.width(8.dp))
                             }
-                            Spacer(Modifier.width(8.dp))
-                        }
-                        if (salesItemsState.list.isNotEmpty()) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                if (salesState.isPosting) {
-                                    AppCircularProgressIndicator()
-                                } else {
-                                    SaveButton(text = "Post") {
-                                        salesViewModel.postBill {
-                                            sharedViewModel.notifyBillPosted()
-                                            onBack()
+                            if (salesItemsState.list.isNotEmpty()) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    if (salesState.isPosting) {
+                                        AppCircularProgressIndicator()
+                                    } else {
+                                        SaveButton(text = "Post") {
+                                            salesViewModel.postBill { id ->
+                                                printBill(id)
+                                                sharedViewModel.notifyBillPosted()
+                                                onBack()
+                                            }
                                         }
                                     }
                                 }

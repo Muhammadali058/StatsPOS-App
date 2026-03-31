@@ -132,6 +132,10 @@ fun AppSettingsScreen(
                         onInnerItemSearchChange = viewModel::onInnerItemSearchChange,
                         itemSuggestions = state.itemSuggestions,
                         onItemSuggestionsChange = viewModel::onItemSuggestionsChange,
+                        onlinePrints = state.onlinePrints,
+                        onOnlinePrintsChange = viewModel::onOnlinePrintsChange,
+                        defaultPrintOn = state.defaultPrintOn,
+                        onDefaultPrintOnChange = viewModel::onDefaultPrintOnChange,
                     )
                     Spacer(Modifier.height(12.dp))
                 }
@@ -171,6 +175,10 @@ private fun Body(
     onInnerItemSearchChange: (Boolean) -> Unit,
     itemSuggestions: Boolean,
     onItemSuggestionsChange: (Boolean) -> Unit,
+    onlinePrints: Boolean,
+    onOnlinePrintsChange: (Boolean) -> Unit,
+    defaultPrintOn: Boolean,
+    onDefaultPrintOnChange: (Boolean) -> Unit,
 ) {
     Row{
         AppSwitch(
@@ -193,6 +201,21 @@ private fun Body(
             checked = itemSuggestions,
             onCheckedChange = onItemSuggestionsChange,
             label = "Item Suggestions"
+        )
+        AppSwitch(
+            modifier = Modifier.weight(1f),
+            checked = onlinePrints,
+            onCheckedChange = onOnlinePrintsChange,
+            label = "Online Prints"
+        )
+    }
+    Spacer(Modifier.height(24.dp))
+    Row{
+        AppSwitch(
+            modifier = Modifier.weight(1f),
+            checked = defaultPrintOn,
+            onCheckedChange = onDefaultPrintOnChange,
+            label = "Default Print On"
         )
     }
 }

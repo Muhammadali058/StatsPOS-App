@@ -338,15 +338,15 @@ private fun ListCard(
                             modifier = Modifier
                                 .weight(.7f)
                         ) {
-                            HeadingMedium(text = "Crtn: ")
-                            LabelMedium(text = item.crtn.toString())
+                            ListHeading(text = "Crtn: ")
+                            ListLabel(text = item.crtn.toString())
                         }
                         Row(
                             modifier = Modifier
                                 .weight(1f)
                         ) {
-                            HeadingMedium(text = "Crtn Rate: ")
-                            LabelMedium(text = HP.formatDecimal(item.crtnRate))
+                            ListHeading(text = "Crtn Rate: ")
+                            ListLabel(text = HP.formatDecimal(item.crtnRate))
                         }
                     }
                 }

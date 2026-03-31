@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.accounts.Accounts
 import com.example.statspos.domain.models.purchase.Purchase
+import com.example.statspos.domain.models.purchase.PurchaseBill
 import com.example.statspos.domain.models.purchase.PurchaseBills
 import com.example.statspos.domain.repository.accounts.AccountsRepository
 import com.example.statspos.domain.repository.purchase.PurchaseRepository
@@ -13,6 +14,7 @@ import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.get
+import com.example.statspos.utils.getListOf
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -68,6 +70,7 @@ class AddUpdatePurchaseViewModel @Inject constructor(
         val isPostedBill: Boolean = false,
         val purchaseBill: PurchaseBills? = null,
 
+        var print: Boolean = HP.appSettings.defaultPrintOn == true,
         val hasLoadedOnce: Boolean = false,
 
         val isLoading: Boolean = false,
@@ -206,6 +209,10 @@ class AddUpdatePurchaseViewModel @Inject constructor(
         }
     }
 
+    fun onPrintChange(value: Boolean) {
+        state.update { it.copy(print = value) }
+    }
+
     fun setHasLoadedOnce(value: Boolean) {
         state.update { it.copy(hasLoadedOnce = value) }
     }
@@ -213,7 +220,7 @@ class AddUpdatePurchaseViewModel @Inject constructor(
     // endregion
 
     // region Network calls
-    fun postBill(onSuccess: () -> Unit) {
+    fun postBill(onSuccess: (id:Long) -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -247,8 +254,10 @@ class AddUpdatePurchaseViewModel @Inject constructor(
                 is Resource.Error -> showError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
+                    val bill = Gson().getListOf<PurchaseBill>(result.data.get("bill").asJsonArray)
+
 //                    clearTextboxes()
-                    onSuccess()
+                    onSuccess(bill[0].id!!)
                 }
             }
         }

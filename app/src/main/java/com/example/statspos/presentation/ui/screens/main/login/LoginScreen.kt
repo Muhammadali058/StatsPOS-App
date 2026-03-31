@@ -51,6 +51,7 @@ import com.example.statspos.presentation.ui.theme.StatsPOSTheme
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.ui.utils.ConstantSize
 import com.example.statspos.presentation.viewmodels.main.LoginViewModel
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.SocketManager
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
@@ -68,6 +69,15 @@ fun LoginScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
 
+    fun test(){
+        viewModel.login{
+            if(HP.appSettings.onlinePrints == true) {
+                SocketManager.join()
+            }
+            onLogin()
+        }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.onRememberCheckedChange(remember)
         viewModel.onUsernameChange(username ?: "")
@@ -76,10 +86,7 @@ fun LoginScreen(
         SocketManager.init()
         SocketManager.connect()
 
-        viewModel.login{
-            SocketManager.join()
-            onLogin()
-        }
+//        test()
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -130,6 +137,9 @@ fun LoginScreen(
             onLogin = {
                 keyboardController?.hide()
                 viewModel.login {
+                    if(HP.appSettings.onlinePrints == true) {
+                        SocketManager.join()
+                    }
                     onLogin()
                 }
             },

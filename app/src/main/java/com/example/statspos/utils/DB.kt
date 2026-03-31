@@ -9,11 +9,13 @@ object DB {
     var isOnlineMode = true
     var branches: List<Branches> = emptyList()
 
-    const val MAIN_URL = "http://192.168.100.28"
-//    const val MAIN_URL = "http://84.247.142.182"
+//    const val MAIN_URL = "http://192.168.100.28"
+    const val MAIN_URL = "http://84.247.142.182"
 
-    const val MAIN_HOST = "${MAIN_URL}:8000"
-//    const val MAIN_HOST = "${MAIN_URL}:5000"
+//    const val MAIN_HOST = "${MAIN_URL}:8000"
+    const val MAIN_HOST = "${MAIN_URL}:5000"
+
+
 
     var HOST = MAIN_HOST
     var API = "${HOST}/api/"

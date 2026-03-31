@@ -1,11 +1,13 @@
 package com.example.statspos.presentation.ui.screens.purchase.purchase_bill
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
@@ -41,6 +43,7 @@ import com.example.statspos.domain.models.purchase.PurchaseBills
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
+import com.example.statspos.presentation.ui.components.AppSwitch
 import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.PasswordDialog
@@ -55,6 +58,7 @@ import com.example.statspos.presentation.viewmodels.purchase.purchase_bill.AddUp
 import com.example.statspos.presentation.viewmodels.purchase.purchase_bill.PurchaseItemsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.PasswordFor
+import com.example.statspos.utils.SocketManager
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import com.example.statspos.utils.showToast
@@ -285,6 +289,16 @@ private fun Home(
         )
     }
 
+    fun printBill(id: Long) {
+        if (HP.appSettings.onlinePrints == true && purchaseState.print) {
+            SocketManager.printPurchaseBill(
+                invoiceId = id,
+                isPendingBill = false,
+                billType = 1
+            )
+        }
+    }
+
     Scaffold(
         snackbarHost = {
             AppSnackbarHost(
@@ -379,43 +393,61 @@ private fun Home(
 
                 // Save & Post Buttons
                 if (purchaseState.hasLoadedOnce) {
-                    Row(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surface)
                             .padding(ConstantPaddings.BODY_HORIZONTAL)
                     ) {
-                        if (!isPostedBill) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth(if(purchaseItemsState.list.isNotEmpty()) 0.5f else 1f),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                if (purchaseState.isSaving) {
-                                    AppCircularProgressIndicator()
-                                } else {
-                                    SaveButton(text = "Save") {
-                                        purchaseViewModel.tempClose {
-                                            sharedViewModel.notifyBillSaved()
-                                            onBack()
+//                        if(HP.appSettings.onlinePrints == true) {
+//                            AppSwitch(
+//                                modifier = Modifier
+//                                    .fillMaxWidth(),
+//                                checked = purchaseState.print,
+//                                onCheckedChange = purchaseViewModel::onPrintChange,
+//                                label = "Print"
+//                            )
+//                            Spacer(Modifier.height(8.dp))
+//                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(ConstantPaddings.BODY_HORIZONTAL)
+                        ) {
+                            if (!isPostedBill) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(if (purchaseItemsState.list.isNotEmpty()) 0.5f else 1f),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    if (purchaseState.isSaving) {
+                                        AppCircularProgressIndicator()
+                                    } else {
+                                        SaveButton(text = "Save") {
+                                            purchaseViewModel.tempClose {
+                                                sharedViewModel.notifyBillSaved()
+                                                onBack()
+                                            }
                                         }
                                     }
                                 }
+                                Spacer(Modifier.width(8.dp))
                             }
-                            Spacer(Modifier.width(8.dp))
-                        }
-                        if (purchaseItemsState.list.isNotEmpty()) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                if (purchaseState.isPosting) {
-                                    AppCircularProgressIndicator()
-                                } else {
-                                    SaveButton(text = "Post") {
-                                        purchaseViewModel.postBill {
-                                            sharedViewModel.notifyBillPosted()
-                                            onBack()
+                            if (purchaseItemsState.list.isNotEmpty()) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    if (purchaseState.isPosting) {
+                                        AppCircularProgressIndicator()
+                                    } else {
+                                        SaveButton(text = "Post") {
+                                            purchaseViewModel.postBill { id ->
+//                                                printBill(id)
+                                                sharedViewModel.notifyBillPosted()
+                                                onBack()
+                                            }
                                         }
                                     }
                                 }

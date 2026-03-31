@@ -180,19 +180,55 @@ object SocketManager {
     }
 
     fun connect() {
-        socket.connect()
+        try {
+            socket.connect()
+        }catch (e: Exception){
+
+        }
     }
 
-    fun printCommand(data: JsonObject) {
-        socket.emit("printCommand", data)
+    fun printSalesBill(invoiceId: Long, isPendingBill:Boolean, billType: Int= 1) {
+        try {
+            socket.emit("printCommand", JsonObject().apply {
+                addProperty("userId", HP.user.id)
+                addProperty("printType", "salesBill")
+                addProperty("id", invoiceId)
+                addProperty("billType", billType)
+                addProperty("isPendingBill", isPendingBill)
+            })
+        }catch (e: Exception){
+
+        }
+    }
+
+    fun printPurchaseBill(invoiceId: Long, isPendingBill:Boolean, billType: Int= 1) {
+        try {
+            socket.emit("printCommand", JsonObject().apply {
+                addProperty("userId", HP.user.id)
+                addProperty("printType", "purchaseBill")
+                addProperty("id", invoiceId)
+                addProperty("billType", billType)
+                addProperty("isPendingBill", isPendingBill)
+            })
+        }catch (e: Exception){
+
+        }
     }
 
     fun join() {
-        socket.emit("join", HP.user.id)
+        try {
+            socket.emit("join", HP.user.id)
+        }catch (e: Exception){
+
+        }
     }
 
     fun disconnect() {
-        socket.disconnect()
+        try {
+            socket.disconnect()
+        }catch (e: Exception){
+
+        }
     }
 }
 

@@ -72,6 +72,7 @@ import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.sales.main_screen.SalesPostedBillsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.PasswordFor
+import com.example.statspos.utils.SocketManager
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import kotlinx.coroutines.launch
@@ -172,8 +173,16 @@ fun SalesPostedBillsBody(
 
     fun printBill() {
         bill?.run {
-            viewModel.getBill(id!!) { bill, ledger ->
-                showBill(bill, ledger)
+            if (HP.appSettings.onlinePrints == true) {
+                SocketManager.printSalesBill(
+                    invoiceId = id!!,
+                    isPendingBill = false,
+                    billType = 2
+                )
+            } else {
+                viewModel.getBill(id!!) { bill, ledger ->
+                    showBill(bill, ledger)
+                }
             }
         }
     }

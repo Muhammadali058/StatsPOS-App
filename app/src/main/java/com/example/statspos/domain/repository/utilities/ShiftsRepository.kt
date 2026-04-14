@@ -4,9 +4,9 @@ import com.example.statspos.utils.Resource
 import com.google.gson.JsonObject
 
 interface ShiftsRepository {
-    suspend fun openShift(body: JsonObject): Resource<JsonObject>
+    suspend fun openShift(userId:Long): Resource<JsonObject>
 
-    suspend fun closeShift(body: JsonObject): Resource<JsonObject>
+    suspend fun closeShift(userId:Long, cashInHand: Long): Resource<JsonObject>
 
     suspend fun passEntry(body: JsonObject): Resource<JsonObject>
 

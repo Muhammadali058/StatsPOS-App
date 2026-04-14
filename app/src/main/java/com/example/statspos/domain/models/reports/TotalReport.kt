@@ -39,4 +39,23 @@ data class TotalReport(
     // Stock
     var totalStockPcs: Double? = null,
     var totalStockCrtn: Int? = null,
+
+    // Shift
+    var openDate: String? = null,
+    var closeDate: String? = null,
+    var status: String? = null,
+    var username: String? = null,
+    var openingBalance: Double? = null,
+    var cashInHand: Double? = null,
+    var purchase: Double? = null,
+    var receipts: Double? = null,
+    var payments: Double? = null,
+    var expenses: Double? = null,
+    var bankSales: Double? = null,
+    var cashGiven: Double? = null,
+    var cashReceived: Double? = null,
+    var totalCashIn: Double? = null,
+    var totalCashOut: Double? = null,
+    var expectedCash: Double? = null,
+    var closingBalance: Double? = null,
 )

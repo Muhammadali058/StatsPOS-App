@@ -12,4 +12,7 @@ interface MainRepository {
     suspend fun uploadImage(image: MultipartBody.Part): Resource<JsonObject>
 
     suspend fun deleteImage(imageUrl: String): Resource<JsonObject>
+
+    suspend fun getUrduText(text:String): Resource<JsonObject>
+
 }

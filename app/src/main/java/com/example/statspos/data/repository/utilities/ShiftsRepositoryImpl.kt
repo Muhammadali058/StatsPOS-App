@@ -12,7 +12,11 @@ import javax.inject.Inject
 class ShiftsRepositoryImpl @Inject constructor(
     private val api: ShiftsApi
 ) : ShiftsRepository {
-    override suspend fun openShift(body: JsonObject): Resource<JsonObject> {
+    override suspend fun openShift(userId:Long): Resource<JsonObject> {
+        val body = JsonObject().apply {
+            addProperty("userId", userId)
+        }
+
         return safeApiCall {
             api.openShift(
                 DB.addParams(body)
@@ -20,7 +24,12 @@ class ShiftsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun closeShift(body: JsonObject): Resource<JsonObject> {
+    override suspend fun closeShift(userId:Long, cashInHand: Long): Resource<JsonObject> {
+        val body = JsonObject().apply {
+            addProperty("userId", userId)
+            addProperty("cashInHand", cashInHand)
+        }
+
         return safeApiCall {
             api.closeShift(
                 DB.addParams(body)

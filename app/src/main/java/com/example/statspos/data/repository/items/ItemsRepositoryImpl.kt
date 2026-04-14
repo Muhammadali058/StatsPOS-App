@@ -84,4 +84,16 @@ class ItemsRepositoryImpl @Inject constructor(
             )
         }
     }
+
+    override suspend fun getBarcode(): Resource<JsonObject> {
+        val body = JsonObject().apply {
+            addProperty("branchGroupId", HP.branchGroupId)
+        }
+
+        return safeApiCall {
+            api.getBarcode(
+                DB.addParams(body)
+            )
+        }
+    }
 }

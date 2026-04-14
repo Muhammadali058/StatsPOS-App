@@ -61,6 +61,10 @@ data class Items(
     var date: String? = null,
     var isAudited: Boolean? = null,
 
+    // Shopping App
+    var popularItem: Boolean? = null,
+    var specialOffer: Boolean? = null,
+
     val clientId:Int? = null,
     val branchId:Int? = null,
     val branchGroupId:Int? = null,

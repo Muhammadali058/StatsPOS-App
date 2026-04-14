@@ -410,6 +410,49 @@ class AddUpdateItemViewModel @Inject constructor(
         }
     }
 
+    fun getBarcode(onSuccess: (String) -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.getBarcode()) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val barcode = result.data.get("barcode").asString
+                    onSuccess(barcode)
+                }
+            }
+        }
+    }
+
+    fun getUrduname(onSuccess: (String) -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if(state.value.itemname.isEmpty())
+                return@launch
+
+            beforeRequest()
+
+            when (val result = mainRepo.getUrduText(state.value.itemname)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val urduname = result.data.get("text").asString
+                    onSuccess(urduname)
+                }
+            }
+        }
+    }
+
     fun uploadImage(multipart: MultipartBody.Part) {
         viewModelScope.launch {
             if (state.value.isLoading)

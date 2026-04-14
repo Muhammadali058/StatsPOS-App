@@ -86,7 +86,7 @@ fun LoginScreen(
         SocketManager.init()
         SocketManager.connect()
 
-//        test()
+        test()
     }
 
     val snackbarHostState = remember { SnackbarHostState() }

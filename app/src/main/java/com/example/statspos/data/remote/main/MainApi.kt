@@ -25,4 +25,7 @@ interface MainApi {
     @POST("main/deleteImage")
     suspend fun deleteImage(@Body body: JsonObject): Response<JsonObject>
 
+    @POST("main/getUrduText")
+    suspend fun getUrduText(@Body body: JsonObject): Response<JsonObject>
+
 }

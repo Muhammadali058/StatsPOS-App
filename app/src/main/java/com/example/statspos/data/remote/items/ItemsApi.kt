@@ -23,4 +23,8 @@ interface ItemsApi {
 
     @POST("items/isBarcodeExists")
     suspend fun isBarcodeExists(@Body body: JsonObject): Response<JsonObject>
+
+    @POST("items/getBarcode")
+    suspend fun getBarcode(@Body body: JsonObject): Response<JsonObject>
+
 }

@@ -60,4 +60,17 @@ class MainRepositoryImpl @Inject constructor(
             )
         }
     }
+
+    override suspend fun getUrduText(text:String): Resource<JsonObject> {
+        val body = JsonObject().apply {
+            addProperty("text", text)
+        }
+
+        return safeApiCall {
+            api.getUrduText(
+                DB.addParams(body)
+            )
+        }
+    }
+
 }

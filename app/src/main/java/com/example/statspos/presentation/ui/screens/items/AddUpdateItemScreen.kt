@@ -6,25 +6,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -36,12 +29,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
@@ -66,7 +59,6 @@ import com.example.statspos.presentation.ui.components.AppText
 import com.example.statspos.presentation.ui.components.BarcodeScannerDialog
 import com.example.statspos.presentation.ui.components.CalculatorTB
 import com.example.statspos.presentation.ui.components.ConfirmDialog
-import com.example.statspos.presentation.ui.components.CustomDatePickerDialog
 import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.DiscountTextbox
 import com.example.statspos.presentation.ui.components.Dropdown
@@ -436,6 +428,16 @@ private fun Home(
                         onCrtnRateChange = viewModel::onCrtnRateChange,
                         onCrtnSizeChange = viewModel::onCrtnSizeChange,
                         onMarketPriceChange = viewModel::onMarketPriceChange,
+                        onGenerateBarcode = {
+                            viewModel.getBarcode { barcode ->
+                                viewModel.onBarcodeChange(barcode)
+                            }
+                        },
+                        onGenerateUrduname = {
+                            viewModel.getUrduname{ urduname ->
+                                viewModel.onUrdunameChange(urduname)
+                            }
+                        },
                     )
 
                     CategoryAndVendor(
@@ -569,6 +571,8 @@ private fun Basic(
     onCrtnRateChange: (String) -> Unit,
     onCrtnSizeChange: (String) -> Unit,
     onMarketPriceChange: (String) -> Unit,
+    onGenerateBarcode: () -> Unit,
+    onGenerateUrduname: () -> Unit,
 ) {
     var showBarcodeScanner by remember { mutableStateOf(false) }
     if (showBarcodeScanner) {
@@ -602,7 +606,15 @@ private fun Basic(
                 },
                 label = {
                     Text("Barcode")
-                }
+                },
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Go
+                ),
+                keyboardActions = KeyboardActions(
+                    onGo = {
+                        onGenerateBarcode()
+                    }
+                )
             )
             Spacer(Modifier.width(8.dp))
             Textbox(
@@ -634,7 +646,17 @@ private fun Basic(
             },
             textStyle = TextStyle(
                 textDirection = TextDirection.Rtl
-            )
+            ),
+            leadingIcon = {
+                AppIconButton(
+                    icon = R.drawable.update,
+                    onClick = {
+                        onGenerateUrduname()
+                    },
+                    size = 18.dp,
+                    buttonSize = 30.dp,
+                )
+            }
         )
 
         // Cost & Market Price
@@ -812,7 +834,7 @@ private fun CategoryAndVendor(
 ) {
     ExpandableSection(
         title = "Category & Vendor",
-        initiallyExpanded = false,
+        initiallyExpanded = true,
     ) {
         Dropdown(
             value = categoryName,
@@ -876,7 +898,7 @@ private fun Stock(
 ) {
     ExpandableSection(
         title = "Stock Warning, Opening Stock",
-        initiallyExpanded = false,
+        initiallyExpanded = true,
     ) {
         // Stock Warning Min & Max
         AppText(
@@ -1035,7 +1057,7 @@ private fun DiscountExpiry(
 ) {
     ExpandableSection(
         title = "Discount, Expiry, Location",
-        initiallyExpanded = false,
+        initiallyExpanded = true,
     ) {
         Column(
             modifier = Modifier
@@ -1142,7 +1164,7 @@ private fun Switches(
 ) {
     ExpandableSection(
         title = "Lock & Others",
-        initiallyExpanded = false,
+        initiallyExpanded = true,
     ) {
         Row {
             AppSwitch(
@@ -1209,7 +1231,7 @@ private fun ImageExpandable(
 ) {
     ExpandableSection(
         title = "Image",
-        initiallyExpanded = false,
+        initiallyExpanded = true,
     ) {
         Column(
             modifier = Modifier
@@ -1272,6 +1294,8 @@ private fun BodyPrev() {
                 onCrtnRateChange = { },
                 onCrtnSizeChange = { },
                 onMarketPriceChange = { },
+                onGenerateBarcode = {},
+                onGenerateUrduname = {},
             )
 
             CategoryAndVendor(

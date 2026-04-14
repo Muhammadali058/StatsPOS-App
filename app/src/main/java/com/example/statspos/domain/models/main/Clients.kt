@@ -9,5 +9,8 @@ data class Clients(
     var city: String? = null,
     var email: String? = null,
     var address: String? = null,
+    var isRegisteredWeek: Boolean? = null,
+    var isRegisteredMonth: Boolean? = null,
     var isOnline: Boolean? = null,
+    var hasShoppingApp: Boolean? = null,
 )

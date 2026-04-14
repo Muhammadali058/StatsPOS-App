@@ -9,18 +9,16 @@ object DB {
     var isOnlineMode = true
     var branches: List<Branches> = emptyList()
 
-//    const val MAIN_URL = "http://192.168.100.28"
-    const val MAIN_URL = "http://84.247.142.182"
+    const val MAIN_HOST = "http://192.168.100.28:8000"
+//    const val MAIN_HOST = "http://api.statspos.com"
 
-//    const val MAIN_HOST = "${MAIN_URL}:8000"
-    const val MAIN_HOST = "${MAIN_URL}:5000"
+        var socketUrl = "http://192.168.100.28:5100"
+//    var socketUrl = "http://ws.statspos.com"
 
 
 
     var HOST = MAIN_HOST
     var API = "${HOST}/api/"
-
-    var socketUrl = "${MAIN_URL}:5100"
 
     fun setBaseUrl(host: String) {
         HOST = host
@@ -28,8 +26,10 @@ object DB {
     }
 
     fun setWebSocketUrl(baseUrl: String) {
-        val urls = baseUrl.split(":")
-        socketUrl = "${urls[0]}:${urls[1]}:5100"
+        try {
+            val urls = baseUrl.split(":")
+            socketUrl = "${urls[0]}:${urls[1]}:5100"
+        }catch (e: Exception){}
     }
 
     fun addParams(jsonObject: JsonObject): JsonObject {

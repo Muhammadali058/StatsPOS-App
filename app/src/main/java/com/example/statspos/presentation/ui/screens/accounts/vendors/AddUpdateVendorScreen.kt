@@ -346,7 +346,7 @@ private fun Tax(
 ) {
     ExpandableSection(
         title = "NTN & STN",
-        initiallyExpanded = false,
+        initiallyExpanded = true,
     ) {
         Textbox(
             value = ntn,
@@ -383,7 +383,7 @@ private fun CategoryAndDiscount(
 ) {
     ExpandableSection(
         title = "Category & Discount",
-        initiallyExpanded = false,
+        initiallyExpanded = true,
     ) {
         Dropdown(
             value = categoryName,
@@ -425,7 +425,7 @@ private fun Others(
 ) {
     ExpandableSection(
         title = "Others",
-        initiallyExpanded = false,
+        initiallyExpanded = true,
     ) {
         Textbox(
             value = remarks,
@@ -461,7 +461,7 @@ private fun ImageExpandable(
 ) {
     ExpandableSection(
         title = "Image",
-        initiallyExpanded = false,
+        initiallyExpanded = true,
     ) {
         Column(
             modifier = Modifier

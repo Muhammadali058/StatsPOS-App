@@ -16,4 +16,7 @@ interface ItemsRepository {
     suspend fun getItem(id: Long): Resource<JsonObject>
 
     suspend fun isBarcodeExists(barcode: String): Resource<JsonObject>
+
+    suspend fun getBarcode(): Resource<JsonObject>
+
 }

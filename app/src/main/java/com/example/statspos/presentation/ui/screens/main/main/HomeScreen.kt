@@ -124,7 +124,7 @@ private val items = listOf(
         R.drawable.purchase_orders,
         HP.userRights.purchase == true
     ),
-//    TopItem("Users", TopRoutes.Users, R.drawable.users, HP.userRights.users == true),
+    TopItem("Users", TopRoutes.Users, R.drawable.users, HP.userRights.users == true),
     TopItem("Settings", TopRoutes.Settings, R.drawable.settings, HP.userRights.settings == true),
 )
 private val accounts = listOf(
@@ -253,7 +253,7 @@ fun HomeScreen(
 
     // Navigation
     val navigationState = rememberNavigationState(
-        startRoute = BottomRoutes.Home,
+        startRoute = BottomRoutes.Reports,
         topLevelRoutes = BOTTOM_DESTINATIONS.keys,
         serializersModules = SerializersModule {
             polymorphic(NavKey::class) {
@@ -660,7 +660,7 @@ private fun HomeBody(
         }
 
         item {
-            Title("Accounts", R.drawable.accounts, HP.userRights.accounts == true)
+            Title("Create accounts", R.drawable.accounts, HP.userRights.accounts == true)
         }
         item {
             HomeGrid(accounts, onTopRouteClick)
@@ -687,7 +687,7 @@ private fun HomeBody(
 }
 
 @Composable
-private fun Title(
+private fun Title1(
     title: String,
     @DrawableRes icon: Int? = null,
     access: Boolean = true,
@@ -720,7 +720,7 @@ private fun Title(
 }
 
 @Composable
-private fun Title1(
+private fun Title(
     title: String,
     @DrawableRes icon: Int? = null,
     access: Boolean = true,
@@ -753,7 +753,7 @@ private fun Title1(
 }
 
 @Composable
-private fun HomeGrid(
+private fun HomeGrid1(
     items: List<TopItem>,
     onClick: (TopRoutes) -> Unit
 ) {
@@ -813,7 +813,7 @@ private fun HomeGrid(
 }
 
 @Composable
-private fun HomeGrid1(
+private fun HomeGrid(
     items: List<TopItem>,
     onClick: (TopRoutes) -> Unit
 ) {

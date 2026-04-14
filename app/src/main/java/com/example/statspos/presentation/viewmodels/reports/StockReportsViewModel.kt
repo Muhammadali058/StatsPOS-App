@@ -45,6 +45,7 @@ class StockReportsViewModel @Inject constructor(
         val vendorId: Long = 0L,
 
         val warehouse: DropdownItem = HP.getNoneDropdownItem(),
+        val combine:Boolean = true,
 
         val stockShowing: DropdownItem = HP.stockShowing[0],
         val stockAt: DropdownItem = HP.stockAt[0],
@@ -379,6 +380,7 @@ class StockReportsViewModel @Inject constructor(
             addProperty("stockExpiry", getStockExpiry())
             addProperty("stockType", getStockType())
             addProperty("expiryDays", 7)
+            addProperty("combine", state.value.combine)
         }
     }
 

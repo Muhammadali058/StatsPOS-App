@@ -34,6 +34,12 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.reports.TotalReport
 import com.example.statspos.domain.models.reports.accounts.AccountReport
@@ -49,6 +55,8 @@ import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.ShowReportIcon
 import com.example.statspos.presentation.ui.components.SubComboBox
 import com.example.statspos.presentation.ui.components.TopAppBar
+import com.example.statspos.presentation.ui.screens.accounts.customers.AddUpdateCustomerScreen
+import com.example.statspos.presentation.ui.screens.utilities.shift.ManageShiftsScreen
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.ui.utils.openPdf
 import com.example.statspos.presentation.viewmodels.SharedViewModel
@@ -56,12 +64,63 @@ import com.example.statspos.presentation.viewmodels.reports.AccountReportsViewMo
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
+import kotlinx.serialization.Serializable
 import java.time.LocalDate
 
-@OptIn(ExperimentalMaterial3Api::class)
+private sealed class Routes : NavKey {
+    @Serializable
+    data object Home : Routes()
+
+    @Serializable
+    data object ManageShift : Routes()
+}
+
 @Composable
 fun AccountsReportsScreen(
     sharedViewModel: SharedViewModel,
+    onBack: () -> Unit,
+) {
+    val backStack = rememberNavBackStack(Routes.Home)
+    fun navigate(key: NavKey) {
+        if (backStack.lastOrNull() != key) {
+            backStack.add(key)
+        }
+    }
+    NavDisplay(
+        backStack = backStack,
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
+        entryProvider = entryProvider {
+            entry<Routes.Home> {
+                Home(
+                    sharedViewModel = sharedViewModel,
+                    onManageShiftsClick = {
+                        navigate(Routes.ManageShift)
+                    },
+                    onBack = {
+                        onBack()
+                    },
+                )
+            }
+            entry<Routes.ManageShift> { key ->
+                ManageShiftsScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                )
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun Home(
+    sharedViewModel: SharedViewModel,
+    onManageShiftsClick: () -> Unit,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -455,8 +514,19 @@ fun AccountsReportsScreen(
                                     }
                                 }
                                 Spacer(Modifier.height(8.dp))
-                                ReportButton("Manage Cash") {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Start,
+                                ) {
 
+                                    ReportButton("Manage Cash") {
+
+                                    }
+                                    Spacer(Modifier.width(8.dp))
+                                    ReportButton("Manage Shifts") {
+                                        onManageShiftsClick()
+                                    }
                                 }
                             }
                         }

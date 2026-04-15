@@ -9,11 +9,11 @@ object DB {
     var isOnlineMode = true
     var branches: List<Branches> = emptyList()
 
-    const val MAIN_HOST = "http://192.168.100.28:8000"
-//    const val MAIN_HOST = "http://api.statspos.com"
+//    const val MAIN_HOST = "http://192.168.100.28:8000"
+    const val MAIN_HOST = "http://api.statspos.com"
 
-        var socketUrl = "http://192.168.100.28:5100"
-//    var socketUrl = "http://ws.statspos.com"
+//        var socketUrl = "http://192.168.100.28:5100"
+    var socketUrl = "http://ws.statspos.com"
 
 
 

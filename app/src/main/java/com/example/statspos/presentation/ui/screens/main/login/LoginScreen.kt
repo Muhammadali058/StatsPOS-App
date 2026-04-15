@@ -3,6 +3,7 @@ package com.example.statspos.presentation.ui.screens.main.login
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,9 +27,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.R
+import com.example.statspos.domain.models.main.Branches
 import com.example.statspos.presentation.ui.components.AppCheckbox
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.components.AppIcon
@@ -47,14 +51,21 @@ import com.example.statspos.presentation.ui.components.CalculatorTB
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.PasswordTextbox
 import com.example.statspos.presentation.ui.components.Textbox
+import com.example.statspos.presentation.ui.screens.TopRoutes
+import com.example.statspos.presentation.ui.screens.main.main.BranchesList
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.ui.utils.ConstantSize
+import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
 import com.example.statspos.presentation.viewmodels.main.LoginViewModel
+import com.example.statspos.utils.DB
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.SocketManager
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
+import com.example.statspos.utils.showToast
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -63,11 +74,17 @@ fun LoginScreen(
     password: String?,
     onLogin: () -> Unit,
     onReset: () -> Unit,
+    onBrachChange:() -> Unit,
 ) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel = hiltViewModel<LoginViewModel>()
+    val localDataViewModel = hiltViewModel<LocalDataViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
+    var branches by remember { mutableStateOf<List<Branches>>(emptyList()) }
+    var showBranchesList by remember { mutableStateOf(false) }
 
     fun test(){
         viewModel.login{
@@ -86,7 +103,7 @@ fun LoginScreen(
         SocketManager.init()
         SocketManager.connect()
 
-        test()
+//        test()
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -143,8 +160,33 @@ fun LoginScreen(
                     onLogin()
                 }
             },
-            onResetClick = onReset
+            onResetClick = onReset,
+            onBranchClick = {
+                scope.launch {
+                    branches = localDataViewModel.getBranches().first()
+                    showBranchesList = true
+                }
+            }
         )
+
+        if (showBranchesList) {
+            BranchesList(
+                branches = branches,
+                onDismiss = {
+                    showBranchesList = false
+                },
+                onBranchClick = { branch ->
+                    showBranchesList = false
+
+                    if (!DB.isOnlineMode) {
+                        localDataViewModel.setBaseUrl(branch.baseUrl.toString())
+                        context.showToast("Branch changed restart app")
+                        onBrachChange()
+                    }
+                }
+            )
+        }
+
     }
 }
 
@@ -160,6 +202,7 @@ private fun Body(
     isLoading: Boolean,
     onLogin: () -> Unit,
     onResetClick: () -> Unit,
+    onBranchClick: () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -256,18 +299,40 @@ private fun Body(
             }
         }
 
-        TextButton(
-            onClick = {
-                onResetClick()
-            },
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
         ) {
-            Text(
-                text = "Reset",
-                modifier = Modifier,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    color = MaterialTheme.colorScheme.primary,
-                ),
-            )
+            TextButton(
+                onClick = {
+                    onResetClick()
+                },
+            ) {
+                Text(
+                    text = "Reset",
+                    modifier = Modifier,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        color = MaterialTheme.colorScheme.primary,
+                    ),
+                )
+            }
+            if (!DB.isOnlineMode) {
+                Spacer(Modifier.width(16.dp))
+                TextButton(
+                    onClick = {
+                        onBranchClick()
+                    },
+                ) {
+                    Text(
+                        text = "Branch",
+                        modifier = Modifier,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = MaterialTheme.colorScheme.primary,
+                        ),
+                    )
+                }
+            }
         }
     }
 }
@@ -287,7 +352,8 @@ private fun BodyPreview() {
             {},
             isLoading = false,
             {},
-            {}
+            {},
+            {},
         )
     }
 }

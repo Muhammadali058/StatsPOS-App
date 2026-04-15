@@ -56,6 +56,7 @@ import com.example.statspos.presentation.ui.components.ShowReportIcon
 import com.example.statspos.presentation.ui.components.SubComboBox
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.screens.accounts.customers.AddUpdateCustomerScreen
+import com.example.statspos.presentation.ui.screens.reports.accounts.manage_cash.ManageCashScreen
 import com.example.statspos.presentation.ui.screens.utilities.shift.ManageShiftsScreen
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.ui.utils.openPdf
@@ -73,6 +74,9 @@ private sealed class Routes : NavKey {
 
     @Serializable
     data object ManageShift : Routes()
+
+    @Serializable
+    data object ManageCash : Routes()
 }
 
 @Composable
@@ -99,6 +103,9 @@ fun AccountsReportsScreen(
                     onManageShiftsClick = {
                         navigate(Routes.ManageShift)
                     },
+                    onManageCashClick = {
+                        navigate(Routes.ManageCash)
+                    },
                     onBack = {
                         onBack()
                     },
@@ -106,6 +113,14 @@ fun AccountsReportsScreen(
             }
             entry<Routes.ManageShift> { key ->
                 ManageShiftsScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                )
+            }
+            entry<Routes.ManageCash> { key ->
+                ManageCashScreen (
                     sharedViewModel = sharedViewModel,
                     onBack = {
                         backStack.removeLastOrNull()
@@ -121,6 +136,7 @@ fun AccountsReportsScreen(
 private fun Home(
     sharedViewModel: SharedViewModel,
     onManageShiftsClick: () -> Unit,
+    onManageCashClick: () -> Unit,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -519,9 +535,8 @@ private fun Home(
                                         .fillMaxWidth(),
                                     horizontalArrangement = Arrangement.Start,
                                 ) {
-
                                     ReportButton("Manage Cash") {
-
+                                        onManageCashClick()
                                     }
                                     Spacer(Modifier.width(8.dp))
                                     ReportButton("Manage Shifts") {

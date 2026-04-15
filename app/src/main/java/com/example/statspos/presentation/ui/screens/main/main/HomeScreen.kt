@@ -253,7 +253,7 @@ fun HomeScreen(
 
     // Navigation
     val navigationState = rememberNavigationState(
-        startRoute = BottomRoutes.Reports,
+        startRoute = BottomRoutes.Home,
         topLevelRoutes = BOTTOM_DESTINATIONS.keys,
         serializersModules = SerializersModule {
             polymorphic(NavKey::class) {
@@ -873,7 +873,7 @@ private fun HomeGrid(
 }
 
 @Composable
-private fun BranchesList(
+fun BranchesList(
     branches: List<Branches>,
     onBranchClick: (Branches) -> Unit,
     onDismiss: () -> Unit,

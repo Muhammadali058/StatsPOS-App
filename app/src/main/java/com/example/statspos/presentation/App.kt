@@ -156,7 +156,11 @@ fun App() {
                             viewModel.setClientId(0)
                             backStack.add(Screens.CloseApp)
                         }
-                    }
+                    },
+                    onBrachChange = {
+                        backStack.add(Screens.CloseApp)
+                        backStack.removeFirstOrNull()
+                    },
                 )
             }
             entry<Screens.Main> {

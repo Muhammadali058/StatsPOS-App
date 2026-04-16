@@ -48,7 +48,9 @@ import com.example.statspos.presentation.ui.screens.warehouse.warehouse.Warehous
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    onLogout: () -> Unit,
+) {
     val sharedViewModel = hiltViewModel<SharedViewModel>()
 
     val backStack = rememberNavBackStack(TopRoutes.Home)
@@ -73,9 +75,10 @@ fun MainScreen() {
             entry<TopRoutes.Home> {
                 HomeScreen(
                     sharedViewModel = sharedViewModel,
+                    onLogout = onLogout,
                     onTopRouteClick = { key ->
                         navigate(key)
-                    }
+                    },
                 )
             }
             entry<TopRoutes.CloseApp> {
@@ -173,7 +176,7 @@ fun MainScreen() {
             // endregion
             // region Purchase
             entry<TopRoutes.AddUpdatePurchase> { key ->
-                PurchaseBillScreen (
+                PurchaseBillScreen(
                     sharedViewModel = sharedViewModel,
                     invoiceId = key.updateId,
                     isPendingBill = key.isPendingBill,

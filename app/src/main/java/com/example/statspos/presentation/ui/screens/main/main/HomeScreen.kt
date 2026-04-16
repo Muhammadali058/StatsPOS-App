@@ -1,6 +1,7 @@
 package com.example.statspos.presentation.ui.screens.main.main
 
 import android.app.Activity
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.DrawableRes
@@ -29,6 +30,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
@@ -216,6 +218,7 @@ private val warehouse = listOf(
 @Composable
 fun HomeScreen(
     sharedViewModel: SharedViewModel,
+    onLogout: () -> Unit,
     onTopRouteClick: (NavKey) -> Unit,
 ) {
     val context = LocalContext.current
@@ -314,7 +317,7 @@ fun HomeScreen(
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
-
+7
                             AppDropdownMenu(
                                 expanded = menuExpanded,
                                 onDismissRequest = { menuExpanded = false },
@@ -361,6 +364,17 @@ fun HomeScreen(
                                             localDataViewModel.setClientId(0)
                                             activity.finish()
                                         }
+                                    }
+                                )
+
+                                DropdownItem(
+                                    text = "Logout",
+                                    icon = {
+                                        AppIcon(R.drawable.logout, size = 20.dp)
+                                    },
+                                    onClick = {
+                                        menuExpanded = false
+                                        onLogout()
                                     }
                                 )
                             }
@@ -910,23 +924,50 @@ fun BranchesList(
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                         ),
+                        onClick = {
+                            onBranchClick(branch)
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .clickable {
-                                onBranchClick(branch)
-                            },
+                            .padding(vertical = 8.dp),
                     ) {
-                        Text(
-                            text = branch.branchName.toString(),
-                            style = TextStyle(
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            ),
-                            maxLines = 1,
+                        Row(
                             modifier = Modifier
-                                .padding(16.dp)
-                        )
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = branch.branchName.toString(),
+                                style = TextStyle(
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                ),
+                                maxLines = 1,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(16.dp)
+                            )
+
+                            if (DB.isOnlineMode) {
+                                if (branch.id == HP.branchId) {
+                                    Spacer(Modifier.width(8.dp))
+                                    AppIcon(
+                                        icon = Icons.Default.Done,
+                                        size = 20.dp,
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                }
+                            } else {
+                                if (branch.baseUrl.equals(DB.HOST, ignoreCase = true)) {
+                                    Spacer(Modifier.width(8.dp))
+                                    AppIcon(
+                                        icon = Icons.Default.Done,
+                                        size = 20.dp,
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                }
+                            }
+                        }
                     }
                 }
             }

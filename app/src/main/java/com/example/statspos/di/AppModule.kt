@@ -6,10 +6,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
-import com.example.statspos.data.remote.items.CategoriesApi
 import com.example.statspos.utils.DB
-import com.example.statspos.utils.HP
-import com.example.statspos.utils.LocalDataStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,10 +15,13 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 import javax.inject.Qualifier
 import javax.inject.Singleton
+
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
@@ -31,6 +31,12 @@ annotation class MainApi
 @InstallIn(SingletonComponent::class)
 object AppModule{
 
+    val client: OkHttpClient = OkHttpClient.Builder()
+        .connectTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(60, TimeUnit.SECONDS)
+        .build()
+
     @MainApi
     @Provides
     @Singleton
@@ -38,6 +44,7 @@ object AppModule{
         return Retrofit.Builder()
             .baseUrl(DB.MAIN_HOST+"/api/")
             .addConverterFactory(GsonConverterFactory.create())
+            .client(client)
             .build()
     }
 
@@ -47,6 +54,7 @@ object AppModule{
         return Retrofit.Builder()
             .baseUrl(DB.API)
             .addConverterFactory(GsonConverterFactory.create())
+            .client(client)
             .build()
     }
 

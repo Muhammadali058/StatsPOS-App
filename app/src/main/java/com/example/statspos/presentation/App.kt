@@ -164,7 +164,15 @@ fun App() {
                 )
             }
             entry<Screens.Main> {
-                MainScreen()
+                MainScreen(
+                    onLogout = {
+                        scope.launch {
+                            viewModel.getLoginInfo { remember, username, password ->
+                                navigate(Screens.Login(remember, username, password))
+                            }
+                        }
+                    }
+                )
             }
             entry<Screens.CloseApp> {
                 CloseAppScreen()

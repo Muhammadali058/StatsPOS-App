@@ -318,7 +318,6 @@ private fun Body(
                 )
             }
             if (!DB.isOnlineMode) {
-                Spacer(Modifier.width(16.dp))
                 TextButton(
                     onClick = {
                         onBranchClick()

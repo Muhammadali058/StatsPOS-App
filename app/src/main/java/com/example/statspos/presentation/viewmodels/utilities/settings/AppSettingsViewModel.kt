@@ -31,6 +31,7 @@ class AppSettingsViewModel @Inject constructor(
         val itemSuggestions: Boolean = false,
         val onlinePrints: Boolean = false,
         val defaultPrintOn: Boolean = false,
+        val fastSales: Boolean = false,
 
         // Extras
         val hasLoadedOnce: Boolean = false,
@@ -117,6 +118,10 @@ class AppSettingsViewModel @Inject constructor(
         state.update { it.copy(defaultPrintOn = value) }
     }
 
+    fun onFastSalesChange(value: Boolean) {
+        state.update { it.copy(fastSales = value) }
+    }
+
     fun setHasLoadedOnce(value: Boolean) {
         state.update { it.copy(hasLoadedOnce = value) }
     }
@@ -169,6 +174,7 @@ class AppSettingsViewModel @Inject constructor(
             itemSuggestions = state.value.itemSuggestions,
             onlinePrints = state.value.onlinePrints,
             defaultPrintOn = state.value.defaultPrintOn,
+            fastSales = state.value.fastSales,
         )
     }
 
@@ -180,6 +186,7 @@ class AppSettingsViewModel @Inject constructor(
                 itemSuggestions = appSettings.itemSuggestions!!,
                 onlinePrints = appSettings.onlinePrints!!,
                 defaultPrintOn = appSettings.defaultPrintOn!!,
+                fastSales = appSettings.fastSales!!,
             )
         }
     }

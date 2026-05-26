@@ -391,7 +391,7 @@ fun SalesPostedBillsBody(
                                 // if user has access to edit bill
                                 if (HP.userRights.editSaleBill == true) {
                                     val today = LocalDate.now()
-                                    val billDate = HP.toLocalDate(salesBills.localDate!!)
+                                    val billDate = HP.toLocalDateTime(salesBills.localDate!!)
                                     val isToday = billDate.isEqual(today)
 
                                     // if bill on credit

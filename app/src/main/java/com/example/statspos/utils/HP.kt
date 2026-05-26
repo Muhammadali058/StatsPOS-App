@@ -1,5 +1,6 @@
 package com.example.statspos.utils
 
+import android.util.Log
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.items.Items
 import com.example.statspos.domain.models.main.Branches
@@ -334,6 +335,13 @@ object HP {
 
     fun toLocalDate(isoDateString: String): LocalDate {
         return Instant.parse(isoDateString)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
+    }
+
+    fun toLocalDateTime(isoDateString: String): LocalDate {
+        val abc = isoDateString.split('T')[0] + "T00:00:00.000Z"
+        return Instant.parse(abc)
             .atZone(ZoneId.systemDefault())
             .toLocalDate()
     }

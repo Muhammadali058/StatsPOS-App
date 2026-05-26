@@ -2,7 +2,6 @@
 
 package com.example.statspos.presentation.ui.components
 
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,13 +22,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.ShoppingBag
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -60,10 +53,7 @@ import androidx.navigation3.runtime.NavKey
 import com.example.statspos.R
 import com.example.statspos.presentation.ui.screens.BottomRoutes
 import com.example.statspos.presentation.ui.screens.TopRoutes
-import com.example.statspos.presentation.ui.theme.backgroundLight
-import com.example.statspos.presentation.ui.theme.dividerLight
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
-import com.example.statspos.utils.HP
 import com.example.statspos.utils.SnackbarType
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 

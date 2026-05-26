@@ -8,6 +8,7 @@ data class AppSettings(
     var itemSuggestions: Boolean? = null,
     var onlinePrints: Boolean? = null,
     var defaultPrintOn: Boolean? = null,
+    var fastSales: Boolean? = null,
 
     val clientId:Int? = null,
     val branchId:Int? = null,

@@ -101,9 +101,9 @@ fun PurchaseBillItemsBody(
     LaunchedEffect(Unit) {
         if (!state.hasLoadedOnce) {
             purchaseItemsViewModel.loadData(purchaseViewModel::updateTotal){
-                if(purchaseItemsViewModel.state.value.list.isEmpty()) {
-                    onAddButtonClick(0L, false, getPurchaseObject())
-                }
+//                if(purchaseItemsViewModel.state.value.list.isEmpty()) {
+//                    onAddButtonClick(0L, false, getPurchaseObject())
+//                }
             }
             purchaseItemsViewModel.setHasLoadedOnce(true)
         }

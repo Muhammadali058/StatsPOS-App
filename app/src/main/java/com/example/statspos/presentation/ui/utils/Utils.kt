@@ -1,25 +1,20 @@
 package com.example.statspos.presentation.ui.utils
 
-import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
-import android.os.Handler
-import android.os.Looper
 import android.os.ParcelFileDescriptor
-import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
-import java.io.File
-import java.net.URLEncoder
-import androidx.core.net.toUri
 import androidx.core.graphics.createBitmap
+import androidx.core.net.toUri
+import java.io.File
 import java.io.FileOutputStream
-import androidx.core.graphics.scale
+import java.net.URLEncoder
 
 // region Paddings
 object ConstantPaddings {

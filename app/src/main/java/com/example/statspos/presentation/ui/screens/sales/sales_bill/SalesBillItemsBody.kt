@@ -112,9 +112,12 @@ fun SalesBillItemsBody(
     LaunchedEffect(Unit) {
         if (!state.hasLoadedOnce) {
             salesItemsViewModel.loadData(salesViewModel::updateTotal) {
-                if (salesItemsViewModel.state.value.list.isEmpty()) {
+                if (HP.appSettings.fastSales == true) {
                     onAddButtonClick(0L, false, getSalesObject())
                 }
+//                if (salesItemsViewModel.state.value.list.isEmpty()) {
+//                    onAddButtonClick(0L, false, getSalesObject())
+//                }
             }
             salesItemsViewModel.setHasLoadedOnce(true)
         }

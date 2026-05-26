@@ -136,6 +136,8 @@ fun AppSettingsScreen(
                         onOnlinePrintsChange = viewModel::onOnlinePrintsChange,
                         defaultPrintOn = state.defaultPrintOn,
                         onDefaultPrintOnChange = viewModel::onDefaultPrintOnChange,
+                        fastSales = state.fastSales,
+                        onFastSalesChange = viewModel::onFastSalesChange,
                     )
                     Spacer(Modifier.height(12.dp))
                 }
@@ -179,6 +181,8 @@ private fun Body(
     onOnlinePrintsChange: (Boolean) -> Unit,
     defaultPrintOn: Boolean,
     onDefaultPrintOnChange: (Boolean) -> Unit,
+    fastSales: Boolean,
+    onFastSalesChange: (Boolean) -> Unit,
 ) {
     Row{
         AppSwitch(
@@ -216,6 +220,12 @@ private fun Body(
             checked = defaultPrintOn,
             onCheckedChange = onDefaultPrintOnChange,
             label = "Default Print On"
+        )
+        AppSwitch(
+            modifier = Modifier.weight(1f),
+            checked = fastSales,
+            onCheckedChange = onFastSalesChange,
+            label = "Fast Sales"
         )
     }
 }

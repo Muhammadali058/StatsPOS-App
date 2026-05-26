@@ -1,5 +1,6 @@
 package com.example.statspos.presentation.viewmodels.sales.sales_bill
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
@@ -510,7 +511,7 @@ class AddUpdateSalesViewModel @Inject constructor(
                 isRetail = sale.isRetail!!,
                 isEstimatedBill = sale.isEstimatedBill!!,
 
-                date = if (state.value.isPostedBill) HP.toLocalDate(sale.date!!) else LocalDate.now(),
+                date = if (state.value.isPostedBill) HP.toLocalDateTime(sale.date!!) else LocalDate.now(),
                 dueDate = HP.toLocalDate(sale.dueDate!!),
 
                 paymentEnabled = !(state.value.isPostedBill && sale.salesOn!! == 2),

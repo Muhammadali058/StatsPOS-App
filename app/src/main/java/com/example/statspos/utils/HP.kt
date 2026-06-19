@@ -1,10 +1,8 @@
 package com.example.statspos.utils
 
-import android.util.Log
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.items.Items
 import com.example.statspos.domain.models.main.Branches
-import com.example.statspos.domain.models.main.LocalClients
 import com.example.statspos.domain.models.utilities.settings.AdminPasswords
 import com.example.statspos.domain.models.utilities.settings.AdminSettings
 import com.example.statspos.domain.models.utilities.settings.AppSettings

@@ -46,6 +46,7 @@ import com.example.statspos.presentation.ui.screens.warehouse.gatepass.GatepassS
 import com.example.statspos.presentation.ui.screens.warehouse.stock_transfer.StockTransferScreen
 import com.example.statspos.presentation.ui.screens.warehouse.warehouse.WarehousesScreen
 import com.example.statspos.presentation.viewmodels.SharedViewModel
+import com.example.statspos.presentation.viewmodels.sales.orders.SalesOrdersViewModel
 
 @Composable
 fun MainScreen(

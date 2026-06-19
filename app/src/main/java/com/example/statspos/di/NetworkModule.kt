@@ -29,6 +29,8 @@ import com.example.statspos.data.remote.reports.SalesReportsApi
 import com.example.statspos.data.remote.reports.StockReportsApi
 import com.example.statspos.data.remote.sales.SalesApi
 import com.example.statspos.data.remote.sales.SalesItemsApi
+import com.example.statspos.data.remote.sales.SalesOrderItemsApi
+import com.example.statspos.data.remote.sales.SalesOrdersApi
 import com.example.statspos.data.remote.utilities.AuditApi
 import com.example.statspos.data.remote.utilities.BarcodeLabelsApi
 import com.example.statspos.data.remote.utilities.SettingsApi
@@ -205,6 +207,16 @@ class NetworkModule {
     fun provideSalesItemsApi(retrofitInstance: Retrofit): SalesItemsApi {
         return retrofitInstance.create(SalesItemsApi::class.java)
     }
+
+    @Provides
+    fun provideSalesOrdersApi(retrofitInstance: Retrofit): SalesOrdersApi {
+        return retrofitInstance.create(SalesOrdersApi::class.java)
+    }
+
+    @Provides
+    fun provideSalesOrderItemsApi(retrofitInstance: Retrofit): SalesOrderItemsApi {
+        return retrofitInstance.create(SalesOrderItemsApi::class.java)
+    }
     // endregion
 
     // region Utilities
@@ -255,10 +267,5 @@ class NetworkModule {
         return retrofitInstance.create(WarehousesApi::class.java)
     }
     // endregion
-
-//    @Provides
-//    fun provideLocalDataStore(dataStore: DataStore<Preferences>): LocalDataStore{
-//        return LocalDataStore(dataStore)
-//    }
 
 }

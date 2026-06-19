@@ -9,6 +9,7 @@ import com.example.statspos.data.repository.accounts.ExpensesRepositoryImpl
 import com.example.statspos.data.repository.accounts.FixedAccountsRepositoryImpl
 import com.example.statspos.data.repository.accounts.SuppliersRepositoryImpl
 import com.example.statspos.data.repository.accounts.VendorsRepositoryImpl
+import com.example.statspos.data.repository.firebase.FirebaseRepositoryImpl
 import com.example.statspos.data.repository.items.CategoriesRepositoryImpl
 import com.example.statspos.data.repository.items.ItemsRepositoryImpl
 import com.example.statspos.data.repository.items.LinkedItemsRepositoryImpl
@@ -28,6 +29,7 @@ import com.example.statspos.data.repository.reports.PurchaseReportsRepositoryImp
 import com.example.statspos.data.repository.reports.SalesReportsRepositoryImpl
 import com.example.statspos.data.repository.reports.StockReportsRepositoryImpl
 import com.example.statspos.data.repository.sales.SalesItemsRepositoryImpl
+import com.example.statspos.data.repository.sales.SalesOrderItemsRepositoryImpl
 import com.example.statspos.data.repository.sales.SalesRepositoryImpl
 import com.example.statspos.data.repository.utilities.AuditRepositoryImpl
 import com.example.statspos.data.repository.utilities.BarcodeLabelsRepositoryImpl
@@ -47,6 +49,7 @@ import com.example.statspos.domain.repository.accounts.ExpensesRepository
 import com.example.statspos.domain.repository.accounts.FixedAccountsRepository
 import com.example.statspos.domain.repository.accounts.SuppliersRepository
 import com.example.statspos.domain.repository.accounts.VendorsRepository
+import com.example.statspos.domain.repository.firebase.FirebaseRepository
 import com.example.statspos.domain.repository.items.CategoriesRepository
 import com.example.statspos.domain.repository.items.ItemsRepository
 import com.example.statspos.domain.repository.items.LinkedItemsRepository
@@ -76,6 +79,9 @@ import com.example.statspos.domain.repository.warehouse.GatepassItemsRepository
 import com.example.statspos.domain.repository.warehouse.GatepassesRepository
 import com.example.statspos.domain.repository.warehouse.StockEntriesRepository
 import com.example.statspos.domain.repository.warehouse.WarehousesRepository
+import com.example.statspos.data.repository.sales.SalesOrdersRepositoryImpl
+import com.example.statspos.domain.repository.sales.SalesOrderItemsRepository
+import com.example.statspos.domain.repository.sales.SalesOrdersRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -183,6 +189,12 @@ abstract class ApiModule {
 
     @Binds
     abstract fun bindsSalesRepositoryImpl(salesRepositoryImpl: SalesRepositoryImpl): SalesRepository
+
+    @Binds
+    abstract fun bindsSalesOrdersRepo(salesOrdersRepositoryImpl: SalesOrdersRepositoryImpl): SalesOrdersRepository
+
+    @Binds
+    abstract fun bindsSalesOrderItemsRepo(salesOrderItemsRepositoryImpl: SalesOrderItemsRepositoryImpl): SalesOrderItemsRepository
     // endregion
 
     // region Utilities
@@ -214,6 +226,11 @@ abstract class ApiModule {
 
     @Binds
     abstract fun bindsWarehousesRepositoryImpl(warehousesRepositoryImpl: WarehousesRepositoryImpl): WarehousesRepository
+    // endregion
+
+    // region Firebase
+    @Binds
+    abstract fun bindsFirebaseRepo(firebaseRepositoryImpl: FirebaseRepositoryImpl): FirebaseRepository
     // endregion
 
 }

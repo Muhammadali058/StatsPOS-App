@@ -8,6 +8,7 @@ plugins {
 
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -131,4 +132,10 @@ dependencies {
     implementation(libs.vico.compose.m3)
 
     implementation(libs.socket.io.client)
+
+//    Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.database.ktx)
 }

@@ -30,4 +30,16 @@ class ClientsRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getClient(clientId: Int): Resource<JsonObject> {
+        val body = JsonObject().apply {
+            addProperty("id", clientId)
+        }
+
+        return safeApiCall {
+            api.getClient(
+                body
+            )
+        }
+    }
+
 }

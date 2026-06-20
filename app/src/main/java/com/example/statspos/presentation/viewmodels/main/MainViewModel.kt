@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.main.Branches
+import com.example.statspos.domain.models.main.Clients
 import com.example.statspos.domain.repository.main.ClientsRepository
 import com.example.statspos.domain.repository.main.MainRepository
 import com.example.statspos.utils.HP
@@ -11,6 +12,7 @@ import com.example.statspos.utils.LocalDataStore
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
+import com.example.statspos.utils.get
 import com.example.statspos.utils.getListOf
 import com.example.statspos.utils.preloadImages
 import com.google.gson.Gson
@@ -52,11 +54,13 @@ class MainViewModel @Inject constructor(
                     _event.send(UiEvent.ShowSnackbar(event.message, event.type))
                 }
             }
+
             is UiEvent.ShowError -> {
                 viewModelScope.launch {
                     _event.send(UiEvent.ShowError(event.error))
                 }
             }
+
             else -> {
                 viewModelScope.launch {
                     _event.send(UiEvent.Idle)
@@ -110,7 +114,8 @@ class MainViewModel @Inject constructor(
                 is Resource.Success -> {
                     resultSuccess()
 
-                    val branches = Gson().getListOf<Branches>(result.data.get("branches").asJsonArray)
+                    val branches =
+                        Gson().getListOf<Branches>(result.data.get("branches").asJsonArray)
                     dataStore.setBranches(branches)
                     onSuccess()
                 }
@@ -118,7 +123,30 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun loadMainData(onSuccess: () -> Unit) {
+    fun getClient(onSuccess: (Clients) -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            beforeRequest()
+
+            val clientId = dataStore.getClientId().first()
+
+            when (val result = clientsRepo.getClient(clientId)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val client = Gson().get<Clients>(result.data.asJsonObject)
+                    HP.client = client
+                    onSuccess(client)
+                }
+            }
+        }
+    }
+
+    fun loadMainData(onSuccess: (Boolean) -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -133,7 +161,14 @@ class MainViewModel @Inject constructor(
                     HP.setDropdowns(result.data)
                     preloadImages(listOf(HP.getImageUrl(HP.printSettings.imageUrl.toString())))
 
-                    onSuccess()
+                    getClient { client ->
+                        if (client.isRegisteredWeek == false || client.isRegisteredMonth == false) {
+                            showSnackbar("Please activate your app")
+                            onSuccess(false)
+                        }else{
+                            onSuccess(true)
+                        }
+                    }
                 }
             }
         }

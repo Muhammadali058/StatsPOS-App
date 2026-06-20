@@ -10,6 +10,8 @@ data class AppSettings(
     var defaultPrintOn: Boolean? = null,
     var fastSales: Boolean? = null,
 
+    var deliveryCharges: Double? = null,
+
     val clientId:Int? = null,
     val branchId:Int? = null,
 )

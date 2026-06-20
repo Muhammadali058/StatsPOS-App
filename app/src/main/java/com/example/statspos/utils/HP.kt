@@ -3,6 +3,7 @@ package com.example.statspos.utils
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.items.Items
 import com.example.statspos.domain.models.main.Branches
+import com.example.statspos.domain.models.main.Clients
 import com.example.statspos.domain.models.utilities.settings.AdminPasswords
 import com.example.statspos.domain.models.utilities.settings.AdminSettings
 import com.example.statspos.domain.models.utilities.settings.AppSettings
@@ -64,6 +65,7 @@ object HP {
     var userTypes = emptyList<DropdownItem>()
     var shifts = emptyList<DropdownItem>()
     var branch = Branches()
+    var client = Clients()
     var gatepasses = emptyList<DropdownItem>()
 
     // region ComboBox Lists

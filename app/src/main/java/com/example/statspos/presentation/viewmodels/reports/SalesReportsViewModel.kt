@@ -1,6 +1,5 @@
 package com.example.statspos.presentation.viewmodels.reports
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
@@ -207,10 +206,12 @@ class SalesReportsViewModel @Inject constructor(
 
     fun onFromDateChange(value: LocalDate) {
         state.update { it.copy(fromDate = value) }
+        loadMainReport()
     }
 
     fun onToDateChange(value: LocalDate) {
         state.update { it.copy(toDate = value) }
+        loadMainReport()
     }
 
     fun onSalesTypeChange(value: DropdownItem) {
@@ -356,7 +357,8 @@ class SalesReportsViewModel @Inject constructor(
 //            beforeRequest()
 
             val params = JsonObject().apply {
-                addProperty("date", HP.getZonedDate(LocalDate.now()))
+                addProperty("fromDate", HP.getZonedDate(state.value.fromDate))
+                addProperty("toDate", HP.getZonedDate(state.value.toDate))
             }
 
             when (val result = api.mainReport(params)) {

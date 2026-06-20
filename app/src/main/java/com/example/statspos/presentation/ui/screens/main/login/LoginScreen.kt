@@ -1,5 +1,7 @@
 package com.example.statspos.presentation.ui.screens.main.login
 
+import android.app.Activity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -64,8 +66,10 @@ import com.example.statspos.utils.SocketManager
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 import com.example.statspos.utils.showToast
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 @Composable
 fun LoginScreen(
@@ -77,6 +81,7 @@ fun LoginScreen(
     onBrachChange:() -> Unit,
 ) {
     val context = LocalContext.current
+    val activity = LocalActivity.current as Activity
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel = hiltViewModel<LoginViewModel>()
@@ -87,12 +92,7 @@ fun LoginScreen(
     var showBranchesList by remember { mutableStateOf(false) }
 
     fun test(){
-        viewModel.login{
-            if(HP.appSettings.onlinePrints == true) {
-                SocketManager.join()
-            }
-            onLogin()
-        }
+
     }
 
     LaunchedEffect(Unit) {
@@ -153,11 +153,20 @@ fun LoginScreen(
             isLoading = state.isLoading,
             onLogin = {
                 keyboardController?.hide()
-                viewModel.login {
-                    if(HP.appSettings.onlinePrints == true) {
-                        SocketManager.join()
+                viewModel.login { success->
+                    if(success) {
+                        if (HP.appSettings.onlinePrints == true) {
+                            SocketManager.join()
+                        }
+                        onLogin()
+                    }else{
+                        viewModel.showError("Please activate your app")
+                        scope.launch {
+                            context.showToast("Please activate your app")
+                            delay(3000)
+                            activity.finish()
+                        }
                     }
-                    onLogin()
                 }
             },
             onResetClick = onReset,

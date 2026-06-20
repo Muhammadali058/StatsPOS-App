@@ -463,9 +463,9 @@ private fun Settings(
 ) {
     ExpandableSection(
         title = "Settings",
-        initiallyExpanded = false,
+        initiallyExpanded = true,
     ) {
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(12.dp))
         Row {
             AppSwitch(
                 modifier = Modifier.weight(1f),
@@ -691,7 +691,7 @@ private fun Passwords(
 ) {
     ExpandableSection(
         title = "Passwords",
-        initiallyExpanded = false,
+        initiallyExpanded = true,
     ) {
         Row(
             modifier = Modifier
@@ -842,53 +842,6 @@ private fun Passwords(
         }
     }
 }
-
-
-@Composable
-private fun ShopData(
-    shopName: String,
-    contact: String,
-    address: String,
-    onShopNameChange: (String) -> Unit,
-    onContactChange: (String) -> Unit,
-    onAddressChange: (String) -> Unit,
-) {
-    ExpandableSection(
-        title = "Shop Data",
-        initiallyExpanded = false,
-    ) {
-        Textbox(
-            value = shopName,
-            onValueChange = onShopNameChange,
-            modifier = Modifier
-                .fillMaxWidth(),
-            label = {
-                Text("Shop Name")
-            }
-        )
-        Textbox(
-            value = contact,
-            onValueChange = onContactChange,
-            modifier = Modifier
-                .fillMaxWidth(),
-            label = {
-                Text("Contact")
-            }
-        )
-        Textbox(
-            value = address,
-            onValueChange = onAddressChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(84.dp),
-            label = {
-                Text("Address")
-            },
-            singleLine = false,
-        )
-    }
-}
-
 
 @Preview(showBackground = true)
 @Composable

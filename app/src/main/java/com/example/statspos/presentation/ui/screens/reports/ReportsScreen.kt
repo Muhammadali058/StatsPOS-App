@@ -58,6 +58,7 @@ import com.example.statspos.presentation.ui.components.FilterIcon
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.ReportButton
 import com.example.statspos.presentation.ui.components.ReportCard
+import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.ShowReportIcon
 import com.example.statspos.presentation.ui.components.TopItem
 import com.example.statspos.presentation.ui.screens.TopRoutes
@@ -277,33 +278,36 @@ fun ReportsDateBox(
     onToDateChange: (LocalDate) -> Unit,
     onFilterClick: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth(),
-    ) {
-        Row(
+    SearchBox{
+        Column(
             modifier = Modifier
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
         ) {
-            DateTextbox(
+            Spacer(Modifier.height(2.dp))
+            Row(
                 modifier = Modifier
-                    .weight(1f),
-                date = fromDate,
-                onDateChange = onFromDateChange,
-                label = "From Date"
-            )
-            Spacer(Modifier.width(8.dp))
-            DateTextbox(
-                modifier = Modifier
-                    .weight(1f),
-                date = toDate,
-                onDateChange = onToDateChange,
-                label = "To Date"
-            )
-            Spacer(Modifier.width(4.dp))
-            FilterIcon {
-                onFilterClick()
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                DateTextbox(
+                    modifier = Modifier
+                        .weight(1f),
+                    date = fromDate,
+                    onDateChange = onFromDateChange,
+                    label = "From Date"
+                )
+                Spacer(Modifier.width(8.dp))
+                DateTextbox(
+                    modifier = Modifier
+                        .weight(1f),
+                    date = toDate,
+                    onDateChange = onToDateChange,
+                    label = "To Date"
+                )
+                Spacer(Modifier.width(4.dp))
+                FilterIcon {
+                    onFilterClick()
+                }
             }
         }
     }
@@ -400,7 +404,7 @@ fun TodaySales(
     ReportCard(
         modifier = modifier,
         heading = "Sales",
-        subHeading = "Summary of daily sales",
+        subHeading = "Summary of sales",
     ) {
         Row(
             modifier = Modifier
@@ -457,7 +461,7 @@ fun TodayPurchase(
     ReportCard(
         modifier = modifier,
         heading = "Purchase",
-        subHeading = "Summary of daily purchase",
+        subHeading = "Summary of purchase",
     ) {
         Row(
             modifier = Modifier
@@ -513,7 +517,7 @@ fun TodayProfit(
     ReportCard(
         modifier = modifier,
         heading = "Profit",
-        subHeading = "Summary of daily profit",
+        subHeading = "Summary of profit",
     ) {
         Row(
             modifier = Modifier
@@ -839,6 +843,41 @@ private fun ReportsGrid(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun DateBox(
+    fromDate: LocalDate,
+    toDate: LocalDate,
+    onFromDateChange: (LocalDate) -> Unit,
+    onToDateChange: (LocalDate) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(),
+    ) {
+        Spacer(Modifier.height(2.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            DateTextbox(
+                modifier = Modifier
+                    .weight(1f),
+                date = fromDate,
+                onDateChange = onFromDateChange,
+                label = "From Date"
+            )
+            Spacer(Modifier.width(8.dp))
+            DateTextbox(
+                modifier = Modifier
+                    .weight(1f),
+                date = toDate,
+                onDateChange = onToDateChange,
+                label = "To Date"
+            )
         }
     }
 }

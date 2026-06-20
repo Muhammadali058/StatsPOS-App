@@ -205,10 +205,12 @@ class PurchaseReportsViewModel @Inject constructor(
 
     fun onFromDateChange(value: LocalDate) {
         state.update { it.copy(fromDate = value) }
+        loadMainReport()
     }
 
     fun onToDateChange(value: LocalDate) {
         state.update { it.copy(toDate = value) }
+        loadMainReport()
     }
 
     fun onPurchaseTypeChange(value: DropdownItem) {
@@ -350,7 +352,8 @@ class PurchaseReportsViewModel @Inject constructor(
 //            beforeRequest()
 
             val params = JsonObject().apply {
-                addProperty("date", HP.getZonedDate(LocalDate.now()))
+                addProperty("fromDate", HP.getZonedDate(state.value.fromDate))
+                addProperty("toDate", HP.getZonedDate(state.value.toDate))
             }
 
             when (val result = api.mainReport(params)) {

@@ -269,7 +269,7 @@ private fun Passwords(
 ) {
     ExpandableSection(
         title = "Passwords",
-        initiallyExpanded = false,
+        initiallyExpanded = true,
     ) {
         Row(
             modifier = Modifier

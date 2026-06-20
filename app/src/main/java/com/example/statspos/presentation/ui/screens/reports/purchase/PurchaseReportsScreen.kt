@@ -338,16 +338,26 @@ private fun Home(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
-                .padding(ConstantPaddings.BODY_HORIZONTAL)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize(),
             ) {
+                ReportsDateBox(
+                    fromDate = state.fromDate,
+                    toDate = state.toDate,
+                    onFromDateChange = viewModel::onFromDateChange,
+                    onToDateChange = viewModel::onToDateChange,
+                    onFilterClick = {
+                        showBottomSheet = true
+                    },
+                )
+
                 Column(
                     Modifier
                         .weight(1f)
                         .verticalScroll(scrollState)
+                        .padding(ConstantPaddings.BODY_HORIZONTAL)
                         .imePadding(),
                 ) {
                     Spacer(Modifier.height(12.dp))
@@ -375,16 +385,6 @@ private fun Home(
                                     .fillMaxWidth()
                                     .padding(4.dp)
                             ){
-                                ReportsDateBox(
-                                    fromDate = state.fromDate,
-                                    toDate = state.toDate,
-                                    onFromDateChange = viewModel::onFromDateChange,
-                                    onToDateChange = viewModel::onToDateChange,
-                                    onFilterClick = {
-                                        showBottomSheet = true
-                                    },
-                                )
-                                Spacer(Modifier.height(4.dp))
                                 ReportButtons(
                                     onTotalBillsClick = {
                                         viewModel.onTotalBillsClick { salesBillWiseReport, totalReport ->

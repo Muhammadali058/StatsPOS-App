@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
@@ -14,10 +15,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -34,12 +38,15 @@ import com.example.statspos.presentation.ui.components.AppCircularProgressIndica
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.AppSwitch
 import com.example.statspos.presentation.ui.components.ErrorDialog
+import com.example.statspos.presentation.ui.components.ExpandableSection
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
+import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.utilities.settings.AppSettingsViewModel
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
@@ -110,7 +117,6 @@ fun AppSettingsScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(ConstantPaddings.BODY_HORIZONTAL)
                 .padding(vertical = 8.dp)
         ) {
             Column(
@@ -138,6 +144,10 @@ fun AppSettingsScreen(
                         onDefaultPrintOnChange = viewModel::onDefaultPrintOnChange,
                         fastSales = state.fastSales,
                         onFastSalesChange = viewModel::onFastSalesChange,
+                    )
+                    ShoppingApp(
+                        deliveryCharges = state.deliveryCharges,
+                        onDeliveryChargesChange = viewModel::onDeliveryChargesChange,
                     )
                     Spacer(Modifier.height(12.dp))
                 }
@@ -184,48 +194,81 @@ private fun Body(
     fastSales: Boolean,
     onFastSalesChange: (Boolean) -> Unit,
 ) {
-    Row{
-        AppSwitch(
-            modifier = Modifier.weight(1f),
-            checked = instantSearch,
-            onCheckedChange = onInstantSearchChange,
-            label = "Instant Search"
-        )
-        AppSwitch(
-            modifier = Modifier.weight(1f),
-            checked = innerItemSearch,
-            onCheckedChange = onInnerItemSearchChange,
-            label = "Inner Item Search"
-        )
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(ConstantPaddings.BODY_HORIZONTAL)
+    ) {
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = instantSearch,
+                onCheckedChange = onInstantSearchChange,
+                label = "Instant Search"
+            )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = innerItemSearch,
+                onCheckedChange = onInnerItemSearchChange,
+                label = "Inner Item Search"
+            )
+        }
+        Spacer(Modifier.height(24.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = itemSuggestions,
+                onCheckedChange = onItemSuggestionsChange,
+                label = "Item Suggestions"
+            )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = onlinePrints,
+                onCheckedChange = onOnlinePrintsChange,
+                label = "Online Prints"
+            )
+        }
+        Spacer(Modifier.height(24.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = defaultPrintOn,
+                onCheckedChange = onDefaultPrintOnChange,
+                label = "Default Print On"
+            )
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = fastSales,
+                onCheckedChange = onFastSalesChange,
+                label = "Fast Sales"
+            )
+        }
     }
-    Spacer(Modifier.height(24.dp))
-    Row{
-        AppSwitch(
-            modifier = Modifier.weight(1f),
-            checked = itemSuggestions,
-            onCheckedChange = onItemSuggestionsChange,
-            label = "Item Suggestions"
-        )
-        AppSwitch(
-            modifier = Modifier.weight(1f),
-            checked = onlinePrints,
-            onCheckedChange = onOnlinePrintsChange,
-            label = "Online Prints"
-        )
-    }
-    Spacer(Modifier.height(24.dp))
-    Row{
-        AppSwitch(
-            modifier = Modifier.weight(1f),
-            checked = defaultPrintOn,
-            onCheckedChange = onDefaultPrintOnChange,
-            label = "Default Print On"
-        )
-        AppSwitch(
-            modifier = Modifier.weight(1f),
-            checked = fastSales,
-            onCheckedChange = onFastSalesChange,
-            label = "Fast Sales"
-        )
+}
+
+@Composable
+private fun ShoppingApp(
+    deliveryCharges: String,
+    onDeliveryChargesChange: (String) -> Unit,
+) {
+    if(HP.client.hasShoppingApp == true) {
+//        Spacer(Modifier.height(12.dp))
+        ExpandableSection(
+            title = "Shopping App",
+            initiallyExpanded = true,
+        ) {
+            Textbox(
+                value = deliveryCharges,
+                onValueChange = onDeliveryChargesChange,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                label = {
+                    Text("Delivery charges")
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                )
+            )
+        }
     }
 }

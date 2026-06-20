@@ -2,8 +2,10 @@ package com.example.statspos.presentation.viewmodels.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.main.Clients
 import com.example.statspos.domain.models.utilities.users.UserRights
 import com.example.statspos.domain.models.utilities.users.Users
+import com.example.statspos.domain.repository.main.ClientsRepository
 import com.example.statspos.domain.repository.main.MainRepository
 import com.example.statspos.domain.repository.utilities.UsersRepository
 import com.example.statspos.utils.HP
@@ -18,6 +20,7 @@ import com.google.gson.JsonObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -27,6 +30,7 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val usersRepository: UsersRepository,
     private val mainRepository: MainRepository,
+    private val clientsRepo: ClientsRepository,
     private var dataStore: LocalDataStore
 ) : ViewModel() {
     // region ScreenState
@@ -74,6 +78,17 @@ class LoginViewModel @Inject constructor(
         onEvent(UiEvent.ShowSnackbar(message, type))
     }
 
+    fun showMessage(message: String?) {
+        showSnackbar(message ?: "")
+
+//        state.update { it.copy(isLoading = false, error = null, message = message) }
+//        onEvent(UiEvent.ShowMessage(message ?: ""))
+    }
+
+    fun showError(error: String?) {
+        state.update { it.copy(error = error) }
+        onEvent(UiEvent.ShowError(error ?: ""))
+    }
     // endregion
 
     // region onChangeMethods
@@ -113,7 +128,7 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun login(onSuccess: () -> Unit) {
+    fun login(onSuccess: (Boolean) -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -136,7 +151,7 @@ class LoginViewModel @Inject constructor(
                         HP.branchId = HP.user.branchId!!
                         HP.branchGroupId = HP.user.branchGroupId!!
 
-                        loadMainData {
+                        loadMainData { success ->
                             viewModelScope.launch {
                                 if (state.value.remember)
                                     dataStore.saveLoginInfo(
@@ -147,7 +162,7 @@ class LoginViewModel @Inject constructor(
                                 else
                                     dataStore.saveLoginInfo(false, "", "")
 
-                                onSuccess()
+                                onSuccess(success)
                             }
                         }
                     } else {
@@ -158,7 +173,7 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun loadMainData(onSuccess: () -> Unit) {
+    fun loadMainData(onSuccess: (Boolean) -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -173,7 +188,36 @@ class LoginViewModel @Inject constructor(
                     HP.setDropdowns(result.data)
                     preloadImages(listOf(HP.getImageUrl(HP.printSettings.imageUrl.toString())))
 
-                    onSuccess()
+                    getClient { client ->
+                        if (client.isRegisteredWeek == false || client.isRegisteredMonth == false) {
+                            onSuccess(false)
+                        }else{
+                            onSuccess(true)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun getClient(onSuccess: (Clients) -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            beforeRequest()
+
+            val clientId = dataStore.getClientId().first()
+
+            when (val result = clientsRepo.getClient(clientId)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val client = Gson().get<Clients>(result.data.asJsonObject)
+                    HP.client = client
+                    onSuccess(client)
                 }
             }
         }
@@ -195,7 +239,8 @@ class LoginViewModel @Inject constructor(
 
     private fun resultError(error: String?) {
         state.update { it.copy(isLoading = false, error = error) }
-        error?.let { onEvent(UiEvent.ShowError(it)) }
+        showError(error)
+//        error?.let { onEvent(UiEvent.ShowError(it)) }
     }
 
     private fun resultInformation(message: String?) {

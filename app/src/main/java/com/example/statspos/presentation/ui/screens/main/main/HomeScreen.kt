@@ -128,6 +128,12 @@ private val items = listOf(
     ),
     TopItem("Users", TopRoutes.Users, R.drawable.users, HP.userRights.users == true),
     TopItem("Settings", TopRoutes.Settings, R.drawable.settings, HP.userRights.settings == true),
+    TopItem(
+        "Sales\nOrders",
+        TopRoutes.SalesOrders,
+        R.drawable.purchase_orders,
+        HP.userRights.sales == true
+    ),
 )
 private val accounts = listOf(
     TopItem(

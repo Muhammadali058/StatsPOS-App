@@ -52,6 +52,7 @@ private val LightColorScheme = lightColorScheme(
     outlineVariant = primaryLight,
 
     surfaceDim = dividerLight,
+    tertiaryContainer = tertiaryContainerLight,
 )
 
 @Composable

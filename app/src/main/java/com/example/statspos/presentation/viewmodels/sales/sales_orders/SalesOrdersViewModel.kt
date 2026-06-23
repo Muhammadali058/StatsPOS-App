@@ -1,13 +1,15 @@
-package com.example.statspos.presentation.viewmodels.sales.orders
+package com.example.statspos.presentation.viewmodels.sales.sales_orders
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.sales.SalesOrders
 import com.example.statspos.domain.repository.firebase.FirebaseRepository
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
+import com.itextpdf.styledxmlparser.jsoup.select.Collector.collect
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -15,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 @HiltViewModel
 class SalesOrdersViewModel @Inject constructor(
@@ -23,6 +26,13 @@ class SalesOrdersViewModel @Inject constructor(
     // region ScreenState
     data class ScreenState(
         val orders: List<SalesOrders> = emptyList(),
+        val statusList: List<DropdownItem> = listOf(
+            DropdownItem(1L, "New"),
+            DropdownItem(2L, "Processing"),
+            DropdownItem(3L, "Delivered"),
+        ),
+        val selectedStatus: DropdownItem = DropdownItem(1L, "New"),
+        val date: LocalDate = LocalDate.now(),
 
         val hasLoadedOnce: Boolean = false,
 
@@ -86,6 +96,16 @@ class SalesOrdersViewModel @Inject constructor(
     // endregion
 
     // region onChangeMethods
+    fun onSelectedStatusChange(value: DropdownItem) {
+        state.update { it.copy(selectedStatus = value) }
+        loadOrders()
+    }
+
+    fun onDateChange(value: LocalDate) {
+        state.update { it.copy(date = value) }
+        loadOrders()
+    }
+
     fun setHasLoadedOnce(value: Boolean) {
         state.update { it.copy(hasLoadedOnce = value) }
     }
@@ -98,18 +118,18 @@ class SalesOrdersViewModel @Inject constructor(
     // region Network calls
     fun loadOrders() {
         viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
+            firebaseRepo.loadOrdersRealtime(
+                state.value.selectedStatus.name,
+                HP.getFormatedDate(state.value.date)
+            ).collect { result ->
+                when (result) {
+                    is Resource.Error -> resultError(result.error)
+                    is Resource.Information -> resultInformation(result.message)
+                    is Resource.Success -> {
+                        resultSuccess()
 
-            beforeRequest()
-
-            when (val result = firebaseRepo.loadOrders()) {
-                is Resource.Error -> resultError(result.error)
-                is Resource.Information -> resultInformation(result.message)
-                is Resource.Success -> {
-                    resultSuccess()
-
-                    state.update { it.copy(orders = result.data) }
+                        state.update { it.copy(orders = result.data) }
+                    }
                 }
             }
         }

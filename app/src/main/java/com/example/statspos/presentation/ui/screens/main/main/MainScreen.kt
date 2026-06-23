@@ -39,6 +39,7 @@ import com.example.statspos.presentation.ui.screens.reports.sales.SalesReportsSc
 import com.example.statspos.presentation.ui.screens.reports.stock.StockReportsScreen
 import com.example.statspos.presentation.ui.screens.sales.sales_bill.SalesBillScreen
 import com.example.statspos.presentation.ui.screens.sales.sales_bill.ViewSalesBillItemsScreen
+import com.example.statspos.presentation.ui.screens.sales.sales_orders.SalesOrdersScreen
 import com.example.statspos.presentation.ui.screens.utilities.settings.SettingsScreen
 import com.example.statspos.presentation.ui.screens.utilities.users.UpdateUserScreen
 import com.example.statspos.presentation.ui.screens.utilities.users.UsersScreen
@@ -46,7 +47,6 @@ import com.example.statspos.presentation.ui.screens.warehouse.gatepass.GatepassS
 import com.example.statspos.presentation.ui.screens.warehouse.stock_transfer.StockTransferScreen
 import com.example.statspos.presentation.ui.screens.warehouse.warehouse.WarehousesScreen
 import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.sales.orders.SalesOrdersViewModel
 
 @Composable
 fun MainScreen(
@@ -127,14 +127,6 @@ fun MainScreen(
                     }
                 )
             }
-            entry<TopRoutes.PurchaseOrders> {
-                PurchaseOrdersScreen(
-                    sharedViewModel = sharedViewModel,
-                    onBack = {
-                        backStack.removeLastOrNull()
-                    }
-                )
-            }
             entry<TopRoutes.Users> {
                 UsersScreen(
                     sharedViewModel = sharedViewModel,
@@ -174,6 +166,14 @@ fun MainScreen(
                     }
                 )
             }
+            entry<TopRoutes.SalesOrders> {
+                SalesOrdersScreen(
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
             // endregion
             // region Purchase
             entry<TopRoutes.AddUpdatePurchase> { key ->
@@ -192,6 +192,14 @@ fun MainScreen(
                 ViewPurchaseBillItemsScreen(
                     invoiceId = key.purchaseBill.id!!,
                     isPostedBill = true,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<TopRoutes.PurchaseOrders> {
+                PurchaseOrdersScreen(
+                    sharedViewModel = sharedViewModel,
                     onBack = {
                         backStack.removeLastOrNull()
                     }

@@ -13,6 +13,7 @@ data class Sales(
     var isDiscRsPer: Boolean? = null,
     var disc: Double? = null,
     var totalDisc: Double? = null,
+    var tax: Double? = null,
 
     var totalItems: Int? = null,
     var payment: Int? = null,

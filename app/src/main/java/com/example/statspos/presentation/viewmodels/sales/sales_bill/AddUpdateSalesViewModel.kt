@@ -1,6 +1,5 @@
 package com.example.statspos.presentation.viewmodels.sales.sales_bill
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
@@ -44,6 +43,7 @@ class AddUpdateSalesViewModel @Inject constructor(
         var isDiscRsPer: Boolean = HP.settings.isDefaultDiscRs == true,
         val disc: String = "",
         var totalDisc: Double = 0.0,
+        val tax: String = "",
         var payment: String = "",
         var change: String = "",
         var salesOn: DropdownItem = HP.salesOn[0],
@@ -165,6 +165,10 @@ class AddUpdateSalesViewModel @Inject constructor(
     fun onIsDiscRsPerChange(value: Boolean) {
         state.update { it.copy(isDiscRsPer = value) }
         updateTotal(state.value.totalBill, state.value.totalCost)
+    }
+
+    fun onTaxChange(value: String) {
+        state.update { it.copy(tax = value) }
     }
 
     fun onSalesOnChange(value: DropdownItem) {
@@ -459,6 +463,7 @@ class AddUpdateSalesViewModel @Inject constructor(
             isDiscRsPer = state.value.isDiscRsPer,
             disc = HP.getDoubleValue(state.value.disc),
             totalDisc = state.value.totalDisc,
+            tax = HP.getDoubleValue(state.value.tax),
 
             payment = HP.getIntValue(state.value.payment),
             change = HP.getIntValue(state.value.change),
@@ -506,6 +511,8 @@ class AddUpdateSalesViewModel @Inject constructor(
                 supplier = HP.getDropdownById(sale.supplierId!!, HP.suppliers),
                 remarks = sale.remarks.toString(),
 
+                tax = sale.tax.toString(),
+
                 salesOn = HP.getDropdownById(sale.salesOn!!.toLong(), HP.salesOn),
                 salesType = HP.getDropdownById(sale.salesType!!.toLong(), HP.salesType),
                 isRetail = sale.isRetail!!,
@@ -546,6 +553,7 @@ class AddUpdateSalesViewModel @Inject constructor(
                 isDiscRsPer = HP.settings.isDefaultDiscRs!!,
                 disc = "",
                 totalDisc = 0.0,
+                tax = "",
                 date = LocalDate.now(),
                 dueDate = LocalDate.now(),
                 isRetail = HP.settings.isDefaultRateRetail!!,

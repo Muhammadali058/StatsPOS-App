@@ -89,4 +89,22 @@ class FirebaseRepositoryImpl @Inject constructor(
             ref.removeEventListener(listener)
         }
     }
+
+    override suspend fun updateStatus(id:Long, status:String): Resource<String> {
+        return try {
+            db.child("clients")
+                .child("clientId_${HP.clientId}")
+                .child("branchId_${HP.branchId}")
+                .child("salesOrders")
+                .child("salesOrderId_${id}")
+                .child("status")
+                .setValue(status)
+                .await()
+
+            Resource.Success("Status updated")
+        } catch (e: Exception) {
+            Resource.Error(e.message)
+        }
+    }
+
 }

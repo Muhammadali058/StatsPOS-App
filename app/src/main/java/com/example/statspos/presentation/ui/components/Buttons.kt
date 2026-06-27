@@ -1,5 +1,6 @@
 package com.example.statspos.presentation.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -14,9 +15,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,6 +29,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun SmallButton(
@@ -108,5 +112,65 @@ fun ReportButton(
         contentPadding = PaddingValues(vertical = 0.dp, horizontal = 12.dp),
     ) {
         Text(text)
+    }
+}
+
+@Composable
+fun PrimaryButton(
+    modifier: Modifier = Modifier,
+    text:String,
+    onClick: () -> Unit,
+) {
+    Button(
+        modifier = modifier
+            .height(35.dp)
+            .defaultMinSize(minHeight = 0.dp, minWidth = 70.dp),
+        onClick = {
+            onClick()
+        },
+        shape = CircleShape,
+        contentPadding = PaddingValues(vertical = 6.dp, horizontal = 16.dp),
+    ) {
+        Text(
+            text = text,
+            style = TextStyle(
+                fontSize = 13.sp,
+            ),
+        )
+    }
+}
+
+@Composable
+fun SecondaryButton(
+    modifier: Modifier = Modifier,
+    text:String,
+    onClick: () -> Unit,
+) {
+    OutlinedButton (
+        modifier = modifier
+            .height(35.dp)
+            .defaultMinSize(minHeight = 0.dp, minWidth = 70.dp),
+        onClick = {
+            onClick()
+        },
+        shape = CircleShape,
+        contentPadding = PaddingValues(vertical = 6.dp, horizontal = 16.dp),
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+        ),
+        colors = ButtonColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            disabledContainerColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            disabledContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        )
+    ) {
+        Text(
+            text = text,
+            style = TextStyle(
+                fontSize = 13.sp,
+            ),
+        )
     }
 }

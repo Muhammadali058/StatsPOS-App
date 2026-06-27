@@ -5,10 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.example.statspos.domain.models.DropdownItem
 import com.example.statspos.domain.models.sales.SalesOrders
 import com.example.statspos.domain.repository.firebase.FirebaseRepository
+import com.example.statspos.domain.repository.sales.SalesOrdersRepository
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
+import com.example.statspos.utils.getListOf
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.itextpdf.styledxmlparser.jsoup.select.Collector.collect
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -18,10 +22,12 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import kotlin.text.get
 
 @HiltViewModel
 class SalesOrdersViewModel @Inject constructor(
     private val firebaseRepo: FirebaseRepository,
+    private val api: SalesOrdersRepository,
 ) : ViewModel() {
     // region ScreenState
     data class ScreenState(
@@ -30,6 +36,7 @@ class SalesOrdersViewModel @Inject constructor(
             DropdownItem(1L, "New"),
             DropdownItem(2L, "Processing"),
             DropdownItem(3L, "Delivered"),
+            DropdownItem(4L, "Cancelled"),
         ),
         val selectedStatus: DropdownItem = DropdownItem(1L, "New"),
         val date: LocalDate = LocalDate.now(),
@@ -37,6 +44,7 @@ class SalesOrdersViewModel @Inject constructor(
         val hasLoadedOnce: Boolean = false,
 
         val isLoading: Boolean = false,
+        val updatingOrderId: Long? = null,
         val error: String? = null,
     )
 
@@ -112,24 +120,81 @@ class SalesOrdersViewModel @Inject constructor(
     // endregion
 
     init {
-        loadOrders()
+        loadOrdersFB()
     }
+
+    // region Button Clicks
+    fun onAccept(salesOrderId: Long) {
+        updateStatus(salesOrderId, "processing")
+    }
+
+    fun onCancel(salesOrderId: Long) {
+        updateStatus(salesOrderId, "cancelled")
+    }
+    // endregion
 
     // region Network calls
     fun loadOrders() {
         viewModelScope.launch {
+//            if (state.value.isLoading)
+//                return@launch
+
+            beforeRequest()
+
+            val params = JsonObject().apply {
+                addProperty("status", state.value.selectedStatus.name)
+                addProperty("date", HP.getZonedDate(state.value.date))
+                addProperty("loadAll", true)
+            }
+
+            when (val result = api.loadSalesOrders(params)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val orders = Gson().getListOf<SalesOrders>(result.data.get("rows").asJsonArray)
+                    state.update { it.copy(orders = orders) }
+                }
+            }
+        }
+    }
+
+    fun loadOrdersFB() {
+        viewModelScope.launch {
+            beforeRequest()
+
             firebaseRepo.loadOrdersRealtime(
                 state.value.selectedStatus.name,
                 HP.getFormatedDate(state.value.date)
             ).collect { result ->
-                when (result) {
-                    is Resource.Error -> resultError(result.error)
-                    is Resource.Information -> resultInformation(result.message)
-                    is Resource.Success -> {
-                        resultSuccess()
+                loadOrders()
+            }
+        }
+    }
 
-                        state.update { it.copy(orders = result.data) }
-                    }
+    // region Network calls
+    fun updateStatus(salesOrderId: Long, status: String) {
+        viewModelScope.launch {
+//            if (state.value.isLoading)
+//                return@launch
+
+            state.update { it.copy(updatingOrderId = salesOrderId) }
+
+            val salesOrder = SalesOrders(
+                id = salesOrderId,
+                status = status,
+            )
+            val result = api.updateSalesOrder(salesOrder)
+
+            state.update { it.copy(updatingOrderId = null) }
+
+            when (result) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+                    loadOrders()
                 }
             }
         }

@@ -274,7 +274,7 @@ private fun Body(
                     Text("Password")
                 },
                 leadingIcon = {
-                    AppIcon(icon = R.drawable.ic_password)
+                    AppIcon(icon = R.drawable.password)
                 },
                 height = ConstantSize.ORIGINAL_TEXTBOX_HEIGHT,
                 contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,

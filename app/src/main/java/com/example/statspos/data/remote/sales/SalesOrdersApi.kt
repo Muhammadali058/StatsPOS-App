@@ -18,4 +18,8 @@ interface SalesOrdersApi {
 
     @POST("salesOrders/updateSalesOrder")
     suspend fun updateSalesOrder(@Body body: JsonObject): Response<JsonObject>
+
+    @POST("salesOrders/generateBill")
+    suspend fun generateBill(@Body body: JsonObject): Response<JsonObject>
+
 }

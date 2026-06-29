@@ -252,7 +252,6 @@ private fun ShoppingApp(
     onDeliveryChargesChange: (String) -> Unit,
 ) {
     if(HP.client.hasShoppingApp == true) {
-//        Spacer(Modifier.height(12.dp))
         ExpandableSection(
             title = "Shopping App",
             initiallyExpanded = true,

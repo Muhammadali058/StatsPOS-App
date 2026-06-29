@@ -1,8 +1,6 @@
 package com.example.statspos.presentation.ui.screens.sales.main_screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,8 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
@@ -35,7 +32,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
@@ -52,10 +48,6 @@ import com.example.statspos.presentation.ui.components.ComboBox
 import com.example.statspos.presentation.ui.components.DateTextbox
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.FilterIcon
-import com.example.statspos.presentation.ui.components.HeadingLarge
-import com.example.statspos.presentation.ui.components.HeadingMedium
-import com.example.statspos.presentation.ui.components.LabelLarge
-import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.ListHeading
 import com.example.statspos.presentation.ui.components.ListLabel
@@ -385,7 +377,7 @@ fun SalesPostedBillsBody(
                             viewModel.loadNextItems()
                         },
                         items = state.list,
-                        onItemClick = { salesBills ->
+                        onEditClick = { salesBills ->
                             // If bill type is sale not return
                             if (salesBills.salesType == "Sales") {
                                 // if user has access to edit bill
@@ -435,7 +427,7 @@ fun SalesPostedBillsBody(
                                 }
                             }
                         },
-                        onViewClick = onViewClick,
+                        onItemClick = onViewClick,
                         onPrintClick = { salesBill, share ->
                             if (HP.adminPasswords.usePrintDuplicates == true) {
                                 bill = salesBill
@@ -523,7 +515,7 @@ private fun BodyList(
     loadNextItems: () -> Unit,
     items: List<SalesBills>,
     onItemClick: (SalesBills) -> Unit,
-    onViewClick: (SalesBills) -> Unit,
+    onEditClick: (SalesBills) -> Unit,
     onPrintClick: (SalesBills, Boolean) -> Unit,
 ) {
     PullToRefreshList(
@@ -549,7 +541,7 @@ private fun BodyList(
             ListCard(
                 item = item,
                 onItemClick = onItemClick,
-                onViewClick = onViewClick,
+                onEditClick = onEditClick,
                 onPrintClick = onPrintClick,
             )
         }
@@ -561,7 +553,7 @@ private fun ListCard(
     modifier: Modifier = Modifier,
     item: SalesBills,
     onItemClick: (SalesBills) -> Unit,
-    onViewClick: (SalesBills) -> Unit,
+    onEditClick: (SalesBills) -> Unit,
     onPrintClick: (SalesBills, Boolean) -> Unit,
 ) {
     ListCard(
@@ -622,9 +614,9 @@ private fun ListCard(
             Spacer(Modifier.width(8.dp))
             Column {
                 AppIconButton(
-                    icon = Icons.Default.List,
+                    icon = Icons.Default.Edit,
                     onClick = {
-                        onViewClick(item)
+                        onEditClick(item)
                     },
                     buttonSize = 26.dp,
                     size = 20.dp,

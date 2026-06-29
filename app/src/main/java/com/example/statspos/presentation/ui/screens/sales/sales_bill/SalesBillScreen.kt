@@ -478,7 +478,7 @@ private fun Home(
                                     if (salesState.isSaving) {
                                         AppCircularProgressIndicator()
                                     } else {
-                                        SaveButton(text = "Save") {
+                                        SaveButton(text = "Temp Close") {
                                             salesViewModel.tempClose {
                                                 sharedViewModel.notifyBillSaved()
                                                 onBack()

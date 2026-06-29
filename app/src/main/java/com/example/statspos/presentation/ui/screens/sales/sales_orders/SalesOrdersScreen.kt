@@ -17,7 +17,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Outbox
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -45,13 +47,16 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.example.statspos.R
 import com.example.statspos.domain.models.sales.SalesOrders
 import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
+import com.example.statspos.presentation.ui.components.AppDropdownMenu
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.ChipsRow
 import com.example.statspos.presentation.ui.components.DateTextbox
+import com.example.statspos.presentation.ui.components.DropdownItem
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingMedium
 import com.example.statspos.presentation.ui.components.LabelMedium
@@ -74,6 +79,9 @@ private sealed class Routes : NavKey {
 
     @Serializable
     data class ViewOrderItems(val salesOrderId: Long) : Routes()
+
+    @Serializable
+    data object Login : Routes()
 }
 
 @Composable
@@ -102,7 +110,10 @@ fun SalesOrdersScreen(
                     },
                     onViewOrderItemsClick = { salesOrderId ->
                         navigate(Routes.ViewOrderItems(salesOrderId))
-                    }
+                    },
+                    onLogin = {
+                        navigate(Routes.Login)
+                    },
                 )
             }
             entry<Routes.ViewOrderItems> { key ->
@@ -113,6 +124,17 @@ fun SalesOrdersScreen(
                     }
                 )
             }
+            entry<Routes.Login> { key ->
+                SalesOrdersLoginScreen(
+                    onLogin = {
+                        backStack.removeLastOrNull()
+                        onBack()
+                    },
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                )
+            }
         }
     )
 }
@@ -121,13 +143,15 @@ fun SalesOrdersScreen(
 private fun Home(
     sharedViewModel: SharedViewModel,
     onBack: () -> Unit,
-    onViewOrderItemsClick: (Long) -> Unit
+    onViewOrderItemsClick: (Long) -> Unit,
+    onLogin: () -> Unit,
 ) {
     val viewModel = hiltViewModel<SalesOrdersViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
+    var menuExpanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(event) {
         checkEvent(
@@ -149,6 +173,16 @@ private fun Home(
         )
     }
 
+    // Edit data when update
+    LaunchedEffect(Unit) {
+        if (!state.hasLoadedOnce) {
+            if (!viewModel.isUserLoggedIn()) {
+                onLogin()
+            }
+            viewModel.setHasLoadedOnce(true)
+        }
+    }
+
     Scaffold(
         snackbarHost = {
             AppSnackbarHost(
@@ -161,8 +195,41 @@ private fun Home(
                     onBack()
                 },
                 title = "Sales Orders",
+                actions = {
+                    Row {
+                        IconButton(
+                            onClick = {
+                                menuExpanded = true
+                            }
+                        ) {
+                            AppIcon(
+                                icon = Icons.Default.MoreVert,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        AppDropdownMenu(
+                            expanded = menuExpanded,
+                            onDismissRequest = { menuExpanded = false },
+                            modifier = Modifier
+                                .width(200.dp),
+                        ) {
+                            DropdownItem(
+                                text = "Sign Out",
+//                            icon = {
+//                                AppIcon(R.drawable.linked, size = 20.dp)
+//                            },
+                                onClick = {
+                                    menuExpanded = false
+                                    viewModel.signOut {
+                                        onBack()
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
             )
-        }
+        },
     ) { innerPadding ->
         Box(
             Modifier
@@ -224,6 +291,9 @@ private fun Home(
                             onAccept = { salesOrder ->
                                 viewModel.onAccept(salesOrder.id!!)
                             },
+                            onDelivered = { salesOrder ->
+                                viewModel.onDelivered(salesOrder.id!!)
+                            },
                             onCancel = { salesOrder ->
                                 viewModel.onCancel(salesOrder.id!!)
                             },
@@ -253,6 +323,7 @@ private fun OrdersList(
     updatingOrderId: Long? = null,
     onClick: (SalesOrders) -> Unit,
     onAccept: (SalesOrders) -> Unit,
+    onDelivered: (SalesOrders) -> Unit,
     onCancel: (SalesOrders) -> Unit,
 ) {
     LazyColumn(
@@ -264,6 +335,7 @@ private fun OrdersList(
                 updatingStatus = updatingOrderId == item.id,
                 onClick = onClick,
                 onAccept = onAccept,
+                onDelivered = onDelivered,
                 onCancel = onCancel,
             )
         }
@@ -276,6 +348,7 @@ fun OrderCard(
     updatingStatus: Boolean,
     onClick: (SalesOrders) -> Unit,
     onAccept: (SalesOrders) -> Unit,
+    onDelivered: (SalesOrders) -> Unit,
     onCancel: (SalesOrders) -> Unit,
 ) {
     ListCard(
@@ -292,8 +365,6 @@ fun OrderCard(
                 .padding(12.dp),
             contentAlignment = Alignment.Center,
         ) {
-
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -327,12 +398,18 @@ fun OrderCard(
                                 .weight(1f),
                         ) {
                             HeadingMedium(
-                                text = "Order Id"
+                                text = item.accountName.toString()
                             )
-                            Spacer(Modifier.height(4.dp))
-                            LabelMedium(
-                                text = "#${item.id.toString()}"
-                            )
+                            Spacer(Modifier.height(8.dp))
+                            Row {
+                                HeadingMedium(
+                                    text = "Order Id: "
+                                )
+//                                Spacer(Modifier.height(4.dp))
+                                LabelMedium(
+                                    text = "#${item.id.toString()}"
+                                )
+                            }
                             Spacer(Modifier.height(8.dp))
                             Row {
                                 HeadingMedium(
@@ -344,9 +421,7 @@ fun OrderCard(
                             }
                         }
                         Spacer(Modifier.width(12.dp))
-                        Column(
-                            modifier = Modifier,
-                        ) {
+                        Column {
                             Text(
                                 text = "Create on",
                                 style = TextStyle(
@@ -398,9 +473,22 @@ fun OrderCard(
                                     )
                                 }
 
+                                if (item.status.equals("processing", ignoreCase = true)) {
+                                    PrimaryButton(
+                                        text = "Delivered",
+                                        onClick = {
+                                            onDelivered(item)
+                                        },
+                                    )
+                                }
+
                                 Spacer(modifier = Modifier.weight(1f))
 
-                                if (!item.status.equals("cancelled", ignoreCase = true) && !item.status.equals("delivered", ignoreCase = true)) {
+                                if (!item.status.equals(
+                                        "cancelled",
+                                        ignoreCase = true
+                                    ) && !item.status.equals("delivered", ignoreCase = true)
+                                ) {
                                     SecondaryButton(
                                         text = "Cancel",
                                         onClick = {

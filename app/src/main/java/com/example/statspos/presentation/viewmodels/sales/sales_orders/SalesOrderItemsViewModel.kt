@@ -8,6 +8,7 @@ import com.example.statspos.utils.SnackbarType
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.getListOf
 import com.example.statspos.domain.repository.sales.SalesOrderItemsRepository
+import com.example.statspos.domain.repository.sales.SalesOrdersRepository
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -20,6 +21,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class SalesOrderItemsViewModel @Inject constructor(
     private val api: SalesOrderItemsRepository,
+    private val salesOrdersRepo: SalesOrdersRepository,
 ) : ViewModel() {
     // region ScreenState
     data class ScreenState(
@@ -28,6 +30,7 @@ class SalesOrderItemsViewModel @Inject constructor(
         val hasLoadedOnce: Boolean = false,
 
         val isLoading: Boolean = false,
+        val isGeneratingBill: Boolean = false,
         val error: String? = null,
     )
 
@@ -93,7 +96,7 @@ class SalesOrderItemsViewModel @Inject constructor(
     // endregion
 
     // region Network calls
-    fun loadOrderItems(salesOrderId:Long) {
+    fun loadOrderItems(salesOrderId: Long) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -106,8 +109,31 @@ class SalesOrderItemsViewModel @Inject constructor(
                 is Resource.Success -> {
                     resultSuccess()
 
-                    val list = Gson().getListOf<SalesOrderItems>(result.data.get("rows").asJsonArray)
+                    val list =
+                        Gson().getListOf<SalesOrderItems>(result.data.get("rows").asJsonArray)
                     state.update { it.copy(orderItems = list) }
+                }
+            }
+        }
+    }
+
+    fun generateBill(salesOrderId: Long, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isGeneratingBill)
+                return@launch
+
+            state.update { it.copy(isGeneratingBill = true) }
+
+            val result = salesOrdersRepo.generateBill(salesOrderId)
+
+            state.update { it.copy(isGeneratingBill = false) }
+
+            when (result) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+                    onSuccess()
                 }
             }
         }

@@ -4,6 +4,7 @@ import com.example.statspos.data.remote.sales.SalesOrdersApi
 import com.example.statspos.domain.models.sales.SalesOrders
 import com.example.statspos.domain.repository.sales.SalesOrdersRepository
 import com.example.statspos.utils.DB
+import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.safeApiCall
 import com.google.gson.JsonObject
@@ -34,6 +35,19 @@ class SalesOrdersRepositoryImpl @Inject constructor(
 
         return safeApiCall {
             api.updateSalesOrder(
+                DB.addParams(body)
+            )
+        }
+    }
+
+    override suspend fun generateBill(salesOrderId: Long): Resource<JsonObject> {
+        val body = JsonObject().apply {
+            addProperty("salesOrderId", salesOrderId)
+            addProperty("userId", HP.user.id)
+        }
+
+        return safeApiCall {
+            api.generateBill(
                 DB.addParams(body)
             )
         }

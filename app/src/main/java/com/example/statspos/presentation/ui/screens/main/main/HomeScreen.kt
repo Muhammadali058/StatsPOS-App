@@ -131,8 +131,8 @@ private val items = listOf(
     TopItem(
         "Sales\nOrders",
         TopRoutes.SalesOrders,
-        R.drawable.purchase_orders,
-        HP.userRights.sales == true
+        R.drawable.sales_orders,
+        (HP.userRights.sales == true && HP.client.hasShoppingApp == true)
     ),
 )
 private val accounts = listOf(

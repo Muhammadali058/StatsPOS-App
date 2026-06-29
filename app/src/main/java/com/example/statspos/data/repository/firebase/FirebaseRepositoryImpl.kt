@@ -4,6 +4,8 @@ import com.example.statspos.domain.models.sales.SalesOrders
 import com.example.statspos.domain.repository.firebase.FirebaseRepository
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -107,4 +109,13 @@ class FirebaseRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun login(email: String, password: String): Resource<FirebaseUser> {
+        return try {
+            val auth = FirebaseAuth.getInstance()
+            val result = auth.signInWithEmailAndPassword(email, password).await()
+            Resource.Success(result.user!!)
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Login failed")
+        }
+    }
 }

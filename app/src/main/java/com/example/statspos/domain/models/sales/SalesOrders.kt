@@ -16,4 +16,8 @@ data class SalesOrders(
 
     val clientId:Int? = null,
     val branchId:Int? = null,
+
+    // Extras
+    val accountName:String? = null,
+    val contact:String? = null,
 )

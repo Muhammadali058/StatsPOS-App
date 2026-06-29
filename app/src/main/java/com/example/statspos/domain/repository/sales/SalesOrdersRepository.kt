@@ -8,4 +8,5 @@ interface SalesOrdersRepository {
     suspend fun loadSalesOrders(jsonObject: JsonObject): Resource<JsonObject>
     suspend fun orderValidation(jsonObject: JsonObject): Resource<JsonObject>
     suspend fun updateSalesOrder(salesOrder: SalesOrders): Resource<JsonObject>
+    suspend fun generateBill(salesOrderId: Long): Resource<JsonObject>
 }

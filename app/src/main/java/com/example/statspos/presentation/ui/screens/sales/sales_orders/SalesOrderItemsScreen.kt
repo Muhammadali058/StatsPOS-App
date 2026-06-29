@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -42,23 +43,27 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.sales.SalesOrderItems
+import com.example.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.ListImageView
 import com.example.statspos.presentation.ui.components.ProgressBarLayout
+import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.viewmodels.sales.sales_orders.SalesOrderItemsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
+import com.example.statspos.utils.showToast
 
 @Composable
 fun SalesOrderItemsScreen(
     salesOrderId: Long,
     onBack: () -> Unit,
 ) {
+    val context = LocalContext.current
     val viewModel = hiltViewModel<SalesOrderItemsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
@@ -112,8 +117,7 @@ fun SalesOrderItemsScreen(
             Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(MaterialTheme.colorScheme.background)
-                .padding(ConstantPaddings.BODY_HORIZONTAL),
+                .background(MaterialTheme.colorScheme.background),
         ) {
             Column(
                 Modifier
@@ -123,7 +127,8 @@ fun SalesOrderItemsScreen(
                 Spacer(Modifier.height(12.dp))
                 Column(
                     Modifier
-                        .weight(1f),
+                        .weight(1f)
+                        .padding(ConstantPaddings.BODY_HORIZONTAL),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     ItemsList(
@@ -133,9 +138,28 @@ fun SalesOrderItemsScreen(
                     )
                 }
 
-                if (state.isLoading) {
-                    ProgressBarLayout()
+                Box(
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(ConstantPaddings.BODY_HORIZONTAL)
+                ) {
+                    if (state.isGeneratingBill) {
+                        AppCircularProgressIndicator()
+                    } else {
+                        SaveButton(
+                            text = "Generate Bill",
+                        ) {
+                            viewModel.generateBill(salesOrderId) {
+                                context.showToast("Bill generated goto sales")
+                                onBack()
+                            }
+                        }
+                    }
                 }
+            }
+
+            if (state.isLoading) {
+                ProgressBarLayout()
             }
         }
     }

@@ -26,26 +26,17 @@ import java.time.LocalDate
 import kotlin.text.get
 
 @HiltViewModel
-class SalesOrdersViewModel @Inject constructor(
+class SalesOrdersLoginViewModel @Inject constructor(
     private val firebaseRepo: FirebaseRepository,
-    private val api: SalesOrdersRepository,
 ) : ViewModel() {
     // region ScreenState
     data class ScreenState(
-        val orders: List<SalesOrders> = emptyList(),
-        val statusList: List<DropdownItem> = listOf(
-            DropdownItem(1L, "New"),
-            DropdownItem(2L, "Processing"),
-            DropdownItem(3L, "Delivered"),
-            DropdownItem(4L, "Cancelled"),
-        ),
-        val selectedStatus: DropdownItem = DropdownItem(1L, "New"),
-        val date: LocalDate = LocalDate.now(),
+        val email: String = "",
+        val password: String = "",
 
         val hasLoadedOnce: Boolean = false,
 
         val isLoading: Boolean = false,
-        val updatingOrderId: Long? = null,
         val error: String? = null,
     )
 
@@ -105,14 +96,12 @@ class SalesOrdersViewModel @Inject constructor(
     // endregion
 
     // region onChangeMethods
-    fun onSelectedStatusChange(value: DropdownItem) {
-        state.update { it.copy(selectedStatus = value) }
-        loadOrders()
+    fun onEmailChange(value: String) {
+        state.update { it.copy(email = value) }
     }
 
-    fun onDateChange(value: LocalDate) {
-        state.update { it.copy(date = value) }
-        loadOrders()
+    fun onPasswordChange(value: String) {
+        state.update { it.copy(password = value) }
     }
 
     fun setHasLoadedOnce(value: Boolean) {
@@ -120,85 +109,20 @@ class SalesOrdersViewModel @Inject constructor(
     }
     // endregion
 
-    init {
-        loadOrdersFB()
-    }
-
-    // region Button Clicks
-    fun onAccept(salesOrderId: Long) {
-        updateStatus(salesOrderId, "processing")
-    }
-
-    fun onDelivered(salesOrderId: Long) {
-        updateStatus(salesOrderId, "delivered")
-    }
-
-    fun onCancel(salesOrderId: Long) {
-        updateStatus(salesOrderId, "cancelled")
-    }
-    // endregion
-
     // region Network calls
-    fun loadOrders() {
+    fun login(onSuccess: () -> Unit) {
         viewModelScope.launch {
-//            if (state.value.isLoading)
-//                return@launch
+            if (state.value.isLoading)
+                return@launch
 
             beforeRequest()
 
-            val params = JsonObject().apply {
-                addProperty("status", state.value.selectedStatus.name)
-                addProperty("date", HP.getZonedDate(state.value.date))
-                addProperty("loadAll", true)
-            }
-
-            when (val result = api.loadSalesOrders(params)) {
+            when (val result = firebaseRepo.login(state.value.email, state.value.password)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
-
-                    val orders = Gson().getListOf<SalesOrders>(result.data.get("rows").asJsonArray)
-                    state.update { it.copy(orders = orders) }
-                }
-            }
-        }
-    }
-
-    fun loadOrdersFB() {
-        viewModelScope.launch {
-            beforeRequest()
-
-            firebaseRepo.loadOrdersRealtime(
-                state.value.selectedStatus.name,
-                HP.getFormatedDate(state.value.date)
-            ).collect { result ->
-                loadOrders()
-            }
-        }
-    }
-
-    fun updateStatus(salesOrderId: Long, status: String) {
-        viewModelScope.launch {
-//            if (state.value.isLoading)
-//                return@launch
-
-            state.update { it.copy(updatingOrderId = salesOrderId) }
-
-            val salesOrder = SalesOrders(
-                id = salesOrderId,
-                status = status,
-            )
-            val result = api.updateSalesOrder(salesOrder)
-
-            state.update { it.copy(updatingOrderId = null) }
-
-            when (result) {
-                is Resource.Error -> resultError(result.error)
-                is Resource.Information -> resultInformation(result.message)
-                is Resource.Success -> {
-                    resultSuccess()
-                    loadOrders()
+                    onSuccess()
                 }
             }
         }
@@ -207,11 +131,6 @@ class SalesOrdersViewModel @Inject constructor(
     fun isUserLoggedIn(): Boolean {
         val currentUser = FirebaseAuth.getInstance().currentUser
         return currentUser != null
-    }
-
-    fun signOut(onSuccess: () -> Unit) {
-        FirebaseAuth.getInstance().signOut()
-        onSuccess()
     }
     // endregion
 

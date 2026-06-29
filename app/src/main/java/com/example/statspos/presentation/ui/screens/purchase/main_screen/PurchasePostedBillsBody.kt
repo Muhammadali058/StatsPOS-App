@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Print
@@ -363,7 +364,7 @@ fun PurchasePostedBillsBody(
                             viewModel.loadNextItems()
                         },
                         items = state.list,
-                        onItemClick = { purchaseBills ->
+                        onEditClick = { purchaseBills ->
                             // If bill type is sale not return
                             if (purchaseBills.purchaseType == "Purchase") {
                                 if (purchaseBills.warehouseId == 0L) {
@@ -415,7 +416,7 @@ fun PurchasePostedBillsBody(
                                 }
                             }
                         },
-                        onViewClick = onViewClick,
+                        onItemClick = onViewClick,
                         onPrintClick = { purchaseBill, share ->
                             if (HP.adminPasswords.usePrintDuplicates == true) {
                                 bill = purchaseBill
@@ -500,7 +501,7 @@ private fun BodyList(
     loadNextItems: () -> Unit,
     items: List<PurchaseBills>,
     onItemClick: (PurchaseBills) -> Unit,
-    onViewClick: (PurchaseBills) -> Unit,
+    onEditClick: (PurchaseBills) -> Unit,
     onPrintClick: (PurchaseBills, Boolean) -> Unit,
 ) {
     PullToRefreshList(
@@ -526,7 +527,7 @@ private fun BodyList(
             ListCard(
                 item = item,
                 onItemClick = onItemClick,
-                onViewClick = onViewClick,
+                onEditClick = onEditClick,
                 onPrintClick = onPrintClick,
             )
         }
@@ -538,7 +539,7 @@ private fun ListCard(
     modifier: Modifier = Modifier,
     item: PurchaseBills,
     onItemClick: (PurchaseBills) -> Unit,
-    onViewClick: (PurchaseBills) -> Unit,
+    onEditClick: (PurchaseBills) -> Unit,
     onPrintClick: (PurchaseBills, Boolean) -> Unit,
 ) {
     ListCard(
@@ -615,9 +616,9 @@ private fun ListCard(
             Spacer(Modifier.width(8.dp))
             Column {
                 AppIconButton(
-                    icon = Icons.Default.List,
+                    icon = Icons.Default.Edit,
                     onClick = {
-                        onViewClick(item)
+                        onEditClick(item)
                     },
                     buttonSize = 26.dp,
                     size = 20.dp,

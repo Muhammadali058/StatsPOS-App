@@ -50,6 +50,7 @@ import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.PasswordTextbox
+import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.Textbox
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
@@ -61,10 +62,11 @@ import com.example.statspos.utils.checkEvent
 
 @Composable
 fun ClientLoginScreen(
+    viewModel:ClientsViewModel,
     onClientLogin: (client: Clients) -> Unit,
-    onSignup: () -> Unit
+    onSignup: () -> Unit,
 ) {
-    val viewModel = hiltViewModel<ClientsViewModel>()
+//    val viewModel = hiltViewModel<ClientsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
 
@@ -81,7 +83,7 @@ fun ClientLoginScreen(
         )
     }
 
-    if(showErrorDialog){
+    if (showErrorDialog) {
         ErrorDialog(
             error = state.error,
             onDismiss = {
@@ -138,95 +140,112 @@ private fun Body(
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween,
     ) {
-        Spacer(
-            Modifier.height(32.dp)
-        )
-        AppIcon(
-            icon = R.drawable.statspos,
-            modifier = Modifier
-                .size(140.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-        Spacer(
-            Modifier.height(16.dp)
-        )
-        Textbox(
+        Column(
             modifier = Modifier
                 .fillMaxWidth(),
-            value = username,
-            onValueChange = onUsernameChange,
-            label = {
-                Text("Username")
-            },
-            leadingIcon = {
-                AppIcon(icon = R.drawable.ic_user)
-            },
-            height = ConstantSize.ORIGINAL_TEXTBOX_HEIGHT,
-            contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
+            horizontalAlignment = Alignment.CenterHorizontally,
         )
-        PasswordTextbox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            value = password,
-            onValueChange = onPasswordChange,
-            label = {
-                Text("Password")
-            },
-            leadingIcon = {
-                AppIcon(icon = R.drawable.ic_password)
-            },
-            height = ConstantSize.ORIGINAL_TEXTBOX_HEIGHT,
-            contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
-            imeAction = ImeAction.Done
-        )
-        Spacer(
-            Modifier.height(16.dp)
-        )
-
-        if (isLoading) {
-            AppCircularProgressIndicator()
-        } else {
-            Button(
-                onClick = {
-                    onClientLogin()
-                },
+        {
+            Spacer(
+                Modifier.height(32.dp)
+            )
+            AppIcon(
+                icon = R.drawable.statspos,
                 modifier = Modifier
-                    .width(120.dp)
-            ) {
-                Text("Login")
+                    .size(140.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(
+                Modifier.height(16.dp)
+            )
+            Textbox(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                value = username,
+                onValueChange = onUsernameChange,
+                label = {
+                    Text("Username")
+                },
+                leadingIcon = {
+                    AppIcon(icon = R.drawable.ic_user)
+                },
+                height = ConstantSize.ORIGINAL_TEXTBOX_HEIGHT,
+                contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
+            )
+            PasswordTextbox(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                value = password,
+                onValueChange = onPasswordChange,
+                label = {
+                    Text("Password")
+                },
+                leadingIcon = {
+                    AppIcon(icon = R.drawable.password)
+                },
+                height = ConstantSize.ORIGINAL_TEXTBOX_HEIGHT,
+                contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
+                imeAction = ImeAction.Done
+            )
+            Spacer(
+                Modifier.height(16.dp)
+            )
+
+            if (isLoading) {
+                AppCircularProgressIndicator()
+            } else {
+                Button(
+                    onClick = {
+                        onClientLogin()
+                    },
+                    modifier = Modifier
+                        .width(120.dp)
+                ) {
+                    Text("Login")
+                }
             }
         }
 
-//        if (DB.isOnlineMode) {
-//            Row(
-//                modifier = Modifier
-//                    .fillMaxWidth(),
-//                horizontalArrangement = Arrangement.Center,
-//                verticalAlignment = Alignment.CenterVertically
-//            ) {
-//                Text(
-//                    text = "Don't have account?",
-//                    style = TextStyle(
-//                        fontSize = 14.sp,
-//                        color = MaterialTheme.colorScheme.onPrimaryContainer
-//                    )
-//                )
-//                TextButton(
-//                    onClick = {
-//                        onSignup()
-//                    }
-//                ) {
-//                    Text(
-//                        text = "Sign up",
-//                        fontSize = 15.sp,
-//                        textDecoration = TextDecoration.Underline,
-//                        color = MaterialTheme.colorScheme.primary
-//                    )
-//                }
-//            }
-//
-//        }
+        // region Sign Up Button
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(ConstantPaddings.BODY_HORIZONTAL),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "Don't have an account?",
+                    style = TextStyle(
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    ),
+                )
+                TextButton(
+                    onClick = {
+                        onSignup()
+                    }
+                ) {
+                    Text(
+                        text = "Sign Up",
+                        style = TextStyle(
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.primary,
+                        ),
+                    )
+                }
+            }
+        }
+        // endregion
+
     }
 }
 
@@ -278,34 +297,13 @@ private fun BranchesList(localBranches: List<LocalBranches>, onClick: (LocalBran
 @Preview(showBackground = true)
 @Composable
 private fun BodyPreview() {
-    StatsPOSTheme {
-        Body(
-            username = "",
-            password = "",
-            {},
-            {},
-            false,
-            {},
-            {}
-        )
-    }
-}
-
-//@Preview(showBackground = true)
-@Composable
-private fun BranchesListPreview() {
-    StatsPOSTheme() {
-        val branches: List<LocalBranches> = List(5) {
-            LocalBranches(
-                it + 1,
-                localClientId = it + 1,
-                branchName = "Branch ${it + 1}",
-                baseUrl = "",
-            )
-        }
-
-        BranchesList(
-            branches
-        ) { }
-    }
+    Body(
+        username = "",
+        password = "",
+        {},
+        {},
+        false,
+        {},
+        {}
+    )
 }

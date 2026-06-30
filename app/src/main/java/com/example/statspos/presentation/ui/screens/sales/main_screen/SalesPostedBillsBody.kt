@@ -12,9 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Print
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -45,7 +44,9 @@ import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.BottomSheet
 import com.example.statspos.presentation.ui.components.ComboBox
+import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.DateTextbox
+import com.example.statspos.presentation.ui.components.DeleteIcon
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.FilterIcon
 import com.example.statspos.presentation.ui.components.ListCard
@@ -67,6 +68,7 @@ import com.example.statspos.utils.PasswordFor
 import com.example.statspos.utils.SocketManager
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
+import com.example.statspos.utils.showToast
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -84,11 +86,14 @@ fun SalesPostedBillsBody(
     var showBottomSheet by remember { mutableStateOf(false) }
 
     val viewModel = hiltViewModel<SalesPostedBillsViewModel>()
+//    val salesViewModel = hiltViewModel<AddUpdateSalesViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
-    var showPasswordDialog by remember { mutableStateOf(false) }
+    var showEditPasswordDialog by remember { mutableStateOf(false) }
+    var showDeletePasswordDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
     var showPrintPasswordDialog by remember { mutableStateOf(false) }
     var bill by remember { mutableStateOf<SalesBills?>(null) }
     var shareBill by remember { mutableStateOf(false) }
@@ -128,16 +133,52 @@ fun SalesPostedBillsBody(
         )
     }
 
-    if (showPasswordDialog) {
+    if (showEditPasswordDialog) {
         PasswordDialog(
             passwordFor = PasswordFor.EDIT_SALES_BILL,
             onDismiss = {
-                showPasswordDialog = false
+                showEditPasswordDialog = false
             },
             onConfirm = {
-                showPasswordDialog = false
+                showEditPasswordDialog = false
                 bill?.run {
                     onAddUpdateButtonClick(id!!, true, this)
+                }
+            }
+        )
+    }
+
+    if (showDeletePasswordDialog) {
+        PasswordDialog(
+            passwordFor = PasswordFor.DELETE_SALES_BILL,
+            onDismiss = {
+                showDeletePasswordDialog = false
+            },
+            onConfirm = {
+                showDeletePasswordDialog = false
+                bill?.run {
+                    viewModel.deleteBill(id!!) {
+                        context.showToast("Bill deleted successfully")
+                        viewModel.loadData()
+                    }
+                }
+            }
+        )
+    }
+
+    if (showDeleteDialog) {
+        ConfirmDialog(
+            text = "Are you sure to delete this bill",
+            onDismiss = {
+                showDeleteDialog = false
+            },
+            onConfirm = {
+                showDeleteDialog = false
+                bill?.run {
+                    viewModel.deleteBill(id!!) {
+                        context.showToast("Bill deleted successfully")
+                        viewModel.loadData()
+                    }
                 }
             }
         )
@@ -395,7 +436,7 @@ fun SalesPostedBillsBody(
                                             } else if (isToday) {
                                                 if (HP.passwords.useEditSalesBill == true) {
                                                     bill = salesBills
-                                                    showPasswordDialog = true
+                                                    showEditPasswordDialog = true
                                                 } else {
                                                     editBill(salesBills)
                                                 }
@@ -403,7 +444,7 @@ fun SalesPostedBillsBody(
                                                 if (HP.settings.editOldCreditBill == true) {
                                                     if (HP.passwords.useEditSalesBill == true) {
                                                         bill = salesBills
-                                                        showPasswordDialog = true
+                                                        showEditPasswordDialog = true
                                                     } else {
                                                         editBill(salesBills)
                                                     }
@@ -418,7 +459,7 @@ fun SalesPostedBillsBody(
                                         } else {
                                             if (HP.passwords.useEditSalesBill == true) {
                                                 bill = salesBills
-                                                showPasswordDialog = true
+                                                showEditPasswordDialog = true
                                             } else {
                                                 editBill(salesBills)
                                             }
@@ -428,16 +469,22 @@ fun SalesPostedBillsBody(
                             }
                         },
                         onItemClick = onViewClick,
-                        onPrintClick = { salesBill, share ->
-                            if (HP.adminPasswords.usePrintDuplicates == true) {
-                                bill = salesBill
-                                shareBill = share
-                                showPrintPasswordDialog = true
+                        onDeleteClick = { salesBill ->
+                            bill = salesBill
+                            if (HP.passwords.useDeleteSalesBill == true) {
+                                showDeletePasswordDialog = true
                             } else {
-                                bill = salesBill
-                                shareBill = share
-                                printBill()
+                                showDeleteDialog = true
                             }
+//                            if (HP.adminPasswords.usePrintDuplicates == true) {
+//                                bill = salesBill
+//                                shareBill = share
+//                                showPrintPasswordDialog = true
+//                            } else {
+//                                bill = salesBill
+//                                shareBill = share
+//                                printBill()
+//                            }
                         },
                     )
                 }
@@ -516,7 +563,7 @@ private fun BodyList(
     items: List<SalesBills>,
     onItemClick: (SalesBills) -> Unit,
     onEditClick: (SalesBills) -> Unit,
-    onPrintClick: (SalesBills, Boolean) -> Unit,
+    onDeleteClick: (SalesBills) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -542,7 +589,7 @@ private fun BodyList(
                 item = item,
                 onItemClick = onItemClick,
                 onEditClick = onEditClick,
-                onPrintClick = onPrintClick,
+                onDeleteClick = onDeleteClick,
             )
         }
     }
@@ -554,7 +601,7 @@ private fun ListCard(
     item: SalesBills,
     onItemClick: (SalesBills) -> Unit,
     onEditClick: (SalesBills) -> Unit,
-    onPrintClick: (SalesBills, Boolean) -> Unit,
+    onDeleteClick: (SalesBills) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -621,24 +668,30 @@ private fun ListCard(
                     buttonSize = 26.dp,
                     size = 20.dp,
                 )
-                if (HP.userRights.printDuplicates == true) {
-                    AppIconButton(
-                        icon = Icons.Default.Print,
-                        onClick = {
-                            onPrintClick(item, false)
-                        },
-                        buttonSize = 26.dp,
-                        size = 20.dp,
-                    )
-                    AppIconButton(
-                        icon = Icons.Default.Share,
-                        onClick = {
-                            onPrintClick(item, true)
-                        },
-                        buttonSize = 26.dp,
-                        size = 20.dp,
-                    )
+                if (HP.userRights.deleteAnything == true) {
+                    Spacer(Modifier.height(8.dp))
+                    DeleteIcon {
+                        onDeleteClick(item)
+                    }
                 }
+//                if (HP.userRights.printDuplicates == true) {
+//                    AppIconButton(
+//                        icon = Icons.Default.Print,
+//                        onClick = {
+//                            onPrintClick(item, false)
+//                        },
+//                        buttonSize = 26.dp,
+//                        size = 20.dp,
+//                    )
+//                    AppIconButton(
+//                        icon = Icons.Default.Share,
+//                        onClick = {
+//                            onPrintClick(item, true)
+//                        },
+//                        buttonSize = 26.dp,
+//                        size = 20.dp,
+//                    )
+//                }
             }
         }
         Spacer(Modifier.height(2.dp))

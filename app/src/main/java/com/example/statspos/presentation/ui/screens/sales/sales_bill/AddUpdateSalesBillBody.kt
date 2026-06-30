@@ -328,7 +328,7 @@ private fun Others(
 ) {
     ExpandableSection(
         title = "Others",
-        initiallyExpanded = false,
+        initiallyExpanded = true,
     ) {
         if (HP.settings.fourRateSystem == false) {
             Spacer(Modifier.height(8.dp))

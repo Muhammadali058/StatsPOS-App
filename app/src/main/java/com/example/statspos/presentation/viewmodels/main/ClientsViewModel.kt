@@ -146,6 +146,7 @@ class ClientsViewModel @Inject constructor(
                 addProperty("contact", state.value.contact)
                 addProperty("username", state.value.username)
                 addProperty("password", state.value.password)
+                addProperty("isOnline", true)
             }
 
             when (val result = clientsRepository.clientSignup(params)) {

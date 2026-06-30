@@ -58,6 +58,8 @@ class FirebaseRepositoryImpl @Inject constructor(
             .child("clientId_${HP.clientId}")
             .child("branchId_${HP.branchId}")
             .child("salesOrders")
+            .orderByChild("date")
+            .equalTo(date)
 
         val listener = object : ValueEventListener {
 
@@ -65,19 +67,19 @@ class FirebaseRepositoryImpl @Inject constructor(
 
                 val orders = snapshot.children
                     .mapNotNull { it.getValue(SalesOrders::class.java) }
-                    .filter { it.status.equals(status, ignoreCase = true) }
+//                    .filter { it.status.equals(status, ignoreCase = true) }
 
-                var filteredOrders = orders
+//                var filteredOrders = orders
+//
+//                if (status.equals("delivered", ignoreCase = true)) {
+//                    filteredOrders = orders.filter {
+//                        HP.getFormatedDate(
+//                            HP.toLocalDate(it.date.toString())
+//                        ).equals(date, ignoreCase = true)
+//                    }
+//                }
 
-                if (status.equals("delivered", ignoreCase = true)) {
-                    filteredOrders = orders.filter {
-                        HP.getFormatedDate(
-                            HP.toLocalDate(it.date.toString())
-                        ).equals(date, ignoreCase = true)
-                    }
-                }
-
-                trySend(Resource.Success(filteredOrders))
+                trySend(Resource.Success(orders))
             }
 
             override fun onCancelled(error: DatabaseError) {

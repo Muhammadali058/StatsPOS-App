@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -40,6 +41,8 @@ import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.BottomHeading
+import com.example.statspos.presentation.ui.components.ConfirmDialog
+import com.example.statspos.presentation.ui.components.DeleteIcon
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingLarge
 import com.example.statspos.presentation.ui.components.HeadingMedium
@@ -48,6 +51,7 @@ import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.ListHeading
 import com.example.statspos.presentation.ui.components.ListLabel
+import com.example.statspos.presentation.ui.components.ListMainHeading
 import com.example.statspos.presentation.ui.components.ListMainLabel
 import com.example.statspos.presentation.ui.components.PasswordDialog
 import com.example.statspos.presentation.ui.components.PullToRefreshList
@@ -64,6 +68,7 @@ import com.example.statspos.utils.PasswordFor
 import com.example.statspos.utils.SocketManager
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
+import com.example.statspos.utils.showToast
 
 @Composable
 fun PurchasePendingBillsBody(
@@ -78,6 +83,7 @@ fun PurchasePendingBillsBody(
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
     var showPrintPasswordDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
     var bill by remember { mutableStateOf<PurchaseBills?>(null) }
     LaunchedEffect(event) {
         checkEvent(
@@ -156,6 +162,24 @@ fun PurchasePendingBillsBody(
         )
     }
 
+    if (showDeleteDialog) {
+        ConfirmDialog(
+            text = "Are you sure to delete this bill",
+            onDismiss = {
+                showDeleteDialog = false
+            },
+            onConfirm = {
+                showDeleteDialog = false
+                bill?.run {
+                    viewModel.deleteBill(id!!) {
+                        context.showToast("Bill deleted successfully")
+                        viewModel.loadData()
+                    }
+                }
+            }
+        )
+    }
+
     Scaffold(
         snackbarHost = {
             AppSnackbarHost(
@@ -214,7 +238,11 @@ fun PurchasePendingBillsBody(
                                 bill = purchaseBill
                                 printBill()
                             }
-                        }
+                        },
+                        onDeleteClick = { purchaseBill ->
+                            bill = purchaseBill
+                            showDeleteDialog = true
+                        },
                     )
                 }
 
@@ -234,6 +262,7 @@ private fun BodyList(
     onRefresh: () -> Unit,
     items: List<PurchaseBills>,
     onItemClick: (PurchaseBills) -> Unit,
+    onDeleteClick: (PurchaseBills) -> Unit,
     onPrintClick: (PurchaseBills) -> Unit,
 ) {
     PullToRefreshList(
@@ -248,6 +277,7 @@ private fun BodyList(
             ListCard(
                 item = item,
                 onItemClick = onItemClick,
+                onDeleteClick = onDeleteClick,
                 onPrintClick = onPrintClick,
             )
         }
@@ -259,6 +289,7 @@ private fun ListCard(
     modifier: Modifier = Modifier,
     item: PurchaseBills,
     onItemClick: (PurchaseBills) -> Unit,
+    onDeleteClick: (PurchaseBills) -> Unit,
     onPrintClick: (PurchaseBills) -> Unit,
 ) {
     ListCard(
@@ -278,7 +309,8 @@ private fun ListCard(
             Column(
                 modifier = Modifier
                     .weight(1f),
-            ) {
+            )
+            {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -309,37 +341,52 @@ private fun ListCard(
                         ListLabel(item.warehouseName.toString())
                     }
                 }
+                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    ListMainHeading("Total", Modifier.weight(1f))
+                    ListHeading("On", Modifier.weight(.5f))
+                    ListHeading("Type", Modifier.weight(.5f))
+                    ListHeading("MOP", Modifier.weight(.5f))
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    ListMainLabel(HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)), Modifier.weight(1f))
+                    ListLabel(item.purchaseOn.toString(), Modifier.weight(.5f))
+                    ListLabel(item.purchaseType.toString(), Modifier.weight(.5f))
+                    ListLabel(item.mop.toString(), Modifier.weight(.5f))
+                }
             }
-            if(HP.userRights.printDuplicates == true) {
-                Spacer(Modifier.width(8.dp))
-                Column {
+            Spacer(Modifier.width(8.dp))
+            Column{
+                if (HP.userRights.printDuplicates == true) {
                     AppIconButton(
                         icon = Icons.Default.Print,
                         onClick = {
                             onPrintClick(item)
                         }
                     )
+                    Spacer(Modifier.height(8.dp))
+                }
+                DeleteIcon {
+                    onDeleteClick(item)
                 }
             }
-        }
-        Spacer(Modifier.height(2.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-        ) {
-            ListHeading("Total", Modifier.weight(1f))
-            ListHeading("On", Modifier.weight(.5f))
-            ListHeading("Type", Modifier.weight(.5f))
-            ListHeading("MOP", Modifier.weight(.5f))
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-        ) {
-            ListLabel(HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)), Modifier.weight(1f))
-            ListLabel(item.purchaseOn.toString(), Modifier.weight(.5f))
-            ListLabel(item.purchaseType.toString(), Modifier.weight(.5f))
-            ListLabel(item.mop.toString(), Modifier.weight(.5f))
+//            if(HP.userRights.printDuplicates == true) {
+//                Spacer(Modifier.width(8.dp))
+//                Column {
+//                    AppIconButton(
+//                        icon = Icons.Default.Print,
+//                        onClick = {
+//                            onPrintClick(item)
+//                        }
+//                    )
+//                }
+//            }
         }
     }
 }

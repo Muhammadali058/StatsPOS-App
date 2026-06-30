@@ -73,25 +73,26 @@ import kotlinx.coroutines.runBlocking
 
 @Composable
 fun LoginScreen(
+    viewModel:LoginViewModel,
     remember: Boolean,
     username: String?,
     password: String?,
     onLogin: () -> Unit,
     onReset: () -> Unit,
-    onBrachChange:() -> Unit,
+    onBrachChange: () -> Unit,
 ) {
     val context = LocalContext.current
     val activity = LocalActivity.current as Activity
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<LoginViewModel>()
+//    val viewModel = hiltViewModel<LoginViewModel>()
     val localDataViewModel = hiltViewModel<LocalDataViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     var branches by remember { mutableStateOf<List<Branches>>(emptyList()) }
     var showBranchesList by remember { mutableStateOf(false) }
 
-    fun test(){
+    fun test() {
 
     }
 
@@ -153,13 +154,13 @@ fun LoginScreen(
             isLoading = state.isLoading,
             onLogin = {
                 keyboardController?.hide()
-                viewModel.login { success->
-                    if(success) {
+                viewModel.login { success ->
+                    if (success) {
                         if (HP.appSettings.onlinePrints == true) {
                             SocketManager.join()
                         }
                         onLogin()
-                    }else{
+                    } else {
                         viewModel.showError("Please activate your app")
                         scope.launch {
                             context.showToast("Please activate your app")

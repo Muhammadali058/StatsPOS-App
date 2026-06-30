@@ -33,12 +33,15 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -55,6 +58,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -190,6 +194,172 @@ fun Textbox(
     )
 }
 
+@Composable
+fun Textbox2(
+    modifier: Modifier = Modifier,
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String = "Search",
+    textColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    placeholderColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    leadingIcon: (@Composable (() -> Unit))? = null,
+    trailingIcon: (@Composable (() -> Unit))? = null,
+    singleLine: Boolean = true,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    isPassword: Boolean = false,
+    shape: Shape = RoundedCornerShape(8.dp),
+    textStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    focusRequester: FocusRequester = remember { FocusRequester() },
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+
+    var visible by rememberSaveable { mutableStateOf(false) }
+    val icon = if (visible)
+        R.drawable.hidden
+    else
+        R.drawable.eye
+
+    Box(
+        modifier = modifier
+            .height(46.dp)
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .padding(horizontal = 12.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            leadingIcon?.let {
+                it()
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+
+            Box(modifier = Modifier.weight(1f)) {
+
+                if (value.isEmpty()) {
+                    Text(
+                        text = placeholder,
+                        color = placeholderColor,
+                        style = textStyle
+                    )
+                }
+
+                BasicTextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    singleLine = singleLine,
+                    enabled = enabled,
+                    readOnly = readOnly,
+                    textStyle = textStyle.copy(color = textColor),
+                    cursorBrush = SolidColor(textColor),
+                    keyboardOptions = keyboardOptions,
+                    keyboardActions = keyboardActions,
+                    interactionSource = interactionSource,
+                    visualTransformation = if (isPassword && !visible)
+                        PasswordVisualTransformation()
+                    else
+                        VisualTransformation.None,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
+                )
+            }
+
+            when {
+                isPassword -> {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    IconButton(onClick = { visible = !visible }) {
+                        AppIcon(
+                            icon = icon,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+
+                trailingIcon != null && value.isNotEmpty() -> {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    trailingIcon()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Textbox3(
+    modifier: Modifier = Modifier,
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String = "Search",
+    textColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    placeholderColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    leadingIcon: (@Composable (() -> Unit))? = null,
+    trailingIcon: (@Composable (() -> Unit))? = null,
+    singleLine: Boolean = true,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    shape: Shape = RoundedCornerShape(8.dp),
+    textStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    focusRequester: FocusRequester = remember { FocusRequester() },
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Box(
+        modifier = modifier
+            .height(46.dp)
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .padding(PaddingValues(horizontal = 12.dp, vertical = 0.dp)),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (leadingIcon != null) {
+                leadingIcon()
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+
+            Box(modifier = Modifier.weight(1f)) {
+                if (value.isEmpty()) {
+                    Text(
+                        text = placeholder,
+                        color = placeholderColor,
+                        style = textStyle
+                    )
+                }
+
+                BasicTextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    singleLine = singleLine,
+                    enabled = enabled,
+                    readOnly = readOnly,
+                    textStyle = textStyle.copy(color = textColor),
+                    cursorBrush = SolidColor(textColor),
+                    keyboardOptions = keyboardOptions,
+                    keyboardActions = keyboardActions,
+                    interactionSource = interactionSource,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
+                )
+            }
+
+            if (trailingIcon != null && value.isNotEmpty()) {
+                Spacer(modifier = Modifier.width(8.dp))
+                trailingIcon()
+            }
+        }
+    }
+}
 
 @Composable
 fun PasswordTextbox(

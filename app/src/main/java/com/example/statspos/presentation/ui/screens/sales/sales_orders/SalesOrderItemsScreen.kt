@@ -52,6 +52,7 @@ import com.example.statspos.presentation.ui.components.ProgressBarLayout
 import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.TopAppBar
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
+import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.sales.sales_orders.SalesOrderItemsViewModel
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.UiEvent
@@ -60,6 +61,7 @@ import com.example.statspos.utils.showToast
 
 @Composable
 fun SalesOrderItemsScreen(
+    sharedViewModel: SharedViewModel,
     salesOrderId: Long,
     onBack: () -> Unit,
 ) {
@@ -150,6 +152,7 @@ fun SalesOrderItemsScreen(
                             text = "Generate Bill",
                         ) {
                             viewModel.generateBill(salesOrderId) {
+                                sharedViewModel.notifyBillPosted()
                                 context.showToast("Bill generated goto sales")
                                 onBack()
                             }

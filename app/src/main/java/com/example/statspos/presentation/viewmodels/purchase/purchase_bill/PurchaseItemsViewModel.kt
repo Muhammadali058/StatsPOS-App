@@ -2,8 +2,10 @@ package com.example.statspos.presentation.viewmodels.purchase.purchase_bill
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.purchase.PurchaseBill
 import com.example.statspos.domain.models.purchase.PurchaseBillItems
 import com.example.statspos.domain.repository.purchase.PurchaseItemsRepository
+import com.example.statspos.domain.repository.purchase.PurchaseRepository
 import com.example.statspos.domain.repository.sales.SalesItemsRepository
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
@@ -23,6 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PurchaseItemsViewModel @Inject constructor(
     private val api: PurchaseItemsRepository,
+    private val purchaseRepo: PurchaseRepository
 ) : ViewModel() {
 
     // region ScreenState
@@ -110,7 +113,7 @@ class PurchaseItemsViewModel @Inject constructor(
     fun onSearchChange(value: String, updateTotal: (Double) -> Unit) {
         state.update { it.copy(search = value) }
 
-        if(HP.appSettings.instantSearch == true)
+        if (HP.appSettings.instantSearch == true)
             loadData(updateTotal)
     }
 
@@ -189,6 +192,35 @@ class PurchaseItemsViewModel @Inject constructor(
                 is Resource.Success -> {
                     resultSuccess()
                     onSuccess()
+                }
+            }
+        }
+    }
+
+    fun getBill(
+        invoiceId: Long,
+        billType: Int,
+        isPendingBill: Boolean,
+        onSuccess: (bill: List<PurchaseBill>) -> Unit
+    ) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            val params = JsonObject().apply {
+                addProperty("id", invoiceId)
+                addProperty("billType", billType)
+                addProperty("isPendingBill", isPendingBill)
+            }
+
+            when (val result = purchaseRepo.getBill(params)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val bill = Gson().getListOf<PurchaseBill>(result.data.get("bill").asJsonArray)
+                    onSuccess(bill)
                 }
             }
         }

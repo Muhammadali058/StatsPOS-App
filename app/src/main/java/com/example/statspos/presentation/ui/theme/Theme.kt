@@ -40,6 +40,9 @@ private val LightColorScheme = lightColorScheme(
     primaryContainer = primaryContainerLight,
     onPrimaryContainer = textLight,
 
+    secondaryContainer = secondaryContainerLight,
+    onSecondaryContainer = text2Light,
+
     background = backgroundLight,
 
     surface = surfaceLight,

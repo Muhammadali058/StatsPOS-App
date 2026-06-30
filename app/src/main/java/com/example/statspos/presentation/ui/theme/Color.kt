@@ -9,8 +9,10 @@ val surfaceLight = Color(0xFFFFFFFF)
 val backgroundLight = Color(0xFFF7FBFA)
 val dividerLight = Color(0xFFCCCCCC)
 val primaryContainerLight = Color(0xFFFFFFFF)
+val secondaryContainerLight = Color(0xFFF6F7FB)
 val tertiaryContainerLight = Color(0xFFF6F7FB)
 val textLight = Color(0xFF494949)
+val text2Light = Color(0xFF81898C)
 
 
 // Dark mode colors

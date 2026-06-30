@@ -311,35 +311,35 @@ private fun Home(
                     goBackWithResult()
                 },
                 title = "Total: ${HP.formatDecimal(purchaseState.total, mustDecimals = 1)}",
-                actions = {
-                    Row {
-                        if (isPendingBill) {
-                            IconButton(onClick = {
-                                showDeleteDialog = true
-                            }) {
-                                AppIcon(
-                                    icon = Icons.Default.Delete,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        } else if (isPostedBill) {
-                            if (HP.userRights.deleteAnything == true) {
-                                IconButton(onClick = {
-                                    if (HP.passwords.useDeletePurchaseBill == true) {
-                                        showPasswordDialog = true
-                                    } else {
-                                        showDeleteDialog = true
-                                    }
-                                }) {
-                                    AppIcon(
-                                        icon = Icons.Default.Delete,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+//                actions = {
+//                    Row {
+//                        if (isPendingBill) {
+//                            IconButton(onClick = {
+//                                showDeleteDialog = true
+//                            }) {
+//                                AppIcon(
+//                                    icon = Icons.Default.Delete,
+//                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+//                                )
+//                            }
+//                        } else if (isPostedBill) {
+//                            if (HP.userRights.deleteAnything == true) {
+//                                IconButton(onClick = {
+//                                    if (HP.passwords.useDeletePurchaseBill == true) {
+//                                        showPasswordDialog = true
+//                                    } else {
+//                                        showDeleteDialog = true
+//                                    }
+//                                }) {
+//                                    AppIcon(
+//                                        icon = Icons.Default.Delete,
+//                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+//                                    )
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
             )
         }
     ) { innerPadding ->

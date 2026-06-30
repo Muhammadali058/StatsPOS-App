@@ -159,7 +159,7 @@ fun MainScreen(
             }
             entry<TopRoutes.ViewSalesBillItems> { key ->
                 ViewSalesBillItemsScreen(
-                    invoiceId = key.salesBill.id!!,
+                    salesBill = key.salesBill,
                     isPostedBill = true,
                     onBack = {
                         backStack.removeLastOrNull()
@@ -190,7 +190,7 @@ fun MainScreen(
             }
             entry<TopRoutes.ViewPurchaseBillItems> { key ->
                 ViewPurchaseBillItemsScreen(
-                    invoiceId = key.purchaseBill.id!!,
+                    purchaseBill = key.purchaseBill,
                     isPostedBill = true,
                     onBack = {
                         backStack.removeLastOrNull()

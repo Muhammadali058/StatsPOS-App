@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -38,6 +39,8 @@ import com.example.statspos.presentation.ui.components.AppFloatingActionButton
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.BottomHeading
+import com.example.statspos.presentation.ui.components.ConfirmDialog
+import com.example.statspos.presentation.ui.components.DeleteIcon
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.ListHeading
@@ -56,7 +59,7 @@ import com.example.statspos.utils.PasswordFor
 import com.example.statspos.utils.SocketManager
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
-import com.google.gson.JsonObject
+import com.example.statspos.utils.showToast
 
 @Composable
 fun SalesPendingBillsBody(
@@ -72,6 +75,7 @@ fun SalesPendingBillsBody(
     var showErrorDialog by remember { mutableStateOf(false) }
     var showPrintPasswordDialog by remember { mutableStateOf(false) }
     var bill by remember { mutableStateOf<SalesBills?>(null) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
@@ -150,6 +154,24 @@ fun SalesPendingBillsBody(
         )
     }
 
+    if (showDeleteDialog) {
+        ConfirmDialog(
+            text = "Are you sure to delete this bill",
+            onDismiss = {
+                showDeleteDialog = false
+            },
+            onConfirm = {
+                showDeleteDialog = false
+                bill?.run {
+                    viewModel.deleteBill(id!!) {
+                        context.showToast("Bill deleted successfully")
+                        viewModel.loadData()
+                    }
+                }
+            }
+        )
+    }
+
     Scaffold(
         snackbarHost = {
             AppSnackbarHost(
@@ -208,7 +230,11 @@ fun SalesPendingBillsBody(
                                 bill = salesBill
                                 printBill()
                             }
-                        }
+                        },
+                        onDeleteClick = {salesBill ->
+                            bill = salesBill
+                            showDeleteDialog = true
+                        },
                     )
                 }
 
@@ -228,6 +254,7 @@ private fun BodyList(
     onRefresh: () -> Unit,
     items: List<SalesBills>,
     onItemClick: (SalesBills) -> Unit,
+    onDeleteClick: (SalesBills) -> Unit,
     onPrintClick: (SalesBills) -> Unit,
 ) {
     PullToRefreshList(
@@ -242,6 +269,7 @@ private fun BodyList(
             ListCard(
                 item = item,
                 onItemClick = onItemClick,
+                onDeleteClick = onDeleteClick,
                 onPrintClick = onPrintClick,
             )
         }
@@ -253,6 +281,7 @@ private fun ListCard(
     modifier: Modifier = Modifier,
     item: SalesBills,
     onItemClick: (SalesBills) -> Unit,
+    onDeleteClick: (SalesBills) -> Unit,
     onPrintClick: (SalesBills) -> Unit,
 ) {
     ListCard(
@@ -272,7 +301,8 @@ private fun ListCard(
             Column(
                 modifier = Modifier
                     .weight(1f),
-            ) {
+            )
+            {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -292,42 +322,46 @@ private fun ListCard(
                     ListHeading("Date: ")
                     ListLabel(item.date.toString())
                 }
+                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    ListMainHeading("Total", Modifier.weight(1f))
+                    ListHeading("On", Modifier.weight(.5f))
+                    ListHeading("Type", Modifier.weight(.5f))
+                    ListHeading("MOP", Modifier.weight(.5f))
+                    ListHeading("R/W", Modifier.weight(.5f))
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    ListMainLabel(
+                        HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)),
+                        Modifier.weight(1f)
+                    )
+                    ListLabel(item.salesOn.toString(), Modifier.weight(.5f))
+                    ListLabel(item.salesType.toString(), Modifier.weight(.5f))
+                    ListLabel(item.mop.toString(), Modifier.weight(.5f))
+                    ListLabel(item.type.toString(), Modifier.weight(.5f))
+                }
             }
-            if (HP.userRights.printDuplicates == true) {
-                Spacer(Modifier.width(8.dp))
-                Column {
+            Spacer(Modifier.width(8.dp))
+            Column{
+                if (HP.userRights.printDuplicates == true) {
                     AppIconButton(
                         icon = Icons.Default.Print,
                         onClick = {
                             onPrintClick(item)
                         }
                     )
+                    Spacer(Modifier.height(8.dp))
+                }
+                DeleteIcon {
+                    onDeleteClick(item)
                 }
             }
-        }
-        Spacer(Modifier.height(2.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-        ) {
-            ListMainHeading("Total", Modifier.weight(1f))
-            ListHeading("On", Modifier.weight(.5f))
-            ListHeading("Type", Modifier.weight(.5f))
-            ListHeading("MOP", Modifier.weight(.5f))
-            ListHeading("R/W", Modifier.weight(.5f))
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-        ) {
-            ListMainLabel(
-                HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)),
-                Modifier.weight(1f)
-            )
-            ListLabel(item.salesOn.toString(), Modifier.weight(.5f))
-            ListLabel(item.salesType.toString(), Modifier.weight(.5f))
-            ListLabel(item.mop.toString(), Modifier.weight(.5f))
-            ListLabel(item.type.toString(), Modifier.weight(.5f))
         }
     }
 }

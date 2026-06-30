@@ -15,7 +15,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -48,7 +47,6 @@ import com.example.statspos.presentation.ui.components.AppDropdownMenu
 import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.AppSwitch
-import com.example.statspos.presentation.ui.components.AppText
 import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.DropdownItem
 import com.example.statspos.presentation.ui.components.ErrorDialog
@@ -337,31 +335,31 @@ private fun Home(
                 title = "Total: ${HP.formatDecimal(salesState.total, mustDecimals = 1)}",
                 actions = {
                     Row {
-                        if (isPendingBill) {
-                            IconButton(onClick = {
-                                showDeleteDialog = true
-                            }) {
-                                AppIcon(
-                                    icon = Icons.Default.Delete,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        } else if (isPostedBill) {
-                            if (HP.userRights.deleteAnything == true) {
-                                IconButton(onClick = {
-                                    if (HP.passwords.useDeleteSalesBill == true) {
-                                        showPasswordDialog = true
-                                    } else {
-                                        showDeleteDialog = true
-                                    }
-                                }) {
-                                    AppIcon(
-                                        icon = Icons.Default.Delete,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                            }
-                        }
+//                        if (isPendingBill) {
+//                            IconButton(onClick = {
+//                                showDeleteDialog = true
+//                            }) {
+//                                AppIcon(
+//                                    icon = Icons.Default.Delete,
+//                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+//                                )
+//                            }
+//                        } else if (isPostedBill) {
+//                            if (HP.userRights.deleteAnything == true) {
+//                                IconButton(onClick = {
+//                                    if (HP.passwords.useDeleteSalesBill == true) {
+//                                        showPasswordDialog = true
+//                                    } else {
+//                                        showDeleteDialog = true
+//                                    }
+//                                }) {
+//                                    AppIcon(
+//                                        icon = Icons.Default.Delete,
+//                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+//                                    )
+//                                }
+//                            }
+//                        }
 
                         if (HP.userRights.seeMargin == true) {
                             IconButton(

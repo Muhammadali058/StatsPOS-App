@@ -253,6 +253,26 @@ class PurchasePostedBillsViewModel @Inject constructor(
             }
         }
     }
+
+    fun deleteBill(id: Long, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = api.deletePurchase(id, true)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    onSuccess()
+                }
+            }
+        }
+    }
+
     // endregion
 
     // region Others

@@ -258,7 +258,7 @@ private fun Others(
 ) {
     ExpandableSection(
         title = "Others",
-        initiallyExpanded = false,
+        initiallyExpanded = true,
     ) {
         if (HP.adminSettings.showSuppliersInPurchase == true) {
             ComboBox(

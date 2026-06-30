@@ -19,7 +19,7 @@ fun MOPSection(
 ) {
     ExpandableSection(
         title = "M.O.P Bank",
-        initiallyExpanded = false,
+        initiallyExpanded = true,
     ) {
         ComboBox(
             modifier = Modifier

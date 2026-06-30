@@ -12,11 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Print
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -41,22 +38,20 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.statspos.domain.models.purchase.PurchaseBill
 import com.example.statspos.domain.models.purchase.PurchaseBills
-import com.example.statspos.domain.models.sales.SalesBills
 import com.example.statspos.presentation.ui.components.AppIconButton
 import com.example.statspos.presentation.ui.components.AppSnackbarHost
 import com.example.statspos.presentation.ui.components.BottomHeading
 import com.example.statspos.presentation.ui.components.BottomSheet
 import com.example.statspos.presentation.ui.components.ComboBox
+import com.example.statspos.presentation.ui.components.ConfirmDialog
 import com.example.statspos.presentation.ui.components.DateTextbox
+import com.example.statspos.presentation.ui.components.DeleteIcon
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.FilterIcon
-import com.example.statspos.presentation.ui.components.HeadingLarge
-import com.example.statspos.presentation.ui.components.HeadingMedium
-import com.example.statspos.presentation.ui.components.LabelLarge
-import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.ListHeading
 import com.example.statspos.presentation.ui.components.ListLabel
+import com.example.statspos.presentation.ui.components.ListMainHeading
 import com.example.statspos.presentation.ui.components.ListMainLabel
 import com.example.statspos.presentation.ui.components.PasswordDialog
 import com.example.statspos.presentation.ui.components.PullToRefreshList
@@ -72,6 +67,7 @@ import com.example.statspos.utils.PasswordFor
 import com.example.statspos.utils.SocketManager
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
+import com.example.statspos.utils.showToast
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -93,7 +89,9 @@ fun PurchasePostedBillsBody(
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
-    var showPasswordDialog by remember { mutableStateOf(false) }
+    var showEditPasswordDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showDeletePasswordDialog by remember { mutableStateOf(false) }
     var showPrintPasswordDialog by remember { mutableStateOf(false) }
     var bill by remember { mutableStateOf<PurchaseBills?>(null) }
     var shareBill by remember { mutableStateOf(false) }
@@ -133,16 +131,52 @@ fun PurchasePostedBillsBody(
         )
     }
 
-    if (showPasswordDialog) {
+    if (showEditPasswordDialog) {
         PasswordDialog(
             passwordFor = PasswordFor.EDIT_PURCHASE_BILL,
             onDismiss = {
-                showPasswordDialog = false
+                showEditPasswordDialog = false
             },
             onConfirm = {
-                showPasswordDialog = false
+                showEditPasswordDialog = false
                 bill?.run {
                     onAddUpdateButtonClick(id!!, true, this)
+                }
+            }
+        )
+    }
+
+    if (showDeleteDialog) {
+        ConfirmDialog(
+            text = "Are you sure to delete this bill",
+            onDismiss = {
+                showDeleteDialog = false
+            },
+            onConfirm = {
+                showDeleteDialog = false
+                bill?.run {
+                    viewModel.deleteBill(id!!) {
+                        context.showToast("Bill deleted successfully")
+                        viewModel.loadData()
+                    }
+                }
+            }
+        )
+    }
+
+    if (showDeletePasswordDialog) {
+        PasswordDialog(
+            passwordFor = PasswordFor.DELETE_PURCHASE_BILL,
+            onDismiss = {
+                showDeletePasswordDialog = false
+            },
+            onConfirm = {
+                showDeletePasswordDialog = false
+                bill?.run {
+                    viewModel.deleteBill(id!!) {
+                        context.showToast("Bill deleted successfully")
+                        viewModel.loadData()
+                    }
                 }
             }
         )
@@ -383,7 +417,7 @@ fun PurchasePostedBillsBody(
                                                 } else if (isToday) {
                                                     if (HP.passwords.useEditPurchaseBill == true) {
                                                         bill = purchaseBills
-                                                        showPasswordDialog = true
+                                                        showEditPasswordDialog = true
                                                     } else {
                                                         editBill(purchaseBills)
                                                     }
@@ -391,7 +425,7 @@ fun PurchasePostedBillsBody(
                                                     if (HP.settings.editOldCreditBill == true) {
                                                         if (HP.passwords.useEditPurchaseBill == true) {
                                                             bill = purchaseBills
-                                                            showPasswordDialog = true
+                                                            showEditPasswordDialog = true
                                                         } else {
                                                             editBill(purchaseBills)
                                                         }
@@ -406,7 +440,7 @@ fun PurchasePostedBillsBody(
                                             } else {
                                                 if (HP.passwords.useEditPurchaseBill == true) {
                                                     bill = purchaseBills
-                                                    showPasswordDialog = true
+                                                    showEditPasswordDialog = true
                                                 } else {
                                                     editBill(purchaseBills)
                                                 }
@@ -417,16 +451,22 @@ fun PurchasePostedBillsBody(
                             }
                         },
                         onItemClick = onViewClick,
-                        onPrintClick = { purchaseBill, share ->
-                            if (HP.adminPasswords.usePrintDuplicates == true) {
-                                bill = purchaseBill
-                                shareBill = share
-                                showPrintPasswordDialog = true
+                        onDeleteClick = { purchaseBill ->
+                            bill = purchaseBill
+                            if (HP.passwords.useDeletePurchaseBill == true) {
+                                showDeletePasswordDialog = true
                             } else {
-                                bill = purchaseBill
-                                shareBill = share
-                                printBill()
+                                showDeleteDialog = true
                             }
+//                            if (HP.adminPasswords.usePrintDuplicates == true) {
+//                                bill = purchaseBill
+//                                shareBill = share
+//                                showPrintPasswordDialog = true
+//                            } else {
+//                                bill = purchaseBill
+//                                shareBill = share
+//                                printBill()
+//                            }
                         },
                     )
                 }
@@ -502,7 +542,7 @@ private fun BodyList(
     items: List<PurchaseBills>,
     onItemClick: (PurchaseBills) -> Unit,
     onEditClick: (PurchaseBills) -> Unit,
-    onPrintClick: (PurchaseBills, Boolean) -> Unit,
+    onDeleteClick: (PurchaseBills) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -528,7 +568,7 @@ private fun BodyList(
                 item = item,
                 onItemClick = onItemClick,
                 onEditClick = onEditClick,
-                onPrintClick = onPrintClick,
+                onDeleteClick = onDeleteClick,
             )
         }
     }
@@ -540,7 +580,7 @@ private fun ListCard(
     item: PurchaseBills,
     onItemClick: (PurchaseBills) -> Unit,
     onEditClick: (PurchaseBills) -> Unit,
-    onPrintClick: (PurchaseBills, Boolean) -> Unit,
+    onDeleteClick: (PurchaseBills) -> Unit,
 ) {
     ListCard(
         modifier = modifier
@@ -623,24 +663,30 @@ private fun ListCard(
                     buttonSize = 26.dp,
                     size = 20.dp,
                 )
-                if (HP.userRights.printDuplicates == true) {
-                    AppIconButton(
-                        icon = Icons.Default.Print,
-                        onClick = {
-                            onPrintClick(item, false)
-                        },
-                        buttonSize = 26.dp,
-                        size = 20.dp,
-                    )
-                    AppIconButton(
-                        icon = Icons.Default.Share,
-                        onClick = {
-                            onPrintClick(item, true)
-                        },
-                        buttonSize = 26.dp,
-                        size = 20.dp,
-                    )
+                if (HP.userRights.deleteAnything == true) {
+                    Spacer(Modifier.height(8.dp))
+                    DeleteIcon {
+                        onDeleteClick(item)
+                    }
                 }
+//                if (HP.userRights.printDuplicates == true) {
+//                    AppIconButton(
+//                        icon = Icons.Default.Print,
+//                        onClick = {
+//                            onPrintClick(item, false)
+//                        },
+//                        buttonSize = 26.dp,
+//                        size = 20.dp,
+//                    )
+//                    AppIconButton(
+//                        icon = Icons.Default.Share,
+//                        onClick = {
+//                            onPrintClick(item, true)
+//                        },
+//                        buttonSize = 26.dp,
+//                        size = 20.dp,
+//                    )
+//                }
             }
         }
         Spacer(Modifier.height(2.dp))
@@ -648,7 +694,7 @@ private fun ListCard(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            ListHeading("Total", Modifier.weight(1f))
+            ListMainHeading("Total", Modifier.weight(1f))
             ListHeading("On", Modifier.weight(.5f))
             ListHeading("Type", Modifier.weight(.5f))
             ListHeading("MOP", Modifier.weight(.5f))

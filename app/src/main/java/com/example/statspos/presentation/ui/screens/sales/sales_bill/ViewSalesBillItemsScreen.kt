@@ -5,21 +5,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContent
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Print
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -33,17 +30,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.statspos.domain.models.sales.Sales
+import com.example.statspos.domain.models.reports.accounts.AccountReport
+import com.example.statspos.domain.models.sales.SalesBill
 import com.example.statspos.domain.models.sales.SalesBillItems
-import com.example.statspos.presentation.ui.components.AppFloatingActionButton
+import com.example.statspos.domain.models.sales.SalesBills
+import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.ErrorDialog
-import com.example.statspos.presentation.ui.components.HeadingLarge
 import com.example.statspos.presentation.ui.components.HeadingMedium
-import com.example.statspos.presentation.ui.components.LabelLarge
 import com.example.statspos.presentation.ui.components.LabelMedium
 import com.example.statspos.presentation.ui.components.ListCard
 import com.example.statspos.presentation.ui.components.ListHeading
@@ -51,31 +49,37 @@ import com.example.statspos.presentation.ui.components.ListImageView
 import com.example.statspos.presentation.ui.components.ListLabel
 import com.example.statspos.presentation.ui.components.ListMainHeading
 import com.example.statspos.presentation.ui.components.ListMainLabel
+import com.example.statspos.presentation.ui.components.PasswordDialog
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
-import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.components.TopAppBar
+import com.example.statspos.presentation.ui.screens.sales.main_screen.salesBillVoucher
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
-import com.example.statspos.presentation.viewmodels.SharedViewModel
-import com.example.statspos.presentation.viewmodels.accounts.banks.BanksViewModel
-import com.example.statspos.presentation.viewmodels.sales.sales_bill.AddUpdateSalesViewModel
+import com.example.statspos.presentation.ui.utils.openPdf
+import com.example.statspos.presentation.ui.utils.sharePdf
 import com.example.statspos.presentation.viewmodels.sales.sales_bill.SalesItemsViewModel
 import com.example.statspos.utils.HP
+import com.example.statspos.utils.PasswordFor
+import com.example.statspos.utils.SocketManager
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
 @Composable
 fun ViewSalesBillItemsScreen(
-    invoiceId: Long,
+    salesBill: SalesBills,
     isPostedBill: Boolean,
     onBack: () -> Unit,
 ) {
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel = hiltViewModel<SalesItemsViewModel>()
+//    val salesViewModel = hiltViewModel<SalesPostedBillsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
+    var shareBill by remember { mutableStateOf(false) }
+    var showPrintPasswordDialog by remember { mutableStateOf(false) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
@@ -97,7 +101,7 @@ fun ViewSalesBillItemsScreen(
     var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         if (!hasLoadedOnce) {
-            viewModel.updateInitialState(invoiceId, isPostedBill)
+            viewModel.updateInitialState(salesBill.id!!, isPostedBill)
             loadData()
             hasLoadedOnce = true
         }
@@ -112,6 +116,67 @@ fun ViewSalesBillItemsScreen(
         )
     }
 
+    fun showBill(
+        bill: List<SalesBill>,
+        ledger: List<AccountReport>?,
+    ) {
+        val file = salesBillVoucher(
+            context = context,
+            bill = bill,
+            ledger = ledger,
+        )
+
+        if (shareBill)
+            sharePdf(context, file)
+        else
+            openPdf(context, file)
+    }
+
+    fun printBill() {
+        salesBill.run {
+            if (shareBill) {
+                viewModel.getBill(
+                    invoiceId = id!!,
+                    billType = if (isPostedBill) 1 else 3,
+                    isPendingBill = !isPostedBill,
+                ) { bill, ledger ->
+                    showBill(bill, ledger)
+                }
+            } else {
+                if (HP.appSettings.onlinePrints == true) {
+                    SocketManager.printSalesBill(
+                        invoiceId = id!!,
+                        isPendingBill = !isPostedBill,
+                        billType = if (isPostedBill) 2 else 3
+                    )
+                } else {
+                    viewModel.getBill(
+                        invoiceId = id!!,
+                        billType = if (isPostedBill) 1 else 3,
+                        isPendingBill = !isPostedBill,
+                    ) { bill, ledger ->
+                        showBill(bill, ledger)
+                    }
+                }
+            }
+        }
+    }
+
+
+    if (showPrintPasswordDialog) {
+        PasswordDialog(
+            passwordFor = PasswordFor.PRINT_DUPLICATES,
+            onDismiss = {
+                showPrintPasswordDialog = false
+            },
+            onConfirm = {
+                showPrintPasswordDialog = false
+                printBill()
+            }
+        )
+    }
+
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -119,6 +184,61 @@ fun ViewSalesBillItemsScreen(
                     onBack()
                 },
                 title = "Total: ${HP.formatDecimal(state.totalBill, mustDecimals = 1)}",
+                actions = {
+                    Row {
+                        if (HP.userRights.printDuplicates == true) {
+//                            AppIconButton(
+//                                icon = Icons.Default.Print,
+//                                onClick = {
+//                                    shareBill = false
+//                                    showPrintPasswordDialog = true
+//                                },
+//                                buttonSize = 26.dp,
+//                                size = 20.dp,
+//                            )
+
+//                            AppIconButton(
+//                                icon = Icons.Default.Share,
+//                                onClick = {
+//                                    shareBill = true
+//                                    printBill()
+//                                },
+//                                buttonSize = 26.dp,
+//                                size = 20.dp,
+//                            )
+
+                            IconButton(onClick = {
+                                if (HP.adminPasswords.usePrintDuplicates == true) {
+                                    shareBill = false
+                                    showPrintPasswordDialog = true
+                                } else {
+                                    shareBill = false
+                                    printBill()
+                                }
+                            }) {
+                                AppIcon(
+                                    icon = Icons.Default.Print,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            IconButton(onClick = {
+                                if (HP.adminPasswords.usePrintDuplicates == true) {
+                                    shareBill = true
+                                    showPrintPasswordDialog = true
+                                } else {
+                                    shareBill = true
+                                    printBill()
+                                }
+                            }) {
+                                AppIcon(
+                                    icon = Icons.Default.Share,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+
+                        }
+                    }
+                },
             )
         },
     ) { innerPadding ->

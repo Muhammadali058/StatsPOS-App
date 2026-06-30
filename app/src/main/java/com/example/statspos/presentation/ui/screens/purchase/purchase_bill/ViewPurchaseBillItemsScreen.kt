@@ -20,6 +20,10 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Print
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -33,14 +37,19 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.statspos.domain.models.purchase.PurchaseBill
 import com.example.statspos.domain.models.purchase.PurchaseBillItems
+import com.example.statspos.domain.models.purchase.PurchaseBills
 import com.example.statspos.domain.models.sales.Sales
 import com.example.statspos.domain.models.sales.SalesBillItems
+import com.example.statspos.domain.models.sales.SalesBills
 import com.example.statspos.presentation.ui.components.AppFloatingActionButton
+import com.example.statspos.presentation.ui.components.AppIcon
 import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.HeadingLarge
 import com.example.statspos.presentation.ui.components.HeadingMedium
@@ -52,32 +61,41 @@ import com.example.statspos.presentation.ui.components.ListImageView
 import com.example.statspos.presentation.ui.components.ListLabel
 import com.example.statspos.presentation.ui.components.ListMainHeading
 import com.example.statspos.presentation.ui.components.ListMainLabel
+import com.example.statspos.presentation.ui.components.PasswordDialog
 import com.example.statspos.presentation.ui.components.PullToRefreshList
 import com.example.statspos.presentation.ui.components.SearchBox
 import com.example.statspos.presentation.ui.components.SearchTextbox
 import com.example.statspos.presentation.ui.components.TopAppBar
+import com.example.statspos.presentation.ui.screens.purchase.main_screen.purchaseBillVoucher
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
+import com.example.statspos.presentation.ui.utils.openPdf
+import com.example.statspos.presentation.ui.utils.sharePdf
 import com.example.statspos.presentation.viewmodels.SharedViewModel
 import com.example.statspos.presentation.viewmodels.accounts.banks.BanksViewModel
 import com.example.statspos.presentation.viewmodels.purchase.purchase_bill.PurchaseItemsViewModel
 import com.example.statspos.presentation.viewmodels.sales.sales_bill.AddUpdateSalesViewModel
 import com.example.statspos.presentation.viewmodels.sales.sales_bill.SalesItemsViewModel
 import com.example.statspos.utils.HP
+import com.example.statspos.utils.PasswordFor
+import com.example.statspos.utils.SocketManager
 import com.example.statspos.utils.UiEvent
 import com.example.statspos.utils.checkEvent
 
 @Composable
 fun ViewPurchaseBillItemsScreen(
-    invoiceId: Long,
+    purchaseBill: PurchaseBills,
     isPostedBill: Boolean,
     onBack: () -> Unit,
 ) {
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel = hiltViewModel<PurchaseItemsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
+    var shareBill by remember { mutableStateOf(false) }
+    var showPrintPasswordDialog by remember { mutableStateOf(false) }
     LaunchedEffect(event) {
         checkEvent(
             event = event,
@@ -97,7 +115,7 @@ fun ViewPurchaseBillItemsScreen(
     var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         if (!hasLoadedOnce) {
-            viewModel.updateInitialState(invoiceId, isPostedBill)
+            viewModel.updateInitialState(purchaseBill.id!!, isPostedBill)
             loadData()
             hasLoadedOnce = true
         }
@@ -112,6 +130,63 @@ fun ViewPurchaseBillItemsScreen(
         )
     }
 
+    fun showBill(
+        bill: List<PurchaseBill>,
+    ) {
+        val file = purchaseBillVoucher(
+            context = context,
+            bill = bill,
+        )
+
+        if (shareBill)
+            sharePdf(context, file)
+        else
+            openPdf(context, file)
+    }
+
+    fun printBill() {
+        purchaseBill.run {
+            if (shareBill) {
+                viewModel.getBill(
+                    invoiceId = id!!,
+                    billType = if (isPostedBill) 1 else 2,
+                    isPendingBill = !isPostedBill,
+                ) { bill ->
+                    showBill(bill)
+                }
+            } else {
+                if (HP.appSettings.onlinePrints == true) {
+                    SocketManager.printPurchaseBill(
+                        invoiceId = id!!,
+                        isPendingBill = !isPostedBill,
+                        billType = if (isPostedBill) 1 else 2
+                    )
+                } else {
+                    viewModel.getBill(
+                        invoiceId = id!!,
+                        billType = if (isPostedBill) 1 else 2,
+                        isPendingBill = !isPostedBill,
+                    ) { bill ->
+                        showBill(bill)
+                    }
+                }
+            }
+        }
+    }
+
+    if (showPrintPasswordDialog) {
+        PasswordDialog(
+            passwordFor = PasswordFor.PRINT_DUPLICATES,
+            onDismiss = {
+                showPrintPasswordDialog = false
+            },
+            onConfirm = {
+                showPrintPasswordDialog = false
+                printBill()
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -119,6 +194,41 @@ fun ViewPurchaseBillItemsScreen(
                     onBack()
                 },
                 title = "Total: ${HP.formatDecimal(state.totalBill, mustDecimals = 1)}",
+                actions = {
+                    Row {
+                        if (HP.userRights.printDuplicates == true) {
+                            IconButton(onClick = {
+                                if (HP.adminPasswords.usePrintDuplicates == true) {
+                                    shareBill = false
+                                    showPrintPasswordDialog = true
+                                }else{
+                                    shareBill = false
+                                    printBill()
+                                }
+                            }) {
+                                AppIcon(
+                                    icon = Icons.Default.Print,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            IconButton(onClick = {
+                                if (HP.adminPasswords.usePrintDuplicates == true) {
+                                    shareBill = true
+                                    showPrintPasswordDialog = true
+                                }else{
+                                    shareBill = true
+                                    printBill()
+                                }
+                            }) {
+                                AppIcon(
+                                    icon = Icons.Default.Share,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+
+                        }
+                    }
+                },
             )
         },
     ) { innerPadding ->

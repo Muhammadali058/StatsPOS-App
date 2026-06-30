@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import okhttp3.internal.notify
 import java.time.LocalDate
 import kotlin.text.get
 
@@ -171,7 +172,7 @@ class SalesOrdersViewModel @Inject constructor(
 
             firebaseRepo.loadOrdersRealtime(
                 state.value.selectedStatus.name,
-                HP.getFormatedDate(state.value.date)
+                HP.getFormatedDate(LocalDate.now())
             ).collect { result ->
                 loadOrders()
             }

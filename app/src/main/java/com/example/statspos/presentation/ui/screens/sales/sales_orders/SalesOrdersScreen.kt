@@ -118,6 +118,7 @@ fun SalesOrdersScreen(
             }
             entry<Routes.ViewOrderItems> { key ->
                 SalesOrderItemsScreen(
+                    sharedViewModel = sharedViewModel,
                     salesOrderId = key.salesOrderId,
                     onBack = {
                         backStack.removeLastOrNull()

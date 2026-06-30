@@ -1,10 +1,12 @@
 package com.example.statspos.presentation.viewmodels.sales.sales_bill
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.statspos.domain.models.reports.accounts.AccountReport
+import com.example.statspos.domain.models.sales.SalesBill
 import com.example.statspos.domain.models.sales.SalesBillItems
 import com.example.statspos.domain.repository.sales.SalesItemsRepository
+import com.example.statspos.domain.repository.sales.SalesRepository
 import com.example.statspos.utils.HP
 import com.example.statspos.utils.Resource
 import com.example.statspos.utils.SnackbarType
@@ -23,6 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SalesItemsViewModel @Inject constructor(
     private val api: SalesItemsRepository,
+    private val salesRepo: SalesRepository
 ) : ViewModel() {
 
     // region ScreenState
@@ -201,6 +204,43 @@ class SalesItemsViewModel @Inject constructor(
                 is Resource.Success -> {
                     resultSuccess()
                     onSuccess()
+                }
+            }
+        }
+    }
+
+    fun getBill(
+        invoiceId:Long,
+        billType:Int,
+        isPendingBill:Boolean,
+        onSuccess: (bill: List<SalesBill>, List<AccountReport>?) -> Unit
+    ) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            beforeRequest()
+
+            val params = JsonObject().apply {
+                addProperty("id", invoiceId)
+                addProperty("billType", billType)
+                addProperty("isPendingBill", isPendingBill)
+            }
+
+            when (val result = salesRepo.getBill(params)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val bill = Gson().getListOf<SalesBill>(result.data.get("bill").asJsonArray)
+                    var ledger: List<AccountReport>? = null
+
+                    if(HP.settings.showLedgerInBill == true){
+                        ledger = Gson().getListOf<AccountReport>(result.data.get("ledger").asJsonArray)
+                    }
+
+                    onSuccess(bill,ledger)
                 }
             }
         }

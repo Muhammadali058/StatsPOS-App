@@ -227,7 +227,8 @@ fun AddUpdatePackageItemScreen(
                         .verticalScroll(scrollState)
                         .imePadding(),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
+                )
+                {
                     Dropdown(
                         value = state.packageName,
                         onValueChange = viewModel::onPackageNameChange,

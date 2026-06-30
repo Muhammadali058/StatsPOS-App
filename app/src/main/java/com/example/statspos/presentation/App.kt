@@ -1,14 +1,14 @@
 package com.example.statspos.presentation
 
 import android.app.Activity
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -22,10 +22,14 @@ import com.example.statspos.presentation.ui.screens.main.login.CloseAppScreen
 import com.example.statspos.presentation.ui.screens.main.login.LoginScreen
 import com.example.statspos.presentation.ui.screens.main.main.MainScreen
 import com.example.statspos.presentation.ui.screens.main.main.SplashScreen
+import com.example.statspos.presentation.viewmodels.main.ClientsViewModel
 import com.example.statspos.presentation.viewmodels.main.LocalDataViewModel
+import com.example.statspos.presentation.viewmodels.main.LoginViewModel
 import com.example.statspos.utils.DB
-import com.example.statspos.utils.DB.socketUrl
 import com.example.statspos.utils.HP
+import com.example.statspos.utils.SocketManager
+import com.example.statspos.utils.showToast
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -57,6 +61,9 @@ fun App() {
     val scope = rememberCoroutineScope()
     val backStack = rememberNavBackStack(Screens.Splash)
     val viewModel = hiltViewModel<LocalDataViewModel>()
+    val clientsViewModel = hiltViewModel<ClientsViewModel>()
+    val loginViewModel = hiltViewModel<LoginViewModel>()
+    val clientsState by clientsViewModel.state.collectAsStateWithLifecycle()
 
     fun navigate(key: NavKey) {
         if (backStack.lastOrNull() != key) {
@@ -127,10 +134,12 @@ fun App() {
             }
             entry<Screens.ClientLogin> {
                 ClientLoginScreen(
+                    viewModel = clientsViewModel,
                     onClientLogin = { client ->
                         showLoginScreen(client)
                     },
                     onSignup = {
+                        backStack.removeLastOrNull()
                         backStack.add(Screens.ClientSignup)
 //                        backStack.removeFirstOrNull()
                     },
@@ -138,13 +147,33 @@ fun App() {
             }
             entry<Screens.ClientSignup> {
                 ClientSignupScreen(
+                    viewModel = clientsViewModel,
                     onSignup = { client ->
-                        showLoginScreen(client)
+                        loginViewModel.onUsernameChange(clientsState.username)
+                        loginViewModel.onPasswordChange(clientsState.password)
+
+                        SocketManager.init()
+                        SocketManager.connect()
+
+                        HP.clientId = client.id!!
+                        DB.isOnlineMode = client.isOnline!!
+
+                        loginViewModel.login { success ->
+                            if (HP.appSettings.onlinePrints == true) {
+                                SocketManager.join()
+                            }
+                            navigate(Screens.Main)
+                        }
+                    },
+                    onSignIn = {
+                        backStack.removeLastOrNull()
+                        backStack.add(Screens.ClientLogin)
                     }
                 )
             }
             entry<Screens.Login> { key ->
                 LoginScreen(
+                    viewModel = loginViewModel,
                     remember = key.remember,
                     username = key.username,
                     password = key.password,

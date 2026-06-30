@@ -117,6 +117,7 @@ fun AppSettingsScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.surface)
+                .padding(ConstantPaddings.BODY_HORIZONTAL)
                 .padding(vertical = 8.dp)
         ) {
             Column(
@@ -197,7 +198,6 @@ private fun Body(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(ConstantPaddings.BODY_HORIZONTAL)
     ) {
         Row {
             AppSwitch(

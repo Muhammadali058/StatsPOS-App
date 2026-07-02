@@ -230,6 +230,28 @@ class AddUpdateSubCategoryViewModel @Inject constructor(
             }
         }
     }
+
+    fun deleteImage(imageUrl: String) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            if(imageUrl.isEmpty())
+                return@launch
+
+            beforeRequest()
+
+            when (val result = mainRepo.deleteImage(imageUrl)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+                    state.update { it.copy(imageUrl = "") }
+                }
+            }
+        }
+    }
+
     // endregion
 
     // region Methods

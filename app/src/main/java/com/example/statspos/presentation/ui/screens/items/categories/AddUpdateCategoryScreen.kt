@@ -189,7 +189,8 @@ fun AddUpdateCategoryScreen(
                         imageUrl = state.imageUrl,
                         onImageUrlChange = {
                             viewModel.uploadImage(it)
-                        }
+                        },
+                        onClear = viewModel::deleteImage,
                     )
                 }
 
@@ -229,6 +230,7 @@ private fun Body(
     isUploadingImage: Boolean,
     imageUrl: String,
     onImageUrlChange: (MultipartBody.Part) -> Unit,
+    onClear: (String) -> Unit,
 ) {
     Textbox(
         value = categoryName,
@@ -261,7 +263,8 @@ private fun Body(
         } else {
             UploadImageView(
                 imageUrl = imageUrl,
-                onImageUrlChange = onImageUrlChange
+                onImageUrlChange = onImageUrlChange,
+                onClear = onClear,
             )
         }
     }
@@ -281,7 +284,8 @@ private fun Prev() {
             onRemarksChange = {},
             isUploadingImage = false,
             imageUrl = "",
-            onImageUrlChange = {}
+            onImageUrlChange = {},
+            onClear = {},
         )
     }
 }

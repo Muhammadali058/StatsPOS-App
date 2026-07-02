@@ -137,7 +137,8 @@ fun UpdateUserScreen(
                         imageUrl = state.imageUrl,
                         onImageUrlChange = {
                             viewModel.uploadImage(it)
-                        }
+                        },
+                        onClear = viewModel::deleteImage,
                     )
                     Spacer(Modifier.height(8.dp))
                     Basic(
@@ -280,6 +281,7 @@ private fun ImageExpandable(
     isUploadingImage: Boolean,
     imageUrl: String,
     onImageUrlChange: (MultipartBody.Part) -> Unit,
+    onClear: (String) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -293,7 +295,8 @@ private fun ImageExpandable(
             UploadImageView(
                 imageUrl = imageUrl,
                 onImageUrlChange = onImageUrlChange,
-                shape = CircleShape
+                onClear = onClear,
+                shape = CircleShape,
             )
         }
     }

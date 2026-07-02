@@ -205,7 +205,8 @@ fun AddUpdateUserScreen(
                         imageUrl = state.imageUrl,
                         onImageUrlChange = {
                             viewModel.uploadImage(it)
-                        }
+                        },
+                        onClear = viewModel::deleteImage,
                     )
 
                     UserRights(
@@ -490,7 +491,7 @@ private fun UserRights(
 ) {
     ExpandableSection(
         title = "User Rights",
-        initiallyExpanded = false,
+        initiallyExpanded = true,
     ) {
         Spacer(Modifier.height(8.dp))
         Row {
@@ -808,10 +809,11 @@ private fun ImageExpandable(
     isUploadingImage: Boolean,
     imageUrl: String,
     onImageUrlChange: (MultipartBody.Part) -> Unit,
+    onClear: (String) -> Unit,
 ) {
     ExpandableSection(
         title = "Image",
-        initiallyExpanded = false,
+        initiallyExpanded = true,
     ) {
         Column(
             modifier = Modifier
@@ -824,7 +826,8 @@ private fun ImageExpandable(
             } else {
                 UploadImageView(
                     imageUrl = imageUrl,
-                    onImageUrlChange = onImageUrlChange
+                    onImageUrlChange = onImageUrlChange,
+                    onClear = onClear,
                 )
             }
         }
@@ -884,6 +887,7 @@ private fun BodyPrev() {
                 isUploadingImage = false,
                 imageUrl = "",
                 onImageUrlChange = { },
+                onClear = { },
             )
 
             UserRights(

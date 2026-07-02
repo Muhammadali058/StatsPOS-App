@@ -251,7 +251,8 @@ fun AddUpdateVendorScreen(
                         imageUrl = state.imageUrl,
                         onImageUrlChange = {
                             viewModel.uploadImage(it)
-                        }
+                        },
+                        onClear = viewModel::deleteImage,
                     )
                 }
 
@@ -458,6 +459,7 @@ private fun ImageExpandable(
     isUploadingImage: Boolean,
     imageUrl: String,
     onImageUrlChange: (MultipartBody.Part) -> Unit,
+    onClear: (String) -> Unit,
 ) {
     ExpandableSection(
         title = "Image",
@@ -474,7 +476,8 @@ private fun ImageExpandable(
             } else {
                 UploadImageView(
                     imageUrl = imageUrl,
-                    onImageUrlChange = onImageUrlChange
+                    onImageUrlChange = onImageUrlChange,
+                    onClear = onClear,
                 )
             }
         }
@@ -541,6 +544,7 @@ private fun BodyPrev() {
                 isUploadingImage = false,
                 imageUrl = "",
                 onImageUrlChange = { },
+                onClear = { },
             )
         }
 

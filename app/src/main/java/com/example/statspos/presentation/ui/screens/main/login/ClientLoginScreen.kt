@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -36,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -52,6 +54,7 @@ import com.example.statspos.presentation.ui.components.ErrorDialog
 import com.example.statspos.presentation.ui.components.PasswordTextbox
 import com.example.statspos.presentation.ui.components.SaveButton
 import com.example.statspos.presentation.ui.components.Textbox
+import com.example.statspos.presentation.ui.components.Textbox2
 import com.example.statspos.presentation.ui.theme.StatsPOSTheme
 import com.example.statspos.presentation.ui.utils.ConstantPaddings
 import com.example.statspos.presentation.ui.utils.ConstantSize
@@ -157,37 +160,36 @@ private fun Body(
                     .size(140.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
-            Spacer(
-                Modifier.height(16.dp)
-            )
-            Textbox(
-                modifier = Modifier
-                    .fillMaxWidth(),
+            Title("Username")
+            Textbox2(
                 value = username,
                 onValueChange = onUsernameChange,
-                label = {
-                    Text("Username")
-                },
+                placeholder = "Username",
                 leadingIcon = {
-                    AppIcon(icon = R.drawable.ic_user)
-                },
-                height = ConstantSize.ORIGINAL_TEXTBOX_HEIGHT,
-                contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
+                    AppIcon(
+                        icon = R.drawable.ic_user,
+                        modifier = Modifier
+                            .size(20.dp)
+                    )
+                }
             )
-            PasswordTextbox(
-                modifier = Modifier
-                    .fillMaxWidth(),
+
+            Title("Password")
+            Textbox2(
                 value = password,
                 onValueChange = onPasswordChange,
-                label = {
-                    Text("Password")
-                },
+                placeholder = "Password",
+                isPassword = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password
+                ),
                 leadingIcon = {
-                    AppIcon(icon = R.drawable.password)
+                    AppIcon(
+                        icon = R.drawable.password,
+                        modifier = Modifier
+                            .size(20.dp)
+                    )
                 },
-                height = ConstantSize.ORIGINAL_TEXTBOX_HEIGHT,
-                contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
-                imeAction = ImeAction.Done
             )
             Spacer(
                 Modifier.height(16.dp)
@@ -249,48 +251,24 @@ private fun Body(
     }
 }
 
-
 @Composable
-private fun BranchesList(localBranches: List<LocalBranches>, onClick: (LocalBranches) -> Unit) {
-    LazyColumn(
+private fun Title(
+    title: String,
+) {
+    Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+            .fillMaxWidth(),
     ) {
-        item {
-            Text(
-                text = "Select Branch:",
-                style = TextStyle(
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
-                modifier = Modifier
-                    .padding(16.dp)
-            )
-        }
-        items(localBranches) { localBranch ->
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .clickable {
-                        onClick(localBranch)
-                    },
-
-                ) {
-                Text(
-                    text = localBranch.branchName,
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    ),
-                    maxLines = 1,
-                    modifier = Modifier
-                        .padding(16.dp)
-                )
-            }
-        }
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = title,
+            style = TextStyle(
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            ),
+        )
+        Spacer(Modifier.height(8.dp))
     }
 }
 

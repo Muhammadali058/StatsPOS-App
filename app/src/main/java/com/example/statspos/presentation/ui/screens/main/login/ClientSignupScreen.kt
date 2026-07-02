@@ -130,6 +130,23 @@ fun ClientSignupScreen(
                         onPasswordChange = viewModel::onPasswordChange,
                         onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
                     )
+
+                    Spacer(Modifier.height(16.dp))
+                    if (state.isLoading) {
+                        AppCircularProgressIndicator()
+                    } else {
+                        Button(
+                            onClick = {
+                                viewModel.clientSignup { client ->
+                                    onSignup(client)
+                                }
+                            },
+                            modifier = Modifier
+                                .width(120.dp)
+                        ) {
+                            Text("Signup")
+                        }
+                    }
                 }
 
                 Column(
@@ -138,21 +155,21 @@ fun ClientSignupScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 )
                 {
-                    if (state.isLoading) {
-                        AppCircularProgressIndicator(
-                            modifier = Modifier
-                                .size(32.dp)
-                        )
-                    } else {
-                        SaveButton(
-                            text = "Signup",
-                            onClick = {
-                                viewModel.clientSignup { client ->
-                                    onSignup(client)
-                                }
-                            }
-                        )
-                    }
+//                    if (state.isLoading) {
+//                        AppCircularProgressIndicator(
+//                            modifier = Modifier
+//                                .size(32.dp)
+//                        )
+//                    } else {
+//                        SaveButton(
+//                            text = "Signup",
+//                            onClick = {
+//                                viewModel.clientSignup { client ->
+//                                    onSignup(client)
+//                                }
+//                            }
+//                        )
+//                    }
 
                     Row(
                         modifier = Modifier

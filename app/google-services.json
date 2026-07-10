@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:874619206240:android:73c37f8e4890d547616105",
+        "mobilesdk_app_id": "1:874619206240:android:302783ebc2302405616105",
         "android_client_info": {
-          "package_name": "com.example.statspos"
+          "package_name": "com.graphees.alyousafgrocery"
         }
       },
       "oauth_client": [],
@@ -27,9 +27,9 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:874619206240:android:bd32a8cf252cb63b616105",
+        "mobilesdk_app_id": "1:874619206240:android:b4d59ca8580ad473616105",
         "android_client_info": {
-          "package_name": "com.example.statspos_shopping_app"
+          "package_name": "com.graphees.statspos"
         }
       },
       "oauth_client": [],

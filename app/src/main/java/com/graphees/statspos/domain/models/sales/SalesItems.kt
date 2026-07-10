@@ -1,0 +1,52 @@
+package com.graphees.statspos.domain.models.sales
+
+import com.graphees.statspos.domain.models.items.Items
+
+data class SalesItems(
+    var id: Long? = null,
+    var salesId: Long? = null,
+    var invoiceNo: Int? = null,
+    var itemId: Long? = null,
+    var itemname: String? = null,
+    var urduname: String? = null,
+
+    var qty: Double? = null,
+    var crtn: Int? = null,
+
+    var cost: Double? = null,
+    var rate: Double? = null,
+    var retail: Double? = null,
+    var wholesale: Double? = null,
+    var rate3: Double? = null,
+    var rate4: Double? = null,
+    var crtnRate: Double? = null,
+    var crtnSize: Int? = null,
+    var marketPrice: Double? = null,
+
+    var isDiscRsPer: Boolean? = null,
+    var disc: Double? = null,
+    var calculatedDisc: Double? = null,
+    var totalDisc: Double? = null,
+
+    var total: Double? = null,
+    var totalCost: Double? = null,
+    var profit: Double? = null,
+
+    var itemNo:Int? = null,
+    var isRetail: Boolean? = null,
+    var userId:Long? = null,
+
+    var clientId:Int? = null,
+    var branchId:Int? = null,
+
+    // Extras not part of database
+    var isPostedBill: Boolean? = null,
+    var salesType: Int? = null,
+    var isEstimatedBill: Boolean? = null,
+    var stockPcs: Double? = null,
+    var stockCrtn: Long? = null,
+    var lockPcs: Boolean? = null,
+    var lockCrtn: Boolean? = null,
+    var warehouseStock: String? = null,
+    var item: Items? = null,
+)

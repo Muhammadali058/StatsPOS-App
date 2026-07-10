@@ -102,6 +102,8 @@ vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", ve
 # Android view system
 vico-views = { group = "com.patrykandpatrick.vico", name = "views", version.ref = "vico" }
 
+firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

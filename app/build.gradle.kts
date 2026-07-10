@@ -12,13 +12,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.statspos"
+    namespace = "com.graphees.statspos"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.example.statspos"
+        applicationId = "com.graphees.statspos"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
@@ -138,4 +138,5 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database.ktx)
+    implementation(libs.firebase.messaging)
 }

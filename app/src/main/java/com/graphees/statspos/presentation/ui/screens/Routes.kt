@@ -61,6 +61,9 @@ sealed class TopRoutes : NavKey {
     @Serializable
     data object CloseApp : TopRoutes()
 
+    @Serializable
+    data object Payment : TopRoutes()
+
     // endregion
 
     // region Sales

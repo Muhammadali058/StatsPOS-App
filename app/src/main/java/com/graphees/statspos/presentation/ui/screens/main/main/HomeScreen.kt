@@ -1,6 +1,7 @@
 package com.graphees.statspos.presentation.ui.screens.main.main
 
 import android.app.Activity
+import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.DrawableRes
@@ -32,6 +33,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -66,6 +69,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
@@ -86,6 +90,7 @@ import com.graphees.statspos.presentation.ui.components.ImageView
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.components.TopItem
+import com.graphees.statspos.presentation.ui.components.UpgradeToPremiumBottomSheet
 import com.graphees.statspos.presentation.ui.utils.Navigator
 import com.graphees.statspos.presentation.ui.utils.rememberNavigationState
 import com.graphees.statspos.presentation.ui.utils.toEntries
@@ -237,6 +242,8 @@ fun HomeScreen(
     val activity = LocalActivity.current as Activity
     var branches by remember { mutableStateOf<List<Branches>>(emptyList()) }
     var showBranchesList by remember { mutableStateOf(false) }
+    var menuExpanded by remember { mutableStateOf(false) }
+    var showPremiumSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(event) {
         checkEvent(
@@ -279,7 +286,22 @@ fun HomeScreen(
         scope.launch { drawerState.close() }
     }
 
-    var menuExpanded by remember { mutableStateOf(false) }
+    if (showPremiumSheet) {
+        UpgradeToPremiumBottomSheet(
+            onDismiss = {
+                showPremiumSheet = false
+            },
+            onUpgradeClick = {
+                onTopRouteClick(TopRoutes.Payment)
+            },
+            onContactClick = {
+                val intent = Intent(Intent.ACTION_DIAL).apply {
+                    data = "tel:03030454625".toUri()
+                }
+                context.startActivity(intent)
+            }
+        )
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -290,6 +312,10 @@ fun HomeScreen(
                     onTopRouteClick(key)
                     scope.launch { drawerState.close() }
                 },
+                onUpgradeToPremium = {
+                    showPremiumSheet = true
+                    scope.launch { drawerState.close() }
+                }
             )
         },
     ) {
@@ -313,6 +339,17 @@ fun HomeScreen(
                         Row {
                             IconButton(
                                 onClick = {
+                                    showPremiumSheet = true
+                                }
+                            ) {
+                                AppIcon(
+                                    icon = Icons.Default.Refresh,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+
+                            IconButton(
+                                onClick = {
                                     menuExpanded = true
                                 }
                             ) {
@@ -321,7 +358,7 @@ fun HomeScreen(
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
-7
+
                             AppDropdownMenu(
                                 expanded = menuExpanded,
                                 onDismissRequest = { menuExpanded = false },
@@ -519,6 +556,7 @@ fun HomeScreen(
 fun NavigationDrawer(
     viewModel: LocalDataViewModel,
     onClick: (NavKey) -> Unit,
+    onUpgradeToPremium: () -> Unit,
 ) {
     var darkModeChecked by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -623,6 +661,28 @@ fun NavigationDrawer(
                     )
                 )
             }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    onUpgradeToPremium()
+                }
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            AppIcon(
+                icon = Icons.Default.WorkspacePremium,
+                size = 22.dp,
+            )
+            Spacer(Modifier.width(12.dp))
+            AppText(
+                text = "Upgrade to Premium",
+                style = TextStyle(
+                    fontSize = 14.sp
+                )
+            )
         }
 
         Row(

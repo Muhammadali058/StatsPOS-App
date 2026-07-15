@@ -114,6 +114,19 @@ fun MainScreen(
             entry<TopRoutes.CloseApp> {
                 CloseAppScreen()
             }
+            entry<TopRoutes.Payment> {
+                PaymentScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                    onWhatsAppClick = {
+
+                    },
+                    onPaymentSent = {
+
+                    }
+                )
+            }
             entry<TopRoutes.SearchItem> {
                 SearchItemsScreen(
                     sharedViewModel = sharedViewModel,

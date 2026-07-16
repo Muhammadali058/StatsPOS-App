@@ -1,12 +1,15 @@
 package com.graphees.statspos.presentation
 
 import android.app.Activity
+import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -16,12 +19,18 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.graphees.statspos.domain.models.main.Clients
+import com.graphees.statspos.presentation.ui.screens.TopRoutes
 import com.graphees.statspos.presentation.ui.screens.main.login.ClientLoginScreen
 import com.graphees.statspos.presentation.ui.screens.main.login.ClientSignupScreen
 import com.graphees.statspos.presentation.ui.screens.main.login.CloseAppScreen
 import com.graphees.statspos.presentation.ui.screens.main.login.LoginScreen
 import com.graphees.statspos.presentation.ui.screens.main.main.MainScreen
 import com.graphees.statspos.presentation.ui.screens.main.main.SplashScreen
+import com.graphees.statspos.presentation.ui.screens.main.main.premium.HelpScreen
+import com.graphees.statspos.presentation.ui.screens.main.main.premium.PaymentScreen
+import com.graphees.statspos.presentation.ui.screens.main.main.premium.SubscriptionExpiredScreen
+import com.graphees.statspos.presentation.ui.utils.openWhatsapp
+import com.graphees.statspos.presentation.ui.utils.sendEmail
 import com.graphees.statspos.presentation.viewmodels.main.ClientsViewModel
 import com.graphees.statspos.presentation.viewmodels.main.LocalDataViewModel
 import com.graphees.statspos.presentation.viewmodels.main.LoginViewModel
@@ -52,10 +61,20 @@ private sealed class Screens : NavKey {
     @Serializable
     data object CloseApp : Screens()
 
+    @Serializable
+    data object SubscriptionExpired : Screens()
+
+    @Serializable
+    data object Payment : Screens()
+
+    @Serializable
+    data object Help : Screens()
+
 }
 
 @Composable
 fun App() {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val backStack = rememberNavBackStack(Screens.Splash)
     val viewModel = hiltViewModel<LocalDataViewModel>()
@@ -82,7 +101,7 @@ fun App() {
                 DB.isOnlineMode = isOnline
                 DB.branches = branches
 
-                if(!isOnline){
+                if (!isOnline) {
                     HP.clientId = 1
                     DB.setBaseUrl(baseUrl)
                     DB.setWebSocketUrl(baseUrl)
@@ -102,11 +121,11 @@ fun App() {
         }
     }
 
-    fun showLoginScreen(client: Clients){
+    fun showLoginScreen(client: Clients) {
         HP.clientId = client.id!!
         DB.isOnlineMode = client.isOnline!!
 
-        if(!client.isOnline!!){
+        if (!client.isOnline!!) {
             scope.launch {
                 val baseUrl = viewModel.getBaseUrl().first()
 
@@ -115,7 +134,7 @@ fun App() {
 
                 navigate(Screens.CloseApp)
             }
-        }else{
+        } else {
             navigate(Screens.Login(false, "", ""))
         }
     }
@@ -139,8 +158,10 @@ fun App() {
                     onSignup = {
                         backStack.removeLastOrNull()
                         backStack.add(Screens.ClientSignup)
-//                        backStack.removeFirstOrNull()
                     },
+                    onHelpClick = {
+                        backStack.add(Screens.Help)
+                    }
                 )
             }
             entry<Screens.ClientSignup> {
@@ -156,7 +177,7 @@ fun App() {
                         HP.clientId = client.id!!
                         DB.isOnlineMode = client.isOnline!!
 
-                        loginViewModel.login { success ->
+                        loginViewModel.login {
                             if (HP.appSettings.onlinePrints == true) {
                                 SocketManager.join()
                             }
@@ -176,7 +197,15 @@ fun App() {
                     username = key.username,
                     password = key.password,
                     onLogin = {
-                        navigate(Screens.Main)
+                        if (HP.appSubscription.isActive == true) {
+                            if (HP.appSubscription.expiryDays!! < -7) {
+                                navigate(Screens.SubscriptionExpired)
+                            } else {
+                                navigate(Screens.Main)
+                            }
+                        } else {
+                            navigate(Screens.Main)
+                        }
                     },
                     onReset = {
                         scope.launch {
@@ -188,6 +217,9 @@ fun App() {
                         backStack.add(Screens.CloseApp)
                         backStack.removeFirstOrNull()
                     },
+                    onHelpClick = {
+                        backStack.add(Screens.Help)
+                    }
                 )
             }
             entry<Screens.Main> {
@@ -203,6 +235,57 @@ fun App() {
             }
             entry<Screens.CloseApp> {
                 CloseAppScreen()
+            }
+            entry<Screens.SubscriptionExpired> {
+                SubscriptionExpiredScreen(
+                    onPayNow = {
+                        backStack.add(Screens.Payment)
+                    },
+                    onContactSupport = {
+                        backStack.add(Screens.Help)
+                    },
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                )
+            }
+            entry<Screens.Payment> {
+                PaymentScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                    onWhatsAppClick = {
+                        openWhatsapp(
+                            context = context,
+                            addClient = true,
+                        )
+                    },
+                    onPaymentSent = {
+
+                    }
+                )
+            }
+            entry<Screens.Help> {
+                HelpScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                    onCallClick = {
+                        val intent = Intent(Intent.ACTION_DIAL).apply {
+                            data = "tel:${HP.graphees.contact!!.replace("-", "")}".toUri()
+                        }
+                        context.startActivity(intent)
+                    },
+                    onWhatsAppClick = {
+                        openWhatsapp(
+                            context = context,
+                            addClient = true,
+                        )
+                    },
+                    onEmailClick = {
+                        sendEmail(context)
+                    }
+                )
             }
         }
     )

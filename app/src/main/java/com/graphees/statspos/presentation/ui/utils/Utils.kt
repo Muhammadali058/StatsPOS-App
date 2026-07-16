@@ -1,17 +1,21 @@
 package com.graphees.statspos.presentation.ui.utils
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
+import android.net.Uri
 import android.os.ParcelFileDescriptor
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
+import com.graphees.statspos.utils.HP
+import com.graphees.statspos.utils.showToast
 import java.io.File
 import java.io.FileOutputStream
 import java.net.URLEncoder
@@ -155,4 +159,53 @@ fun bitmapToFile(context: Context, bitmap: Bitmap): File {
 fun getImageFromPdf(context: Context, file: File): File {
     val bitmap = pdfToBitmap(file)
     return bitmapToFile(context, bitmap)
+}
+
+fun openWhatsapp(
+    context: Context,
+    contact: String = HP.getContact(HP.graphees.contact!!),
+    message: String = "",
+    addClient: Boolean = false
+) {
+    val message1 = Uri.encode(
+        """
+        Welcome: SP${HP.clientId} ${HP.client.clientName},
+        Your msg here...
+        $message
+        """.trimIndent()
+    )
+
+    val intent = Intent(
+        Intent.ACTION_VIEW,
+        "https://wa.me/$contact?text=${if (addClient) message1 else message}".toUri()
+    )
+    try {
+        context.startActivity(intent)
+    } catch (e: Exception) {
+        context.showToast("No application found to open WhatsApp.")
+    }
+}
+
+fun sendEmail(
+    context: Context,
+    email: String = HP.graphees.email!!,
+    subject: String = "StatsPOS Support",
+    message:String = "",
+) {
+    val body = "Hello, SP${HP.clientId} ${HP.client.clientName} here.\n\n"
+
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_EMAIL, arrayOf(email))
+        putExtra(Intent.EXTRA_SUBJECT, subject)
+        putExtra(Intent.EXTRA_TEXT, body + message)
+    }
+
+    try {
+        context.startActivity(
+            Intent.createChooser(intent, "Choose an email app")
+        )
+    } catch (e: ActivityNotFoundException) {
+        context.showToast("No email application found.")
+    }
 }

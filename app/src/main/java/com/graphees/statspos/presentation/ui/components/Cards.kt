@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardElevation
 import androidx.compose.material3.MaterialTheme
@@ -19,6 +20,33 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+@Composable
+fun AppCard(
+    modifier: Modifier = Modifier,
+    shape: Shape = RoundedCornerShape(12.dp),
+    elevation: CardElevation = CardDefaults.cardElevation(
+        defaultElevation = 3.dp
+    ),
+    colors: CardColors = CardDefaults.cardColors(
+        containerColor = MaterialTheme.colorScheme.primaryContainer
+    ),
+    border: BorderStroke? = null,
+    onClick: () -> Unit = {},
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Card(
+        modifier = modifier,
+        elevation = elevation,
+        shape = shape,
+        border = border,
+        onClick = onClick,
+        colors = colors,
+        content = {
+            content()
+        }
+    )
+}
 
 @Composable
 fun ListCard(

@@ -77,6 +77,7 @@ fun LoginScreen(
     onLogin: () -> Unit,
     onReset: () -> Unit,
     onBrachChange: () -> Unit,
+    onHelpClick: () -> Unit,
 ) {
     val context = LocalContext.current
     val activity = LocalActivity.current as Activity
@@ -153,20 +154,11 @@ fun LoginScreen(
             isLoading = state.isLoading,
             onLogin = {
                 keyboardController?.hide()
-                viewModel.login { success ->
-                    if (success) {
-                        if (HP.appSettings.onlinePrints == true) {
-                            SocketManager.join()
-                        }
-                        onLogin()
-                    } else {
-                        viewModel.showError("Please activate your app")
-                        scope.launch {
-                            context.showToast("Please activate your app")
-                            delay(3000)
-                            activity.finish()
-                        }
+                viewModel.login {
+                    if (HP.appSettings.onlinePrints == true) {
+                        SocketManager.join()
                     }
+                    onLogin()
                 }
             },
             onResetClick = onReset,
@@ -175,7 +167,8 @@ fun LoginScreen(
                     branches = localDataViewModel.getBranches().first()
                     showBranchesList = true
                 }
-            }
+            },
+            onHelpClick = onHelpClick,
         )
 
         if (showBranchesList) {
@@ -212,6 +205,7 @@ private fun Body(
     onLogin: () -> Unit,
     onResetClick: () -> Unit,
     onBranchClick: () -> Unit,
+    onHelpClick: () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -306,8 +300,22 @@ private fun Body(
                     Text("Login")
                 }
             }
-        }
 
+            Spacer(Modifier.height(8.dp))
+            TextButton(
+                onClick = {
+                    onHelpClick()
+                },
+            ) {
+                Text(
+                    text = "Need help?",
+                    modifier = Modifier,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        color = MaterialTheme.colorScheme.primary,
+                    ),
+                )
+            }
+        }
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -359,6 +367,7 @@ private fun BodyPreview() {
             {},
             {},
             isLoading = false,
+            {},
             {},
             {},
             {},

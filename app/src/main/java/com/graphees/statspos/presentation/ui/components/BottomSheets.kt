@@ -1,5 +1,6 @@
 package com.graphees.statspos.presentation.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,15 +52,17 @@ fun UpgradeToPremiumBottomSheet(
             .fillMaxWidth(),
         sheetState = sheetState,
         onDismissRequest = onDismiss,
+        backgroundColor = MaterialTheme.colorScheme.background,
     ) {
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-//                .padding(horizontal = 24.dp)
                 .padding(bottom = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.height(12.dp))
+
             Surface(
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primaryContainer,
@@ -102,10 +106,7 @@ fun UpgradeToPremiumBottomSheet(
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                ),
+            AppCard(
                 modifier = Modifier.fillMaxWidth()
             ) {
 
@@ -147,11 +148,8 @@ fun UpgradeToPremiumBottomSheet(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            OutlinedButton(
+            AppOutlinedButton(
                 onClick = onContactClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp)
             ) {
                 Icon(
                     Icons.Default.Call,

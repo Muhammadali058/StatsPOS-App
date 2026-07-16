@@ -14,6 +14,8 @@ import com.graphees.statspos.domain.models.utilities.users.UserRights
 import com.graphees.statspos.domain.models.utilities.users.Users
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.graphees.statspos.domain.models.main.AppSubscription
+import com.graphees.statspos.domain.models.main.Graphees
 import net.objecthunter.exp4j.ExpressionBuilder
 import java.text.DecimalFormat
 import java.time.Instant
@@ -28,8 +30,8 @@ object HP {
     const val ITEMS_PER_PAGE = 50
     var darkTheme = false
 
-    var clientId: Int = 1
-    var branchId: Int = 1
+    var clientId: Int = 0
+    var branchId: Int = 0
     var branchGroupId: Int = 0
 
     var user = Users(id = 1, clientId = 1, branchId = 1)
@@ -65,7 +67,9 @@ object HP {
     var userTypes = emptyList<DropdownItem>()
     var shifts = emptyList<DropdownItem>()
     var branch = Branches()
-    var client = Clients()
+    var client = Clients(clientName = "New Client")
+    var appSubscription = AppSubscription()
+    var graphees = Graphees(name = "Muhammad Ali", contact = "0303-0454625", email = "Muhammadali058@gmail.com")
     var gatepasses = emptyList<DropdownItem>()
 
     // region ComboBox Lists
@@ -94,6 +98,7 @@ object HP {
         DropdownItem(0L, "Rs."),
         DropdownItem(1L, "Percent"),
     )
+
     // Sales
     val salesPostedBillsSearchBy = listOf(
         DropdownItem(0L, "By Name"),
@@ -163,6 +168,7 @@ object HP {
         DropdownItem(1L, "Simple List"),
         DropdownItem(2L, "Sales List"),
     )
+
     // Items
     val itemsListType = listOf(
         DropdownItem(1L, "Simple List"),
@@ -171,61 +177,76 @@ object HP {
     // endregion
 
     fun setDropdowns(jsonObject: JsonObject) {
-        printSettings = Gson().get<PrintSettings>(jsonObject.get("printSettings").asJsonObject)
-        appSettings = Gson().get<AppSettings>(jsonObject.get("appSettings").asJsonObject)
-        settings = Gson().get<Settings>(jsonObject.get("settings").asJsonObject)
-        passwords = Gson().get<Passwords>(jsonObject.get("passwords").asJsonObject)
-        adminSettings = Gson().get<AdminSettings>(jsonObject.get("adminSettings").asJsonObject)
-        adminPasswords = Gson().get<AdminPasswords>(jsonObject.get("adminPasswords").asJsonObject)
+        try {
+            printSettings = Gson().get<PrintSettings>(jsonObject.get("printSettings").asJsonObject)
+            appSettings = Gson().get<AppSettings>(jsonObject.get("appSettings").asJsonObject)
+            settings = Gson().get<Settings>(jsonObject.get("settings").asJsonObject)
+            passwords = Gson().get<Passwords>(jsonObject.get("passwords").asJsonObject)
+            adminSettings = Gson().get<AdminSettings>(jsonObject.get("adminSettings").asJsonObject)
+            adminPasswords =
+                Gson().get<AdminPasswords>(jsonObject.get("adminPasswords").asJsonObject)
 
-        autoCompleteItems = Gson().getListOf<Items>(jsonObject.get("items").asJsonArray).map {
-            it.itemname!!
-        }
+            autoCompleteItems = Gson().getListOf<Items>(jsonObject.get("items").asJsonArray).map {
+                it.itemname!!
+            }
 
-        categories = Gson().getListOf<DropdownItem>(jsonObject.get("categories").asJsonArray)
-        subCategories = jsonObject.get("subCategories").asJsonArray.map { obj ->
-            DropdownItem(
-                id = obj.asJsonObject.get("id").asLong,
-                name = obj.asJsonObject.get("name").asString,
-                mainId = obj.asJsonObject.get("categoryId").asLong,
-            )
+            categories = Gson().getListOf<DropdownItem>(jsonObject.get("categories").asJsonArray)
+            subCategories = jsonObject.get("subCategories").asJsonArray.map { obj ->
+                DropdownItem(
+                    id = obj.asJsonObject.get("id").asLong,
+                    name = obj.asJsonObject.get("name").asString,
+                    mainId = obj.asJsonObject.get("categoryId").asLong,
+                )
+            }
+            packages = Gson().getListOf<DropdownItem>(jsonObject.get("packages").asJsonArray)
+            purchaseOrders =
+                Gson().getListOf<DropdownItem>(jsonObject.get("purchaseOrders").asJsonArray)
+            customers = Gson().getListOf<DropdownItem>(jsonObject.get("customers").asJsonArray)
+            vendors = Gson().getListOf<DropdownItem>(jsonObject.get("vendors").asJsonArray)
+            suppliers = Gson().getListOf<DropdownItem>(jsonObject.get("suppliers").asJsonArray)
+            fixedAccounts =
+                Gson().getListOf<DropdownItem>(jsonObject.get("fixedAccounts").asJsonArray)
+            users = Gson().getListOf<DropdownItem>(jsonObject.get("users").asJsonArray)
+            accountCategories =
+                Gson().getListOf<DropdownItem>(jsonObject.get("accountCategories").asJsonArray)
+            expenses = Gson().getListOf<DropdownItem>(jsonObject.get("expenses").asJsonArray)
+            subExpenses = jsonObject.get("subExpenses").asJsonArray.map { obj ->
+                DropdownItem(
+                    id = obj.asJsonObject.get("id").asLong,
+                    name = obj.asJsonObject.get("name").asString,
+                    mainId = obj.asJsonObject.get("expenseId").asLong,
+                )
+            }
+            banks = Gson().getListOf<DropdownItem>(jsonObject.get("banks").asJsonArray)
+            subBanks = jsonObject.get("subBanks").asJsonArray.map { obj ->
+                DropdownItem(
+                    id = obj.asJsonObject.get("id").asLong,
+                    name = obj.asJsonObject.get("name").asString,
+                    mainId = obj.asJsonObject.get("bankId").asLong,
+                )
+            }
+            warehouses = Gson().getListOf<DropdownItem>(jsonObject.get("warehouses").asJsonArray)
+            branches = Gson().getListOf<DropdownItem>(jsonObject.get("branches").asJsonArray)
+            branchGroups =
+                Gson().getListOf<DropdownItem>(jsonObject.get("branchGroups").asJsonArray)
+            printSizes = Gson().getListOf<DropdownItem>(jsonObject.get("printSizes").asJsonArray)
+            printLanguages =
+                Gson().getListOf<DropdownItem>(jsonObject.get("printLanguages").asJsonArray)
+            accounts = Gson().getListOf<DropdownItem>(jsonObject.get("accounts").asJsonArray)
+            userTypes = Gson().getListOf<DropdownItem>(jsonObject.get("userTypes").asJsonArray)
+            shifts = Gson().getListOf<DropdownItem>(jsonObject.get("shifts").asJsonArray)
+            branch = Gson().get<Branches>(jsonObject.get("branch").asJsonObject)
+            client = Gson().get<Clients>(jsonObject.get("client").asJsonObject)
+            appSubscription = Gson().get<AppSubscription>(jsonObject.get("appSubscription").asJsonObject)
+            graphees = Gson().get<Graphees>(jsonObject.get("graphees").asJsonObject)
+
+        } catch (e: Exception) {
+
         }
-        packages = Gson().getListOf<DropdownItem>(jsonObject.get("packages").asJsonArray)
-        purchaseOrders =
-            Gson().getListOf<DropdownItem>(jsonObject.get("purchaseOrders").asJsonArray)
-        customers = Gson().getListOf<DropdownItem>(jsonObject.get("customers").asJsonArray)
-        vendors = Gson().getListOf<DropdownItem>(jsonObject.get("vendors").asJsonArray)
-        suppliers = Gson().getListOf<DropdownItem>(jsonObject.get("suppliers").asJsonArray)
-        fixedAccounts = Gson().getListOf<DropdownItem>(jsonObject.get("fixedAccounts").asJsonArray)
-        users = Gson().getListOf<DropdownItem>(jsonObject.get("users").asJsonArray)
-        accountCategories =
-            Gson().getListOf<DropdownItem>(jsonObject.get("accountCategories").asJsonArray)
-        expenses = Gson().getListOf<DropdownItem>(jsonObject.get("expenses").asJsonArray)
-        subExpenses = jsonObject.get("subExpenses").asJsonArray.map { obj ->
-            DropdownItem(
-                id = obj.asJsonObject.get("id").asLong,
-                name = obj.asJsonObject.get("name").asString,
-                mainId = obj.asJsonObject.get("expenseId").asLong,
-            )
-        }
-        banks = Gson().getListOf<DropdownItem>(jsonObject.get("banks").asJsonArray)
-        subBanks = jsonObject.get("subBanks").asJsonArray.map { obj ->
-            DropdownItem(
-                id = obj.asJsonObject.get("id").asLong,
-                name = obj.asJsonObject.get("name").asString,
-                mainId = obj.asJsonObject.get("bankId").asLong,
-            )
-        }
-        warehouses = Gson().getListOf<DropdownItem>(jsonObject.get("warehouses").asJsonArray)
-        branches = Gson().getListOf<DropdownItem>(jsonObject.get("branches").asJsonArray)
-        branchGroups = Gson().getListOf<DropdownItem>(jsonObject.get("branchGroups").asJsonArray)
-        printSizes = Gson().getListOf<DropdownItem>(jsonObject.get("printSizes").asJsonArray)
-        printLanguages =
-            Gson().getListOf<DropdownItem>(jsonObject.get("printLanguages").asJsonArray)
-        accounts = Gson().getListOf<DropdownItem>(jsonObject.get("accounts").asJsonArray)
-        userTypes = Gson().getListOf<DropdownItem>(jsonObject.get("userTypes").asJsonArray)
-        shifts = Gson().getListOf<DropdownItem>(jsonObject.get("shifts").asJsonArray)
-        branch = Gson().get<Branches>(jsonObject.get("branch").asJsonObject)
+    }
+
+    fun getContact(contact: String): String {
+        return "92${contact.replace("-", "").substring(1)}"
     }
 
     fun getImageUrl(imageUrl: String): String {

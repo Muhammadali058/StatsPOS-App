@@ -6,6 +6,7 @@ import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.Resource
 import com.graphees.statspos.utils.safeApiCall
 import com.google.gson.JsonObject
+import com.graphees.statspos.utils.DB
 import javax.inject.Inject
 
 class ClientsRepositoryImpl @Inject constructor(
@@ -49,6 +50,19 @@ class ClientsRepositoryImpl @Inject constructor(
         return safeApiCall {
             api.updateFCMToken(
                 body
+            )
+        }
+    }
+
+    override suspend fun updateAppSubscription(): Resource<JsonObject> {
+        val body = JsonObject().apply {
+            addProperty("id", HP.appSubscription.id!!)
+            addProperty("paymentRequest", true)
+        }
+
+        return safeApiCall {
+            api.updateAppSubscription(
+                DB.addParams(body)
             )
         }
     }

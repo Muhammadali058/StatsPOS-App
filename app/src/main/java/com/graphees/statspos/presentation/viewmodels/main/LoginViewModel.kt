@@ -1,5 +1,6 @@
 package com.graphees.statspos.presentation.viewmodels.main
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.graphees.statspos.domain.models.main.Clients
@@ -130,7 +131,7 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun login(onSuccess: (Boolean) -> Unit) {
+    fun login(onSuccess: () -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -143,7 +144,8 @@ class LoginViewModel @Inject constructor(
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
-                    resultSuccess()
+//                    resultSuccess()
+
                     if (result.data.get("isExists").asBoolean) {
                         HP.user = Gson().get<Users>(result.data.get("user").asJsonObject)
                         HP.userRights =
@@ -153,7 +155,7 @@ class LoginViewModel @Inject constructor(
                         HP.branchId = HP.user.branchId!!
                         HP.branchGroupId = HP.user.branchGroupId!!
 
-                        loadMainData { success ->
+                        loadMainData {
                             viewModelScope.launch {
                                 if (state.value.remember)
                                     dataStore.saveLoginInfo(
@@ -164,7 +166,7 @@ class LoginViewModel @Inject constructor(
                                 else
                                     dataStore.saveLoginInfo(false, "", "")
 
-                                onSuccess(success)
+                                onSuccess()
                             }
                         }
                     } else {
@@ -175,12 +177,8 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun loadMainData(onSuccess: (Boolean) -> Unit) {
+    fun loadMainData(onSuccess: () -> Unit) {
         viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
-            beforeRequest()
-
             when (val result = mainRepository.loadData()) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
@@ -189,26 +187,22 @@ class LoginViewModel @Inject constructor(
 
                     HP.setDropdowns(result.data)
                     preloadImages(listOf(HP.getImageUrl(HP.printSettings.imageUrl.toString())))
+//                    onSuccess()
 
-                    getClient { client ->
-                        if (client.isRegisteredWeek == false || client.isRegisteredMonth == false) {
-                            onSuccess(false)
-                        }else{
-                            onSuccess(true)
-                        }
+                    getClient{
+                        onSuccess()
                     }
                 }
             }
         }
     }
 
-    fun getClient(onSuccess: (Clients) -> Unit) {
+    fun getClient(onSuccess: () -> Unit) {
         viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
-
-            beforeRequest()
-
+//            if (state.value.isLoading)
+//                return@launch
+//
+//            beforeRequest()
             val clientId = dataStore.getClientId().first()
 
             when (val result = clientsRepo.getClient(clientId)) {
@@ -219,7 +213,8 @@ class LoginViewModel @Inject constructor(
 
                     val client = Gson().get<Clients>(result.data.asJsonObject)
                     HP.client = client
-                    onSuccess(client)
+
+                    onSuccess()
                 }
             }
         }

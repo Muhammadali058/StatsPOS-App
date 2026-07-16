@@ -1,4 +1,4 @@
-package com.graphees.statspos.presentation.ui.screens.main.main
+package com.graphees.statspos.presentation.ui.screens.main.main.premium
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ContentCopy
@@ -37,14 +36,17 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.graphees.statspos.presentation.ui.components.AppCard
 import com.graphees.statspos.presentation.ui.components.TopAppBar
+import com.graphees.statspos.utils.HP
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentScreen(
     onBack: () -> Unit,
     onWhatsAppClick: () -> Unit,
-    onPaymentSent: () -> Unit
+    onPaymentSent: () -> Unit,
 ) {
     val clipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
@@ -64,17 +66,13 @@ fun PaymentScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
+                .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
             item {
+                Spacer(modifier = Modifier.height(16.dp))
 
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    )
-                ) {
+                AppCard{
 
                     Column(
                         modifier = Modifier.padding(20.dp),
@@ -144,11 +142,7 @@ fun PaymentScreen(
 
             item {
 
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    )
-                ) {
+                AppCard{
 
                     Column(
                         modifier = Modifier.padding(16.dp)
@@ -183,29 +177,42 @@ fun PaymentScreen(
 
             item {
 
-                Button(
-                    onClick = onWhatsAppClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                ) {
-                    Icon(Icons.Default.Chat, null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Send Screenshot on WhatsApp")
+                if(HP.appSubscription.paymentRequest == true){
+                    Text(
+                        "Wait until payment processes.",
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }else {
+                    Button(
+                        onClick = onWhatsAppClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                    ) {
+                        Icon(Icons.Default.Chat, null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Send Screenshot on WhatsApp")
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Button(
+                        onClick = onPaymentSent,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                    ) {
+                        Icon(Icons.Default.CheckCircle, null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Payment Sent")
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Button(
-                    onClick = onPaymentSent,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                ) {
-                    Icon(Icons.Default.CheckCircle, null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Payment Sent")
-                }
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
@@ -219,11 +226,7 @@ private fun PaymentAccountCard(
     onCopy: () -> Unit
 ) {
 
-    Card (
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
-    ){
+    AppCard{
 
         Column(
             modifier = Modifier.padding(16.dp)

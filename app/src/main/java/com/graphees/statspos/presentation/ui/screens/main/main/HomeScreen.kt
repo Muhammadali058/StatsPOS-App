@@ -1,7 +1,6 @@
 package com.graphees.statspos.presentation.ui.screens.main.main
 
 import android.app.Activity
-import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.DrawableRes
@@ -33,7 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Subscriptions
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -69,7 +68,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
@@ -295,10 +293,7 @@ fun HomeScreen(
                 onTopRouteClick(TopRoutes.Payment)
             },
             onContactClick = {
-                val intent = Intent(Intent.ACTION_DIAL).apply {
-                    data = "tel:03030454625".toUri()
-                }
-                context.startActivity(intent)
+                onTopRouteClick(TopRoutes.Help)
             }
         )
     }
@@ -312,10 +307,14 @@ fun HomeScreen(
                     onTopRouteClick(key)
                     scope.launch { drawerState.close() }
                 },
-                onUpgradeToPremium = {
+                onUpgradeToPremiumClick = {
                     showPremiumSheet = true
                     scope.launch { drawerState.close() }
-                }
+                },
+                onSubscriptionsClick = {
+                    onTopRouteClick(TopRoutes.Subscriptions)
+                    scope.launch { drawerState.close() }
+                },
             )
         },
     ) {
@@ -339,12 +338,13 @@ fun HomeScreen(
                         Row {
                             IconButton(
                                 onClick = {
-                                    showPremiumSheet = true
+                                    onTopRouteClick(TopRoutes.Help)
                                 }
                             ) {
                                 AppIcon(
-                                    icon = Icons.Default.Refresh,
+                                    icon = R.drawable.help,
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    size = 22.dp
                                 )
                             }
 
@@ -556,7 +556,8 @@ fun HomeScreen(
 fun NavigationDrawer(
     viewModel: LocalDataViewModel,
     onClick: (NavKey) -> Unit,
-    onUpgradeToPremium: () -> Unit,
+    onUpgradeToPremiumClick: () -> Unit,
+    onSubscriptionsClick: () -> Unit,
 ) {
     var darkModeChecked by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -663,26 +664,50 @@ fun NavigationDrawer(
             }
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    onUpgradeToPremium()
-                }
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            AppIcon(
-                icon = Icons.Default.WorkspacePremium,
-                size = 22.dp,
-            )
-            Spacer(Modifier.width(12.dp))
-            AppText(
-                text = "Upgrade to Premium",
-                style = TextStyle(
-                    fontSize = 14.sp
+        if(HP.appSubscription.isActive == true) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        onSubscriptionsClick()
+                    }
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AppIcon(
+                    icon = Icons.Default.Subscriptions,
+                    size = 24.dp,
                 )
-            )
+                Spacer(Modifier.width(12.dp))
+                AppText(
+                    text = "Subscriptions",
+                    style = TextStyle(
+                        fontSize = 14.sp
+                    )
+                )
+            }
+        }else{
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        onUpgradeToPremiumClick()
+                    }
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AppIcon(
+                    icon = Icons.Default.WorkspacePremium,
+                    size = 24.dp,
+                )
+                Spacer(Modifier.width(12.dp))
+                AppText(
+                    text = "Upgrade to Premium",
+                    style = TextStyle(
+                        fontSize = 14.sp
+                    )
+                )
+            }
         }
 
         Row(

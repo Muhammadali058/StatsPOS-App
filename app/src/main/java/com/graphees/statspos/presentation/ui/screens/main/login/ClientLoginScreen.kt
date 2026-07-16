@@ -54,6 +54,7 @@ fun ClientLoginScreen(
     viewModel:ClientsViewModel,
     onClientLogin: (client: Clients) -> Unit,
     onSignup: () -> Unit,
+    onHelpClick: () -> Unit,
 ) {
 //    val viewModel = hiltViewModel<ClientsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -107,7 +108,8 @@ fun ClientLoginScreen(
                 },
                 onSignup = {
                     onSignup()
-                }
+                },
+                onHelpClick = onHelpClick,
             )
         }
     }
@@ -122,6 +124,7 @@ private fun Body(
     isLoading: Boolean,
     onClientLogin: () -> Unit,
     onSignup: () -> Unit,
+    onHelpClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -193,6 +196,21 @@ private fun Body(
                 ) {
                     Text("Login")
                 }
+            }
+
+            Spacer(Modifier.height(8.dp))
+            TextButton(
+                onClick = {
+                    onHelpClick()
+                },
+            ) {
+                Text(
+                    text = "Need help?",
+                    modifier = Modifier,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        color = MaterialTheme.colorScheme.primary,
+                    ),
+                )
             }
         }
 
@@ -268,6 +286,7 @@ private fun BodyPreview() {
         {},
         false,
         {},
-        {}
+        {},
+        {},
     )
 }

@@ -2,22 +2,34 @@ package com.graphees.statspos.presentation.ui.screens.main.main
 
 import android.Manifest
 import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.screens.TopRoutes
 import com.graphees.statspos.presentation.ui.screens.accounts.account_categories.AccountCategoriesScreen
 import com.graphees.statspos.presentation.ui.screens.accounts.banks.BanksScreen
@@ -35,6 +47,10 @@ import com.graphees.statspos.presentation.ui.screens.items.SearchItemsScreen
 import com.graphees.statspos.presentation.ui.screens.items.categories.CategoriesScreen
 import com.graphees.statspos.presentation.ui.screens.items.packages.PackagesScreen
 import com.graphees.statspos.presentation.ui.screens.main.login.CloseAppScreen
+import com.graphees.statspos.presentation.ui.screens.main.main.premium.HelpScreen
+import com.graphees.statspos.presentation.ui.screens.main.main.premium.PaymentScreen
+import com.graphees.statspos.presentation.ui.screens.main.main.premium.SubscriptionExpiredScreen
+import com.graphees.statspos.presentation.ui.screens.main.main.premium.SubscriptionsScreen
 import com.graphees.statspos.presentation.ui.screens.purchase.purchase_bill.PurchaseBillScreen
 import com.graphees.statspos.presentation.ui.screens.purchase.purchase_bill.ViewPurchaseBillItemsScreen
 import com.graphees.statspos.presentation.ui.screens.purchase.purchase_orders.PurchaseOrdersScreen
@@ -53,13 +69,21 @@ import com.graphees.statspos.presentation.ui.screens.utilities.users.UsersScreen
 import com.graphees.statspos.presentation.ui.screens.warehouse.gatepass.GatepassScreen
 import com.graphees.statspos.presentation.ui.screens.warehouse.stock_transfer.StockTransferScreen
 import com.graphees.statspos.presentation.ui.screens.warehouse.warehouse.WarehousesScreen
+import com.graphees.statspos.presentation.ui.utils.openWhatsapp
+import com.graphees.statspos.presentation.ui.utils.sendEmail
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
+import com.graphees.statspos.presentation.viewmodels.main.MainViewModel
+import com.graphees.statspos.utils.HP
+import com.graphees.statspos.utils.UiEvent
+import com.graphees.statspos.utils.checkEvent
+import com.graphees.statspos.utils.showToast
 
 @Composable
 fun MainScreen(
     onLogout: () -> Unit,
 ) {
     // region Request permission for notifications
+    val context = LocalContext.current
     val activity = LocalActivity.current as Activity
     val notificationPermissionLauncher =
         rememberLauncherForActivityResult(
@@ -81,6 +105,31 @@ fun MainScreen(
         }
     }
     // endregion
+
+    val viewModel = hiltViewModel<MainViewModel>()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val event by viewModel.event.collectAsState(UiEvent.Idle)
+    val snackbarHostState = remember { SnackbarHostState() }
+    var showErrorDialog by remember { mutableStateOf(false) }
+    LaunchedEffect(event) {
+        checkEvent(
+            event = event,
+            snackbarHostState = snackbarHostState,
+            viewModelIdleEvent = viewModel::onEvent,
+            onError = {
+                showErrorDialog = true
+            }
+        )
+    }
+
+    if (showErrorDialog) {
+        ErrorDialog(
+            error = state.error,
+            onDismiss = {
+                showErrorDialog = false
+            },
+        )
+    }
 
     val sharedViewModel = hiltViewModel<SharedViewModel>()
     val backStack = rememberNavBackStack(TopRoutes.Home)
@@ -120,11 +169,52 @@ fun MainScreen(
                         backStack.removeLastOrNull()
                     },
                     onWhatsAppClick = {
-
+                        openWhatsapp(
+                            context = context,
+                            addClient = true,
+                        )
                     },
                     onPaymentSent = {
-
+                        viewModel.updatePaymentRequest {
+                            context.showToast("Payment request sent")
+                            backStack.removeLastOrNull()
+                        }
                     }
+                )
+            }
+            entry<TopRoutes.Subscriptions> {
+                SubscriptionsScreen (
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                    onHelpClick = {
+                        navigate(TopRoutes.Help)
+                    },
+                    onPayNowClick = {
+                        navigate(TopRoutes.Payment)
+                    },
+                )
+            }
+            entry<TopRoutes.Help> {
+                HelpScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                    onCallClick = {
+                        val intent = Intent(Intent.ACTION_DIAL).apply {
+                            data = "tel:${HP.graphees.contact!!.replace("-", "")}".toUri()
+                        }
+                        context.startActivity(intent)
+                    },
+                    onWhatsAppClick = {
+                        openWhatsapp(
+                            context = context,
+                            addClient = true,
+                        )
+                    },
+                    onEmailClick = {
+                        sendEmail(context)
+                    },
                 )
             }
             entry<TopRoutes.SearchItem> {

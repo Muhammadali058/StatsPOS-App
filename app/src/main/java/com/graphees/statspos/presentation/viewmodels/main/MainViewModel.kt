@@ -1,5 +1,6 @@
 package com.graphees.statspos.presentation.viewmodels.main
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.graphees.statspos.domain.models.main.Branches
@@ -15,6 +16,7 @@ import com.graphees.statspos.utils.get
 import com.graphees.statspos.utils.getListOf
 import com.graphees.statspos.utils.preloadImages
 import com.google.gson.Gson
+import com.graphees.statspos.domain.models.main.AppSubscription
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,6 +37,8 @@ class MainViewModel @Inject constructor(
     data class ScreenState(
         val isLoading: Boolean = false,
         val error: String? = null,
+
+        val hasLoadedOnce: Boolean = false,
     )
 
     var state = MutableStateFlow(ScreenState())
@@ -72,6 +76,12 @@ class MainViewModel @Inject constructor(
         onEvent(UiEvent.ShowSnackbar(message, type))
     }
 
+    // endregion
+
+    // region onChangeMethods
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
+    }
     // endregion
 
     // region Network calls
@@ -168,6 +178,28 @@ class MainViewModel @Inject constructor(
                             onSuccess(true)
                         }
                     }
+                }
+            }
+        }
+    }
+
+    fun updatePaymentRequest(onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            beforeRequest()
+
+            when (val result = clientsRepo.updateAppSubscription()) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    val appSubscription = Gson().get<AppSubscription>(result.data)
+                    Log.d("TAG", appSubscription.toString())
+                    HP.appSubscription = appSubscription
+                    onSuccess()
                 }
             }
         }

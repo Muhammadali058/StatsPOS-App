@@ -281,6 +281,7 @@ fun BottomSheet(
     onDismissRequest: () -> Unit,
     tonalElevation: Dp = 0.dp,
     shape: Shape = BottomSheetDefaults.ExpandedShape,
+    backgroundColor: Color = MaterialTheme.colorScheme.surface,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     ModalBottomSheet(
@@ -289,7 +290,7 @@ fun BottomSheet(
         modifier = modifier
             .fillMaxHeight()
             .statusBarsPadding(),
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = backgroundColor,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         tonalElevation = tonalElevation,
         shape = shape,

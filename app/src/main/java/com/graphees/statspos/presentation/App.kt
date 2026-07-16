@@ -34,9 +34,11 @@ import com.graphees.statspos.presentation.ui.utils.sendEmail
 import com.graphees.statspos.presentation.viewmodels.main.ClientsViewModel
 import com.graphees.statspos.presentation.viewmodels.main.LocalDataViewModel
 import com.graphees.statspos.presentation.viewmodels.main.LoginViewModel
+import com.graphees.statspos.presentation.viewmodels.main.MainViewModel
 import com.graphees.statspos.utils.DB
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.SocketManager
+import com.graphees.statspos.utils.showToast
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -260,9 +262,6 @@ fun App() {
                             addClient = true,
                         )
                     },
-                    onPaymentSent = {
-
-                    }
                 )
             }
             entry<Screens.Help> {

@@ -130,9 +130,11 @@ class SalesOrdersLoginViewModel @Inject constructor(
 
             beforeRequest()
 
-            getFCMToken { token ->
+            getFCMToken { fcmToken ->
                 viewModelScope.launch {
-                    when (val result = clientRepo.updateShoppingAppFCMToken(token)) {
+                    beforeRequest()
+
+                    when (val result = clientRepo.updateShoppingAppFCMToken(fcmToken)) {
                         is Resource.Error -> resultError(result.error)
                         is Resource.Information -> resultInformation(result.message)
                         is Resource.Success -> {

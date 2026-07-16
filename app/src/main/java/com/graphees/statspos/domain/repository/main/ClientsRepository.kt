@@ -9,5 +9,5 @@ interface ClientsRepository {
     suspend fun getBranches(clientId: Int): Resource<JsonObject>
     suspend fun getClient(clientId: Int): Resource<JsonObject>
     suspend fun updateShoppingAppFCMToken(fcmToken:String): Resource<JsonObject>
-    suspend fun updateAppSubscription(): Resource<JsonObject>
+    suspend fun updateAppSubscription(body: JsonObject): Resource<JsonObject>
 }

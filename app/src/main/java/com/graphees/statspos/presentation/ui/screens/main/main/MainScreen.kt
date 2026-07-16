@@ -174,12 +174,6 @@ fun MainScreen(
                             addClient = true,
                         )
                     },
-                    onPaymentSent = {
-                        viewModel.updatePaymentRequest {
-                            context.showToast("Payment request sent")
-                            backStack.removeLastOrNull()
-                        }
-                    }
                 )
             }
             entry<TopRoutes.Subscriptions> {

@@ -174,32 +174,10 @@ class MainViewModel @Inject constructor(
                         if (client.isRegisteredWeek == false || client.isRegisteredMonth == false) {
                             showSnackbar("Please activate your app")
                             onSuccess(false)
-                        }else{
+                        } else {
                             onSuccess(true)
                         }
                     }
-                }
-            }
-        }
-    }
-
-    fun updatePaymentRequest(onSuccess: () -> Unit) {
-        viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
-
-            beforeRequest()
-
-            when (val result = clientsRepo.updateAppSubscription()) {
-                is Resource.Error -> resultError(result.error)
-                is Resource.Information -> resultInformation(result.message)
-                is Resource.Success -> {
-                    resultSuccess()
-
-                    val appSubscription = Gson().get<AppSubscription>(result.data)
-                    Log.d("TAG", appSubscription.toString())
-                    HP.appSubscription = appSubscription
-                    onSuccess()
                 }
             }
         }

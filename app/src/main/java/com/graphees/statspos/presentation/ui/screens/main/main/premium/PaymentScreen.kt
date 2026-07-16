@@ -26,8 +26,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -37,19 +44,51 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.presentation.ui.components.AppCard
+import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.TopAppBar
+import com.graphees.statspos.presentation.viewmodels.main.MainViewModel
+import com.graphees.statspos.presentation.viewmodels.main.PaymentViewModel
 import com.graphees.statspos.utils.HP
+import com.graphees.statspos.utils.UiEvent
+import com.graphees.statspos.utils.checkEvent
+import com.graphees.statspos.utils.showToast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentScreen(
     onBack: () -> Unit,
     onWhatsAppClick: () -> Unit,
-    onPaymentSent: () -> Unit,
 ) {
     val clipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
+    val viewModel = hiltViewModel<PaymentViewModel>()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val event by viewModel.event.collectAsState(UiEvent.Idle)
+    val snackbarHostState = remember { SnackbarHostState() }
+    var showErrorDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(event) {
+        checkEvent(
+            event = event,
+            snackbarHostState = snackbarHostState,
+            viewModelIdleEvent = viewModel::onEvent,
+            onError = {
+                showErrorDialog = true
+            }
+        )
+    }
+
+    if (showErrorDialog) {
+        ErrorDialog(
+            error = state.error,
+            onDismiss = {
+                showErrorDialog = false
+            },
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -201,7 +240,12 @@ fun PaymentScreen(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Button(
-                        onClick = onPaymentSent,
+                        onClick = {
+                            viewModel.updatePaymentRequest {
+                                context.showToast("Payment request sent")
+                                onBack()
+                            }
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp)

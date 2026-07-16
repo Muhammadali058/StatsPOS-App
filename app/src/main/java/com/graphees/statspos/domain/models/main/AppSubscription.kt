@@ -6,6 +6,7 @@ data class AppSubscription(
     var expiryDate: String? = null,
     var paymentDate: String? = null,
     var paymentRequest: Boolean? = null,
+    var months: Int? = null,
 
     var clientId: Int? = null,
     var branchId: Int? = null,

@@ -126,7 +126,6 @@ class FirebaseRepositoryImpl @Inject constructor(
     override suspend fun getFCMToken(): Resource<String> {
         return try {
             val token = FirebaseMessaging.getInstance().token.await()
-            Log.d("TAG token", token)
             Resource.Success(token)
         } catch (e: Exception) {
             Resource.Error(e.message ?: "Failed to get FCM token")

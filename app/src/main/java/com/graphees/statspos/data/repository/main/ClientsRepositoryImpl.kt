@@ -54,7 +54,7 @@ class ClientsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateAppSubscription(): Resource<JsonObject> {
+    override suspend fun updateAppSubscription(body: JsonObject): Resource<JsonObject> {
         val body = JsonObject().apply {
             addProperty("id", HP.appSubscription.id!!)
             addProperty("paymentRequest", true)

@@ -24,6 +24,9 @@ interface ClientsApi {
     @POST("clients/updateFCMToken")
     suspend fun updateFCMToken(@Body body: JsonObject): Response<JsonObject>
 
+    @POST("clients/paymentRequest")
+    suspend fun paymentRequest(@Body body: JsonObject): Response<JsonObject>
+
     @POST("clients/updateAppSubscription")
     suspend fun updateAppSubscription(@Body body: JsonObject): Response<JsonObject>
 }

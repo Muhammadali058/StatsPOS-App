@@ -16,6 +16,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -75,7 +76,7 @@ class PaymentViewModel @Inject constructor(
     // endregion
 
     // region Network calls
-    fun updatePaymentRequest(onSuccess: () -> Unit) {
+    fun paymentRequest(onSuccess: () -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -84,10 +85,9 @@ class PaymentViewModel @Inject constructor(
 
             val params = JsonObject().apply {
                 addProperty("months", 1)
-                addProperty("paymentDate", HP.getZonedDate())
             }
 
-            when (val result = api.updateAppSubscription(params)) {
+            when (val result = api.paymentRequest(params)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
@@ -95,6 +95,31 @@ class PaymentViewModel @Inject constructor(
 
                     val appSubscription = Gson().get<AppSubscription>(result.data)
                     HP.appSubscription = appSubscription
+                    onSuccess()
+                }
+            }
+        }
+    }
+
+    fun updateAppSubscription(onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            if (state.value.isLoading)
+                return@launch
+
+            beforeRequest()
+
+            val appSubscription = AppSubscription(
+                id = HP.appSubscription.id,
+                isActive = false,
+            )
+
+            when (val result = api.updateAppSubscription(appSubscription)) {
+                is Resource.Error -> resultError(result.error)
+                is Resource.Information -> resultInformation(result.message)
+                is Resource.Success -> {
+                    resultSuccess()
+
+                    HP.appSubscription.isActive = false
                     onSuccess()
                 }
             }

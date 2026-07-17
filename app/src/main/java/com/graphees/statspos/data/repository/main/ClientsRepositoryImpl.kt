@@ -6,6 +6,7 @@ import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.Resource
 import com.graphees.statspos.utils.safeApiCall
 import com.google.gson.JsonObject
+import com.graphees.statspos.domain.models.main.AppSubscription
 import com.graphees.statspos.utils.DB
 import javax.inject.Inject
 
@@ -54,17 +55,22 @@ class ClientsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateAppSubscription(body: JsonObject): Resource<JsonObject> {
+    override suspend fun paymentRequest(body: JsonObject): Resource<JsonObject> {
         val body = JsonObject().apply {
             addProperty("id", HP.appSubscription.id!!)
+            addProperty("clientId", HP.clientId)
             addProperty("paymentRequest", true)
         }
 
         return safeApiCall {
-            api.updateAppSubscription(
-                DB.addParams(body)
-            )
+            api.paymentRequest(body)
         }
     }
 
+    override suspend fun updateAppSubscription(appSubscription: AppSubscription): Resource<JsonObject> {
+        val body = DB.getJsonObject(appSubscription)
+        return safeApiCall {
+            api.updateAppSubscription(body)
+        }
+    }
 }

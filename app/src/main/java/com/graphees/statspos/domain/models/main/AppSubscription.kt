@@ -9,7 +9,6 @@ data class AppSubscription(
     var months: Int? = null,
 
     var clientId: Int? = null,
-    var branchId: Int? = null,
 
     // Extras
     var expiryDays: Int? = null,

@@ -13,18 +13,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -47,9 +47,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.presentation.ui.components.AppCard
+import com.graphees.statspos.presentation.ui.components.AppOutlinedButton
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.TopAppBar
-import com.graphees.statspos.presentation.viewmodels.main.MainViewModel
 import com.graphees.statspos.presentation.viewmodels.main.PaymentViewModel
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.UiEvent
@@ -241,7 +241,7 @@ fun PaymentScreen(
 
                     Button(
                         onClick = {
-                            viewModel.updatePaymentRequest {
+                            viewModel.paymentRequest {
                                 context.showToast("Payment request sent")
                                 onBack()
                             }
@@ -254,6 +254,7 @@ fun PaymentScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Payment Sent")
                     }
+
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))

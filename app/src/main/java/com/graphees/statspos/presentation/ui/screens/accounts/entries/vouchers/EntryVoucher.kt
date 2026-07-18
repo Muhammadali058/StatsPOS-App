@@ -5,7 +5,9 @@ import com.graphees.statspos.domain.models.reports.accounts.AccountReport
 import com.graphees.statspos.domain.models.accounts.EntryVoucher
 import com.graphees.statspos.utils.EntryType
 import com.graphees.statspos.utils.HP
+import com.itextpdf.io.font.constants.StandardFonts
 import com.itextpdf.kernel.colors.ColorConstants
+import com.itextpdf.kernel.font.PdfFontFactory
 import com.itextpdf.kernel.geom.PageSize
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
@@ -33,6 +35,8 @@ fun entryVoucher(
         file.delete()
     }
 
+    val boldFont = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD)
+
     val writer = PdfWriter(file)
     val pdf = PdfDocument(writer)
     val pageWidth = 226.77f
@@ -47,14 +51,14 @@ fun entryVoucher(
     if(HP.printSettings.shopName.toString().isNotEmpty()) {
         document.add(
             Paragraph(HP.printSettings.shopName.toString())
-                .setBold()
+                .setFont(boldFont)
                 .setFontSize(18f)
                 .setTextAlignment(TextAlignment.CENTER)
         )
     }
 
     val title = Paragraph("${if (entryType == EntryType.RECEIPT) "Receipt" else "Payment"} Voucher")
-        .setBold()
+        .setFont(boldFont)
         .setFontSize(14f)
         .setTextAlignment(TextAlignment.CENTER)
 
@@ -68,7 +72,7 @@ fun entryVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text(if (entryType == EntryType.RECEIPT) "Received From: " else "Paid To: ").setBold())
+                    .add(Text(if (entryType == EntryType.RECEIPT) "Received From: " else "Paid To: ").setFont(boldFont))
                     .add(Text(entry.accountName.toString()))
             )
             .setFontSize(topFontSize)
@@ -80,7 +84,7 @@ fun entryVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("MOP: ").setBold())
+                    .add(Text("MOP: ").setFont(boldFont))
                     .add(Text(entry.mop.toString()))
             )
             .setFontSize(topFontSize)
@@ -92,7 +96,7 @@ fun entryVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Date: ").setBold())
+                    .add(Text("Date: ").setFont(boldFont))
                     .add(Text(entry.date.toString()))
             )
             .setFontSize(topFontSize)
@@ -129,7 +133,7 @@ fun entryVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Old Balance: ").setBold())
+                    .add(Text("Old Balance: ").setFont(boldFont))
                     .add(
                         Div()
                             .setWidth(UnitValue.createPointValue(100f))
@@ -148,7 +152,7 @@ fun entryVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text(if (entryType == EntryType.RECEIPT) "Received: " else "Paid: ").setBold())
+                    .add(Text(if (entryType == EntryType.RECEIPT) "Received: " else "Paid: ").setFont(boldFont))
                     .add(
                         Div()
                             .setWidth(UnitValue.createPointValue(100f))
@@ -167,7 +171,7 @@ fun entryVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("New Balance: ").setBold())
+                    .add(Text("New Balance: ").setFont(boldFont))
                     .add(
                         Div()
                             .setWidth(UnitValue.createPointValue(100f))
@@ -186,7 +190,7 @@ fun entryVoucher(
 
     document.add(
         Paragraph("Naration: ")
-            .setBold()
+            .setFont(boldFont)
             .setFontSize(10f)
             .setTextAlignment(TextAlignment.LEFT)
     )
@@ -204,7 +208,7 @@ fun entryVoucher(
 
         document.add(
             Paragraph("Last Five Entries")
-                .setBold()
+                .setFont(boldFont)
                 .setFontSize(10f)
                 .setTextAlignment(TextAlignment.CENTER)
         )
@@ -229,7 +233,7 @@ fun entryVoucher(
         headers.forEachIndexed { index, item ->
             val cell = Cell().add(
                 Paragraph(item)
-                    .setBold()
+                    .setFont(boldFont)
                     .setFontSize(fontSize)
             )
 

@@ -8,8 +8,10 @@ import com.graphees.statspos.presentation.ui.utils.REPORT_BODY_FONT_SIZE
 import com.graphees.statspos.presentation.ui.utils.REPORT_HEADER_FONT_SIZE
 import com.graphees.statspos.presentation.ui.utils.REPORT_HEADINGS_FONT_SIZE
 import com.graphees.statspos.utils.HP
+import com.itextpdf.io.font.constants.StandardFonts
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.events.PdfDocumentEvent
+import com.itextpdf.kernel.font.PdfFontFactory
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
@@ -36,6 +38,8 @@ fun incomeStatementReport(
         file.delete()
     }
 
+    val boldFont = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD)
+
     val writer = PdfWriter(file)
     val pdf = PdfDocument(writer)
     val pageHandler = PageXofYEventHandler(pdf)
@@ -48,7 +52,7 @@ fun incomeStatementReport(
     // region Header
     // ---------------- Report Title ----------------
     val title = Paragraph("Income Statement")
-        .setBold()
+        .setFont(boldFont)
         .setFontSize(24f)
         .setTextAlignment(TextAlignment.CENTER)
 
@@ -60,7 +64,7 @@ fun incomeStatementReport(
     val fromDateCell = Cell()
         .add(
             Paragraph()
-                .add(Text("From Date: ").setBold())
+                .add(Text("From Date: ").setFont(boldFont))
                 .add(Text(fromDate))
         )
         .setFontSize(REPORT_HEADINGS_FONT_SIZE)
@@ -70,7 +74,7 @@ fun incomeStatementReport(
     val toDateCell = Cell()
         .add(
             Paragraph()
-                .add(Text("To Date: ").setBold())
+                .add(Text("To Date: ").setFont(boldFont))
                 .add(Text(toDate))
         )
         .setFontSize(REPORT_HEADINGS_FONT_SIZE)
@@ -99,7 +103,7 @@ fun incomeStatementReport(
     headers.forEachIndexed { index, item ->
         val cell = Cell().add(
             Paragraph(item)
-                .setBold()
+                .setFont(boldFont)
                 .setFontSize(REPORT_HEADER_FONT_SIZE)
         )
 
@@ -128,7 +132,7 @@ fun incomeStatementReport(
     bodyTable.addCell(
         Cell().add(
             Paragraph()
-                .add(Text("Less: ").setBold())
+                .add(Text("Less: ").setFont(boldFont))
                 .add(Text("Cost of goods sold"))
         )
             .setBorderBottom(null)
@@ -145,7 +149,7 @@ fun incomeStatementReport(
     // ---------------- Row3 ----------------
     bodyTable.addCell(
         Cell().add(Paragraph(if (totalReport.grossProfit!! > 0.0) "Gross Profit" else "Gross Loss"))
-            .setBold().setFontSize(REPORT_BODY_FONT_SIZE)
+            .setFont(boldFont).setFontSize(REPORT_BODY_FONT_SIZE)
             .setBorderBottom(null)
             .setBorderTop(null)
             .setTextAlignment(TextAlignment.RIGHT)
@@ -162,7 +166,7 @@ fun incomeStatementReport(
 
     // ---------------- Row4 ----------------
     bodyTable.addCell(
-        Cell().add(Paragraph("Expenses").setBold().setFontSize(REPORT_BODY_FONT_SIZE))
+        Cell().add(Paragraph("Expenses").setFont(boldFont).setFontSize(REPORT_BODY_FONT_SIZE))
             .setBorderTop(null)
             .setTextAlignment(TextAlignment.CENTER)
     )
@@ -178,7 +182,7 @@ fun incomeStatementReport(
         bodyTable.addCell(
             Cell().add(
                 Paragraph()
-                    .add(Text(item.date.toString() + " ").setBold())
+                    .add(Text(item.date.toString() + " ").setFont(boldFont))
                     .add(Text(item.expense.toString()))
             )
                 .setFontSize(REPORT_BODY_FONT_SIZE)
@@ -208,7 +212,7 @@ fun incomeStatementReport(
     val totalExpensesCell = Cell()
         .add(
             Paragraph()
-                .add(Text("Total Expenses: ").setBold())
+                .add(Text("Total Expenses: ").setFont(boldFont))
                 .add(
                     Div()
                         .setWidth(UnitValue.createPointValue(120f))
@@ -235,7 +239,7 @@ fun incomeStatementReport(
     val netProfitCell = Cell()
         .add(
             Paragraph()
-                .add(Text(if (totalReport.netProfit!! > 0.0) "Net Profit: " else "Net Loss: ").setBold())
+                .add(Text(if (totalReport.netProfit!! > 0.0) "Net Profit: " else "Net Loss: ").setFont(boldFont))
                 .add(
                     Div()
                         .setWidth(UnitValue.createPointValue(120f))

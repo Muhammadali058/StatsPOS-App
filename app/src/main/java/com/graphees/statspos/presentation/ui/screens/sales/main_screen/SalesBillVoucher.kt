@@ -10,10 +10,14 @@ import com.graphees.statspos.presentation.ui.utils.REPORT_HEADINGS_FONT_SIZE
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.getDefaultImageCell
 import com.graphees.statspos.utils.urduTextToPdfImage
+import com.itextpdf.io.font.constants.StandardFonts
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.events.PdfDocumentEvent
+import com.itextpdf.kernel.font.PdfFontFactory
+import com.itextpdf.kernel.pdf.CompressionConstants
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
+import com.itextpdf.kernel.pdf.WriterProperties
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.borders.SolidBorder
 import com.itextpdf.layout.element.Cell
@@ -25,6 +29,7 @@ import com.itextpdf.layout.properties.HorizontalAlignment
 import com.itextpdf.layout.properties.TextAlignment
 import com.itextpdf.layout.properties.UnitValue
 import java.io.File
+import java.io.FileOutputStream
 import kotlin.math.abs
 
 fun salesBillVoucher(
@@ -37,6 +42,8 @@ fun salesBillVoucher(
     if (file.exists()) {
         file.delete()
     }
+
+    val boldFont = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD)
 
     val writer = PdfWriter(file)
     val pdf = PdfDocument(writer)
@@ -68,7 +75,7 @@ fun salesBillVoucher(
             .add(
                 Paragraph()
                     .add(
-                        Text(HP.printSettings.shopName).setBold().setFontSize(20f)
+                        Text(HP.printSettings.shopName).setFont(boldFont).setFontSize(20f)
                             .setTextAlignment(TextAlignment.CENTER)
                     )
                     .add(
@@ -109,7 +116,7 @@ fun salesBillVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Customer: ").setBold())
+                    .add(Text("Customer: ").setFont(boldFont))
                     .add(Text(bill[0].customerName))
 //                    .setMarginTop(-5f)
             )
@@ -122,7 +129,7 @@ fun salesBillVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Invoice #: ").setBold())
+                    .add(Text("Invoice #: ").setFont(boldFont))
                     .add(Text(bill[0].id.toString()))
 //                    .setMarginTop(-5f)
             )
@@ -135,7 +142,7 @@ fun salesBillVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Contact: ").setBold())
+                    .add(Text("Contact: ").setFont(boldFont))
                     .add(Text(bill[0].customerContact))
 //                    .setMarginTop(-5f)
             )
@@ -148,7 +155,7 @@ fun salesBillVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("User: ").setBold())
+                    .add(Text("User: ").setFont(boldFont))
                     .add(Text(bill[0].user))
 //                    .setMarginTop(-5f)
             )
@@ -161,7 +168,7 @@ fun salesBillVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Address: ").setBold())
+                    .add(Text("Address: ").setFont(boldFont))
                     .add(Text(bill[0].customerAddress))
 //                    .setMarginTop(-5f)
             )
@@ -174,7 +181,7 @@ fun salesBillVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Date: ").setBold())
+                    .add(Text("Date: ").setFont(boldFont))
                     .add(Text("${bill[0].date}, ${bill[0].time}"))
 //                    .setMarginTop(-5f)
             )
@@ -189,7 +196,7 @@ fun salesBillVoucher(
     if (bill[0].billType.equals("pending bill", ignoreCase = true)) {
         document.add(
             Paragraph(bill[0].billType)
-                .setBold()
+                .setFont(boldFont)
                 .setFontSize(12f)
                 .setTextAlignment(TextAlignment.CENTER)
         )
@@ -231,7 +238,7 @@ fun salesBillVoucher(
     headers.forEachIndexed { index, item ->
         val cell = Cell().add(
             Paragraph(item)
-                .setBold()
+                .setFont(boldFont)
                 .setFontSize(REPORT_HEADER_FONT_SIZE)
         )
 
@@ -337,7 +344,7 @@ fun salesBillVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Total Items: ").setBold())
+                    .add(Text("Total Items: ").setFont(boldFont))
                     .add(
                         Div()
                             .setWidth(UnitValue.createPointValue(100f))
@@ -357,7 +364,7 @@ fun salesBillVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Sub Total: ").setBold())
+                    .add(Text("Sub Total: ").setFont(boldFont))
                     .add(
                         Div()
                             .setWidth(UnitValue.createPointValue(100f))
@@ -387,7 +394,7 @@ fun salesBillVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Discount: ").setBold())
+                    .add(Text("Discount: ").setFont(boldFont))
                     .add(
                         Div()
                             .setWidth(UnitValue.createPointValue(100f))
@@ -418,7 +425,7 @@ fun salesBillVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Grand Total: ").setBold())
+                    .add(Text("Grand Total: ").setFont(boldFont))
                     .add(
                         Div()
                             .setWidth(UnitValue.createPointValue(100f))
@@ -455,7 +462,7 @@ fun salesBillVoucher(
             Cell()
                 .add(
                     Paragraph()
-                        .add(Text("Old Balance: ").setBold())
+                        .add(Text("Old Balance: ").setFont(boldFont))
                         .add(
                             Div()
                                 .setWidth(UnitValue.createPointValue(100f))
@@ -486,7 +493,7 @@ fun salesBillVoucher(
             Cell()
                 .add(
                     Paragraph()
-                        .add(Text("Total: ").setBold())
+                        .add(Text("Total: ").setFont(boldFont))
                         .add(
                             Div()
                                 .setWidth(UnitValue.createPointValue(100f))
@@ -517,7 +524,7 @@ fun salesBillVoucher(
             Cell()
                 .add(
                     Paragraph()
-                        .add(Text("Payment: ").setBold())
+                        .add(Text("Payment: ").setFont(boldFont))
                         .add(
                             Div()
                                 .setWidth(UnitValue.createPointValue(100f))
@@ -548,7 +555,7 @@ fun salesBillVoucher(
             Cell()
                 .add(
                     Paragraph()
-                        .add(Text("New Balance: ").setBold())
+                        .add(Text("New Balance: ").setFont(boldFont))
                         .add(
                             Div()
                                 .setWidth(UnitValue.createPointValue(100f))
@@ -580,7 +587,7 @@ fun salesBillVoucher(
 
         document.add(
             Paragraph("Last Five Entries")
-                .setBold()
+                .setFont(boldFont)
                 .setFontSize(12f)
                 .setTextAlignment(TextAlignment.CENTER)
         )
@@ -603,7 +610,7 @@ fun salesBillVoucher(
         headers.forEachIndexed { index, item ->
             val cell = Cell().add(
                 Paragraph(item)
-                    .setBold()
+                    .setFont(boldFont)
                     .setFontSize(REPORT_HEADER_FONT_SIZE)
             )
 

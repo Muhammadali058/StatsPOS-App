@@ -5,7 +5,9 @@ import com.graphees.statspos.domain.models.reports.TotalReport
 import com.graphees.statspos.domain.models.reports.accounts.ShiftReport
 import com.graphees.statspos.presentation.ui.utils.REPORT_HEADER_FONT_SIZE
 import com.graphees.statspos.utils.HP
+import com.itextpdf.io.font.constants.StandardFonts
 import com.itextpdf.kernel.colors.ColorConstants
+import com.itextpdf.kernel.font.PdfFontFactory
 import com.itextpdf.kernel.geom.PageSize
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
@@ -31,6 +33,8 @@ fun shiftReport(
         file.delete()
     }
 
+    val boldFont = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD)
+
     val writer = PdfWriter(file)
     val pdf = PdfDocument(writer)
     val pageWidth = 226.77f
@@ -42,7 +46,7 @@ fun shiftReport(
 
     // region Header
     val title = Paragraph("Shift Report")
-        .setBold()
+        .setFont(boldFont)
         .setFontSize(14f)
         .setTextAlignment(TextAlignment.CENTER)
 
@@ -57,7 +61,7 @@ fun shiftReport(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("User: ").setBold())
+                    .add(Text("User: ").setFont(boldFont))
                     .add(Text(totalReport.username.toString()))
             )
             .setFontSize(topFontSize)
@@ -69,7 +73,7 @@ fun shiftReport(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Status: ").setBold())
+                    .add(Text("Status: ").setFont(boldFont))
                     .add(Text(totalReport.status.toString()))
             )
             .setFontSize(topFontSize)
@@ -81,7 +85,7 @@ fun shiftReport(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Open: ").setBold())
+                    .add(Text("Open: ").setFont(boldFont))
                     .add(Text(totalReport.openDate.toString()))
             )
             .setFontSize(topFontSize)
@@ -93,7 +97,7 @@ fun shiftReport(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Close: ").setBold())
+                    .add(Text("Close: ").setFont(boldFont))
                     .add(Text(totalReport.closeDate.toString()))
             )
             .setFontSize(topFontSize)
@@ -121,7 +125,7 @@ fun shiftReport(
     headers.forEachIndexed { index, item ->
         val cell = Cell().add(
             Paragraph(item)
-                .setBold()
+                .setFont(boldFont)
                 .setFontSize(REPORT_HEADER_FONT_SIZE)
         )
 
@@ -131,11 +135,11 @@ fun shiftReport(
 
     bodyTable.addCell(
         Cell().add(Paragraph("Opening Balance").setFontSize(bodyFontSize))
-            .setTextAlignment(TextAlignment.LEFT).setBold()
+            .setTextAlignment(TextAlignment.LEFT).setFont(boldFont)
     )
     bodyTable.addCell(
         Cell().add(Paragraph(HP.formatDecimal(totalReport.openingBalance)).setFontSize(bodyFontSize))
-            .setTextAlignment(TextAlignment.CENTER).setBold()
+            .setTextAlignment(TextAlignment.CENTER).setFont(boldFont)
     )
     bodyTable.addCell(
         Cell().add(Paragraph("").setFontSize(bodyFontSize))
@@ -247,7 +251,7 @@ fun shiftReport(
     val totalCell = Cell()
         .add(
             Paragraph()
-                .add(Text("Expected Cash: ").setBold())
+                .add(Text("Expected Cash: ").setFont(boldFont))
                 .add(
                     Div()
                         .setWidth(UnitValue.createPointValue(70f))
@@ -273,7 +277,7 @@ fun shiftReport(
     val discTableCell = Cell()
         .add(
             Paragraph()
-                .add(Text("Cash in Hand: ").setBold())
+                .add(Text("Cash in Hand: ").setFont(boldFont))
                 .add(
                     Div()
                         .setWidth(UnitValue.createPointValue(70f))
@@ -299,7 +303,7 @@ fun shiftReport(
     val grandTotalTableCell = Cell()
         .add(
             Paragraph()
-                .add(Text("Closing Balance: ").setBold())
+                .add(Text("Closing Balance: ").setFont(boldFont))
                 .add(
                     Div()
                         .setWidth(UnitValue.createPointValue(70f))
@@ -323,7 +327,7 @@ fun shiftReport(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Bank Sales: ").setBold())
+                    .add(Text("Bank Sales: ").setFont(boldFont))
                     .add(Text(HP.formatDecimal(totalReport.bankSales)))
             )
             .setFontSize(topFontSize)

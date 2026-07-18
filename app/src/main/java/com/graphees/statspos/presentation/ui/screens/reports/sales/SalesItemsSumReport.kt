@@ -8,8 +8,10 @@ import com.graphees.statspos.presentation.ui.utils.REPORT_BODY_FONT_SIZE
 import com.graphees.statspos.presentation.ui.utils.REPORT_HEADER_FONT_SIZE
 import com.graphees.statspos.presentation.ui.utils.REPORT_HEADINGS_FONT_SIZE
 import com.graphees.statspos.utils.HP
+import com.itextpdf.io.font.constants.StandardFonts
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.events.PdfDocumentEvent
+import com.itextpdf.kernel.font.PdfFontFactory
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
@@ -36,6 +38,8 @@ fun salesItemsSumReport(
         file.delete()
     }
 
+    val boldFont = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD)
+
     val writer = PdfWriter(file)
     val pdf = PdfDocument(writer)
     val pageHandler = PageXofYEventHandler(pdf)
@@ -48,7 +52,7 @@ fun salesItemsSumReport(
     // region Header
     // ---------------- Report Title ----------------
     val title = Paragraph("Sales Report")
-        .setBold()
+        .setFont(boldFont)
         .setFontSize(24f)
         .setTextAlignment(TextAlignment.CENTER)
 
@@ -60,7 +64,7 @@ fun salesItemsSumReport(
     val fromDateCell = Cell()
         .add(
             Paragraph()
-                .add(Text("From Date: ").setBold())
+                .add(Text("From Date: ").setFont(boldFont))
                 .add(Text(fromDate))
         )
         .setFontSize(REPORT_HEADINGS_FONT_SIZE)
@@ -70,7 +74,7 @@ fun salesItemsSumReport(
     val toDateCell = Cell()
         .add(
             Paragraph()
-                .add(Text("To Date: ").setBold())
+                .add(Text("To Date: ").setFont(boldFont))
                 .add(Text(toDate))
         )
         .setFontSize(REPORT_HEADINGS_FONT_SIZE)
@@ -111,7 +115,7 @@ fun salesItemsSumReport(
     headers.forEachIndexed { index, item ->
         val cell = Cell().add(
             Paragraph(item)
-                .setBold()
+                .setFont(boldFont)
                 .setFontSize(REPORT_HEADER_FONT_SIZE)
         )
 
@@ -165,7 +169,7 @@ fun salesItemsSumReport(
             .useAllAvailableWidth()
 
     val paragraph = Paragraph()
-        .add(Text("Total Qty: ").setBold())
+        .add(Text("Total Qty: ").setFont(boldFont))
         .add(
             Div()
                 .setWidth(UnitValue.createPointValue(100f))
@@ -178,7 +182,7 @@ fun salesItemsSumReport(
 
     if (HP.settings.saleCartons == true) {
         paragraph
-            .add(Text("Total Crtn: ").setBold())
+            .add(Text("Total Crtn: ").setFont(boldFont))
             .add(
                 Div()
                     .setWidth(UnitValue.createPointValue(100f))
@@ -199,7 +203,7 @@ fun salesItemsSumReport(
     val totalCell = Cell()
         .add(
             Paragraph()
-                .add(Text("Total: ").setBold())
+                .add(Text("Total: ").setFont(boldFont))
                 .add(
                     Div()
                         .setWidth(UnitValue.createPointValue(100f))
@@ -226,7 +230,7 @@ fun salesItemsSumReport(
     val discTableCell = Cell()
         .add(
             Paragraph()
-                .add(Text("Discount: ").setBold())
+                .add(Text("Discount: ").setFont(boldFont))
                 .add(
                     Div()
                         .setWidth(UnitValue.createPointValue(100f))
@@ -252,7 +256,7 @@ fun salesItemsSumReport(
     val grandTotalTableCell = Cell()
         .add(
             Paragraph()
-                .add(Text("Grand Total: ").setBold())
+                .add(Text("Grand Total: ").setFont(boldFont))
                 .add(
                     Div()
                         .setWidth(UnitValue.createPointValue(100f))

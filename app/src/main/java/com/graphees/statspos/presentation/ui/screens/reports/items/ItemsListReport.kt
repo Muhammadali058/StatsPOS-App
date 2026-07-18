@@ -8,8 +8,10 @@ import com.graphees.statspos.presentation.ui.utils.REPORT_BODY_FONT_SIZE
 import com.graphees.statspos.presentation.ui.utils.REPORT_HEADER_FONT_SIZE
 import com.graphees.statspos.presentation.ui.utils.REPORT_HEADINGS_FONT_SIZE
 import com.graphees.statspos.utils.HP
+import com.itextpdf.io.font.constants.StandardFonts
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.events.PdfDocumentEvent
+import com.itextpdf.kernel.font.PdfFontFactory
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
@@ -35,6 +37,8 @@ fun itemsListReport(
         file.delete()
     }
 
+    val boldFont = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD)
+
     val writer = PdfWriter(file)
     val pdf = PdfDocument(writer)
     val pageHandler = PageXofYEventHandler(pdf)
@@ -47,7 +51,7 @@ fun itemsListReport(
     // region Header
     // ---------------- Report Title ----------------
     val title = Paragraph("Items List")
-        .setBold()
+        .setFont(boldFont)
         .setFontSize(24f)
         .setTextAlignment(TextAlignment.CENTER)
 
@@ -59,7 +63,7 @@ fun itemsListReport(
     val fromDateCell = Cell()
         .add(
             Paragraph()
-                .add(Text("Date: ").setBold())
+                .add(Text("Date: ").setFont(boldFont))
                 .add(Text(HP.getFormatedDate(LocalDate.now())))
         )
         .setFontSize(REPORT_HEADINGS_FONT_SIZE)
@@ -104,7 +108,7 @@ fun itemsListReport(
     headers.forEachIndexed { index, item ->
         val cell = Cell().add(
             Paragraph(item)
-                .setBold()
+                .setFont(boldFont)
                 .setFontSize(REPORT_HEADER_FONT_SIZE)
         )
 
@@ -173,7 +177,7 @@ fun itemsListReport(
             .useAllAvailableWidth()
 
     val paragraph = Paragraph()
-        .add(Text("Total Items: ").setBold())
+        .add(Text("Total Items: ").setFont(boldFont))
         .add(
             Div()
                 .setWidth(UnitValue.createPointValue(100f))

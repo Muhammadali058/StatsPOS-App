@@ -3,7 +3,9 @@ package com.graphees.statspos.presentation.ui.screens.warehouse.gatepass
 import android.content.Context
 import com.graphees.statspos.domain.models.warehouse.GatepassVoucher
 import com.graphees.statspos.utils.HP
+import com.itextpdf.io.font.constants.StandardFonts
 import com.itextpdf.kernel.colors.ColorConstants
+import com.itextpdf.kernel.font.PdfFontFactory
 import com.itextpdf.kernel.geom.PageSize
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
@@ -29,6 +31,8 @@ fun gatepassVoucher(
         file.delete()
     }
 
+    val boldFont = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD)
+
     val writer = PdfWriter(file)
     val pdf = PdfDocument(writer)
     val pageWidth = 226.77f
@@ -42,7 +46,7 @@ fun gatepassVoucher(
     // ---------------- Report Title ----------------
     document.add(
         Paragraph("Gatepass")
-            .setBold()
+            .setFont(boldFont)
             .setFontSize(18f)
             .setTextAlignment(TextAlignment.CENTER)
     )
@@ -55,7 +59,7 @@ fun gatepassVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Name: ").setBold())
+                    .add(Text("Name: ").setFont(boldFont))
                     .add(Text(gatepass[0].gatepassName.toString()))
             )
             .setFontSize(topFontSize)
@@ -67,7 +71,7 @@ fun gatepassVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Warehouse: ").setBold())
+                    .add(Text("Warehouse: ").setFont(boldFont))
                     .add(Text(gatepass[0].warehouseName.toString()))
             )
             .setFontSize(topFontSize)
@@ -79,7 +83,7 @@ fun gatepassVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Date: ").setBold())
+                    .add(Text("Date: ").setFont(boldFont))
                     .add(Text(gatepass[0].date.toString()))
             )
             .setFontSize(topFontSize)
@@ -118,7 +122,7 @@ fun gatepassVoucher(
     headers.forEachIndexed { index, item ->
         val cell = Cell().add(
             Paragraph(item)
-                .setBold()
+                .setFont(boldFont)
                 .setFontSize(fontSize)
         )
 
@@ -168,7 +172,7 @@ fun gatepassVoucher(
             .useAllAvailableWidth()
 
     val paragraph = Paragraph()
-        .add(Text("Total Qty: ").setBold())
+        .add(Text("Total Qty: ").setFont(boldFont))
         .add(
             Div()
                 .setWidth(UnitValue.createPointValue(50f))
@@ -181,7 +185,7 @@ fun gatepassVoucher(
 
     if (HP.settings.saleCartons == true) {
         paragraph
-            .add(Text("Total Crtn: ").setBold())
+            .add(Text("Total Crtn: ").setFont(boldFont))
             .add(
                 Div()
                     .setWidth(UnitValue.createPointValue(50f))
@@ -204,7 +208,7 @@ fun gatepassVoucher(
 
     document.add(
         Paragraph("Remarks: ")
-            .setBold()
+            .setFont(boldFont)
             .setFontSize(10f)
             .setTextAlignment(TextAlignment.LEFT)
     )

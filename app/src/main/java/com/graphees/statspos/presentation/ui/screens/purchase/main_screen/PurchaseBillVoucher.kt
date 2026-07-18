@@ -9,8 +9,10 @@ import com.graphees.statspos.presentation.ui.utils.REPORT_HEADINGS_FONT_SIZE
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.getDefaultImageCell
 import com.graphees.statspos.utils.urduTextToPdfImage
+import com.itextpdf.io.font.constants.StandardFonts
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.events.PdfDocumentEvent
+import com.itextpdf.kernel.font.PdfFontFactory
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
@@ -35,6 +37,8 @@ fun purchaseBillVoucher(
     if (file.exists()) {
         file.delete()
     }
+
+    val boldFont = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD)
 
     val writer = PdfWriter(file)
     val pdf = PdfDocument(writer)
@@ -73,7 +77,7 @@ fun purchaseBillVoucher(
             .add(
                 Paragraph()
                     .add(
-                        Text(HP.printSettings.shopName).setBold().setFontSize(20f)
+                        Text(HP.printSettings.shopName).setFont(boldFont).setFontSize(20f)
                             .setTextAlignment(TextAlignment.CENTER)
                     )
                     .add(
@@ -94,7 +98,7 @@ fun purchaseBillVoucher(
 
     document.add(
         Paragraph("Purchase Invoice")
-            .setBold()
+            .setFont(boldFont)
             .setFontSize(14f)
             .setTextAlignment(TextAlignment.CENTER)
     )
@@ -121,7 +125,7 @@ fun purchaseBillVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Vendor: ").setBold())
+                    .add(Text("Vendor: ").setFont(boldFont))
                     .add(Text(bill[0].vendorName))
 //                    .setMarginTop(-5f)
             )
@@ -134,7 +138,7 @@ fun purchaseBillVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Invoice #: ").setBold())
+                    .add(Text("Invoice #: ").setFont(boldFont))
                     .add(Text(bill[0].id.toString()))
 //                    .setMarginTop(-5f)
             )
@@ -147,7 +151,7 @@ fun purchaseBillVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Contact: ").setBold())
+                    .add(Text("Contact: ").setFont(boldFont))
                     .add(Text(bill[0].vendorContact))
 //                    .setMarginTop(-5f)
             )
@@ -160,7 +164,7 @@ fun purchaseBillVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("User: ").setBold())
+                    .add(Text("User: ").setFont(boldFont))
                     .add(Text(bill[0].user))
 //                    .setMarginTop(-5f)
             )
@@ -173,7 +177,7 @@ fun purchaseBillVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Address: ").setBold())
+                    .add(Text("Address: ").setFont(boldFont))
                     .add(Text(bill[0].vendorAddress))
 //                    .setMarginTop(-5f)
             )
@@ -186,7 +190,7 @@ fun purchaseBillVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Date: ").setBold())
+                    .add(Text("Date: ").setFont(boldFont))
                     .add(Text("${bill[0].date}, ${bill[0].time}"))
 //                    .setMarginTop(-5f)
             )
@@ -201,7 +205,7 @@ fun purchaseBillVoucher(
     if (bill[0].billType.equals("pending bill", ignoreCase = true)) {
         document.add(
             Paragraph(bill[0].billType)
-                .setBold()
+                .setFont(boldFont)
                 .setFontSize(12f)
                 .setTextAlignment(TextAlignment.CENTER)
         )
@@ -242,7 +246,7 @@ fun purchaseBillVoucher(
     headers.forEachIndexed { index, item ->
         val cell = Cell().add(
             Paragraph(item)
-                .setBold()
+                .setFont(boldFont)
                 .setFontSize(REPORT_HEADER_FONT_SIZE)
         )
 
@@ -333,7 +337,7 @@ fun purchaseBillVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Total Items: ").setBold())
+                    .add(Text("Total Items: ").setFont(boldFont))
                     .add(
                         Div()
                             .setWidth(UnitValue.createPointValue(100f))
@@ -353,7 +357,7 @@ fun purchaseBillVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Sub Total: ").setBold())
+                    .add(Text("Sub Total: ").setFont(boldFont))
                     .add(
                         Div()
                             .setWidth(UnitValue.createPointValue(100f))
@@ -383,7 +387,7 @@ fun purchaseBillVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Discount: ").setBold())
+                    .add(Text("Discount: ").setFont(boldFont))
                     .add(
                         Div()
                             .setWidth(UnitValue.createPointValue(100f))
@@ -414,7 +418,7 @@ fun purchaseBillVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Grand Total: ").setBold())
+                    .add(Text("Grand Total: ").setFont(boldFont))
                     .add(
                         Div()
                             .setWidth(UnitValue.createPointValue(100f))
@@ -451,7 +455,7 @@ fun purchaseBillVoucher(
             Cell()
                 .add(
                     Paragraph()
-                        .add(Text("Old Balance: ").setBold())
+                        .add(Text("Old Balance: ").setFont(boldFont))
                         .add(
                             Div()
                                 .setWidth(UnitValue.createPointValue(100f))
@@ -482,7 +486,7 @@ fun purchaseBillVoucher(
             Cell()
                 .add(
                     Paragraph()
-                        .add(Text("New Balance: ").setBold())
+                        .add(Text("New Balance: ").setFont(boldFont))
                         .add(
                             Div()
                                 .setWidth(UnitValue.createPointValue(100f))

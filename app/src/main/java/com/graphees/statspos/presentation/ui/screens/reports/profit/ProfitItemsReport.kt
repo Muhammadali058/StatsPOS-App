@@ -8,8 +8,10 @@ import com.graphees.statspos.presentation.ui.utils.REPORT_BODY_FONT_SIZE
 import com.graphees.statspos.presentation.ui.utils.REPORT_HEADER_FONT_SIZE
 import com.graphees.statspos.presentation.ui.utils.REPORT_HEADINGS_FONT_SIZE
 import com.graphees.statspos.utils.HP
+import com.itextpdf.io.font.constants.StandardFonts
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.events.PdfDocumentEvent
+import com.itextpdf.kernel.font.PdfFontFactory
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
@@ -36,6 +38,8 @@ fun profitItemsReport(
         file.delete()
     }
 
+    val boldFont = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD)
+
     val writer = PdfWriter(file)
     val pdf = PdfDocument(writer)
     val pageHandler = PageXofYEventHandler(pdf)
@@ -48,7 +52,7 @@ fun profitItemsReport(
     // region Header
     // ---------------- Report Title ----------------
     val title = Paragraph("Profit Report")
-        .setBold()
+        .setFont(boldFont)
         .setFontSize(24f)
         .setTextAlignment(TextAlignment.CENTER)
 
@@ -60,7 +64,7 @@ fun profitItemsReport(
     val fromDateCell = Cell()
         .add(
             Paragraph()
-                .add(Text("From Date: ").setBold())
+                .add(Text("From Date: ").setFont(boldFont))
                 .add(Text(fromDate))
         )
         .setFontSize(REPORT_HEADINGS_FONT_SIZE)
@@ -70,7 +74,7 @@ fun profitItemsReport(
     val toDateCell = Cell()
         .add(
             Paragraph()
-                .add(Text("To Date: ").setBold())
+                .add(Text("To Date: ").setFont(boldFont))
                 .add(Text(toDate))
         )
         .setFontSize(REPORT_HEADINGS_FONT_SIZE)
@@ -121,7 +125,7 @@ fun profitItemsReport(
     headers.forEachIndexed { index, item ->
         val cell = Cell().add(
             Paragraph(item)
-                .setBold()
+                .setFont(boldFont)
                 .setFontSize(REPORT_HEADER_FONT_SIZE)
         )
 
@@ -200,7 +204,7 @@ fun profitItemsReport(
             .useAllAvailableWidth()
 
     val paragraph = Paragraph()
-        .add(Text("Total Qty: ").setBold())
+        .add(Text("Total Qty: ").setFont(boldFont))
         .add(
             Div()
                 .setWidth(UnitValue.createPointValue(100f))
@@ -213,7 +217,7 @@ fun profitItemsReport(
 
     if (HP.settings.saleCartons == true) {
         paragraph
-            .add(Text("Total Crtn: ").setBold())
+            .add(Text("Total Crtn: ").setFont(boldFont))
             .add(
                 Div()
                     .setWidth(UnitValue.createPointValue(100f))
@@ -234,7 +238,7 @@ fun profitItemsReport(
     val totalCell = Cell()
         .add(
             Paragraph()
-                .add(Text("Total Sales: ").setBold())
+                .add(Text("Total Sales: ").setFont(boldFont))
                 .add(
                     Div()
                         .setWidth(UnitValue.createPointValue(100f))
@@ -261,7 +265,7 @@ fun profitItemsReport(
     val discTableCell = Cell()
         .add(
             Paragraph()
-                .add(Text("Total Cost: ").setBold())
+                .add(Text("Total Cost: ").setFont(boldFont))
                 .add(
                     Div()
                         .setWidth(UnitValue.createPointValue(100f))
@@ -287,7 +291,7 @@ fun profitItemsReport(
     val marginTableCell = Cell()
         .add(
             Paragraph()
-                .add(Text("Margin: ").setBold())
+                .add(Text("Margin: ").setFont(boldFont))
                 .add(
                     Div()
                         .setWidth(UnitValue.createPointValue(100f))
@@ -313,7 +317,7 @@ fun profitItemsReport(
     val totalProfitTableCell = Cell()
         .add(
             Paragraph()
-                .add(Text("Total Profit: ").setBold())
+                .add(Text("Total Profit: ").setFont(boldFont))
                 .add(
                     Div()
                         .setWidth(UnitValue.createPointValue(100f))

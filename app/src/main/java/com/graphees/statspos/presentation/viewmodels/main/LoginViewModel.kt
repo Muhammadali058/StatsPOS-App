@@ -19,6 +19,8 @@ import com.graphees.statspos.utils.get
 import com.graphees.statspos.utils.preloadImages
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.graphees.statspos.domain.models.main.AppSubscription
+import com.graphees.statspos.utils.HP.appSubscription
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -109,35 +111,15 @@ class LoginViewModel @Inject constructor(
     // endregion
 
     // region Network calls
-    fun test() {
-        viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
-            beforeRequest()
-
-            val params = JsonObject().apply {
-                addProperty("clientId", 1)
-                addProperty("branchId", 1)
-            }
-
-//            when (val result = usersRepository.loadUsers(params)) {
-//                is Resource.Error -> resultError(result.error)
-//                is Resource.Information -> resultInformation(result.message)
-//                is Resource.Success -> {
-//                    resultSuccess()
-//                    Log.d("TAG Users", result.data.toString())
-//                }
-//            }
-        }
-    }
-
     fun login(onSuccess: () -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
+
             if (!loginValidation()) {
                 return@launch
             }
+
             beforeRequest()
 
             when (val result = usersRepository.login(state.value.username, state.value.password)) {
@@ -170,6 +152,7 @@ class LoginViewModel @Inject constructor(
                             }
                         }
                     } else {
+                        resultSuccess()
                         showSnackbar("Username or password incorrect")
                     }
                 }
@@ -183,11 +166,10 @@ class LoginViewModel @Inject constructor(
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
-                    resultSuccess()
+//                    resultSuccess()
 
                     HP.setDropdowns(result.data)
                     preloadImages(listOf(HP.getImageUrl(HP.printSettings.imageUrl.toString())))
-//                    onSuccess()
 
                     getClient{
                         onSuccess()
@@ -199,20 +181,18 @@ class LoginViewModel @Inject constructor(
 
     fun getClient(onSuccess: () -> Unit) {
         viewModelScope.launch {
-//            if (state.value.isLoading)
-//                return@launch
-//
-//            beforeRequest()
             val clientId = dataStore.getClientId().first()
 
-            when (val result = clientsRepo.getClient(clientId)) {
+            when (val result = clientsRepo.getClientData(clientId)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
 
-                    val client = Gson().get<Clients>(result.data.asJsonObject)
+                    val client = Gson().get<Clients>(result.data.get("client").asJsonObject)
+                    val appSubscription = Gson().get<AppSubscription>(result.data.get("appSubscription").asJsonObject)
                     HP.client = client
+                    HP.appSubscription = appSubscription
 
                     onSuccess()
                 }

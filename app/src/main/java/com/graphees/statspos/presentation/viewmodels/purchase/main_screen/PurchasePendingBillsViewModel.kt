@@ -182,7 +182,7 @@ class PurchasePendingBillsViewModel @Inject constructor(
             )
 
             when (val result = api.tempClose(purchase)) {
-                is Resource.Error -> showError(result.error)
+                is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()

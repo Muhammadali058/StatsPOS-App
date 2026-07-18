@@ -584,6 +584,7 @@ class AddUpdateUserViewModel @Inject constructor(
             salesReturn = state.value.salesReturn,
             creditBill = state.value.creditBill,
             editSaleBill = state.value.editSalesBill,
+            editPurchaseBill = state.value.editPurchaseBill,
             editCreditBill = state.value.editCreditBill,
             dateWiseSales = state.value.dateWiseSales,
             payBill = state.value.payBill,

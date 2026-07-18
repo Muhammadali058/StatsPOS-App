@@ -42,6 +42,18 @@ class ClientsRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getClientData(clientId: Int): Resource<JsonObject> {
+        val body = JsonObject().apply {
+            addProperty("id", clientId)
+        }
+
+        return safeApiCall {
+            api.getClientData(
+                body
+            )
+        }
+    }
+
     override suspend fun updateShoppingAppFCMToken(fcmToken:String): Resource<JsonObject> {
         val body = JsonObject().apply {
             addProperty("id", HP.clientId)
@@ -56,11 +68,9 @@ class ClientsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun paymentRequest(body: JsonObject): Resource<JsonObject> {
-        val body = JsonObject().apply {
-            addProperty("id", HP.appSubscription.id!!)
-            addProperty("clientId", HP.clientId)
-            addProperty("paymentRequest", true)
-        }
+        body.addProperty("id", HP.appSubscription.id!!)
+        body.addProperty("clientId", HP.clientId)
+        body.addProperty("paymentRequest", true)
 
         return safeApiCall {
             api.paymentRequest(body)

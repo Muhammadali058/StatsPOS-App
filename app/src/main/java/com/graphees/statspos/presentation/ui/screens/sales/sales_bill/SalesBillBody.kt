@@ -54,7 +54,7 @@ import com.graphees.statspos.utils.checkEvent
 import java.time.LocalDate
 
 @Composable
-fun AddUpdateSalesBillBody(
+fun SalesBillBody(
     sharedViewModel: SharedViewModel,
     salesViewModel: AddUpdateSalesViewModel,
     salesItemsViewModel: SalesItemsViewModel,

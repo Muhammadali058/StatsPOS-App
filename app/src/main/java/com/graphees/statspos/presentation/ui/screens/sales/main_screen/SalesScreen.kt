@@ -22,6 +22,8 @@ fun SalesScreen(
     sharedViewModel: SharedViewModel,
     onViewClick: (SalesBills) -> Unit,
     onAddUpdateButtonClick: (Long, Boolean, Boolean, SalesBills?) -> Unit,
+    onUpgradeClick: () -> Unit,
+    onHelpClick: () -> Unit,
 ) {
     val tabs = listOf("Pending Bills", "Posted Bills")
     val pagerState = rememberPagerState(
@@ -66,6 +68,8 @@ fun SalesScreen(
                             onAddUpdateButtonClick = { invoiceId, isPendingBill, salesBills ->
                                 onAddUpdateButtonClick(invoiceId, isPendingBill, false, salesBills)
                             },
+                            onUpgradeClick = onUpgradeClick,
+                            onHelpClick = onHelpClick,
                         )
 
                     1 ->

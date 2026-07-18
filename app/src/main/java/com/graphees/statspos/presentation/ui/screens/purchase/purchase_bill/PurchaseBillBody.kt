@@ -50,7 +50,7 @@ import com.graphees.statspos.utils.checkEvent
 import java.time.LocalDate
 
 @Composable
-fun AddUpdatePurchaseBillBody(
+fun PurchaseBillBody(
     sharedViewModel: SharedViewModel,
     purchaseViewModel: AddUpdatePurchaseViewModel,
     snackbarHostState: SnackbarHostState,

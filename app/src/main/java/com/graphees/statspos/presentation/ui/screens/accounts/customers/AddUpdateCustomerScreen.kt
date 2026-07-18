@@ -45,6 +45,7 @@ import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
 import com.graphees.statspos.presentation.ui.components.Textbox
 import com.graphees.statspos.presentation.ui.components.TopAppBar
+import com.graphees.statspos.presentation.ui.components.UpgradeToPremiumBottomSheet
 import com.graphees.statspos.presentation.ui.components.UploadImageView
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
@@ -61,6 +62,8 @@ fun AddUpdateCustomerScreen(
     sharedViewModel: SharedViewModel,
     updateId: Long = 0,
     isUpdate: Boolean = false,
+    onUpgradeClick: () -> Unit,
+    onHelpClick: () -> Unit,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -78,6 +81,7 @@ fun AddUpdateCustomerScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
+    var showUpgradeToPremiumSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(event) {
         checkEvent(
@@ -108,6 +112,9 @@ fun AddUpdateCustomerScreen(
             error = state.error,
             onDismiss = {
                 showErrorDialog = false
+
+                if(state.error!!.contains("upgrade to premium", ignoreCase = true))
+                    showUpgradeToPremiumSheet = true
             },
         )
     }
@@ -140,6 +147,20 @@ fun AddUpdateCustomerScreen(
                     context.showToast("Customer deleted successfully")
                     goBackWithResult()
                 }
+            }
+        )
+    }
+
+    if (showUpgradeToPremiumSheet) {
+        UpgradeToPremiumBottomSheet(
+            onDismiss = {
+                showUpgradeToPremiumSheet = false
+            },
+            onUpgradeClick = {
+                onUpgradeClick()
+            },
+            onContactClick = {
+                onHelpClick()
             }
         )
     }
@@ -260,7 +281,7 @@ fun AddUpdateCustomerScreen(
                 Box(
                     modifier = Modifier
                         .padding(ConstantPaddings.BODY_HORIZONTAL)
-                        .padding(vertical = 16.dp)
+                        .padding(bottom = 16.dp)
                 ) {
                     if (state.isSaving) {
                         AppCircularProgressIndicator()

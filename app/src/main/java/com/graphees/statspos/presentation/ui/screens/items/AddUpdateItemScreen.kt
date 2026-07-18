@@ -73,11 +73,14 @@ import com.graphees.statspos.presentation.ui.components.SmallButton
 import com.graphees.statspos.presentation.ui.components.SubDropdown
 import com.graphees.statspos.presentation.ui.components.Textbox
 import com.graphees.statspos.presentation.ui.components.TopAppBar
+import com.graphees.statspos.presentation.ui.components.UpgradeToPremiumBottomSheet
 import com.graphees.statspos.presentation.ui.components.UploadImageView
 import com.graphees.statspos.presentation.ui.screens.items.linked_items.AddUpdateLinkedItemScreen
 import com.graphees.statspos.presentation.ui.screens.items.linked_items.LinkedItemsScreen
 import com.graphees.statspos.presentation.ui.screens.items.sub_barcodes.AddUpdateSubBarcodeScreen
 import com.graphees.statspos.presentation.ui.screens.items.sub_barcodes.SubBarcodesScreen
+import com.graphees.statspos.presentation.ui.screens.main.main.premium.HelpScreen
+import com.graphees.statspos.presentation.ui.screens.main.main.premium.PaymentScreen
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.items.AddUpdateItemViewModel
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
@@ -116,6 +119,12 @@ private sealed class Routes : NavKey {
     @Serializable
     data object SearchItem : Routes()
 
+    @Serializable
+    data object Payment : Routes()
+
+    @Serializable
+    data object Help : Routes()
+
 }
 
 @Composable
@@ -125,6 +134,7 @@ fun AddUpdateItemScreen(
     isUpdate: Boolean = false,
     onBack: () -> Unit,
 ) {
+    val context = LocalContext.current
     val backStack = rememberNavBackStack(Routes.Home)
     fun navigate(key: NavKey) {
         if (backStack.lastOrNull() != key) {
@@ -151,7 +161,13 @@ fun AddUpdateItemScreen(
                     },
                     onSubBarcodesClick = {
                         navigate(Routes.SubBarcodes(itemId = updateId))
-                    }
+                    },
+                    onUpgradeClick = {
+                        navigate(Routes.Payment)
+                    },
+                    onHelpClick = {
+                        navigate(Routes.Help)
+                    },
                 )
             }
             entry<Routes.LinkedItems> { key ->
@@ -213,6 +229,20 @@ fun AddUpdateItemScreen(
                     }
                 )
             }
+            entry<Routes.Payment> {
+                PaymentScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                )
+            }
+            entry<Routes.Help> {
+                HelpScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                )
+            }
         }
     )
 }
@@ -225,6 +255,8 @@ private fun Home(
     onBack: () -> Unit,
     onLinkedItemsClick: (Int) -> Unit,
     onSubBarcodesClick: () -> Unit,
+    onUpgradeClick: () -> Unit,
+    onHelpClick: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -243,6 +275,7 @@ private fun Home(
     var menuExpanded by remember { mutableStateOf(false) }
     val itemnameFocusRequester = remember { FocusRequester() }
     val scrollState = rememberScrollState()
+    var showUpgradeToPremiumSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(event) {
         checkEvent(
@@ -276,6 +309,9 @@ private fun Home(
             error = state.error,
             onDismiss = {
                 showErrorDialog = false
+
+                if(state.error!!.contains("upgrade to premium", ignoreCase = true))
+                    showUpgradeToPremiumSheet = true
             },
         )
     }
@@ -308,6 +344,20 @@ private fun Home(
                     context.showToast("Item deleted successfully")
                     goBackWithResult()
                 }
+            }
+        )
+    }
+
+    if (showUpgradeToPremiumSheet) {
+        UpgradeToPremiumBottomSheet(
+            onDismiss = {
+                showUpgradeToPremiumSheet = false
+            },
+            onUpgradeClick = {
+                onUpgradeClick()
+            },
+            onContactClick = {
+                onHelpClick()
             }
         )
     }
@@ -527,7 +577,7 @@ private fun Home(
                 Box(
                     modifier = Modifier
                         .padding(ConstantPaddings.BODY_HORIZONTAL)
-                        .padding(vertical = 16.dp)
+                        .padding(bottom = 16.dp)
                 ) {
                     if (state.isSaving) {
                         AppCircularProgressIndicator()

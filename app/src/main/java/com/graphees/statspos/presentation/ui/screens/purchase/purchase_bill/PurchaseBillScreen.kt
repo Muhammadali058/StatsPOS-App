@@ -45,7 +45,10 @@ import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
 import com.graphees.statspos.presentation.ui.components.TabLayout
 import com.graphees.statspos.presentation.ui.components.TopAppBar
+import com.graphees.statspos.presentation.ui.components.UpgradeToPremiumBottomSheet
 import com.graphees.statspos.presentation.ui.screens.items.SearchItemsScreen
+import com.graphees.statspos.presentation.ui.screens.main.main.premium.HelpScreen
+import com.graphees.statspos.presentation.ui.screens.main.main.premium.PaymentScreen
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.purchase.purchase_bill.AddUpdatePurchaseViewModel
@@ -72,6 +75,13 @@ private sealed class Routes : NavKey {
 
     @Serializable
     data object SearchItem : Routes()
+
+    @Serializable
+    data object Payment : Routes()
+
+    @Serializable
+    data object Help : Routes()
+
 }
 
 @Composable
@@ -86,18 +96,6 @@ fun PurchaseBillScreen(
     val purchaseViewModel = hiltViewModel<AddUpdatePurchaseViewModel>()
     val purchaseItemsViewModel = hiltViewModel<PurchaseItemsViewModel>()
     fun goBackWithResult() {
-//        if(isPendingBill){
-//            viewModel.tempClose {
-//                sharedViewModel.notifyBillSaved()
-//                onBack()
-//            }
-//        }else if(isPostedBill) {
-//            viewModel.postBill {
-//                sharedViewModel.notifyBillPosted()
-//                onBack()
-//            }
-//        }
-
         onBack()
     }
 
@@ -107,12 +105,6 @@ fun PurchaseBillScreen(
             backStack.add(key)
         }
     }
-
-//    BackHandler {
-//        if (backStack.size == 1) {
-//            goBackWithResult()
-//        }
-//    }
 
     // Edit data when update
     var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
@@ -147,10 +139,15 @@ fun PurchaseBillScreen(
                     purchaseViewModel = purchaseViewModel,
                     purchaseItemsViewModel = purchaseItemsViewModel,
                     invoiceId = invoiceId,
-                    isPendingBill = isPendingBill,
                     isPostedBill = isPostedBill,
                     onAddUpdatePurchaseItem = { updateId, isUpdate, purchase ->
                         navigate(Routes.AddUpdatePurchaseItem(updateId, isUpdate, purchase))
+                    },
+                    onUpgradeClick = {
+                        navigate(Routes.Payment)
+                    },
+                    onHelpClick = {
+                        navigate(Routes.Help)
                     },
                     onBack = onBack,
                     goBackWithResult = {
@@ -180,6 +177,20 @@ fun PurchaseBillScreen(
                     }
                 )
             }
+            entry<Routes.Payment> {
+                PaymentScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                )
+            }
+            entry<Routes.Help> {
+                HelpScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                )
+            }
         }
     )
 }
@@ -190,9 +201,10 @@ private fun Home(
     purchaseViewModel: AddUpdatePurchaseViewModel,
     purchaseItemsViewModel: PurchaseItemsViewModel,
     invoiceId: Long = 0L,
-    isPendingBill: Boolean = false,
     isPostedBill: Boolean = false,
     onAddUpdatePurchaseItem: (Long, Boolean, Purchase) -> Unit,
+    onUpgradeClick: () -> Unit,
+    onHelpClick: () -> Unit,
     onBack: () -> Unit,
     goBackWithResult: () -> Unit,
 ) {
@@ -209,6 +221,7 @@ private fun Home(
     var showErrorDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
+    var showUpgradeToPremiumSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(event) {
         checkEvent(
@@ -235,6 +248,9 @@ private fun Home(
             error = purchaseState.error,
             onDismiss = {
                 showErrorDialog = false
+
+                if(purchaseState.error!!.contains("upgrade to premium", ignoreCase = true))
+                    showUpgradeToPremiumSheet = true
             },
         )
     }
@@ -291,6 +307,20 @@ private fun Home(
                 billType = 1
             )
         }
+    }
+
+    if (showUpgradeToPremiumSheet) {
+        UpgradeToPremiumBottomSheet(
+            onDismiss = {
+                showUpgradeToPremiumSheet = false
+            },
+            onUpgradeClick = {
+                onUpgradeClick()
+            },
+            onContactClick = {
+                onHelpClick()
+            }
+        )
     }
 
     Scaffold(
@@ -375,7 +405,7 @@ private fun Home(
                                     )
 
                                 1 ->
-                                    AddUpdatePurchaseBillBody(
+                                    PurchaseBillBody(
                                         sharedViewModel = sharedViewModel,
                                         purchaseViewModel = purchaseViewModel,
                                         snackbarHostState = snackbarHostState,

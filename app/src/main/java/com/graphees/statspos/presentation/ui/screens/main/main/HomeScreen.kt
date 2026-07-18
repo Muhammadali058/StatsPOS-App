@@ -76,12 +76,12 @@ import androidx.navigation3.ui.NavDisplay
 import com.graphees.statspos.R
 import com.graphees.statspos.domain.models.main.Branches
 import com.graphees.statspos.presentation.ui.components.AppDropdownMenu
-import com.graphees.statspos.presentation.ui.components.BOTTOM_DESTINATIONS
-import com.graphees.statspos.presentation.ui.components.BottomBar
 import com.graphees.statspos.presentation.ui.components.AppIcon
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.AppSwitch
 import com.graphees.statspos.presentation.ui.components.AppText
+import com.graphees.statspos.presentation.ui.components.BOTTOM_DESTINATIONS
+import com.graphees.statspos.presentation.ui.components.BottomBar
 import com.graphees.statspos.presentation.ui.components.DropdownItem
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ImageView
@@ -89,9 +89,6 @@ import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.components.TopItem
 import com.graphees.statspos.presentation.ui.components.UpgradeToPremiumBottomSheet
-import com.graphees.statspos.presentation.ui.utils.Navigator
-import com.graphees.statspos.presentation.ui.utils.rememberNavigationState
-import com.graphees.statspos.presentation.ui.utils.toEntries
 import com.graphees.statspos.presentation.ui.screens.BottomRoutes
 import com.graphees.statspos.presentation.ui.screens.TopRoutes
 import com.graphees.statspos.presentation.ui.screens.items.ItemsScreen
@@ -99,6 +96,9 @@ import com.graphees.statspos.presentation.ui.screens.purchase.main_screen.Purcha
 import com.graphees.statspos.presentation.ui.screens.reports.ReportsScreen
 import com.graphees.statspos.presentation.ui.screens.sales.main_screen.SalesScreen
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
+import com.graphees.statspos.presentation.ui.utils.Navigator
+import com.graphees.statspos.presentation.ui.utils.rememberNavigationState
+import com.graphees.statspos.presentation.ui.utils.toEntries
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.main.LocalDataViewModel
 import com.graphees.statspos.presentation.viewmodels.main.MainViewModel
@@ -241,7 +241,7 @@ fun HomeScreen(
     var branches by remember { mutableStateOf<List<Branches>>(emptyList()) }
     var showBranchesList by remember { mutableStateOf(false) }
     var menuExpanded by remember { mutableStateOf(false) }
-    var showPremiumSheet by remember { mutableStateOf(false) }
+    var showUpgradeToPremiumSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(event) {
         checkEvent(
@@ -284,10 +284,10 @@ fun HomeScreen(
         scope.launch { drawerState.close() }
     }
 
-    if (showPremiumSheet) {
+    if (showUpgradeToPremiumSheet) {
         UpgradeToPremiumBottomSheet(
             onDismiss = {
-                showPremiumSheet = false
+                showUpgradeToPremiumSheet = false
             },
             onUpgradeClick = {
                 onTopRouteClick(TopRoutes.Payment)
@@ -308,7 +308,7 @@ fun HomeScreen(
                     scope.launch { drawerState.close() }
                 },
                 onUpgradeToPremiumClick = {
-                    showPremiumSheet = true
+                    showUpgradeToPremiumSheet = true
                     scope.launch { drawerState.close() }
                 },
                 onSubscriptionsClick = {
@@ -483,7 +483,13 @@ fun HomeScreen(
                                                     salesBill
                                                 )
                                             )
-                                        }
+                                        },
+                                        onUpgradeClick = {
+                                            onTopRouteClick(TopRoutes.Payment)
+                                        },
+                                        onHelpClick = {
+                                            onTopRouteClick(TopRoutes.Help)
+                                        },
                                     )
                                 }
                                 entry<BottomRoutes.Purchase> {
@@ -505,7 +511,13 @@ fun HomeScreen(
                                                     purchaseBill
                                                 )
                                             )
-                                        }
+                                        },
+                                        onUpgradeClick = {
+                                            onTopRouteClick(TopRoutes.Payment)
+                                        },
+                                        onHelpClick = {
+                                            onTopRouteClick(TopRoutes.Help)
+                                        },
                                     )
                                 }
                                 entry<BottomRoutes.Reports> {

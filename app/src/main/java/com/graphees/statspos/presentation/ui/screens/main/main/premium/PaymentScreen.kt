@@ -50,6 +50,7 @@ import com.graphees.statspos.presentation.ui.components.AppCard
 import com.graphees.statspos.presentation.ui.components.AppOutlinedButton
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.TopAppBar
+import com.graphees.statspos.presentation.ui.utils.openWhatsapp
 import com.graphees.statspos.presentation.viewmodels.main.PaymentViewModel
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.UiEvent
@@ -60,7 +61,6 @@ import com.graphees.statspos.utils.showToast
 @Composable
 fun PaymentScreen(
     onBack: () -> Unit,
-    onWhatsAppClick: () -> Unit,
 ) {
     val clipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
@@ -227,7 +227,12 @@ fun PaymentScreen(
                     )
                 }else {
                     Button(
-                        onClick = onWhatsAppClick,
+                        onClick = {
+                            openWhatsapp(
+                                context = context,
+                                addClient = true,
+                            )
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp)

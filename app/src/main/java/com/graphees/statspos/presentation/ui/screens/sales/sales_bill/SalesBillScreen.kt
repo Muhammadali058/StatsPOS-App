@@ -54,7 +54,10 @@ import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
 import com.graphees.statspos.presentation.ui.components.TabLayout
 import com.graphees.statspos.presentation.ui.components.TopAppBar
+import com.graphees.statspos.presentation.ui.components.UpgradeToPremiumBottomSheet
 import com.graphees.statspos.presentation.ui.screens.items.SearchItemsScreen
+import com.graphees.statspos.presentation.ui.screens.main.main.premium.HelpScreen
+import com.graphees.statspos.presentation.ui.screens.main.main.premium.PaymentScreen
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.sales.sales_bill.AddUpdateSalesViewModel
@@ -84,6 +87,13 @@ private sealed class Routes : NavKey {
 
     @Serializable
     data object SearchItem : Routes()
+
+    @Serializable
+    data object Payment : Routes()
+
+    @Serializable
+    data object Help : Routes()
+
 }
 
 @Composable
@@ -98,18 +108,6 @@ fun SalesBillScreen(
     val salesViewModel = hiltViewModel<AddUpdateSalesViewModel>()
     val salesItemsViewModel = hiltViewModel<SalesItemsViewModel>()
     fun goBackWithResult() {
-//        if(isPendingBill){
-//            viewModel.tempClose {
-//                sharedViewModel.notifyBillSaved()
-//                onBack()
-//            }
-//        }else if(isPostedBill) {
-//            viewModel.postBill {
-//                sharedViewModel.notifyBillPosted()
-//                onBack()
-//            }
-//        }
-
         onBack()
     }
 
@@ -119,12 +117,6 @@ fun SalesBillScreen(
             backStack.add(key)
         }
     }
-
-//    BackHandler {
-//        if (backStack.size == 1) {
-//            goBackWithResult()
-//        }
-//    }
 
     // Edit data when update
     var hasLoadedOnce by rememberSaveable { mutableStateOf(false) }
@@ -167,6 +159,12 @@ fun SalesBillScreen(
                     onMarginClick = { totalDisc ->
                         navigate(Routes.ViewBillMargin(invoiceId, isPostedBill, totalDisc))
                     },
+                    onUpgradeClick = {
+                        navigate(Routes.Payment)
+                    },
+                    onHelpClick = {
+                        navigate(Routes.Help)
+                    },
                     onBack = onBack,
                     goBackWithResult = {
                         goBackWithResult()
@@ -205,6 +203,20 @@ fun SalesBillScreen(
                     }
                 )
             }
+            entry<Routes.Payment> {
+                PaymentScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                )
+            }
+            entry<Routes.Help> {
+                HelpScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                )
+            }
         }
     )
 }
@@ -219,6 +231,8 @@ private fun Home(
     isPostedBill: Boolean = false,
     onAddUpdateSalesItem: (Long, Boolean, Sales) -> Unit,
     onMarginClick: (Double) -> Unit,
+    onUpgradeClick: () -> Unit,
+    onHelpClick: () -> Unit,
     onBack: () -> Unit,
     goBackWithResult: () -> Unit,
 ) {
@@ -236,6 +250,7 @@ private fun Home(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
     var menuExpanded by remember { mutableStateOf(false) }
+    var showUpgradeToPremiumSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(event) {
         checkEvent(
@@ -262,6 +277,9 @@ private fun Home(
             error = salesState.error,
             onDismiss = {
                 showErrorDialog = false
+
+                if(salesState.error!!.contains("upgrade to premium", ignoreCase = true))
+                    showUpgradeToPremiumSheet = true
             },
         )
     }
@@ -306,6 +324,20 @@ private fun Home(
                         onBack()
                     }
                 }
+            }
+        )
+    }
+
+    if (showUpgradeToPremiumSheet) {
+        UpgradeToPremiumBottomSheet(
+            onDismiss = {
+                showUpgradeToPremiumSheet = false
+            },
+            onUpgradeClick = {
+                onUpgradeClick()
+            },
+            onContactClick = {
+                onHelpClick()
             }
         )
     }
@@ -434,7 +466,7 @@ private fun Home(
                                     )
 
                                 1 ->
-                                    AddUpdateSalesBillBody(
+                                    SalesBillBody(
                                         sharedViewModel = sharedViewModel,
                                         salesViewModel = salesViewModel,
                                         salesItemsViewModel = salesItemsViewModel,

@@ -69,6 +69,7 @@ import com.graphees.statspos.presentation.ui.screens.utilities.users.UsersScreen
 import com.graphees.statspos.presentation.ui.screens.warehouse.gatepass.GatepassScreen
 import com.graphees.statspos.presentation.ui.screens.warehouse.stock_transfer.StockTransferScreen
 import com.graphees.statspos.presentation.ui.screens.warehouse.warehouse.WarehousesScreen
+import com.graphees.statspos.presentation.ui.utils.openCall
 import com.graphees.statspos.presentation.ui.utils.openWhatsapp
 import com.graphees.statspos.presentation.ui.utils.sendEmail
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
@@ -168,12 +169,6 @@ fun MainScreen(
                     onBack = {
                         backStack.removeLastOrNull()
                     },
-                    onWhatsAppClick = {
-                        openWhatsapp(
-                            context = context,
-                            addClient = true,
-                        )
-                    },
                 )
             }
             entry<TopRoutes.Subscriptions> {
@@ -193,21 +188,6 @@ fun MainScreen(
                 HelpScreen(
                     onBack = {
                         backStack.removeLastOrNull()
-                    },
-                    onCallClick = {
-                        val intent = Intent(Intent.ACTION_DIAL).apply {
-                            data = "tel:${HP.graphees.contact!!.replace("-", "")}".toUri()
-                        }
-                        context.startActivity(intent)
-                    },
-                    onWhatsAppClick = {
-                        openWhatsapp(
-                            context = context,
-                            addClient = true,
-                        )
-                    },
-                    onEmailClick = {
-                        sendEmail(context)
                     },
                 )
             }

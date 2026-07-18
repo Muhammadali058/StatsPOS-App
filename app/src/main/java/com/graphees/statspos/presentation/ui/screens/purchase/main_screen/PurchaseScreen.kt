@@ -17,6 +17,8 @@ fun PurchaseScreen(
     sharedViewModel: SharedViewModel,
     onViewClick: (PurchaseBills) -> Unit,
     onAddUpdateButtonClick: (Long, Boolean, Boolean, PurchaseBills?) -> Unit,
+    onUpgradeClick: () -> Unit,
+    onHelpClick: () -> Unit,
 ) {
     val tabs = listOf("Pending Bills", "Posted Bills")
     val pagerState = rememberPagerState(
@@ -51,6 +53,8 @@ fun PurchaseScreen(
                                     purchaseBill
                                 )
                             },
+                            onUpgradeClick = onUpgradeClick,
+                            onHelpClick = onHelpClick,
                         )
 
                     1 ->

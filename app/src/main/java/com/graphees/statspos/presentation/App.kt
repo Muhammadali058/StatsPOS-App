@@ -256,12 +256,6 @@ fun App() {
                     onBack = {
                         backStack.removeLastOrNull()
                     },
-                    onWhatsAppClick = {
-                        openWhatsapp(
-                            context = context,
-                            addClient = true,
-                        )
-                    },
                 )
             }
             entry<Screens.Help> {
@@ -269,21 +263,6 @@ fun App() {
                     onBack = {
                         backStack.removeLastOrNull()
                     },
-                    onCallClick = {
-                        val intent = Intent(Intent.ACTION_DIAL).apply {
-                            data = "tel:${HP.graphees.contact!!.replace("-", "")}".toUri()
-                        }
-                        context.startActivity(intent)
-                    },
-                    onWhatsAppClick = {
-                        openWhatsapp(
-                            context = context,
-                            addClient = true,
-                        )
-                    },
-                    onEmailClick = {
-                        sendEmail(context)
-                    }
                 )
             }
         }

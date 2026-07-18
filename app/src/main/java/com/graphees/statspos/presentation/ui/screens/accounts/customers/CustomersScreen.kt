@@ -62,6 +62,8 @@ import com.graphees.statspos.presentation.ui.components.PasswordDialog
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.components.TopAppBar
+import com.graphees.statspos.presentation.ui.screens.main.main.premium.HelpScreen
+import com.graphees.statspos.presentation.ui.screens.main.main.premium.PaymentScreen
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.accounts.customers.CustomersViewModel
@@ -79,6 +81,13 @@ private sealed class Routes : NavKey {
 
     @Serializable
     data class AddUpdateCustomer(val updateId: Long, val isUpdate: Boolean) : Routes()
+
+    @Serializable
+    data object Payment : Routes()
+
+    @Serializable
+    data object Help : Routes()
+
 }
 
 @Composable
@@ -115,6 +124,26 @@ fun CustomersScreen(
                     sharedViewModel = sharedViewModel,
                     updateId = key.updateId,
                     isUpdate = key.isUpdate,
+                    onUpgradeClick = {
+                        navigate(Routes.Payment)
+                    },
+                    onHelpClick = {
+                        navigate(Routes.Help)
+                    },
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                )
+            }
+            entry<Routes.Payment> {
+                PaymentScreen(
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                )
+            }
+            entry<Routes.Help> {
+                HelpScreen(
                     onBack = {
                         backStack.removeLastOrNull()
                     },

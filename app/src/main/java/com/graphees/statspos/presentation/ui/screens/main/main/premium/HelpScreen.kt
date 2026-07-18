@@ -32,22 +32,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.graphees.statspos.presentation.ui.components.AppCard
 import com.graphees.statspos.presentation.ui.components.AppOutlinedButton
 import com.graphees.statspos.presentation.ui.components.TopAppBar
+import com.graphees.statspos.presentation.ui.utils.openCall
+import com.graphees.statspos.presentation.ui.utils.openWhatsapp
+import com.graphees.statspos.presentation.ui.utils.sendEmail
 import com.graphees.statspos.utils.HP
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HelpScreen(
     onBack: () -> Unit,
-    onCallClick: () -> Unit,
-    onWhatsAppClick: () -> Unit,
-    onEmailClick: () -> Unit
 ) {
+    val context = LocalContext.current
     Scaffold(
         topBar = {
             TopAppBar(
@@ -128,7 +130,9 @@ fun HelpScreen(
 
             item {
                 Button(
-                    onClick = onCallClick,
+                    onClick = {
+                        openCall(context)
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp)
@@ -141,7 +145,12 @@ fun HelpScreen(
                 Spacer(Modifier.height(12.dp))
 
                 AppOutlinedButton(
-                    onClick = onWhatsAppClick,
+                    onClick = {
+                        openWhatsapp(
+                            context = context,
+                            addClient = true,
+                        )
+                    },
                 ) {
                     Icon(Icons.Default.Chat, null)
                     Spacer(Modifier.width(8.dp))
@@ -151,7 +160,9 @@ fun HelpScreen(
                 Spacer(Modifier.height(12.dp))
 
                 AppOutlinedButton(
-                    onClick = onEmailClick,
+                    onClick = {
+                        sendEmail(context)
+                    },
                 ) {
                     Icon(Icons.Default.Email, null)
                     Spacer(Modifier.width(8.dp))

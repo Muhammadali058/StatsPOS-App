@@ -236,8 +236,7 @@ object HP {
             userTypes = Gson().getListOf<DropdownItem>(jsonObject.get("userTypes").asJsonArray)
             shifts = Gson().getListOf<DropdownItem>(jsonObject.get("shifts").asJsonArray)
             branch = Gson().get<Branches>(jsonObject.get("branch").asJsonObject)
-            client = Gson().get<Clients>(jsonObject.get("client").asJsonObject)
-            appSubscription = Gson().get<AppSubscription>(jsonObject.get("appSubscription").asJsonObject)
+//            client = Gson().get<Clients>(jsonObject.get("client").asJsonObject)
             graphees = Gson().get<Graphees>(jsonObject.get("graphees").asJsonObject)
 
         } catch (e: Exception) {

@@ -48,6 +48,7 @@ import com.graphees.statspos.presentation.ui.components.ListMainLabel
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
+import com.graphees.statspos.presentation.ui.components.UpgradeToPremiumBottomSheet
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.ui.utils.openPdf
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
@@ -63,6 +64,8 @@ import com.graphees.statspos.utils.showToast
 fun PurchasePendingBillsBody(
     sharedViewModel: SharedViewModel,
     onAddUpdateButtonClick: (Long, Boolean, PurchaseBills?) -> Unit,
+    onUpgradeClick: () -> Unit,
+    onHelpClick: () -> Unit,
 ) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -74,6 +77,8 @@ fun PurchasePendingBillsBody(
     var showPrintPasswordDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var bill by remember { mutableStateOf<PurchaseBills?>(null) }
+    var showUpgradeToPremiumSheet by remember { mutableStateOf(false) }
+
     LaunchedEffect(event) {
         checkEvent(
             event = event,
@@ -106,6 +111,9 @@ fun PurchasePendingBillsBody(
             error = state.error,
             onDismiss = {
                 showErrorDialog = false
+
+                if(state.error!!.contains("upgrade to premium", ignoreCase = true))
+                    showUpgradeToPremiumSheet = true
             },
         )
     }
@@ -165,6 +173,20 @@ fun PurchasePendingBillsBody(
                         viewModel.loadData()
                     }
                 }
+            }
+        )
+    }
+
+    if (showUpgradeToPremiumSheet) {
+        UpgradeToPremiumBottomSheet(
+            onDismiss = {
+                showUpgradeToPremiumSheet = false
+            },
+            onUpgradeClick = {
+                onUpgradeClick()
+            },
+            onContactClick = {
+                onHelpClick()
             }
         )
     }

@@ -161,6 +161,16 @@ fun getImageFromPdf(context: Context, file: File): File {
     return bitmapToFile(context, bitmap)
 }
 
+fun openCall(
+    context: Context,
+    contact: String = HP.getContact(HP.graphees.contact!!).replace("-", ""),
+) {
+    val intent = Intent(Intent.ACTION_DIAL).apply {
+        data = "tel:${contact}".toUri()
+    }
+    context.startActivity(intent)
+}
+
 fun openWhatsapp(
     context: Context,
     contact: String = HP.getContact(HP.graphees.contact!!),

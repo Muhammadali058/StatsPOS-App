@@ -49,7 +49,6 @@ import com.graphees.statspos.presentation.ui.screens.items.packages.PackagesScre
 import com.graphees.statspos.presentation.ui.screens.main.login.CloseAppScreen
 import com.graphees.statspos.presentation.ui.screens.main.main.premium.HelpScreen
 import com.graphees.statspos.presentation.ui.screens.main.main.premium.PaymentScreen
-import com.graphees.statspos.presentation.ui.screens.main.main.premium.SubscriptionExpiredScreen
 import com.graphees.statspos.presentation.ui.screens.main.main.premium.SubscriptionsScreen
 import com.graphees.statspos.presentation.ui.screens.purchase.purchase_bill.PurchaseBillScreen
 import com.graphees.statspos.presentation.ui.screens.purchase.purchase_bill.ViewPurchaseBillItemsScreen

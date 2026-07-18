@@ -1,8 +1,9 @@
 package com.graphees.statspos.presentation.viewmodels.main
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
+import com.graphees.statspos.domain.models.main.AppSubscription
 import com.graphees.statspos.domain.models.main.Clients
 import com.graphees.statspos.domain.models.utilities.users.UserRights
 import com.graphees.statspos.domain.models.utilities.users.Users
@@ -17,10 +18,6 @@ import com.graphees.statspos.utils.SnackbarType
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.get
 import com.graphees.statspos.utils.preloadImages
-import com.google.gson.Gson
-import com.google.gson.JsonObject
-import com.graphees.statspos.domain.models.main.AppSubscription
-import com.graphees.statspos.utils.HP.appSubscription
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,7 +33,6 @@ class LoginViewModel @Inject constructor(
     private val mainRepository: MainRepository,
     private val clientsRepo: ClientsRepository,
     private var dataStore: LocalDataStore,
-    private var firebaseRepo: FirebaseRepository,
 ) : ViewModel() {
     // region ScreenState
     data class ScreenState(
@@ -199,7 +195,6 @@ class LoginViewModel @Inject constructor(
             }
         }
     }
-
     // endregion
 
     // region Others

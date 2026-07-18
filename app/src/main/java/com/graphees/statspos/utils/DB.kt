@@ -1,5 +1,6 @@
 package com.graphees.statspos.utils
 
+import android.util.Log
 import com.graphees.statspos.domain.models.main.Branches
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -22,12 +23,16 @@ object DB {
     fun setBaseUrl(host: String) {
         HOST = host
         API = "${host}/api/"
+
+
+        Log.d("TAG setBaseUrl", "Successfully setBaseUrl")
     }
 
     fun setWebSocketUrl(baseUrl: String) {
         try {
             val urls = baseUrl.split(":")
             socketUrl = "${urls[0]}:${urls[1]}:5100"
+            Log.d("TAG setWebSocketUrl", "Successfully setWebSocketUrl")
         }catch (e: Exception){}
     }
 

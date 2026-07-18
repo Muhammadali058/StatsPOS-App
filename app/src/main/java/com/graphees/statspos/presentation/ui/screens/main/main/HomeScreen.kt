@@ -1,6 +1,7 @@
 package com.graphees.statspos.presentation.ui.screens.main.main
 
 import android.app.Activity
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.DrawableRes
@@ -86,6 +87,7 @@ import com.graphees.statspos.presentation.ui.components.DropdownItem
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ImageView
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
+import com.graphees.statspos.presentation.ui.components.SubscriptionExpiredBottomSheet
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.components.TopItem
 import com.graphees.statspos.presentation.ui.components.UpgradeToPremiumBottomSheet
@@ -242,6 +244,7 @@ fun HomeScreen(
     var showBranchesList by remember { mutableStateOf(false) }
     var menuExpanded by remember { mutableStateOf(false) }
     var showUpgradeToPremiumSheet by remember { mutableStateOf(false) }
+    var showPayNowBottomSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(event) {
         checkEvent(
@@ -261,6 +264,17 @@ fun HomeScreen(
                 showErrorDialog = false
             },
         )
+    }
+
+    // Edit data when update
+    LaunchedEffect(Unit) {
+        if (!state.hasLoadedOnce) {
+            if (HP.appSubscription.isActive == true && HP.appSubscription.expiryDays!! <= 0) {
+                showPayNowBottomSheet = true
+            }
+
+            viewModel.setHasLoadedOnce(true)
+        }
     }
 
     // Navigation
@@ -290,6 +304,20 @@ fun HomeScreen(
                 showUpgradeToPremiumSheet = false
             },
             onUpgradeClick = {
+                onTopRouteClick(TopRoutes.Payment)
+            },
+            onContactClick = {
+                onTopRouteClick(TopRoutes.Help)
+            }
+        )
+    }
+
+    if (showPayNowBottomSheet) {
+        SubscriptionExpiredBottomSheet(
+            onDismiss = {
+                showPayNowBottomSheet = false
+            },
+            onPayNowClick = {
                 onTopRouteClick(TopRoutes.Payment)
             },
             onContactClick = {

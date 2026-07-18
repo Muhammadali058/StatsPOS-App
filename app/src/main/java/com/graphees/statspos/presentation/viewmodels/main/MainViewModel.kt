@@ -1,8 +1,8 @@
 package com.graphees.statspos.presentation.viewmodels.main
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
 import com.graphees.statspos.domain.models.main.Branches
 import com.graphees.statspos.domain.models.main.Clients
 import com.graphees.statspos.domain.repository.main.ClientsRepository
@@ -15,8 +15,6 @@ import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.get
 import com.graphees.statspos.utils.getListOf
 import com.graphees.statspos.utils.preloadImages
-import com.google.gson.Gson
-import com.graphees.statspos.domain.models.main.AppSubscription
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow

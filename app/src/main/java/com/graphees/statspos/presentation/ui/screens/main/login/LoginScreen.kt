@@ -70,7 +70,6 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
-    viewModel:LoginViewModel,
     remember: Boolean,
     username: String?,
     password: String?,
@@ -80,10 +79,9 @@ fun LoginScreen(
     onHelpClick: () -> Unit,
 ) {
     val context = LocalContext.current
-    val activity = LocalActivity.current as Activity
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
-//    val viewModel = hiltViewModel<LoginViewModel>()
+    val viewModel = hiltViewModel<LoginViewModel>()
     val localDataViewModel = hiltViewModel<LocalDataViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)

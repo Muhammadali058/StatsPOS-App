@@ -1,17 +1,12 @@
 package com.graphees.statspos.presentation
 
 import android.app.Activity
-import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -19,7 +14,6 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.graphees.statspos.domain.models.main.Clients
-import com.graphees.statspos.presentation.ui.screens.TopRoutes
 import com.graphees.statspos.presentation.ui.screens.main.login.ClientLoginScreen
 import com.graphees.statspos.presentation.ui.screens.main.login.ClientSignupScreen
 import com.graphees.statspos.presentation.ui.screens.main.login.CloseAppScreen
@@ -29,16 +23,10 @@ import com.graphees.statspos.presentation.ui.screens.main.main.SplashScreen
 import com.graphees.statspos.presentation.ui.screens.main.main.premium.HelpScreen
 import com.graphees.statspos.presentation.ui.screens.main.main.premium.PaymentScreen
 import com.graphees.statspos.presentation.ui.screens.main.main.premium.SubscriptionExpiredScreen
-import com.graphees.statspos.presentation.ui.utils.openWhatsapp
-import com.graphees.statspos.presentation.ui.utils.sendEmail
 import com.graphees.statspos.presentation.viewmodels.main.ClientsViewModel
 import com.graphees.statspos.presentation.viewmodels.main.LocalDataViewModel
-import com.graphees.statspos.presentation.viewmodels.main.LoginViewModel
-import com.graphees.statspos.presentation.viewmodels.main.MainViewModel
 import com.graphees.statspos.utils.DB
 import com.graphees.statspos.utils.HP
-import com.graphees.statspos.utils.SocketManager
-import com.graphees.statspos.utils.showToast
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -76,13 +64,10 @@ private sealed class Screens : NavKey {
 
 @Composable
 fun App() {
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val backStack = rememberNavBackStack(Screens.Splash)
     val viewModel = hiltViewModel<LocalDataViewModel>()
     val clientsViewModel = hiltViewModel<ClientsViewModel>()
-    val loginViewModel = hiltViewModel<LoginViewModel>()
-    val clientsState by clientsViewModel.state.collectAsStateWithLifecycle()
 
     fun navigate(key: NavKey) {
         if (backStack.lastOrNull() != key) {
@@ -137,7 +122,7 @@ fun App() {
                 navigate(Screens.CloseApp)
             }
         } else {
-            navigate(Screens.Login(false, "", ""))
+            navigate(Screens.Login(true, client.username, client.password))
         }
     }
 
@@ -170,21 +155,7 @@ fun App() {
                 ClientSignupScreen(
                     viewModel = clientsViewModel,
                     onSignup = { client ->
-                        loginViewModel.onUsernameChange(clientsState.username)
-                        loginViewModel.onPasswordChange(clientsState.password)
-
-                        SocketManager.init()
-                        SocketManager.connect()
-
-                        HP.clientId = client.id!!
-                        DB.isOnlineMode = client.isOnline!!
-
-                        loginViewModel.login {
-                            if (HP.appSettings.onlinePrints == true) {
-                                SocketManager.join()
-                            }
-                            navigate(Screens.Main)
-                        }
+                        showLoginScreen(client)
                     },
                     onSignIn = {
                         backStack.removeLastOrNull()
@@ -194,7 +165,6 @@ fun App() {
             }
             entry<Screens.Login> { key ->
                 LoginScreen(
-                    viewModel = loginViewModel,
                     remember = key.remember,
                     username = key.username,
                     password = key.password,

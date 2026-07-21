@@ -715,12 +715,12 @@ fun NavigationDrawer(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 AppIcon(
-                    icon = Icons.Default.Subscriptions,
-                    size = 24.dp,
+                    icon = R.drawable.subscription,
+                    size = 20.dp,
                 )
                 Spacer(Modifier.width(12.dp))
                 AppText(
-                    text = "Subscriptions",
+                    text = "Subscription",
                     style = TextStyle(
                         fontSize = 14.sp
                     )
@@ -737,8 +737,8 @@ fun NavigationDrawer(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 AppIcon(
-                    icon = Icons.Default.WorkspacePremium,
-                    size = 24.dp,
+                    icon = R.drawable.upgrade_to_premium,
+                    size = 22.dp,
                 )
                 Spacer(Modifier.width(12.dp))
                 AppText(

@@ -1,20 +1,18 @@
 package com.graphees.statspos.utils
 
-import android.util.Log
-import com.graphees.statspos.domain.models.main.Branches
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.graphees.statspos.domain.models.main.Branches
 import retrofit2.Response
 
 object DB {
     var isOnlineMode = true
     var branches: List<Branches> = emptyList()
 
-//    const val MAIN_HOST = "http://192.168.100.28:8000"
-    const val MAIN_HOST = "https://api.statspos.com"
-
-//        var socketUrl = "http://192.168.100.28:5100"
-    var socketUrl = "http://ws.statspos.com"
+    const val MAIN_HOST = "http://192.168.100.28:8000"
+//    const val MAIN_HOST = "https://api.statspos.com"
+        var socketUrl = "http://192.168.100.28:5100"
+//    var socketUrl = "http://ws.statspos.com"
 
 
     var HOST = MAIN_HOST
@@ -23,16 +21,12 @@ object DB {
     fun setBaseUrl(host: String) {
         HOST = host
         API = "${host}/api/"
-
-
-        Log.d("TAG setBaseUrl", "Successfully setBaseUrl")
     }
 
     fun setWebSocketUrl(baseUrl: String) {
         try {
             val urls = baseUrl.split(":")
             socketUrl = "${urls[0]}:${urls[1]}:5100"
-            Log.d("TAG setWebSocketUrl", "Successfully setWebSocketUrl")
         }catch (e: Exception){}
     }
 

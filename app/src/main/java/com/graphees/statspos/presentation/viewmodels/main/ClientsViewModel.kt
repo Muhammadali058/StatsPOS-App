@@ -183,7 +183,10 @@ class ClientsViewModel @Inject constructor(
             showSnackbar("Enter Business Name")
             return false
         } else if (state.value.contact.isEmpty()) {
-            showSnackbar("Enter contact")
+            showSnackbar("Enter phone number")
+            return false
+        }else if (state.value.contact.length != 11) {
+            showSnackbar("Please enter correct phone number")
             return false
         } else if (state.value.username.isEmpty()) {
             showSnackbar("Enter username")

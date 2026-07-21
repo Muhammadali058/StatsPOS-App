@@ -108,6 +108,7 @@ dependencies {
     // Coil to load images from url
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+    implementation(libs.zoomable)
 
     // System ui controller
     implementation(libs.accompanist.systemuicontroller)

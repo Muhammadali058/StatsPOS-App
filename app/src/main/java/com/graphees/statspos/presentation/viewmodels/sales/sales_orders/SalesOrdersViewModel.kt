@@ -38,7 +38,8 @@ class SalesOrdersViewModel @Inject constructor(
             DropdownItem(4L, "Cancelled"),
         ),
         val selectedStatus: DropdownItem = DropdownItem(1L, "New"),
-        val date: LocalDate = LocalDate.now(),
+        val fromDate: LocalDate = LocalDate.now(),
+        val toDate: LocalDate = LocalDate.now(),
 
         val hasLoadedOnce: Boolean = false,
 
@@ -108,8 +109,13 @@ class SalesOrdersViewModel @Inject constructor(
         loadOrders()
     }
 
-    fun onDateChange(value: LocalDate) {
-        state.update { it.copy(date = value) }
+    fun onFromDateChange(value: LocalDate) {
+        state.update { it.copy(fromDate = value) }
+        loadOrders()
+    }
+
+    fun onToDateChange(value: LocalDate) {
+        state.update { it.copy(toDate = value) }
         loadOrders()
     }
 
@@ -146,7 +152,8 @@ class SalesOrdersViewModel @Inject constructor(
 
             val params = JsonObject().apply {
                 addProperty("status", state.value.selectedStatus.name)
-                addProperty("date", HP.getZonedDate(state.value.date))
+                addProperty("fromDate", HP.getZonedDate(state.value.fromDate))
+                addProperty("toDate", HP.getZonedDate(state.value.toDate))
                 addProperty("loadAll", true)
             }
 

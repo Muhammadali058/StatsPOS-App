@@ -40,6 +40,7 @@ material3 = "1.4.0"
 runtimeSaveable = "1.10.5"
 googleGmsGoogleServices = "4.4.4"
 firebaseDatabase = "22.0.1"
+zoomable = "1.6.1"
 
 [libraries]
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
@@ -103,6 +104,7 @@ vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", ve
 vico-views = { group = "com.patrykandpatrick.vico", name = "views", version.ref = "vico" }
 
 firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
+zoomable = { module = "net.engawapg.lib:zoomable", version.ref = "zoomable" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

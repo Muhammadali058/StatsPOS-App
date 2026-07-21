@@ -219,3 +219,21 @@ fun sendEmail(
         context.showToast("No email application found.")
     }
 }
+
+fun openGoogleMaps(context: Context, latitude: Double, longitude: Double) {
+    val uri = "geo:$latitude,$longitude?q=$latitude,$longitude".toUri()
+    val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+        setPackage("com.google.android.apps.maps")
+    }
+
+    if (intent.resolveActivity(context.packageManager) != null) {
+        context.startActivity(intent)
+    } else {
+        // Fallback to browser
+        val browserIntent = Intent(
+            Intent.ACTION_VIEW,
+            "https://www.google.com/maps/search/?api=1&query=$latitude,$longitude".toUri()
+        )
+        context.startActivity(browserIntent)
+    }
+}

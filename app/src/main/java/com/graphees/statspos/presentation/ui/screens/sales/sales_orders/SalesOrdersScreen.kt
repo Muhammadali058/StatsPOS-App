@@ -75,7 +75,7 @@ private sealed class Routes : NavKey {
     data object Home : Routes()
 
     @Serializable
-    data class ViewOrderItems(val salesOrderId: Long) : Routes()
+    data class ViewOrderItems(val salesOrder: SalesOrders) : Routes()
 
     @Serializable
     data object Login : Routes()
@@ -105,8 +105,8 @@ fun SalesOrdersScreen(
                     onBack = {
                         onBack()
                     },
-                    onViewOrderItemsClick = { salesOrderId ->
-                        navigate(Routes.ViewOrderItems(salesOrderId))
+                    onViewOrderItemsClick = { salesOrder ->
+                        navigate(Routes.ViewOrderItems(salesOrder))
                     },
                     onLogin = {
                         navigate(Routes.Login)
@@ -116,7 +116,7 @@ fun SalesOrdersScreen(
             entry<Routes.ViewOrderItems> { key ->
                 SalesOrderItemsScreen(
                     sharedViewModel = sharedViewModel,
-                    salesOrderId = key.salesOrderId,
+                    salesOrder = key.salesOrder,
                     onBack = {
                         backStack.removeLastOrNull()
                     }
@@ -141,7 +141,7 @@ fun SalesOrdersScreen(
 private fun Home(
     sharedViewModel: SharedViewModel,
     onBack: () -> Unit,
-    onViewOrderItemsClick: (Long) -> Unit,
+    onViewOrderItemsClick: (SalesOrders) -> Unit,
     onLogin: () -> Unit,
 ) {
     val viewModel = hiltViewModel<SalesOrdersViewModel>()
@@ -258,13 +258,26 @@ private fun Home(
 
                     if (state.selectedStatus.name.equals("delivered", ignoreCase = true)) {
                         Spacer(Modifier.height(16.dp))
-                        DateTextbox(
-                            modifier = Modifier
+                        Row(
+                            Modifier
                                 .fillMaxWidth(),
-                            date = state.date,
-                            onDateChange = viewModel::onDateChange,
-                            label = "Date"
-                        )
+                        ) {
+                            DateTextbox(
+                                modifier = Modifier
+                                    .weight(1f),
+                                date = state.fromDate,
+                                onDateChange = viewModel::onFromDateChange,
+                                label = "From Date"
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            DateTextbox(
+                                modifier = Modifier
+                                    .weight(1f),
+                                date = state.toDate,
+                                onDateChange = viewModel::onToDateChange,
+                                label = "To Date"
+                            )
+                        }
                     }
 
                     Spacer(Modifier.height(12.dp))
@@ -284,7 +297,7 @@ private fun Home(
                             items = state.orders,
                             updatingOrderId = state.updatingOrderId,
                             onClick = { salesOrder ->
-                                onViewOrderItemsClick(salesOrder.id!!)
+                                onViewOrderItemsClick(salesOrder)
                             },
                             onAccept = { salesOrder ->
                                 viewModel.onAccept(salesOrder.id!!)

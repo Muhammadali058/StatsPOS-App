@@ -18,7 +18,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -43,8 +46,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.domain.models.sales.SalesOrderItems
+import com.graphees.statspos.domain.models.sales.SalesOrders
 import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndicator
+import com.graphees.statspos.presentation.ui.components.AppDropdownMenu
+import com.graphees.statspos.presentation.ui.components.AppIcon
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
+import com.graphees.statspos.presentation.ui.components.DropdownItem
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListImageView
@@ -52,6 +59,7 @@ import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
+import com.graphees.statspos.presentation.ui.utils.openGoogleMaps
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.sales.sales_orders.SalesOrderItemsViewModel
 import com.graphees.statspos.utils.HP
@@ -62,7 +70,7 @@ import com.graphees.statspos.utils.showToast
 @Composable
 fun SalesOrderItemsScreen(
     sharedViewModel: SharedViewModel,
-    salesOrderId: Long,
+    salesOrder: SalesOrders,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -95,7 +103,7 @@ fun SalesOrderItemsScreen(
     // Load data initially
     LaunchedEffect(Unit) {
         if (!state.hasLoadedOnce) {
-            viewModel.loadOrderItems(salesOrderId)
+            viewModel.loadOrderItems(salesOrder.id!!)
             viewModel.setHasLoadedOnce(true)
         }
     }
@@ -112,6 +120,20 @@ fun SalesOrderItemsScreen(
                     onBack()
                 },
                 title = "Order Details",
+                actions = {
+                    Row {
+                        IconButton(
+                            onClick = {
+                                openGoogleMaps(context, salesOrder.latitude!!, salesOrder.longitude!!)
+                            }
+                        ) {
+                            AppIcon(
+                                icon = Icons.Default.LocationOn,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
             )
         }
     ) { innerPadding ->
@@ -151,7 +173,7 @@ fun SalesOrderItemsScreen(
                         SaveButton(
                             text = "Generate Bill",
                         ) {
-                            viewModel.generateBill(salesOrderId) {
+                            viewModel.generateBill(salesOrder.id!!) {
                                 sharedViewModel.notifyBillPosted()
                                 context.showToast("Bill generated goto sales")
                                 onBack()

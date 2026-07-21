@@ -196,6 +196,39 @@ fun openWhatsapp(
     }
 }
 
+fun shareLocationOnWhatsApp(
+    context: Context,
+    latitude: Double,
+    longitude: Double
+) {
+    val locationUrl = "https://maps.google.com/?q=$latitude,$longitude"
+
+    val sendIntent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_TEXT, "My location:\n$locationUrl")
+    }
+
+    val packageManager = context.packageManager
+
+    when {
+        sendIntent.apply { `package` = "com.whatsapp" }
+            .resolveActivity(packageManager) != null -> {
+            context.startActivity(sendIntent)
+        }
+
+        sendIntent.apply { `package` = "com.whatsapp.w4b" }
+            .resolveActivity(packageManager) != null -> {
+            context.startActivity(sendIntent)
+        }
+
+        else -> {
+            // Let the user choose another app
+            sendIntent.`package` = null
+            context.startActivity(Intent.createChooser(sendIntent, "Share location"))
+        }
+    }
+}
+
 fun sendEmail(
     context: Context,
     email: String = HP.graphees.email!!,

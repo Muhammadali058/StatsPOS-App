@@ -20,6 +20,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.ShareLocation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -60,6 +62,7 @@ import com.graphees.statspos.presentation.ui.components.SaveButton
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.ui.utils.openGoogleMaps
+import com.graphees.statspos.presentation.ui.utils.shareLocationOnWhatsApp
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.sales.sales_orders.SalesOrderItemsViewModel
 import com.graphees.statspos.utils.HP
@@ -129,6 +132,17 @@ fun SalesOrderItemsScreen(
                         ) {
                             AppIcon(
                                 icon = Icons.Default.LocationOn,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+
+                        IconButton(
+                            onClick = {
+                                shareLocationOnWhatsApp(context, salesOrder.latitude!!, salesOrder.longitude!!)
+                            }
+                        ) {
+                            AppIcon(
+                                icon = Icons.Default.ShareLocation,
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }

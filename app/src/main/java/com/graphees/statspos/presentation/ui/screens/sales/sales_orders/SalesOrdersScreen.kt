@@ -416,7 +416,6 @@ fun OrderCard(
                                 HeadingMedium(
                                     text = "Order Id: "
                                 )
-//                                Spacer(Modifier.height(4.dp))
                                 LabelMedium(
                                     text = "#${item.id.toString()}"
                                 )
@@ -450,6 +449,18 @@ fun OrderCard(
                             )
                         }
                     }
+
+                    Spacer(Modifier.height(8.dp))
+                    Column{
+                        HeadingMedium(
+                            text = "Address: "
+                        )
+                        Spacer(Modifier.height(2.dp))
+                        LabelMedium(
+                            text = item.address!!
+                        )
+                    }
+                    Spacer(Modifier.height(8.dp))
 
                     Column(
                         modifier = Modifier

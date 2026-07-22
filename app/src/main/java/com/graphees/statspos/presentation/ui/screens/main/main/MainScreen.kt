@@ -2,9 +2,7 @@ package com.graphees.statspos.presentation.ui.screens.main.main
 
 import android.Manifest
 import android.app.Activity
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
@@ -20,7 +18,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -61,22 +58,18 @@ import com.graphees.statspos.presentation.ui.screens.reports.sales.SalesReportsS
 import com.graphees.statspos.presentation.ui.screens.reports.stock.StockReportsScreen
 import com.graphees.statspos.presentation.ui.screens.sales.sales_bill.SalesBillScreen
 import com.graphees.statspos.presentation.ui.screens.sales.sales_bill.ViewSalesBillItemsScreen
-import com.graphees.statspos.presentation.ui.screens.sales.sales_orders.SalesOrdersScreen
+import com.graphees.statspos.presentation.ui.screens.shopping_app.ShoppingAppScreen
+import com.graphees.statspos.presentation.ui.screens.shopping_app.sales_orders.SalesOrdersScreen
 import com.graphees.statspos.presentation.ui.screens.utilities.settings.SettingsScreen
 import com.graphees.statspos.presentation.ui.screens.utilities.users.UpdateUserScreen
 import com.graphees.statspos.presentation.ui.screens.utilities.users.UsersScreen
 import com.graphees.statspos.presentation.ui.screens.warehouse.gatepass.GatepassScreen
 import com.graphees.statspos.presentation.ui.screens.warehouse.stock_transfer.StockTransferScreen
 import com.graphees.statspos.presentation.ui.screens.warehouse.warehouse.WarehousesScreen
-import com.graphees.statspos.presentation.ui.utils.openCall
-import com.graphees.statspos.presentation.ui.utils.openWhatsapp
-import com.graphees.statspos.presentation.ui.utils.sendEmail
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.main.MainViewModel
-import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
-import com.graphees.statspos.utils.showToast
 
 @Composable
 fun MainScreen(
@@ -248,6 +241,14 @@ fun MainScreen(
                     }
                 )
             }
+            entry<TopRoutes.ShoppingApp> {
+                ShoppingAppScreen (
+                    sharedViewModel = sharedViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
 
             // region Sales
             entry<TopRoutes.AddUpdateSales> { key ->
@@ -266,14 +267,6 @@ fun MainScreen(
                 ViewSalesBillItemsScreen(
                     salesBill = key.salesBill,
                     isPostedBill = true,
-                    onBack = {
-                        backStack.removeLastOrNull()
-                    }
-                )
-            }
-            entry<TopRoutes.SalesOrders> {
-                SalesOrdersScreen(
-                    sharedViewModel = sharedViewModel,
                     onBack = {
                         backStack.removeLastOrNull()
                     }

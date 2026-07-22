@@ -1,13 +1,13 @@
-package com.graphees.statspos.presentation.viewmodels.sales.sales_orders
+package com.graphees.statspos.presentation.viewmodels.shopping_app
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.graphees.statspos.domain.repository.firebase.FirebaseRepository
 import com.graphees.statspos.domain.repository.main.ClientsRepository
 import com.graphees.statspos.utils.Resource
 import com.graphees.statspos.utils.SnackbarType
 import com.graphees.statspos.utils.UiEvent
-import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class SalesOrdersLoginViewModel @Inject constructor(
+class ShoppingAppLoginViewModel @Inject constructor(
     private val firebaseRepo: FirebaseRepository,
     private val clientRepo: ClientsRepository,
 ) : ViewModel() {

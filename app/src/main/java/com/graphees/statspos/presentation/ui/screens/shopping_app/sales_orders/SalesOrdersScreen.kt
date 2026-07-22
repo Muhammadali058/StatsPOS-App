@@ -1,4 +1,4 @@
-package com.graphees.statspos.presentation.ui.screens.sales.sales_orders
+package com.graphees.statspos.presentation.ui.screens.shopping_app.sales_orders
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -39,12 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
-import androidx.navigation3.ui.NavDisplay
 import com.graphees.statspos.domain.models.sales.SalesOrders
 import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.graphees.statspos.presentation.ui.components.AppDropdownMenu
@@ -63,93 +57,21 @@ import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SecondaryButton
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
-import com.graphees.statspos.presentation.viewmodels.SharedViewModel
-import com.graphees.statspos.presentation.viewmodels.sales.sales_orders.SalesOrdersViewModel
+import com.graphees.statspos.presentation.viewmodels.shopping_app.sales_orders.SalesOrdersViewModel
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
-import kotlinx.serialization.Serializable
-
-private sealed class Routes : NavKey {
-    @Serializable
-    data object Home : Routes()
-
-    @Serializable
-    data class ViewOrderItems(val salesOrder: SalesOrders) : Routes()
-
-    @Serializable
-    data object Login : Routes()
-}
 
 @Composable
 fun SalesOrdersScreen(
-    sharedViewModel: SharedViewModel,
-    onBack: () -> Unit,
-) {
-    val backStack = rememberNavBackStack(Routes.Home)
-    fun navigate(key: NavKey) {
-        if (backStack.lastOrNull() != key) {
-            backStack.add(key)
-        }
-    }
-    NavDisplay(
-        backStack = backStack,
-        entryDecorators = listOf(
-            rememberSaveableStateHolderNavEntryDecorator(),
-            rememberViewModelStoreNavEntryDecorator()
-        ),
-        entryProvider = entryProvider {
-            entry<Routes.Home> {
-                Home(
-                    sharedViewModel = sharedViewModel,
-                    onBack = {
-                        onBack()
-                    },
-                    onViewOrderItemsClick = { salesOrder ->
-                        navigate(Routes.ViewOrderItems(salesOrder))
-                    },
-                    onLogin = {
-                        navigate(Routes.Login)
-                    },
-                )
-            }
-            entry<Routes.ViewOrderItems> { key ->
-                SalesOrderItemsScreen(
-                    sharedViewModel = sharedViewModel,
-                    salesOrder = key.salesOrder,
-                    onBack = {
-                        backStack.removeLastOrNull()
-                    }
-                )
-            }
-            entry<Routes.Login> { key ->
-                SalesOrdersLoginScreen(
-                    onLogin = {
-                        backStack.removeLastOrNull()
-                        onBack()
-                    },
-                    onBack = {
-                        backStack.removeLastOrNull()
-                    },
-                )
-            }
-        }
-    )
-}
-
-@Composable
-private fun Home(
-    sharedViewModel: SharedViewModel,
-    onBack: () -> Unit,
     onViewOrderItemsClick: (SalesOrders) -> Unit,
-    onLogin: () -> Unit,
+    onBack: () -> Unit,
 ) {
     val viewModel = hiltViewModel<SalesOrdersViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
-    var menuExpanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(event) {
         checkEvent(
@@ -171,16 +93,6 @@ private fun Home(
         )
     }
 
-    // Edit data when update
-    LaunchedEffect(Unit) {
-        if (!state.hasLoadedOnce) {
-            if (!viewModel.isUserLoggedIn()) {
-                onLogin()
-            }
-            viewModel.setHasLoadedOnce(true)
-        }
-    }
-
     Scaffold(
         snackbarHost = {
             AppSnackbarHost(
@@ -193,39 +105,6 @@ private fun Home(
                     onBack()
                 },
                 title = "Sales Orders",
-                actions = {
-                    Row {
-                        IconButton(
-                            onClick = {
-                                menuExpanded = true
-                            }
-                        ) {
-                            AppIcon(
-                                icon = Icons.Default.MoreVert,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        AppDropdownMenu(
-                            expanded = menuExpanded,
-                            onDismissRequest = { menuExpanded = false },
-                            modifier = Modifier
-                                .width(200.dp),
-                        ) {
-                            DropdownItem(
-                                text = "Sign Out",
-//                            icon = {
-//                                AppIcon(R.drawable.linked, size = 20.dp)
-//                            },
-                                onClick = {
-                                    menuExpanded = false
-                                    viewModel.signOut {
-                                        onBack()
-                                    }
-                                }
-                            )
-                        }
-                    }
-                }
             )
         },
     ) { innerPadding ->
@@ -354,7 +233,7 @@ private fun OrdersList(
 }
 
 @Composable
-fun OrderCard(
+private fun OrderCard(
     item: SalesOrders,
     updatingStatus: Boolean,
     onClick: (SalesOrders) -> Unit,

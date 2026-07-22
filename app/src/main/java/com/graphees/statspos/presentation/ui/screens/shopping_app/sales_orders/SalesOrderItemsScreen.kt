@@ -1,4 +1,4 @@
-package com.graphees.statspos.presentation.ui.screens.sales.sales_orders
+package com.graphees.statspos.presentation.ui.screens.shopping_app.sales_orders
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,8 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Outbox
 import androidx.compose.material.icons.filled.ShareLocation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -50,21 +50,23 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.domain.models.sales.SalesOrderItems
 import com.graphees.statspos.domain.models.sales.SalesOrders
 import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndicator
-import com.graphees.statspos.presentation.ui.components.AppDropdownMenu
 import com.graphees.statspos.presentation.ui.components.AppIcon
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
-import com.graphees.statspos.presentation.ui.components.DropdownItem
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
+import com.graphees.statspos.presentation.ui.components.HeadingMedium
+import com.graphees.statspos.presentation.ui.components.LabelMedium
 import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListImageView
+import com.graphees.statspos.presentation.ui.components.PrimaryButton
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
+import com.graphees.statspos.presentation.ui.components.SecondaryButton
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.ui.utils.openGoogleMaps
 import com.graphees.statspos.presentation.ui.utils.shareLocationOnWhatsApp
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
-import com.graphees.statspos.presentation.viewmodels.sales.sales_orders.SalesOrderItemsViewModel
+import com.graphees.statspos.presentation.viewmodels.shopping_app.sales_orders.SalesOrderItemsViewModel
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
@@ -372,6 +374,112 @@ fun ItemCard(
                 }
             }
             Spacer(Modifier.height(12.dp))
+        }
+    }
+}
+
+
+@Composable
+private fun OrderCard(
+    salesOrder: SalesOrders,
+) {
+    ListCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = ConstantPaddings.LIST_PADDING_VERTICAL),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+            )
+            {
+                Box(
+                    modifier = Modifier
+                        .size(60.dp)
+                        .background(
+                            MaterialTheme.colorScheme.tertiaryContainer,
+                            RoundedCornerShape(8.dp)
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    AppIcon(
+                        icon = Icons.Default.Outbox,
+                        size = 28.dp
+                    )
+                }
+                Spacer(Modifier.width(12.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f),
+                        ) {
+                            HeadingMedium(
+                                text = salesOrder.accountName.toString()
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Row {
+                                HeadingMedium(
+                                    text = "Order Id: "
+                                )
+                                LabelMedium(
+                                    text = "#${salesOrder.id.toString()}"
+                                )
+                            }
+                            Spacer(Modifier.height(8.dp))
+                            Row {
+                                HeadingMedium(
+                                    text = "Value: "
+                                )
+                                LabelMedium(
+                                    text = "${salesOrder.totalBill!! + salesOrder.deliveryCharges!!}"
+                                )
+                            }
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Column {
+                            Text(
+                                text = "Create on",
+                                style = TextStyle(
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                ),
+                            )
+                            Text(
+                                text = HP.getFormatedDate(HP.toLocalDate(salesOrder.date.toString())),
+                                style = TextStyle(
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    fontWeight = FontWeight.Medium,
+                                ),
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.height(8.dp))
+                    Column{
+                        HeadingMedium(
+                            text = "Address: "
+                        )
+                        Spacer(Modifier.height(2.dp))
+                        LabelMedium(
+                            text = salesOrder.address!!
+                        )
+                    }
+                }
+            }
         }
     }
 }

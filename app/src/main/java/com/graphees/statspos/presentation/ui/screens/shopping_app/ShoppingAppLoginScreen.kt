@@ -1,4 +1,4 @@
-package com.graphees.statspos.presentation.ui.screens.sales.sales_orders
+package com.graphees.statspos.presentation.ui.screens.shopping_app
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -43,17 +43,17 @@ import com.graphees.statspos.presentation.ui.components.Textbox
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.ui.utils.ConstantSize
-import com.graphees.statspos.presentation.viewmodels.sales.sales_orders.SalesOrdersLoginViewModel
+import com.graphees.statspos.presentation.viewmodels.shopping_app.ShoppingAppLoginViewModel
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
 
 @Composable
-fun SalesOrdersLoginScreen(
+fun ShoppingAppLoginScreen(
     onLogin: () -> Unit,
     onBack: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<SalesOrdersLoginViewModel>()
+    val viewModel = hiltViewModel<ShoppingAppLoginViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }

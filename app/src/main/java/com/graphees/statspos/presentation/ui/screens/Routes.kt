@@ -47,7 +47,7 @@ sealed class TopRoutes : NavKey {
     data object PurchaseOrders : TopRoutes()
 
     @Serializable
-    data object SalesOrders : TopRoutes()
+    data object ShoppingApp : TopRoutes()
 
     @Serializable
     data object Users : TopRoutes()

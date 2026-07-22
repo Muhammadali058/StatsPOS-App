@@ -1,7 +1,6 @@
 package com.graphees.statspos.presentation.ui.screens.main.main
 
 import android.app.Activity
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.DrawableRes
@@ -33,8 +32,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Subscriptions
-import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -132,10 +129,10 @@ private val items = listOf(
     TopItem("Users", TopRoutes.Users, R.drawable.users, HP.userRights.users == true),
     TopItem("Settings", TopRoutes.Settings, R.drawable.settings, HP.userRights.settings == true),
     TopItem(
-        "Sales\nOrders",
-        TopRoutes.SalesOrders,
+        "Shopping\nApp",
+        TopRoutes.ShoppingApp,
         R.drawable.sales_orders,
-        (HP.userRights.sales == true && HP.client.hasShoppingApp == true)
+        (HP.user.userType == 1 && HP.client.hasShoppingApp == true)
     ),
 )
 private val accounts = listOf(

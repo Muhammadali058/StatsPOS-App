@@ -1,15 +1,19 @@
-package com.graphees.statspos.presentation.viewmodels.sales.sales_orders
+package com.graphees.statspos.presentation.viewmodels.shopping_app.sales_orders
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.graphees.statspos.domain.models.sales.SalesOrderItems
+import com.graphees.statspos.domain.models.DropdownItem
+import com.graphees.statspos.domain.models.sales.SalesOrders
+import com.graphees.statspos.domain.repository.firebase.FirebaseRepository
+import com.graphees.statspos.domain.repository.sales.SalesOrdersRepository
+import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.Resource
 import com.graphees.statspos.utils.SnackbarType
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.getListOf
-import com.graphees.statspos.domain.repository.sales.SalesOrderItemsRepository
-import com.graphees.statspos.domain.repository.sales.SalesOrdersRepository
+import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
+import com.google.gson.JsonObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -17,20 +21,30 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 @HiltViewModel
-class SalesOrderItemsViewModel @Inject constructor(
-    private val api: SalesOrderItemsRepository,
-    private val salesOrdersRepo: SalesOrdersRepository,
+class SalesOrdersViewModel @Inject constructor(
+    private val firebaseRepo: FirebaseRepository,
+    private val api: SalesOrdersRepository,
 ) : ViewModel() {
     // region ScreenState
     data class ScreenState(
-        val orderItems: List<SalesOrderItems> = emptyList(),
+        val orders: List<SalesOrders> = emptyList(),
+        val statusList: List<DropdownItem> = listOf(
+            DropdownItem(1L, "New"),
+            DropdownItem(2L, "Processing"),
+            DropdownItem(3L, "Delivered"),
+            DropdownItem(4L, "Cancelled"),
+        ),
+        val selectedStatus: DropdownItem = DropdownItem(1L, "New"),
+        val fromDate: LocalDate = LocalDate.now(),
+        val toDate: LocalDate = LocalDate.now(),
 
         val hasLoadedOnce: Boolean = false,
 
         val isLoading: Boolean = false,
-        val isGeneratingBill: Boolean = false,
+        val updatingOrderId: Long? = null,
         val error: String? = null,
     )
 
@@ -90,55 +104,110 @@ class SalesOrderItemsViewModel @Inject constructor(
     // endregion
 
     // region onChangeMethods
+    fun onSelectedStatusChange(value: DropdownItem) {
+        state.update { it.copy(selectedStatus = value) }
+        loadOrders()
+    }
+
+    fun onFromDateChange(value: LocalDate) {
+        state.update { it.copy(fromDate = value) }
+        loadOrders()
+    }
+
+    fun onToDateChange(value: LocalDate) {
+        state.update { it.copy(toDate = value) }
+        loadOrders()
+    }
+
     fun setHasLoadedOnce(value: Boolean) {
         state.update { it.copy(hasLoadedOnce = value) }
     }
     // endregion
 
+    init {
+        loadOrdersFB()
+    }
+
+    // region Button Clicks
+    fun onAccept(salesOrderId: Long) {
+        updateStatus(salesOrderId, "processing")
+    }
+
+    fun onDelivered(salesOrderId: Long) {
+        updateStatus(salesOrderId, "delivered")
+    }
+
+    fun onCancel(salesOrderId: Long) {
+        updateStatus(salesOrderId, "cancelled")
+    }
+    // endregion
+
     // region Network calls
-    fun loadOrderItems(salesOrderId: Long) {
+    fun loadOrders() {
         viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
+//            if (state.value.isLoading)
+//                return@launch
 
             beforeRequest()
 
-            when (val result = api.loadSalesOrderItems(salesOrderId)) {
+            val params = JsonObject().apply {
+                addProperty("status", state.value.selectedStatus.name)
+                addProperty("fromDate", HP.getZonedDate(state.value.fromDate))
+                addProperty("toDate", HP.getZonedDate(state.value.toDate))
+                addProperty("loadAll", true)
+            }
+
+            when (val result = api.loadSalesOrders(params)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
 
-                    val list =
-                        Gson().getListOf<SalesOrderItems>(result.data.get("rows").asJsonArray)
-                    state.update { it.copy(orderItems = list) }
+                    val orders = Gson().getListOf<SalesOrders>(result.data.get("rows").asJsonArray)
+                    state.update { it.copy(orders = orders) }
                 }
             }
         }
     }
 
-    fun generateBill(salesOrderId: Long, onSuccess: () -> Unit) {
+    fun loadOrdersFB() {
         viewModelScope.launch {
-            if (state.value.isGeneratingBill)
-                return@launch
+            beforeRequest()
 
-            state.update { it.copy(isGeneratingBill = true) }
+            firebaseRepo.loadOrdersRealtime(
+                state.value.selectedStatus.name,
+                HP.getFormatedDate(LocalDate.now())
+            ).collect { result ->
+                loadOrders()
+            }
+        }
+    }
 
-            val result = salesOrdersRepo.generateBill(salesOrderId)
+    fun updateStatus(salesOrderId: Long, status: String) {
+        viewModelScope.launch {
+//            if (state.value.isLoading)
+//                return@launch
 
-            state.update { it.copy(isGeneratingBill = false) }
+            state.update { it.copy(updatingOrderId = salesOrderId) }
+
+            val salesOrder = SalesOrders(
+                id = salesOrderId,
+                status = status,
+            )
+            val result = api.updateSalesOrder(salesOrder)
+
+            state.update { it.copy(updatingOrderId = null) }
 
             when (result) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
-                    onSuccess()
+                    loadOrders()
                 }
             }
         }
     }
-
     // endregion
 
     // region Others

@@ -1,4 +1,4 @@
-package com.graphees.statspos.presentation.ui.screens.main
+package com.graphees.statspos.presentation.ui.screens.others
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

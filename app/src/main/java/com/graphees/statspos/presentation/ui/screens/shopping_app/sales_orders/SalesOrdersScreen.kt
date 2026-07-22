@@ -44,11 +44,13 @@ import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndic
 import com.graphees.statspos.presentation.ui.components.AppDropdownMenu
 import com.graphees.statspos.presentation.ui.components.AppIcon
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
+import com.graphees.statspos.presentation.ui.components.AppText
 import com.graphees.statspos.presentation.ui.components.BottomHeading
 import com.graphees.statspos.presentation.ui.components.ChipsRow
 import com.graphees.statspos.presentation.ui.components.DateTextbox
 import com.graphees.statspos.presentation.ui.components.DropdownItem
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
+import com.graphees.statspos.presentation.ui.components.HeadingLarge
 import com.graphees.statspos.presentation.ui.components.HeadingMedium
 import com.graphees.statspos.presentation.ui.components.LabelMedium
 import com.graphees.statspos.presentation.ui.components.ListCard
@@ -258,8 +260,7 @@ private fun OrderCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
-            )
-            {
+            ) {
                 Box(
                     modifier = Modifier
                         .size(60.dp)
@@ -282,55 +283,42 @@ private fun OrderCard(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .weight(1f),
-                        ) {
-                            HeadingMedium(
-                                text = item.accountName.toString()
+                        HeadingMedium(
+                            text = item.accountName.toString()
+                        )
+                        AppText(
+                            text = "Rs.${item.totalBill!! + item.deliveryCharges!!}",
+                            style = TextStyle(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
                             )
-                            Spacer(Modifier.height(8.dp))
-                            Row {
-                                HeadingMedium(
-                                    text = "Order Id: "
-                                )
-                                LabelMedium(
-                                    text = "#${item.id.toString()}"
-                                )
-                            }
-                            Spacer(Modifier.height(8.dp))
-                            Row {
-                                HeadingMedium(
-                                    text = "Value: "
-                                )
-                                LabelMedium(
-                                    text = "${item.totalBill!! + item.deliveryCharges!!}"
-                                )
-                            }
-                        }
-                        Spacer(Modifier.width(12.dp))
-                        Column {
-                            Text(
-                                text = "Create on",
-                                style = TextStyle(
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                ),
-                            )
-                            Text(
-                                text = HP.getFormatedDate(HP.toLocalDate(item.date.toString())),
-                                style = TextStyle(
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    fontWeight = FontWeight.Medium,
-                                ),
-                            )
-                        }
+                        )
                     }
 
-                    Spacer(Modifier.height(8.dp))
-                    Column{
+                    Spacer(Modifier.height(4.dp))
+                    Row {
+                        HeadingMedium(
+                            text = "Order Id: "
+                        )
+                        LabelMedium(
+                            text = "#${item.id.toString()}"
+                        )
+                    }
+
+//                    Spacer(Modifier.height(4.dp))
+//                    Row {
+//                        HeadingMedium(
+//                            text = "Date: "
+//                        )
+//                        LabelMedium(
+//                            text = HP.getFormatedDate(HP.toLocalDate(item.date.toString())),
+//                        )
+//                    }
+
+                    Spacer(Modifier.height(4.dp))
+                    Column {
                         HeadingMedium(
                             text = "Address: "
                         )
@@ -339,8 +327,8 @@ private fun OrderCard(
                             text = item.address!!
                         )
                     }
-                    Spacer(Modifier.height(8.dp))
 
+                    Spacer(Modifier.height(8.dp))
                     Column(
                         modifier = Modifier
                             .fillMaxWidth(),

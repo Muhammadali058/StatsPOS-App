@@ -205,7 +205,7 @@ fun shareLocationOnWhatsApp(
 
     val sendIntent = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
-        putExtra(Intent.EXTRA_TEXT, "My location:\n$locationUrl")
+        putExtra(Intent.EXTRA_TEXT, locationUrl)
     }
 
     val packageManager = context.packageManager
@@ -253,7 +253,11 @@ fun sendEmail(
     }
 }
 
-fun openGoogleMaps(context: Context, latitude: Double, longitude: Double) {
+fun openGoogleMaps(
+    context: Context,
+    latitude: Double,
+    longitude: Double
+) {
     val uri = "geo:$latitude,$longitude?q=$latitude,$longitude".toUri()
     val intent = Intent(Intent.ACTION_VIEW, uri).apply {
         setPackage("com.google.android.apps.maps")

@@ -49,9 +49,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.domain.models.sales.SalesOrderItems
 import com.graphees.statspos.domain.models.sales.SalesOrders
+import com.graphees.statspos.presentation.ui.components.AppCard
 import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.graphees.statspos.presentation.ui.components.AppIcon
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
+import com.graphees.statspos.presentation.ui.components.AppText
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.HeadingMedium
 import com.graphees.statspos.presentation.ui.components.LabelMedium
@@ -63,7 +65,9 @@ import com.graphees.statspos.presentation.ui.components.SaveButton
 import com.graphees.statspos.presentation.ui.components.SecondaryButton
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
+import com.graphees.statspos.presentation.ui.utils.openCall
 import com.graphees.statspos.presentation.ui.utils.openGoogleMaps
+import com.graphees.statspos.presentation.ui.utils.openWhatsapp
 import com.graphees.statspos.presentation.ui.utils.shareLocationOnWhatsApp
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.shopping_app.sales_orders.SalesOrderItemsViewModel
@@ -129,7 +133,11 @@ fun SalesOrderItemsScreen(
                     Row {
                         IconButton(
                             onClick = {
-                                openGoogleMaps(context, salesOrder.latitude!!, salesOrder.longitude!!)
+                                openGoogleMaps(
+                                    context,
+                                    salesOrder.latitude!!,
+                                    salesOrder.longitude!!
+                                )
                             }
                         ) {
                             AppIcon(
@@ -140,7 +148,11 @@ fun SalesOrderItemsScreen(
 
                         IconButton(
                             onClick = {
-                                shareLocationOnWhatsApp(context, salesOrder.latitude!!, salesOrder.longitude!!)
+                                shareLocationOnWhatsApp(
+                                    context,
+                                    salesOrder.latitude!!,
+                                    salesOrder.longitude!!
+                                )
                             }
                         ) {
                             AppIcon(
@@ -157,18 +169,29 @@ fun SalesOrderItemsScreen(
             Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(MaterialTheme.colorScheme.background),
+                .background(MaterialTheme.colorScheme.background)
+                .padding(ConstantPaddings.BODY_HORIZONTAL),
         ) {
             Column(
                 Modifier
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(8.dp))
+                OrderCard(
+                    item = salesOrder,
+                    onWhatsappClick = {
+                        openWhatsapp(context, HP.getContact(salesOrder.contact!!))
+                    },
+                    onCallClick = {
+                        openCall(context, salesOrder.contact!!)
+                    },
+                )
+
+                Spacer(Modifier.height(8.dp))
                 Column(
                     Modifier
-                        .weight(1f)
-                        .padding(ConstantPaddings.BODY_HORIZONTAL),
+                        .weight(1f),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     ItemsList(
@@ -181,7 +204,6 @@ fun SalesOrderItemsScreen(
                 Box(
                     modifier = Modifier
                         .background(MaterialTheme.colorScheme.surface)
-                        .padding(ConstantPaddings.BODY_HORIZONTAL)
                 ) {
                     if (state.isGeneratingBill) {
                         AppCircularProgressIndicator()
@@ -223,7 +245,7 @@ private fun ItemsList(
 }
 
 @Composable
-fun ItemCard(
+private fun ItemCard(
     item: SalesOrderItems,
 ) {
     ListCard(
@@ -378,10 +400,11 @@ fun ItemCard(
     }
 }
 
-
 @Composable
 private fun OrderCard(
-    salesOrder: SalesOrders,
+    item: SalesOrders,
+    onWhatsappClick: () -> Unit,
+    onCallClick: () -> Unit,
 ) {
     ListCard(
         modifier = Modifier
@@ -394,90 +417,77 @@ private fun OrderCard(
                 .padding(12.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth(),
-            )
-            {
-                Box(
-                    modifier = Modifier
-                        .size(60.dp)
-                        .background(
-                            MaterialTheme.colorScheme.tertiaryContainer,
-                            RoundedCornerShape(8.dp)
-                        ),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    AppIcon(
-                        icon = Icons.Default.Outbox,
-                        size = 28.dp
-                    )
-                }
-                Spacer(Modifier.width(12.dp))
-                Column(
+            ) {
+                Row(
                     modifier = Modifier
                         .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .weight(1f),
-                        ) {
-                            HeadingMedium(
-                                text = salesOrder.accountName.toString()
-                            )
-                            Spacer(Modifier.height(8.dp))
-                            Row {
-                                HeadingMedium(
-                                    text = "Order Id: "
-                                )
-                                LabelMedium(
-                                    text = "#${salesOrder.id.toString()}"
-                                )
-                            }
-                            Spacer(Modifier.height(8.dp))
-                            Row {
-                                HeadingMedium(
-                                    text = "Value: "
-                                )
-                                LabelMedium(
-                                    text = "${salesOrder.totalBill!! + salesOrder.deliveryCharges!!}"
-                                )
-                            }
-                        }
-                        Spacer(Modifier.width(12.dp))
-                        Column {
-                            Text(
-                                text = "Create on",
-                                style = TextStyle(
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                ),
-                            )
-                            Text(
-                                text = HP.getFormatedDate(HP.toLocalDate(salesOrder.date.toString())),
-                                style = TextStyle(
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    fontWeight = FontWeight.Medium,
-                                ),
-                            )
-                        }
-                    }
+                    HeadingMedium(
+                        text = item.accountName.toString()
+                    )
+                    AppText(
+                        text = "Rs.${item.totalBill!! + item.deliveryCharges!!}",
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    )
+                }
 
-                    Spacer(Modifier.height(8.dp))
-                    Column{
-                        HeadingMedium(
-                            text = "Address: "
-                        )
-                        Spacer(Modifier.height(2.dp))
-                        LabelMedium(
-                            text = salesOrder.address!!
-                        )
-                    }
+                Spacer(Modifier.height(4.dp))
+                Row {
+                    HeadingMedium(
+                        text = "Order Id: "
+                    )
+                    LabelMedium(
+                        text = "#${item.id.toString()}"
+                    )
+                }
+
+                Spacer(Modifier.height(4.dp))
+                Row {
+                    HeadingMedium(
+                        text = "Date: "
+                    )
+                    LabelMedium(
+                        text = HP.getFormatedDate(HP.toLocalDate(item.date.toString())),
+                    )
+                }
+
+                Spacer(Modifier.height(4.dp))
+                Column {
+                    HeadingMedium(
+                        text = "Address: "
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    LabelMedium(
+                        text = item.address!!
+                    )
+                }
+
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    PrimaryButton(
+                        text = "WhatsApp",
+                        onClick = {
+                            onWhatsappClick()
+                        },
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    SecondaryButton(
+                        text = "Call",
+                        onClick = {
+                            onCallClick()
+                        },
+                    )
                 }
             }
         }

@@ -59,7 +59,6 @@ import com.graphees.statspos.presentation.ui.screens.reports.stock.StockReportsS
 import com.graphees.statspos.presentation.ui.screens.sales.sales_bill.SalesBillScreen
 import com.graphees.statspos.presentation.ui.screens.sales.sales_bill.ViewSalesBillItemsScreen
 import com.graphees.statspos.presentation.ui.screens.shopping_app.ShoppingAppScreen
-import com.graphees.statspos.presentation.ui.screens.shopping_app.sales_orders.SalesOrdersScreen
 import com.graphees.statspos.presentation.ui.screens.utilities.settings.SettingsScreen
 import com.graphees.statspos.presentation.ui.screens.utilities.users.UpdateUserScreen
 import com.graphees.statspos.presentation.ui.screens.utilities.users.UsersScreen

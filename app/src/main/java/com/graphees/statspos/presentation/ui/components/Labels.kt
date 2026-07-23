@@ -157,11 +157,12 @@ fun ListHeading(
     text: String,
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Start,
+    color: Color = MaterialTheme.colorScheme.onPrimaryContainer,
 ) {
     Text(
         modifier = modifier,
         text = text,
-        color = MaterialTheme.colorScheme.onPrimaryContainer,
+        color = color,
         style = MaterialTheme.typography.labelSmall.copy(
             fontWeight = FontWeight.Bold,
             textAlign = textAlign
@@ -174,11 +175,12 @@ fun ListLabel(
     text: String,
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Start,
+    color: Color = MaterialTheme.colorScheme.onPrimaryContainer,
 ) {
     Text(
         modifier = modifier,
         text = text,
-        color = MaterialTheme.colorScheme.onPrimaryContainer,
+        color = color,
         style = MaterialTheme.typography.labelSmall.copy(
             textAlign = textAlign
         )

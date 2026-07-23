@@ -503,11 +503,12 @@ private fun SearchBox(
             onValueChange = onValueChange,
             onSearchClick = onSearchClick,
         )
-        Spacer(Modifier.width(4.dp))
+        Spacer(Modifier.width(8.dp))
         FilterIcon {
             onFilterClick()
         }
     }
+    Spacer(Modifier.height(4.dp))
     Row(
         modifier = Modifier
             .fillMaxWidth(),

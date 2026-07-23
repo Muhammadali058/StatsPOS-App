@@ -403,7 +403,7 @@ private fun ItemnameBox(
                     onValueChange = onValueChange,
                     onItemSelected = onItemSelected,
                     onEndIconClick = onEndIconClick,
-                    onSearchClick = onSearchClick,
+                    onGoClick = onSearchClick,
                     label = {
                         Text(
                             text = "Select Item"

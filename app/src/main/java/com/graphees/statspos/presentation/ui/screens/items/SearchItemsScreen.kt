@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -31,13 +33,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.R
 import com.graphees.statspos.domain.models.items.Items
-import com.graphees.statspos.presentation.ui.components.AppIconButton
+import com.graphees.statspos.presentation.ui.components.AppIcon
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.AutoCompleteItemsTextbox
 import com.graphees.statspos.presentation.ui.components.BarcodeScannerDialog
@@ -45,6 +49,7 @@ import com.graphees.statspos.presentation.ui.components.BottomHeading
 import com.graphees.statspos.presentation.ui.components.BottomSheet
 import com.graphees.statspos.presentation.ui.components.ChipsRow
 import com.graphees.statspos.presentation.ui.components.ComboBox
+import com.graphees.statspos.presentation.ui.components.DeleteIcon
 import com.graphees.statspos.presentation.ui.components.Dropdown
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.FilterIcon
@@ -239,11 +244,7 @@ fun SearchItemsScreen(
                             viewModel.getItem(it)
                             keyboardController?.hide()
                         },
-                        onSearchClick = {
-                            viewModel.loadItems()
-                            keyboardController?.hide()
-                        },
-                        onEndIconClick = {
+                        onGoClick = {
                             viewModel.getItem(it)
                             keyboardController?.hide()
                         },
@@ -316,8 +317,7 @@ private fun SearchBox(
     value: String,
     onValueChange: (String) -> Unit,
     onItemSelected: (String) -> Unit,
-    onSearchClick: (String) -> Unit,
-    onEndIconClick: (String) -> Unit,
+    onGoClick: (String) -> Unit,
     onBarcodeClick: () -> Unit,
     onFilterClick: () -> Unit,
 ) {
@@ -332,26 +332,36 @@ private fun SearchBox(
             value = value,
             onValueChange = onValueChange,
             onItemSelected = onItemSelected,
-            onEndIconClick = onEndIconClick,
-            onSearchClick = onSearchClick,
+            onEndIconClick = {  },
+            onGoClick = onGoClick,
             suggestions = false,
             label = {
                 Text(
                     text = "Search"
                 )
             },
+            trailingIcon = {
+                IconButton(onClick = {
+                    onBarcodeClick()
+                }) {
+                    AppIcon(
+                        icon = R.drawable.ic_barcode,
+                        size = 20.dp
+                    )
+                }
+            },
             focusRequester = itemFocusRequester,
         )
-        Spacer(Modifier.width(4.dp))
-        AppIconButton(
-            onClick = {
-                onBarcodeClick()
-            },
-            icon = R.drawable.ic_barcode,
-            buttonSize = 32.dp,
-            size = 26.dp
-        )
-        Spacer(Modifier.width(4.dp))
+//        Spacer(Modifier.width(4.dp))
+//        AppIconButton(
+//            onClick = {
+//                onBarcodeClick()
+//            },
+//            icon = R.drawable.ic_barcode,
+//            buttonSize = 32.dp,
+//            size = 26.dp
+//        )
+        Spacer(Modifier.width(8.dp))
         FilterIcon {
             onFilterClick()
         }
@@ -400,12 +410,15 @@ private fun BodyList(
 private fun ListCard(
     modifier: Modifier = Modifier,
     item: Items,
-    onItemClick: (Items) -> Unit
+    onItemClick: (Items) -> Unit,
 ) {
+    val primaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
+    val secondaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.6f)
+
     ListCard(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = ConstantPaddings.LIST_PADDING_VERTICAL),
         onClick = {
             onItemClick(item)
         }
@@ -431,15 +444,69 @@ private fun ListCard(
                     .weight(1f),
             ) {
                 // Itemname
-                ListMainLabel(item.itemname.toString())
-                Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f),
+                    ) {
+                        Text(
+                            modifier = modifier,
+                            text = item.itemname.toString(),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+
+                        // Category
+                        item.categoryName?.let {
+                            if (it.isNotEmpty()) {
+                                Spacer(Modifier.height(2.dp))
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                ) {
+                                    ListHeading(
+                                        text = "Category: ",
+                                        color = primaryColor
+                                    )
+                                    ListLabel(
+                                        text = item.categoryName.toString(),
+                                        color = secondaryColor
+                                    )
+                                    item.subCategoryName?.let {
+                                        if (it.isNotEmpty()) {
+                                            ListHeading(
+                                                text = "  Sub: ",
+                                                color = primaryColor
+                                            )
+                                            ListLabel(
+                                                text = item.subCategoryName.toString(),
+                                                color = secondaryColor,
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+                }
+
+                Spacer(Modifier.height(8.dp))
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.2f)
+                )
+                Spacer(Modifier.height(8.dp))
 
                 // Rows when fourRateSystem
                 if (HP.settings.fourRateSystem == true) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         ListHeading("Rate 1", Modifier.weight(1f))
                         ListHeading("Rate 2", Modifier.weight(1f))
@@ -449,7 +516,6 @@ private fun ListCard(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         ListLabel(HP.formatDecimal(item.retail), Modifier.weight(1f))
                         ListLabel(HP.formatDecimal(item.wholesale), Modifier.weight(1f))
@@ -457,11 +523,9 @@ private fun ListCard(
                         ListLabel(HP.formatDecimal(item.rate4), Modifier.weight(1f))
                     }
                 } else {
-                    // Rows else fourRateSystem
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         ListHeading(
                             text = "Retail",
@@ -479,7 +543,6 @@ private fun ListCard(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         ListLabel(
                             text = HP.formatDecimal(item.retail),
@@ -500,86 +563,56 @@ private fun ListCard(
             }
         }
 
-        // Stock
-        Spacer(Modifier.height(2.dp))
+        // region Stock
+        Spacer(Modifier.height(8.dp))
+        HorizontalDivider(
+            thickness = 0.5.dp,
+            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.2f)
+        )
+        Spacer(Modifier.height(8.dp))
+
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
+            AppIcon(
+                icon = R.drawable.stock,
+                size = 14.dp,
+                tint = primaryColor,
+            )
+            Spacer(Modifier.width(8.dp))
+
             Row(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                ListHeading("Stock Pcs: ")
-                ListLabel(HP.formatDecimal(item.stockPcs))
+                ListHeading(
+                    text = if (HP.settings.saleCartons == true) "Stock Pcs: " else "Stock: ",
+                    color = primaryColor,
+                )
+                ListLabel(
+                    text = HP.formatDecimal(item.stockPcs),
+                    color = secondaryColor,
+                )
             }
             if (HP.settings.saleCartons == true) {
                 Row(
                     modifier = Modifier
                         .weight(1f),
                 ) {
-                    ListHeading("Stock Crtn: ")
-                    ListLabel(item.stockCrtn.toString())
+                    ListHeading(
+                        text = "Stock Crtn: ",
+                        color = primaryColor,
+                    )
+                    ListLabel(
+                        text = item.stockCrtn.toString(),
+                        color = secondaryColor,
+                    )
                 }
             }
         }
-
-        // Category
-        item.categoryName?.let {
-            if (it.isNotEmpty()) {
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    ListHeading("Category: ")
-                    ListLabel(item.categoryName.toString())
-                }
-            }
-        }
-
-        // Sub-Category
-        item.subCategoryName?.let {
-            if (it.isNotEmpty()) {
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    ListHeading("Sub-Category: ")
-                    ListLabel(item.subCategoryName.toString())
-                }
-            }
-        }
-
-        // Vendor
-        item.vendorName?.let {
-            if (it.isNotEmpty()) {
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    ListHeading("Vendor: ")
-                    ListLabel(item.vendorName.toString())
-                }
-            }
-        }
-
-        // Location
-        item.location?.let {
-            if (it.isNotEmpty()) {
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    ListHeading("Location: ")
-                    ListLabel(item.location.toString())
-                }
-            }
-        }
-
+        // endregion
     }
 }
 
@@ -597,8 +630,7 @@ private fun Prev() {
             value = "",
             onValueChange = {},
             onItemSelected = {},
-            onSearchClick = {},
-            onEndIconClick = {},
+            onGoClick = {},
             onBarcodeClick = {},
             onFilterClick = {},
         )

@@ -276,7 +276,7 @@ fun HomeScreen(
 
     // Navigation
     val navigationState = rememberNavigationState(
-        startRoute = BottomRoutes.Home,
+        startRoute = BottomRoutes.Items,
         topLevelRoutes = BOTTOM_DESTINATIONS.keys,
         serializersModules = SerializersModule {
             polymorphic(NavKey::class) {
@@ -701,7 +701,7 @@ fun NavigationDrawer(
             }
         }
 
-        if(HP.appSubscription.isActive == true) {
+        if (HP.appSubscription.isActive == true) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -723,7 +723,7 @@ fun NavigationDrawer(
                     )
                 )
             }
-        }else{
+        } else {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -796,25 +796,28 @@ private fun HomeBody(
         }
 
         item {
+            Title("Inventory & Operations", subTitle = "Manage orders, users and settings", icon = R.drawable.inventory, access = true)
+        }
+        item {
             HomeGrid(items, onTopRouteClick)
         }
 
         item {
-            Title("Create accounts", R.drawable.accounts, HP.userRights.accounts == true)
+            Title("Create Accounts", subTitle = "Manage your financial accounts", icon = R.drawable.accounts, access = HP.userRights.accounts == true)
         }
         item {
             HomeGrid(accounts, onTopRouteClick)
         }
 
         item {
-            Title("Entry", R.drawable.entry, HP.userRights.entry == true)
+            Title("Transactions", subTitle = "Record and manage your business transactions", icon = R.drawable.transactions, access = HP.userRights.entry == true)
         }
         item {
             HomeGrid(entries, onTopRouteClick)
         }
 
         item {
-            Title("Warehouse", R.drawable.warehouse, HP.userRights.warehouse == true)
+            Title("Warehouse", subTitle = "Manage stock in different warehouses", icon = R.drawable.warehouse, access = HP.userRights.warehouse == true)
         }
         item {
             HomeGrid(warehouse, onTopRouteClick)
@@ -827,41 +830,9 @@ private fun HomeBody(
 }
 
 @Composable
-private fun Title1(
-    title: String,
-    @DrawableRes icon: Int? = null,
-    access: Boolean = true,
-) {
-    if (access) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start,
-        ) {
-            if (icon != null) {
-                AppIcon(
-                    icon = icon,
-                    size = 22.dp,
-                )
-                Spacer(Modifier.width(8.dp))
-            }
-            Text(
-                text = title,
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                ),
-            )
-        }
-    }
-}
-
-@Composable
 private fun Title(
     title: String,
+    subTitle: String = "",
     @DrawableRes icon: Int? = null,
     access: Boolean = true,
 ) {
@@ -873,82 +844,160 @@ private fun Title(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start,
         ) {
-            if (icon != null) {
-                AppIcon(
-                    icon = icon,
-                    size = 26.dp,
-                )
-                Spacer(Modifier.width(8.dp))
-            }
-            Text(
-                text = title,
-                style = TextStyle(
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                ),
-            )
-        }
-    }
-}
-
-@Composable
-private fun HomeGrid1(
-    items: List<TopItem>,
-    onClick: (TopRoutes) -> Unit
-) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(4),
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(max = 400.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        val filteredItems = items.filter { it.access }
-        items(filteredItems) { item ->
-            Card(
+            Box(
                 modifier = Modifier
-                    .width(80.dp)
-                    .height(92.dp)
-                    .padding(vertical = 5.dp),
-                onClick = { onClick(item.screen) },
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = 2.dp
-                ),
-                shape = RoundedCornerShape(8.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                ),
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(MaterialTheme.colorScheme.primary.copy(.1f))
+                ,
+                contentAlignment = Alignment.Center,
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.SpaceEvenly,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Spacer(Modifier.height(8.dp))
-                    item.icon?.run {
-                        AppIcon(
-                            modifier = Modifier
-                                .weight(1f),
-                            icon = item.icon,
-                            size = 20.dp,
-                        )
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    Text(
+                if (icon != null) {
+                    AppIcon(
                         modifier = Modifier
-                            .weight(1f),
-                        text = item.text,
-                        style = TextStyle(
-                            textAlign = TextAlign.Center,
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        )
+                            .padding(12.dp),
+                        icon = icon,
+                        size = 22.dp,
+                        tint = MaterialTheme.colorScheme.primary,
                     )
                 }
             }
+
+            Spacer(Modifier.width(8.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.SpaceAround,
+            ) {
+                Text(
+                    text = title,
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    ),
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = subTitle,
+                    style = TextStyle(
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    ),
+                )
+            }
         }
+
+
+//        Row(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(vertical = 8.dp),
+//            verticalAlignment = Alignment.CenterVertically,
+//            horizontalArrangement = Arrangement.Start,
+//        ) {
+//            if (icon != null) {
+//                AppIcon(
+//                    icon = icon,
+//                    size = 26.dp,
+//                )
+//                Spacer(Modifier.width(8.dp))
+//            }
+//            Text(
+//                text = title,
+//                style = TextStyle(
+//                    fontSize = 14.sp,
+//                    fontWeight = FontWeight.Bold,
+//                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+//                ),
+//            )
+//        }
+    }
+}
+
+@Composable
+private fun Title1(
+    title: String,
+    subTitle: String = "",
+    @DrawableRes icon: Int? = null,
+    access: Boolean = true,
+) {
+    if (access) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start,
+        ) {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.onPrimaryContainer.copy(.1f))
+                ,
+                contentAlignment = Alignment.Center,
+            ) {
+                if (icon != null) {
+                    AppIcon(
+                        modifier = Modifier
+                            .padding(12.dp),
+                        icon = icon,
+                        size = 22.dp,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                }
+            }
+
+            Spacer(Modifier.width(8.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.SpaceAround,
+            ) {
+                Text(
+                    text = title,
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    ),
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = subTitle,
+                    style = TextStyle(
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    ),
+                )
+            }
+        }
+
+
+//        Row(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(vertical = 8.dp),
+//            verticalAlignment = Alignment.CenterVertically,
+//            horizontalArrangement = Arrangement.Start,
+//        ) {
+//            if (icon != null) {
+//                AppIcon(
+//                    icon = icon,
+//                    size = 26.dp,
+//                )
+//                Spacer(Modifier.width(8.dp))
+//            }
+//            Text(
+//                text = title,
+//                style = TextStyle(
+//                    fontSize = 14.sp,
+//                    fontWeight = FontWeight.Bold,
+//                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+//                ),
+//            )
+//        }
     }
 }
 
@@ -983,29 +1032,41 @@ private fun HomeGrid(
                 Column(
                     modifier = Modifier
                         .fillMaxSize(),
-                    verticalArrangement = Arrangement.SpaceEvenly,
+                    verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Spacer(Modifier.height(12.dp))
                     item.icon?.run {
-                        AppIcon(
+                        Box(
                             modifier = Modifier
-                                .weight(1f),
-                            icon = item.icon,
-                            size = 26.dp,
+                                .clip(RoundedCornerShape(16.dp))
+//                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.onPrimaryContainer.copy(.1f))
+                                .padding(10.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            AppIcon(
+                                icon = item.icon,
+                                size = 24.dp,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            )
+                        }
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ){
+                        Text(
+                            text = item.text,
+                            style = TextStyle(
+                                textAlign = TextAlign.Center,
+                                fontSize = 13.sp,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            )
                         )
                     }
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        modifier = Modifier
-                            .weight(1f),
-                        text = item.text,
-                        style = TextStyle(
-                            textAlign = TextAlign.Center,
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        )
-                    )
                 }
             }
         }
@@ -1108,3 +1169,63 @@ fun BranchesList(
 
 }
 
+
+@Composable
+private fun HomeGridOld(
+    items: List<TopItem>,
+    onClick: (TopRoutes) -> Unit
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(3),
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(max = 400.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        val filteredItems = items.filter { it.access }
+        items(filteredItems) { item ->
+            Card(
+                modifier = Modifier
+                    .width(100.dp)
+                    .height(112.dp)
+                    .padding(vertical = 6.dp),
+                onClick = { onClick(item.screen) },
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 2.dp
+                ),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                ),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.SpaceEvenly,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Spacer(Modifier.height(12.dp))
+                    item.icon?.run {
+                        AppIcon(
+                            modifier = Modifier
+                                .weight(1f),
+                            icon = item.icon,
+                            size = 26.dp,
+                        )
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        modifier = Modifier
+                            .weight(1f),
+                        text = item.text,
+                        style = TextStyle(
+                            textAlign = TextAlign.Center,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
+                    )
+                }
+            }
+        }
+    }
+}

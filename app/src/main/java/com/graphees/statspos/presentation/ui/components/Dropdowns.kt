@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -691,7 +692,7 @@ fun ChipsRow(
     items: List<DropdownItem>,
     selectedItem: DropdownItem,
     onItemSelected: (DropdownItem) -> Unit,
-    shape: Shape = CircleShape,
+    shape: Shape = RoundedCornerShape(12.dp),
     addNone: Boolean = true,
     noneText: String = "None",
 ) {
@@ -734,7 +735,7 @@ fun SubChipsRow(
     selectedItem: DropdownItem,
     onItemSelected: (DropdownItem) -> Unit,
     mainId: Long = 0L,
-    shape: Shape = CircleShape,
+    shape: Shape = RoundedCornerShape(12.dp),
     addNone: Boolean = true,
     noneText: String = "None",
 ) {
@@ -806,7 +807,7 @@ private fun FilterChip(
 ) {
     FilterChip(
         modifier = Modifier
-            .height(30.dp),
+            .height(36.dp),
         selected = isSelected,
         onClick = {
             onItemSelected(item)
@@ -821,7 +822,7 @@ private fun FilterChip(
         shape = shape,
         border = BorderStroke(
             width = 1.dp,
-            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimaryContainer
+            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimaryContainer.copy(.2f)
         ),
         colors = FilterChipDefaults.filterChipColors(
             selectedContainerColor = MaterialTheme.colorScheme.primary,

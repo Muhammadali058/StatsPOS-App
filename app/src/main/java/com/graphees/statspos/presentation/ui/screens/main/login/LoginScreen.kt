@@ -89,7 +89,12 @@ fun LoginScreen(
     var showBranchesList by remember { mutableStateOf(false) }
 
     fun test() {
-
+        viewModel.login {
+            if (HP.appSettings.onlinePrints == true) {
+                SocketManager.join()
+            }
+            onLogin()
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -100,7 +105,7 @@ fun LoginScreen(
         SocketManager.init()
         SocketManager.connect()
 
-//        test()
+        test()
     }
 
     val snackbarHostState = remember { SnackbarHostState() }

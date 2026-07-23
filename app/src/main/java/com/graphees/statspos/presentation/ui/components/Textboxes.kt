@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -39,6 +41,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -46,6 +49,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -85,6 +89,124 @@ import com.graphees.statspos.utils.HP
 import java.time.LocalDate
 
 @Composable
+fun TextboxBasic(
+    modifier: Modifier = Modifier,
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: @Composable (() -> Unit)? = null,
+    height: Dp = ConstantSize.DEFAULT_TEXTBOX_HEIGHT,
+    shape: Shape = RoundedCornerShape(12.dp),
+    textStyle: TextStyle = TextStyle(fontSize = 15.sp),
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    singleLine: Boolean = true,
+    showBorder: Boolean = true,
+    focusRequester: FocusRequester? = null,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    contentPadding: PaddingValues = PaddingValues(
+        start = 15.dp,
+        top = 10.dp,
+        end = 10.dp,
+        bottom = 10.dp,
+    ),
+    padding: PaddingValues = ConstantPaddings.CUSTOM_TEXTBOX_OUTSIDE,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val internalFocusRequester = focusRequester ?: remember { FocusRequester() }
+
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val containerColor =
+        if (isFocused)
+            Color.Transparent
+        else
+            Color.Transparent
+
+    val borderColor =
+        if (isFocused)
+            MaterialTheme.colorScheme.outlineVariant
+        else
+            MaterialTheme.colorScheme.outlineVariant
+
+    Column(
+        modifier = modifier.padding(padding)
+    ) {
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(height)
+                .background(containerColor, shape)
+                .then(
+                    if (showBorder)
+                        Modifier.border(1.dp, borderColor, shape)
+                    else
+                        Modifier
+                )
+                .focusRequester(internalFocusRequester)
+                .padding(contentPadding)
+            ,
+            contentAlignment = Alignment.CenterStart
+        ) {
+
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                leadingIcon?.invoke()
+//                if (leadingIcon != null) {
+//                    Box(
+//                        modifier = Modifier.padding(start = 5.dp, end = 5.dp)
+//                    ) {
+//                        leadingIcon()
+//                    }
+//                }
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 6.dp),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+
+                    if (value.isEmpty()) {
+                        CompositionLocalProvider(
+                            LocalContentColor provides MaterialTheme.colorScheme.onPrimaryContainer
+                        ) {
+                            placeholder?.invoke()
+                        }
+                    }
+
+                    BasicTextField(
+                        value = value,
+                        onValueChange = onValueChange,
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = enabled,
+                        readOnly = readOnly,
+                        singleLine = singleLine,
+                        textStyle = textStyle.copy(
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        interactionSource = interactionSource,
+                        keyboardOptions = keyboardOptions,
+                        keyboardActions = keyboardActions,
+                        visualTransformation = visualTransformation
+                    )
+                }
+
+                trailingIcon?.invoke()
+            }
+        }
+    }
+}
+
+@Composable
 fun Textbox(
     modifier: Modifier = Modifier,
     value: String,
@@ -97,13 +219,13 @@ fun Textbox(
         focusedIndicatorColor = MaterialTheme.colorScheme.outlineVariant,
         unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
         focusedLabelColor = MaterialTheme.colorScheme.outlineVariant,
-        unfocusedLabelColor = MaterialTheme.colorScheme.outline,
+        unfocusedLabelColor = MaterialTheme.colorScheme.outline.copy(.5f),
         focusedContainerColor = Color.Transparent,
         unfocusedContainerColor = Color.Transparent,
         focusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
         unfocusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        focusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        focusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(.5f),
+        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(.5f),
         disabledContainerColor = Color.Transparent,
     ),
     textStyle: TextStyle = TextStyle(
@@ -220,7 +342,7 @@ fun Textbox2(
 
     Box(
         modifier = modifier
-            .height(46.dp)
+            .height(42.dp)
             .clip(shape)
             .background(MaterialTheme.colorScheme.secondaryContainer)
             .padding(horizontal = 12.dp),
@@ -277,81 +399,10 @@ fun Textbox2(
                     }
                 }
 
-                trailingIcon != null && value.isNotEmpty() -> {
+                trailingIcon != null -> {
                     Spacer(modifier = Modifier.width(8.dp))
                     trailingIcon()
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun Textbox3(
-    modifier: Modifier = Modifier,
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String = "Search",
-    textColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
-    placeholderColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
-    leadingIcon: (@Composable (() -> Unit))? = null,
-    trailingIcon: (@Composable (() -> Unit))? = null,
-    singleLine: Boolean = true,
-    enabled: Boolean = true,
-    readOnly: Boolean = false,
-    shape: Shape = RoundedCornerShape(8.dp),
-    textStyle: TextStyle = TextStyle(fontSize = 14.sp),
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    keyboardActions: KeyboardActions = KeyboardActions.Default,
-    focusRequester: FocusRequester = remember { FocusRequester() },
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-
-    Box(
-        modifier = modifier
-            .height(46.dp)
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.secondaryContainer)
-            .padding(PaddingValues(horizontal = 12.dp, vertical = 0.dp)),
-        contentAlignment = Alignment.CenterStart
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (leadingIcon != null) {
-                leadingIcon()
-                Spacer(modifier = Modifier.width(8.dp))
-            }
-
-            Box(modifier = Modifier.weight(1f)) {
-                if (value.isEmpty()) {
-                    Text(
-                        text = placeholder,
-                        color = placeholderColor,
-                        style = textStyle
-                    )
-                }
-
-                BasicTextField(
-                    value = value,
-                    onValueChange = onValueChange,
-                    singleLine = singleLine,
-                    enabled = enabled,
-                    readOnly = readOnly,
-                    textStyle = textStyle.copy(color = textColor),
-                    cursorBrush = SolidColor(textColor),
-                    keyboardOptions = keyboardOptions,
-                    keyboardActions = keyboardActions,
-                    interactionSource = interactionSource,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(focusRequester),
-                )
-            }
-
-            if (trailingIcon != null && value.isNotEmpty()) {
-                Spacer(modifier = Modifier.width(8.dp))
-                trailingIcon()
             }
         }
     }
@@ -421,7 +472,7 @@ fun AutoCompleteItemsTextbox(
     onValueChange: (String) -> Unit,
     onItemSelected: (String) -> Unit,
     onEndIconClick: (String) -> Unit,
-    onSearchClick: (String) -> Unit,
+    onGoClick: (String) -> Unit,
     suggestions: Boolean = true,
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
@@ -436,10 +487,11 @@ fun AutoCompleteItemsTextbox(
         }
     },
     keyboardOptions: KeyboardOptions = KeyboardOptions(
-        imeAction = ImeAction.Search
+        imeAction = ImeAction.Go
     ),
     height: Dp = ConstantSize.DEFAULT_TEXTBOX_HEIGHT,
-    shape: Shape = OutlinedTextFieldDefaults.shape,
+//    shape: Shape = OutlinedTextFieldDefaults.shape,
+    shape: Shape = RoundedCornerShape(12.dp),
     textStyle: TextStyle = TextStyle(),
     enabled: Boolean = true,
     readOnly: Boolean = false,
@@ -465,7 +517,7 @@ fun AutoCompleteItemsTextbox(
     Box(
         modifier = modifier
     ) {
-        Textbox(
+        TextboxBasic(
             modifier = Modifier
                 .fillMaxWidth()
                 .onGloballyPositioned { coordinates ->
@@ -478,7 +530,7 @@ fun AutoCompleteItemsTextbox(
                     expanded = it.isNotEmpty()
             },
             height = height,
-            label = label,
+//            label = label,
             placeholder = placeholder,
             shape = shape,
             textStyle = textStyle,
@@ -487,15 +539,23 @@ fun AutoCompleteItemsTextbox(
             singleLine = singleLine,
             leadingIcon = if (suggestions) {
                 {
-                    IconButton(
+                    AppIconButton(
+                        icon = Icons.Default.ArrowDropDown,
+                        buttonSize = 24.dp,
+                        size = 20.dp,
                         onClick = {
                             expanded = !expanded
                         }
-                    ) {
-                        AppIcon(
-                            icon = Icons.Default.ArrowDropDown
-                        )
-                    }
+                    )
+//                    IconButton(
+//                        onClick = {
+//                            expanded = !expanded
+//                        }
+//                    ) {
+//                        AppIcon(
+//                            icon = Icons.Default.ArrowDropDown
+//                        )
+//                    }
 
                 }
             } else null,
@@ -503,17 +563,30 @@ fun AutoCompleteItemsTextbox(
             keyboardOptions = keyboardOptions,
             keyboardActions = KeyboardActions(
                 onSearch = {
-                    onSearchClick(value)
+                    onGoClick(value)
                     expanded = false
                 },
                 onGo = {
-                    onSearchClick(value)
+                    onGoClick(value)
                     expanded = false
 
                 }
             ),
+//            colors = TextFieldDefaults.colors(
+//                focusedIndicatorColor = MaterialTheme.colorScheme.outlineVariant,
+//                unfocusedIndicatorColor = MaterialTheme.colorScheme.outlineVariant,
+//                focusedLabelColor = MaterialTheme.colorScheme.outlineVariant,
+//                unfocusedLabelColor = MaterialTheme.colorScheme.outline.copy(.5f),
+//                focusedContainerColor = Color.Transparent,
+//                unfocusedContainerColor = Color.Transparent,
+//                focusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+//                unfocusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+//                focusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(.5f),
+//                unfocusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(.5f),
+//                disabledContainerColor = Color.Transparent,
+//            ),
             focusRequester = focusRequester,
-            contentPadding = contentPadding,
+//            contentPadding = contentPadding,
             padding = padding,
         )
 
@@ -832,27 +905,36 @@ fun SearchTextbox(
         onValueChange("")
     },
 ) {
-    Textbox(
+    TextboxBasic(
         modifier = modifier
             .fillMaxWidth(),
         value = value,
         onValueChange = onValueChange,
-        label = {
+        placeholder = {
             Text(
                 text = label
             )
         },
-        trailingIcon = {
-            IconButton(onClick = {
-                onEndIconClick(value)
-            }) {
-                AppIcon(
-                    icon = Icons.Default.Clear,
-                    modifier = Modifier.size(20.dp)
-                )
-//                AppIcon(icon = R.drawable.ic_search)
-            }
+        leadingIcon = {
+            AppIcon(
+                icon = Icons.Default.Search,
+                modifier = Modifier.size(22.dp),
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
+            )
         },
+        trailingIcon = if (value.isNotEmpty()) {
+            {
+                IconButton(onClick = {
+                    onEndIconClick(value)
+                }) {
+                    AppIcon(
+                        icon = Icons.Default.Clear,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(.5f)
+                    )
+                }
+            }
+        } else null,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Text,
             imeAction = ImeAction.Search
@@ -861,7 +943,8 @@ fun SearchTextbox(
             onSearch = {
                 onSearchClick(value)
             }
-        )
+        ),
+        shape = RoundedCornerShape(12.dp),
     )
 }
 
@@ -938,7 +1021,7 @@ fun SearchItemBox(
             onValueChange = onValueChange,
             onItemSelected = onItemSelected,
             onEndIconClick = onEndIconClick,
-            onSearchClick = onSearchClick,
+            onGoClick = onSearchClick,
             label = {
                 Text(
                     text = "Select Item"
@@ -1083,7 +1166,7 @@ fun CalculatorTB(
 
 @Composable
 private fun CalculatorScreen(
-    result:String,
+    result: String,
     onResultChange: (String) -> Unit,
 ) {
     Column(
@@ -1160,7 +1243,7 @@ private fun CalculatorButton(
             modifier = Modifier
                 .fillMaxSize(),
             contentAlignment = Alignment.Center,
-        ){
+        ) {
             Text(
                 text = text,
                 style = TextStyle(
@@ -1179,15 +1262,16 @@ private fun handleInput(current: String, input: String): String {
         "C" -> "0"
         "=" -> calculateResult(current)
         "." -> {
-            if (current.isEmpty() || current.last() in listOf('+','-','*','/')) {
+            if (current.isEmpty() || current.last() in listOf('+', '-', '*', '/')) {
                 current + "0."
             } else {
                 val lastNumber = current.split("+", "-", "*", "/").last()
                 if (lastNumber.contains(".")) current else "$current."
             }
         }
+
         else -> {
-            if(current == "0")
+            if (current == "0")
                 input
             else
                 current + input

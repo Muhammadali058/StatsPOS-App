@@ -27,6 +27,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -50,6 +52,9 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -137,10 +142,10 @@ fun BottomBar(
     modifier: Modifier = Modifier
 ) {
     val selectedColor = MaterialTheme.colorScheme.primary
+//    val backgroundColor = Color.Red
     val backgroundColor = MaterialTheme.colorScheme.surface
     val foregroundColor = MaterialTheme.colorScheme.onSurface
 
-//    Custom NavigationBar
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -152,6 +157,7 @@ fun BottomBar(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // region item
         items.forEach { (key, data) ->
             val selected = selectedKey == key
 
@@ -172,8 +178,7 @@ fun BottomBar(
                     .clip(RoundedCornerShape(12.dp))
                     .clickable { onSelectKey(key) }
                     .background(if (selected) MaterialTheme.colorScheme.primary.copy(.1f) else Color.Transparent)
-                    .padding(vertical = 4.dp)
-                ,
+                    .padding(vertical = 4.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Column(
@@ -201,6 +206,7 @@ fun BottomBar(
                 }
             }
         }
+        // endregion
     }
 }
 

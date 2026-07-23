@@ -64,6 +64,7 @@ import com.graphees.statspos.presentation.ui.components.ListHeading
 import com.graphees.statspos.presentation.ui.components.ListImageView
 import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
+import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SubChipsRow
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
@@ -363,18 +364,7 @@ private fun SearchBox(
             value = value,
             onValueChange = onValueChange,
             onItemSelected = onItemSelected,
-            onEndIconClick = { },
             onGoClick = onGoClick,
-//            label = {
-//                Text(
-//                    text = "Search"
-//                )
-//            },
-            placeholder = {
-                Text(
-                    text = "Search"
-                )
-            },
             trailingIcon = {
                 AppIconButton(
                     icon = R.drawable.ic_barcode,
@@ -383,68 +373,10 @@ private fun SearchBox(
                         onBarcodeClick()
                     }
                 )
-//                IconButton(
-//                    modifier = modifier
-//                        .size(30.dp),
-//                    onClick = {
-//                        onBarcodeClick()
-//                    }
-//                ) {
-//                    AppIcon(
-//                        icon = R.drawable.ic_barcode,
-//                        size = 20.dp
-//                    )
-//                }
             }
         )
 
         Spacer(Modifier.width(8.dp))
-        FilterIcon {
-            onFilterClick()
-        }
-    }
-}
-
-@Composable
-private fun SearchBox1(
-    modifier: Modifier = Modifier,
-    value: String,
-    onValueChange: (String) -> Unit,
-    onItemSelected: (String) -> Unit,
-    onSearchClick: (String) -> Unit,
-    onEndIconClick: (String) -> Unit,
-    onBarcodeClick: () -> Unit,
-    onFilterClick: () -> Unit,
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        AutoCompleteItemsTextbox(
-            modifier = Modifier
-                .weight(1f),
-            value = value,
-            onValueChange = onValueChange,
-            onItemSelected = onItemSelected,
-            onEndIconClick = onEndIconClick,
-            onGoClick = onSearchClick,
-            label = {
-                Text(
-                    text = "Search"
-                )
-            },
-        )
-        Spacer(Modifier.width(4.dp))
-        AppIconButton(
-            onClick = {
-                onBarcodeClick()
-            },
-            icon = R.drawable.ic_barcode,
-            buttonSize = 32.dp,
-            size = 26.dp
-        )
-        Spacer(Modifier.width(4.dp))
         FilterIcon {
             onFilterClick()
         }

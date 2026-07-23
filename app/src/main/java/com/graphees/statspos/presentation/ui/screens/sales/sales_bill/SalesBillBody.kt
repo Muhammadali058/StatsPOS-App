@@ -41,9 +41,10 @@ import com.graphees.statspos.presentation.ui.components.Dropdown
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ExpandableSection
 import com.graphees.statspos.presentation.ui.components.MOPSection
+import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.sales.sales_bill.AddUpdateSalesViewModel
@@ -215,6 +216,9 @@ private fun Basic(
             label = {
                 Text("Customer")
             },
+            placeholder = {
+                PlaceHolder(text = "Customer")
+            },
             padding = PaddingValues(top = 4.dp)
         )
         Row(
@@ -227,7 +231,7 @@ private fun Basic(
             )
         }
         Spacer(Modifier.height(16.dp))
-        Textbox(
+        TextboxOutlined(
             value = customerName,
             onValueChange = onCustomerNameChange,
             modifier = Modifier
@@ -271,6 +275,10 @@ private fun Basic(
                 label = {
                     Text(text = "Sales On")
                 },
+                placeholder = {
+                    PlaceHolder(text = "Sales On")
+                },
+                outlined = true,
                 showEndIcon = false,
                 enabled = HP.userRights.creditBill == true,
             )
@@ -284,6 +292,10 @@ private fun Basic(
                 label = {
                     Text(text = "Sales Type")
                 },
+                placeholder = {
+                    PlaceHolder(text = "Sales Type")
+                },
+                outlined = true,
                 showEndIcon = false,
                 enabled = HP.userRights.salesReturn == true,
             )
@@ -346,13 +358,16 @@ private fun Others(
             label = {
                 Text(text = "Supplier")
             },
+            placeholder = {
+                PlaceHolder(text = "Supplier")
+            },
             addNone = true,
         )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Textbox(
+            TextboxOutlined(
                 value = payment,
                 onValueChange = onPaymentChange,
                 modifier = Modifier
@@ -366,7 +381,7 @@ private fun Others(
                 enabled = paymentEnabled,
             )
             Spacer(Modifier.width(8.dp))
-            Textbox(
+            TextboxOutlined(
                 value = change,
                 onValueChange = onChangeChange,
                 modifier = Modifier
@@ -380,7 +395,7 @@ private fun Others(
                 readOnly = true,
             )
         }
-        Textbox(
+        TextboxOutlined(
             value = remarks,
             onValueChange = onRemarksChange,
             modifier = Modifier

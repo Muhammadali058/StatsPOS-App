@@ -276,7 +276,7 @@ fun HomeScreen(
 
     // Navigation
     val navigationState = rememberNavigationState(
-        startRoute = BottomRoutes.Items,
+        startRoute = BottomRoutes.Home,
         topLevelRoutes = BOTTOM_DESTINATIONS.keys,
         serializersModules = SerializersModule {
             polymorphic(NavKey::class) {
@@ -854,9 +854,9 @@ private fun Title(
                 if (icon != null) {
                     AppIcon(
                         modifier = Modifier
-                            .padding(12.dp),
+                            .padding(10.dp),
                         icon = icon,
-                        size = 22.dp,
+                        size = 20.dp,
                         tint = MaterialTheme.colorScheme.primary,
                     )
                 }
@@ -866,111 +866,26 @@ private fun Title(
             Column(
                 modifier = Modifier
                     .fillMaxWidth(),
-                verticalArrangement = Arrangement.SpaceAround,
+//                verticalArrangement = Arrangement.SpaceAround,
+                verticalArrangement = Arrangement.Center,
             ) {
                 Text(
                     text = title,
                     style = TextStyle(
-                        fontSize = 14.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                     ),
                 )
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    text = subTitle,
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Normal,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    ),
-                )
-            }
-        }
-
-
-//        Row(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(vertical = 8.dp),
-//            verticalAlignment = Alignment.CenterVertically,
-//            horizontalArrangement = Arrangement.Start,
-//        ) {
-//            if (icon != null) {
-//                AppIcon(
-//                    icon = icon,
-//                    size = 26.dp,
+//                Spacer(Modifier.height(2.dp))
+//                Text(
+//                    text = subTitle,
+//                    style = TextStyle(
+//                        fontSize = 12.sp,
+//                        fontWeight = FontWeight.Normal,
+//                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+//                    ),
 //                )
-//                Spacer(Modifier.width(8.dp))
-//            }
-//            Text(
-//                text = title,
-//                style = TextStyle(
-//                    fontSize = 14.sp,
-//                    fontWeight = FontWeight.Bold,
-//                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-//                ),
-//            )
-//        }
-    }
-}
-
-@Composable
-private fun Title1(
-    title: String,
-    subTitle: String = "",
-    @DrawableRes icon: Int? = null,
-    access: Boolean = true,
-) {
-    if (access) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start,
-        ) {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.onPrimaryContainer.copy(.1f))
-                ,
-                contentAlignment = Alignment.Center,
-            ) {
-                if (icon != null) {
-                    AppIcon(
-                        modifier = Modifier
-                            .padding(12.dp),
-                        icon = icon,
-                        size = 22.dp,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                }
-            }
-
-            Spacer(Modifier.width(8.dp))
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.SpaceAround,
-            ) {
-                Text(
-                    text = title,
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    ),
-                )
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    text = subTitle,
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Normal,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    ),
-                )
             }
         }
 
@@ -1040,8 +955,7 @@ private fun HomeGrid(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(16.dp))
-//                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.onPrimaryContainer.copy(.1f))
+                                .background(MaterialTheme.colorScheme.primary.copy(.1f))
                                 .padding(10.dp),
                             contentAlignment = Alignment.Center,
                         ) {

@@ -43,7 +43,7 @@ import com.graphees.statspos.presentation.ui.components.ExpandableSection
 import com.graphees.statspos.presentation.ui.components.PasswordTextbox
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.components.UploadImageView
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
@@ -336,7 +336,7 @@ private fun Basic(
             .fillMaxWidth()
             .padding(ConstantPaddings.BODY_HORIZONTAL),
     ) {
-        Textbox(
+        TextboxOutlined(
             value = username,
             onValueChange = onUsernameChange,
             modifier = Modifier
@@ -373,6 +373,7 @@ private fun Basic(
                 Text("User Type")
             },
             showEndIcon = false,
+            outlined = true,
         )
         ComboBox(
             modifier = Modifier
@@ -384,6 +385,7 @@ private fun Basic(
                 Text("Shift")
             },
             showEndIcon = false,
+            outlined = true,
         )
         if(HP.user.isMainUser == true) {
             Spacer(Modifier.height(8.dp))

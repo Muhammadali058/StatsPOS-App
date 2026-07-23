@@ -56,6 +56,7 @@ import com.graphees.statspos.presentation.ui.components.ListImageView
 import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.ListMainLabel
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
+import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.components.TopAppBar
@@ -271,7 +272,11 @@ private fun Home(
                     },
                     label = {
                         Text(text = "Category")
-                    }
+                    },
+                    placeholder = {
+                        PlaceHolder(text = "Category")
+                    },
+                    outlined = true,
                 )
 
                 Button(onClick = {

@@ -55,6 +55,7 @@ import com.graphees.statspos.presentation.ui.components.AutoCompleteItemsTextbox
 import com.graphees.statspos.presentation.ui.components.DateTextbox
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.FilterIcon
+import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.ReportButton
 import com.graphees.statspos.presentation.ui.components.ReportCard
@@ -304,7 +305,7 @@ fun ReportsDateBox(
                     onDateChange = onToDateChange,
                     label = "To Date"
                 )
-                Spacer(Modifier.width(4.dp))
+                Spacer(Modifier.width(8.dp))
                 FilterIcon {
                     onFilterClick()
                 }
@@ -340,12 +341,9 @@ fun ReportsItemnameBox(
                 value = value,
                 onValueChange = onValueChange,
                 onItemSelected = onItemSelected,
-                onEndIconClick = onEndIconClick,
                 onGoClick = onSearchClick,
-                label = {
-                    Text(
-                        text = "Select Item"
-                    )
+                placeholder = {
+                    PlaceHolder("Select Item")
                 },
                 trailingIcon = {
                     ShowReportIcon {

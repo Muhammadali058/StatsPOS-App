@@ -38,9 +38,10 @@ import com.graphees.statspos.presentation.ui.components.Dropdown
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ExpandableSection
 import com.graphees.statspos.presentation.ui.components.MOPSection
+import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.purchase.purchase_bill.AddUpdatePurchaseViewModel
@@ -174,6 +175,9 @@ private fun Basic(
             label = {
                 Text("Vendor")
             },
+            placeholder = {
+                PlaceHolder(text = "Vendor")
+            },
             padding = PaddingValues(top = 4.dp)
         )
         Row(
@@ -218,6 +222,10 @@ private fun Basic(
                 label = {
                     Text(text = "Purchase On")
                 },
+                placeholder = {
+                    PlaceHolder(text = "Purchase On")
+                },
+                outlined = true,
                 showEndIcon = false,
                 enabled = HP.userRights.creditBill == true,
             )
@@ -231,6 +239,10 @@ private fun Basic(
                 label = {
                     Text(text = "Purchase Type")
                 },
+                placeholder = {
+                    PlaceHolder(text = "Purchase Type")
+                },
+                outlined = true,
                 showEndIcon = false,
             )
         }
@@ -270,6 +282,9 @@ private fun Others(
                 label = {
                     Text(text = "Supplier")
                 },
+                placeholder = {
+                    PlaceHolder(text = "Supplier")
+                },
                 addNone = true,
             )
         }
@@ -281,7 +296,7 @@ private fun Others(
 //                Text("Expense")
 //            }
 //        )
-        Textbox(
+        TextboxOutlined(
             value = refInvoiceNo,
             onValueChange = onRefInvoiceNoChange,
             modifier = Modifier.fillMaxWidth(),

@@ -1,7 +1,5 @@
 package com.graphees.statspos.presentation.ui.screens.main.login
 
-import android.app.Activity
-import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -51,7 +49,7 @@ import com.graphees.statspos.presentation.ui.components.AppIcon
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.PasswordTextbox
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.screens.main.main.BranchesList
 import com.graphees.statspos.presentation.ui.theme.StatsPOSTheme
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
@@ -64,7 +62,6 @@ import com.graphees.statspos.utils.SocketManager
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
 import com.graphees.statspos.utils.showToast
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -105,7 +102,7 @@ fun LoginScreen(
         SocketManager.init()
         SocketManager.connect()
 
-        test()
+//        test()
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -248,7 +245,7 @@ private fun Body(
                 )
             )
             Spacer(Modifier.height(16.dp))
-            Textbox(
+            TextboxOutlined(
                 value = username,
                 onValueChange = onUsernameChange,
                 label = {

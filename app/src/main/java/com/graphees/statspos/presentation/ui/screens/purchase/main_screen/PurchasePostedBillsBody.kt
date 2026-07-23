@@ -263,6 +263,7 @@ fun PurchasePostedBillsBody(
                     label = {
                         Text(text = "Search By")
                     },
+                    outlined = true,
                 )
                 if (HP.user.userType == 1) {
                     ComboBox(
@@ -275,6 +276,7 @@ fun PurchasePostedBillsBody(
                             Text(text = "User")
                         },
                         addNone = true,
+                        outlined = true,
                     )
                 }
                 Row(
@@ -295,6 +297,7 @@ fun PurchasePostedBillsBody(
                         addNone = true,
                         noneText = "Both",
                         showEndIcon = false,
+                        outlined = true,
                     )
                     Spacer(Modifier.width(8.dp))
                     ComboBox(
@@ -311,6 +314,7 @@ fun PurchasePostedBillsBody(
                         addNone = true,
                         noneText = "Both",
                         showEndIcon = false,
+                        outlined = true,
                     )
                 }
 
@@ -332,6 +336,7 @@ fun PurchasePostedBillsBody(
                         addNone = true,
                         noneText = "Both",
                         showEndIcon = false,
+                        outlined = true,
                     )
                 }
                 Button(onClick = {

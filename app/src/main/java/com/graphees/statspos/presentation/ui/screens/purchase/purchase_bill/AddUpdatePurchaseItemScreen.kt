@@ -61,7 +61,7 @@ import com.graphees.statspos.presentation.ui.components.LabelMedium
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
 import com.graphees.statspos.presentation.ui.components.SearchItemBox
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
@@ -538,7 +538,7 @@ private fun Body(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                Textbox(
+                TextboxOutlined(
                     value = tax,
                     onValueChange = onTaxChange,
                     modifier = Modifier
@@ -710,7 +710,7 @@ private fun SaleRates(
         Spacer(Modifier.height(8.dp))
         // Retail & Wholesale
         Row {
-            Textbox(
+            TextboxOutlined(
                 value = retail,
                 onValueChange = onRetailChange,
                 modifier = Modifier.weight(1f),
@@ -725,7 +725,7 @@ private fun SaleRates(
                 enabled = retailEnabled,
             )
             Spacer(Modifier.width(8.dp))
-            Textbox(
+            TextboxOutlined(
                 value = wholesale,
                 onValueChange = onWholesaleChange,
                 modifier = Modifier.weight(1f),
@@ -744,7 +744,7 @@ private fun SaleRates(
         // Rate3 & Rate4
         if (HP.settings.fourRateSystem == true) {
             Row {
-                Textbox(
+                TextboxOutlined(
                     value = rate3,
                     onValueChange = onRate3Change,
                     modifier = Modifier.weight(1f),
@@ -756,7 +756,7 @@ private fun SaleRates(
                     ),
                 )
                 Spacer(Modifier.width(8.dp))
-                Textbox(
+                TextboxOutlined(
                     value = rate4,
                     onValueChange = onRate4Change,
                     modifier = Modifier.weight(1f),
@@ -773,7 +773,7 @@ private fun SaleRates(
         // Carton Rate & PCS in Carton
         if (HP.settings.saleCartons == true) {
             Row {
-                Textbox(
+                TextboxOutlined(
                     value = crtnRate,
                     onValueChange = onCrtnRateChange,
                     modifier = Modifier.weight(1f),
@@ -786,7 +786,7 @@ private fun SaleRates(
                     enabled = crtnRateEnabled,
                 )
                 Spacer(Modifier.width(8.dp))
-                Textbox(
+                TextboxOutlined(
                     value = marketPrice,
                     onValueChange = onMarketPriceChange,
                     modifier = Modifier.weight(1f),

@@ -50,7 +50,7 @@ import com.graphees.statspos.presentation.ui.components.AppIcon
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.PasswordTextbox
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.Textbox2
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.main.ClientsViewModel
@@ -372,7 +372,7 @@ private fun Body1(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Textbox(
+        TextboxOutlined(
             value = businessName,
             onValueChange = onBusinessNameChange,
             label = {
@@ -385,7 +385,7 @@ private fun Body1(
             },
             contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
         )
-        Textbox(
+        TextboxOutlined(
             value = contact,
             onValueChange = onContactChange,
             label = {
@@ -401,7 +401,7 @@ private fun Body1(
                 keyboardType = KeyboardType.Number
             )
         )
-        Textbox(
+        TextboxOutlined(
             value = username,
             onValueChange = onUsernameChange,
             label = {

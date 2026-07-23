@@ -43,7 +43,7 @@ import com.graphees.statspos.presentation.ui.components.ConfirmDialog
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.items.sub_barcodes.AddUpdateSubBarcodeViewModel
@@ -232,7 +232,7 @@ private fun Body(
         )
     }
 
-    Textbox(
+    TextboxOutlined(
         value = subBarcode,
         onValueChange = onSubBarcodeChange,
         modifier = Modifier

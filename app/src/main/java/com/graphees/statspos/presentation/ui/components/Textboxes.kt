@@ -23,14 +23,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
@@ -93,7 +91,9 @@ fun TextboxBasic(
     modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
-    placeholder: @Composable (() -> Unit)? = null,
+    placeholder: @Composable (() -> Unit)? = {
+        PlaceHolder("Search")
+    },
     height: Dp = ConstantSize.DEFAULT_TEXTBOX_HEIGHT,
     shape: Shape = RoundedCornerShape(12.dp),
     textStyle: TextStyle = TextStyle(fontSize = 15.sp),
@@ -110,8 +110,8 @@ fun TextboxBasic(
     contentPadding: PaddingValues = PaddingValues(
         start = 15.dp,
         top = 10.dp,
-        end = 10.dp,
         bottom = 10.dp,
+        end = 15.dp,
     ),
     padding: PaddingValues = ConstantPaddings.CUSTOM_TEXTBOX_OUTSIDE,
 ) {
@@ -152,20 +152,11 @@ fun TextboxBasic(
             ,
             contentAlignment = Alignment.CenterStart
         ) {
-
             Row(
                 modifier = Modifier.fillMaxSize(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
                 leadingIcon?.invoke()
-//                if (leadingIcon != null) {
-//                    Box(
-//                        modifier = Modifier.padding(start = 5.dp, end = 5.dp)
-//                    ) {
-//                        leadingIcon()
-//                    }
-//                }
 
                 Box(
                     modifier = Modifier
@@ -173,7 +164,6 @@ fun TextboxBasic(
                         .padding(horizontal = 6.dp),
                     contentAlignment = Alignment.CenterStart
                 ) {
-
                     if (value.isEmpty()) {
                         CompositionLocalProvider(
                             LocalContentColor provides MaterialTheme.colorScheme.onPrimaryContainer
@@ -207,7 +197,7 @@ fun TextboxBasic(
 }
 
 @Composable
-fun Textbox(
+fun TextboxOutlined(
     modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
@@ -217,9 +207,9 @@ fun Textbox(
     shape: Shape = OutlinedTextFieldDefaults.shape,
     colors: TextFieldColors = TextFieldDefaults.colors(
         focusedIndicatorColor = MaterialTheme.colorScheme.outlineVariant,
-        unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
+        unfocusedIndicatorColor = MaterialTheme.colorScheme.outlineVariant,
         focusedLabelColor = MaterialTheme.colorScheme.outlineVariant,
-        unfocusedLabelColor = MaterialTheme.colorScheme.outline.copy(.5f),
+        unfocusedLabelColor = MaterialTheme.colorScheme.outline,
         focusedContainerColor = Color.Transparent,
         unfocusedContainerColor = Color.Transparent,
         focusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -433,7 +423,7 @@ fun PasswordTextbox(
     else
         R.drawable.eye
 
-    Textbox(
+    TextboxOutlined(
         modifier = modifier,
         value = value,
         onValueChange = onValueChange,
@@ -471,21 +461,12 @@ fun AutoCompleteItemsTextbox(
     value: String,
     onValueChange: (String) -> Unit,
     onItemSelected: (String) -> Unit,
-    onEndIconClick: (String) -> Unit,
     onGoClick: (String) -> Unit,
     suggestions: Boolean = true,
-    label: @Composable (() -> Unit)? = null,
-    placeholder: @Composable (() -> Unit)? = null,
-    trailingIcon: @Composable (() -> Unit) = {
-        IconButton(onClick = {
-            onEndIconClick(value)
-        }) {
-            AppIcon(
-                icon = Icons.Default.ArrowForward,
-                size = 20.dp
-            )
-        }
+    placeholder: @Composable (() -> Unit)? = {
+        PlaceHolder("Search")
     },
+    trailingIcon: @Composable (() -> Unit)? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions(
         imeAction = ImeAction.Go
     ),
@@ -497,7 +478,6 @@ fun AutoCompleteItemsTextbox(
     readOnly: Boolean = false,
     singleLine: Boolean = true,
     focusRequester: FocusRequester? = null,
-    contentPadding: PaddingValues = ConstantPaddings.CUSTOM_TEXTBOX_INSIDE,
     padding: PaddingValues = ConstantPaddings.CUSTOM_TEXTBOX_OUTSIDE,
 ) {
     var items by remember { mutableStateOf(if (HP.appSettings.itemSuggestions == true) HP.autoCompleteItems else emptyList()) }
@@ -530,7 +510,6 @@ fun AutoCompleteItemsTextbox(
                     expanded = it.isNotEmpty()
             },
             height = height,
-//            label = label,
             placeholder = placeholder,
             shape = shape,
             textStyle = textStyle,
@@ -547,16 +526,6 @@ fun AutoCompleteItemsTextbox(
                             expanded = !expanded
                         }
                     )
-//                    IconButton(
-//                        onClick = {
-//                            expanded = !expanded
-//                        }
-//                    ) {
-//                        AppIcon(
-//                            icon = Icons.Default.ArrowDropDown
-//                        )
-//                    }
-
                 }
             } else null,
             trailingIcon = trailingIcon,
@@ -572,21 +541,7 @@ fun AutoCompleteItemsTextbox(
 
                 }
             ),
-//            colors = TextFieldDefaults.colors(
-//                focusedIndicatorColor = MaterialTheme.colorScheme.outlineVariant,
-//                unfocusedIndicatorColor = MaterialTheme.colorScheme.outlineVariant,
-//                focusedLabelColor = MaterialTheme.colorScheme.outlineVariant,
-//                unfocusedLabelColor = MaterialTheme.colorScheme.outline.copy(.5f),
-//                focusedContainerColor = Color.Transparent,
-//                unfocusedContainerColor = Color.Transparent,
-//                focusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-//                unfocusedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-//                focusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(.5f),
-//                unfocusedPlaceholderColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(.5f),
-//                disabledContainerColor = Color.Transparent,
-//            ),
             focusRequester = focusRequester,
-//            contentPadding = contentPadding,
             padding = padding,
         )
 
@@ -663,7 +618,7 @@ fun DiscountTextbox(
                 items[1]
         }
 
-        Textbox(
+        TextboxOutlined(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier
@@ -684,7 +639,7 @@ fun DiscountTextbox(
                 .width(85.dp)
                 .align(Alignment.CenterEnd)
         ) {
-            Textbox(
+            TextboxOutlined(
                 value = selectedItem.name,
                 onValueChange = {},
                 modifier = Modifier
@@ -770,7 +725,7 @@ fun DateTextbox(
         )
     }
 
-    Textbox(
+    TextboxOutlined(
         value = HP.getFormatedDate(date),
         onValueChange = { },
         modifier = modifier,
@@ -815,7 +770,7 @@ fun TextboxCB(
     Box(
         modifier = modifier
     ) {
-        Textbox(
+        TextboxOutlined(
             modifier = Modifier
                 .fillMaxWidth()
                 .onGloballyPositioned { coordinates ->
@@ -911,9 +866,7 @@ fun SearchTextbox(
         value = value,
         onValueChange = onValueChange,
         placeholder = {
-            Text(
-                text = label
-            )
+            PlaceHolder(label)
         },
         leadingIcon = {
             AppIcon(
@@ -924,15 +877,13 @@ fun SearchTextbox(
         },
         trailingIcon = if (value.isNotEmpty()) {
             {
-                IconButton(onClick = {
-                    onEndIconClick(value)
-                }) {
-                    AppIcon(
-                        icon = Icons.Default.Clear,
-                        modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(.5f)
-                    )
-                }
+                AppIconButton(
+                    icon = Icons.Default.Clear,
+                    size = 20.dp,
+                    onClick = {
+                        onEndIconClick(value)
+                    }
+                )
             }
         } else null,
         keyboardOptions = KeyboardOptions(
@@ -973,7 +924,7 @@ fun SearchBox(
             onSearchClick = onSearchClick,
         )
         if (showFilterIcon) {
-            Spacer(Modifier.width(4.dp))
+            Spacer(Modifier.width(8.dp))
             FilterIcon {
                 onFilterClick()
             }
@@ -1020,22 +971,18 @@ fun SearchItemBox(
             value = value,
             onValueChange = onValueChange,
             onItemSelected = onItemSelected,
-            onEndIconClick = onEndIconClick,
             onGoClick = onSearchClick,
-            label = {
-                Text(
-                    text = "Select Item"
-                )
+            placeholder = {
+                PlaceHolder("Select Item")
             },
             trailingIcon = {
-                IconButton(onClick = {
-                    onEndIconClick(value)
-                }) {
-                    AppIcon(
-                        icon = Icons.Default.Clear,
-                        size = 20.dp
-                    )
-                }
+                AppIconButton(
+                    icon = Icons.Default.Clear,
+                    size = 20.dp,
+                    onClick = {
+                        onEndIconClick(value)
+                    }
+                )
             },
             keyboardOptions = KeyboardOptions(
                 imeAction = ImeAction.Go
@@ -1087,7 +1034,7 @@ fun CalculatorTB(
     var showCalculator by remember { mutableStateOf(false) }
     var result by remember { mutableStateOf("0") }
 
-    Textbox(
+    TextboxOutlined(
         modifier = modifier,
         value = value,
         onValueChange = onValueChange,
@@ -1212,6 +1159,18 @@ private fun CalculatorScreen(
             }
         }
     }
+}
+
+@Composable
+fun PlaceHolder(
+    text:String,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        modifier = modifier,
+        text = text,
+        fontSize = 14.sp,
+    )
 }
 
 @Composable

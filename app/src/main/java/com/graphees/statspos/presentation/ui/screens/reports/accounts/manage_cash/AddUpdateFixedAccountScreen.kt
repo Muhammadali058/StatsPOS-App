@@ -38,7 +38,7 @@ import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
@@ -234,7 +234,7 @@ private fun Body(
     onAccountNameChange: (String) -> Unit,
     onRemarksChange: (String) -> Unit,
 ) {
-    Textbox(
+    TextboxOutlined(
         value = bankName,
         onValueChange = onAccountNameChange,
         modifier = Modifier
@@ -243,7 +243,7 @@ private fun Body(
             Text("Account Name")
         }
     )
-    Textbox(
+    TextboxOutlined(
         value = remarks,
         onValueChange = onRemarksChange,
         modifier = Modifier

@@ -42,11 +42,12 @@ import com.graphees.statspos.presentation.ui.components.ComboBox
 import com.graphees.statspos.presentation.ui.components.DateTextbox
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.MOPSection
+import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
 import com.graphees.statspos.presentation.ui.components.SearchItemBox
 import com.graphees.statspos.presentation.ui.components.SubComboBox
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.accounts.entries.stock.NewStockEntryViewModel
@@ -244,6 +245,9 @@ private fun Body(
             label = {
                 Text("Expense")
             },
+            placeholder = {
+                PlaceHolder(text = "Expense")
+            },
             addNone = true,
         )
         SubComboBox(
@@ -255,6 +259,9 @@ private fun Body(
             label = {
                 Text("Sub-Expense")
             },
+            placeholder = {
+                PlaceHolder(text = "Sub-Expense")
+            },
             addNone = true,
             mainId = expense?.id ?: 0L
         )
@@ -262,7 +269,7 @@ private fun Body(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            Textbox(
+            TextboxOutlined(
                 modifier = Modifier
                     .weight(1f),
                 value = qty,
@@ -276,7 +283,7 @@ private fun Body(
             )
             if (HP.settings.saleCartons == true) {
                 Spacer(Modifier.width(8.dp))
-                Textbox(
+                TextboxOutlined(
                     modifier = Modifier
                         .weight(1f),
                     value = crtn,
@@ -294,7 +301,7 @@ private fun Body(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            Textbox(
+            TextboxOutlined(
                 modifier = Modifier
                     .weight(1f),
                 value = amount,
@@ -316,7 +323,7 @@ private fun Body(
                 )
             }
         }
-        Textbox(
+        TextboxOutlined(
             modifier = Modifier
                 .fillMaxWidth(),
             value = naration,

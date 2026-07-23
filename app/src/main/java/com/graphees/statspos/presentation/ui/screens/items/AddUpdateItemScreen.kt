@@ -67,11 +67,12 @@ import com.graphees.statspos.presentation.ui.components.DropdownItem
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ExpandableSection
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
+import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
 import com.graphees.statspos.presentation.ui.components.SmallButton
 import com.graphees.statspos.presentation.ui.components.SubDropdown
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.components.UpgradeToPremiumBottomSheet
 import com.graphees.statspos.presentation.ui.components.UploadImageView
@@ -649,7 +650,7 @@ private fun Basic(
     ) {
         // Barcode & Ref. Code
         Row {
-            Textbox(
+            TextboxOutlined(
                 value = barcode,
                 onValueChange = onBarcodeChange,
                 modifier = Modifier
@@ -673,7 +674,7 @@ private fun Basic(
                 )
             )
             Spacer(Modifier.width(8.dp))
-            Textbox(
+            TextboxOutlined(
                 value = refCode,
                 onValueChange = onRefCodeChange,
                 modifier = Modifier
@@ -685,7 +686,7 @@ private fun Basic(
         }
 
         // Itemname & Urduname
-        Textbox(
+        TextboxOutlined(
             value = itemname,
             onValueChange = onItemnameChange,
             modifier = Modifier.fillMaxWidth(),
@@ -694,7 +695,7 @@ private fun Basic(
             },
             focusRequester = itemnameFocusRequester,
         )
-        Textbox(
+        TextboxOutlined(
             value = urduname,
             onValueChange = onUrdunameChange,
             modifier = Modifier.fillMaxWidth(),
@@ -863,7 +864,7 @@ private fun Basic(
                     ),
                 )
                 Spacer(Modifier.width(8.dp))
-                Textbox(
+                TextboxOutlined(
                     value = crtnSize,
                     onValueChange = onCrtnSizeChange,
                     modifier = Modifier.weight(1f),
@@ -905,7 +906,10 @@ private fun CategoryAndVendor(
             },
             label = {
                 Text(text = "Category")
-            }
+            },
+            placeholder = {
+                PlaceHolder(text = "Category")
+            },
         )
         SubDropdown(
             value = subCategoryName,
@@ -917,7 +921,10 @@ private fun CategoryAndVendor(
             },
             label = {
                 Text(text = "Sub-Category")
-            }
+            },
+            placeholder = {
+                PlaceHolder(text = "Sub-Category")
+            },
         )
         Dropdown(
             value = vendorName,
@@ -928,7 +935,10 @@ private fun CategoryAndVendor(
             },
             label = {
                 Text(text = "Vendor")
-            }
+            },
+            placeholder = {
+                PlaceHolder(text = "Vendor")
+            },
         )
     }
 }
@@ -969,7 +979,7 @@ private fun Stock(
             textAlign = TextAlign.Center,
         )
         Row {
-            Textbox(
+            TextboxOutlined(
                 value = stockWarningMin,
                 onValueChange = onStockWarningMinChange,
                 modifier = Modifier.weight(1f),
@@ -981,7 +991,7 @@ private fun Stock(
                 )
             )
             Spacer(Modifier.width(8.dp))
-            Textbox(
+            TextboxOutlined(
                 value = stockWarningMax,
                 onValueChange = onStockWarningMaxChange,
                 modifier = Modifier.weight(1f),
@@ -1002,7 +1012,7 @@ private fun Stock(
             textAlign = TextAlign.Center,
         )
         Row {
-            Textbox(
+            TextboxOutlined(
                 value = maxSalePcs,
                 onValueChange = onMaxSalePcsChange,
                 modifier = Modifier.weight(1f),
@@ -1015,7 +1025,7 @@ private fun Stock(
             )
             if (HP.settings.saleCartons == true) {
                 Spacer(Modifier.width(8.dp))
-                Textbox(
+                TextboxOutlined(
                     value = maxSaleCrtn,
                     onValueChange = onMaxSaleCrtnChange,
                     modifier = Modifier.weight(1f),
@@ -1037,7 +1047,7 @@ private fun Stock(
             textAlign = TextAlign.Center,
         )
         Row {
-            Textbox(
+            TextboxOutlined(
                 value = openingStockPcs,
                 onValueChange = onOpeningStockPcsChange,
                 modifier = Modifier.weight(1f),
@@ -1051,7 +1061,7 @@ private fun Stock(
             )
             if (HP.settings.saleCartons == true) {
                 Spacer(Modifier.width(8.dp))
-                Textbox(
+                TextboxOutlined(
                     value = openingStockCrtn,
                     onValueChange = onOpeningStockCrtnChange,
                     modifier = Modifier.weight(1f),
@@ -1074,7 +1084,7 @@ private fun Stock(
             textAlign = TextAlign.Center,
         )
         Row {
-            Textbox(
+            TextboxOutlined(
                 value = currentStockPcs,
                 onValueChange = onCurrentStockPcsChange,
                 modifier = Modifier.weight(1f),
@@ -1085,7 +1095,7 @@ private fun Stock(
             )
             if (HP.settings.saleCartons == true) {
                 Spacer(Modifier.width(8.dp))
-                Textbox(
+                TextboxOutlined(
                     value = currentStockCrtn,
                     onValueChange = onCurrentStockCrtnChange,
                     modifier = Modifier.weight(1f),
@@ -1182,7 +1192,7 @@ private fun DiscountExpiry(
                 modifier = Modifier
                     .fillMaxWidth(),
             )
-            Textbox(
+            TextboxOutlined(
                 value = packing,
                 onValueChange = onPackingChange,
                 modifier = Modifier
@@ -1191,7 +1201,7 @@ private fun DiscountExpiry(
                     Text("Packing")
                 },
             )
-            Textbox(
+            TextboxOutlined(
                 value = location,
                 onValueChange = onLocationChange,
                 modifier = Modifier

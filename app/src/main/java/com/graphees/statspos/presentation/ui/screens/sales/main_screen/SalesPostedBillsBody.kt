@@ -54,6 +54,7 @@ import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.ListMainHeading
 import com.graphees.statspos.presentation.ui.components.ListMainLabel
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
+import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.components.SearchTextbox
@@ -267,6 +268,7 @@ fun SalesPostedBillsBody(
                     label = {
                         Text(text = "Search By")
                     },
+                    outlined = true,
                 )
                 if (HP.user.userType == 1) {
                     ComboBox(
@@ -279,6 +281,7 @@ fun SalesPostedBillsBody(
                             Text(text = "User")
                         },
                         addNone = true,
+                        outlined = true,
                     )
                 }
                 Row(
@@ -299,6 +302,7 @@ fun SalesPostedBillsBody(
                         addNone = true,
                         noneText = "Both",
                         showEndIcon = false,
+                        outlined = true,
                     )
                     Spacer(Modifier.width(8.dp))
                     ComboBox(
@@ -315,6 +319,7 @@ fun SalesPostedBillsBody(
                         addNone = true,
                         noneText = "Both",
                         showEndIcon = false,
+                        outlined = true,
                     )
                 }
 
@@ -336,6 +341,7 @@ fun SalesPostedBillsBody(
                         addNone = true,
                         noneText = "Both",
                         showEndIcon = false,
+                        outlined = true,
                     )
                     Spacer(Modifier.width(8.dp))
                     ComboBox(
@@ -352,6 +358,7 @@ fun SalesPostedBillsBody(
                         addNone = true,
                         noneText = "Both",
                         showEndIcon = false,
+                        outlined = true,
                     )
                 }
                 Button(onClick = {

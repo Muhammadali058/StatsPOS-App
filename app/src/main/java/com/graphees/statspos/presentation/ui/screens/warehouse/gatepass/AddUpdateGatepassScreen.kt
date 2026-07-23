@@ -36,9 +36,10 @@ import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.ConfirmDialog
 import com.graphees.statspos.presentation.ui.components.Dropdown
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
+import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
@@ -186,6 +187,9 @@ fun AddUpdateGatepassScreen(
                         label = {
                             Text("Warehouse")
                         },
+                        placeholder = {
+                            PlaceHolder(text = "Warehouse")
+                        },
                         enabled = false,
                     )
                     Body(
@@ -234,7 +238,7 @@ private fun Body(
         modifier = Modifier
             .fillMaxWidth(),
     ) {
-        Textbox(
+        TextboxOutlined(
             modifier = Modifier
                 .fillMaxWidth(),
             value = gatepassName,
@@ -243,7 +247,7 @@ private fun Body(
                 Text("Gatepass Name")
             }
         )
-        Textbox(
+        TextboxOutlined(
             value = remarks,
             onValueChange = onRemarksChange,
             modifier = Modifier

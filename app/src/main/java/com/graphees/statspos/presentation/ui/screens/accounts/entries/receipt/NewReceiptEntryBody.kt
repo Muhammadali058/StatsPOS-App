@@ -49,9 +49,10 @@ import com.graphees.statspos.presentation.ui.components.DateTextbox
 import com.graphees.statspos.presentation.ui.components.Dropdown
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.MOPSection
+import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.accounts.entries.receipt.NewReceiptEntryViewModel
@@ -235,6 +236,9 @@ private fun Body(
                 label = {
                     Text("Customer")
                 },
+                placeholder = {
+                    PlaceHolder(text = "Customer")
+                },
                 padding = PaddingValues(top = 4.dp),
                 focusRequester = accountFocusRequester,
             )
@@ -247,6 +251,9 @@ private fun Body(
                 onItemSelected = onVendorSelected,
                 label = {
                     Text("Vendor")
+                },
+                placeholder = {
+                    PlaceHolder(text = "Vendor")
                 },
                 padding = PaddingValues(top = 4.dp),
                 focusRequester = accountFocusRequester,
@@ -266,7 +273,7 @@ private fun Body(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            Textbox(
+            TextboxOutlined(
                 modifier = Modifier
                     .weight(1f),
                 value = amount,
@@ -289,7 +296,7 @@ private fun Body(
                 )
             }
         }
-        Textbox(
+        TextboxOutlined(
             modifier = Modifier
                 .fillMaxWidth(),
             value = naration,

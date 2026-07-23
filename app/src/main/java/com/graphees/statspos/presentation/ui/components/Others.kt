@@ -29,7 +29,11 @@ fun MOPSection(
             onItemSelected = onMOPChange,
             label = {
                 Text("M.O.P")
-            }
+            },
+            placeholder = {
+                PlaceHolder(text = "M.O.P")
+            },
+            outlined = true,
         )
         ComboBox(
             modifier = Modifier
@@ -40,6 +44,10 @@ fun MOPSection(
             label = {
                 Text("Bank")
             },
+            placeholder = {
+                PlaceHolder(text = "Bank")
+            },
+            outlined = true,
             addNone = true,
             enabled = mop.id == 2L,
         )
@@ -52,6 +60,10 @@ fun MOPSection(
             label = {
                 Text("Bank Account")
             },
+            placeholder = {
+                PlaceHolder(text = "Bank Account")
+            },
+            outlined = true,
             addNone = true,
             enabled = mop.id == 2L,
             mainId = bank.id

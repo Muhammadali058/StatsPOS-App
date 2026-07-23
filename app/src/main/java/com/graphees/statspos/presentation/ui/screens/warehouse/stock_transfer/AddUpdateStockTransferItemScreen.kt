@@ -50,10 +50,11 @@ import com.graphees.statspos.presentation.ui.components.Dropdown
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.HeadingMedium
 import com.graphees.statspos.presentation.ui.components.LabelMedium
+import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
 import com.graphees.statspos.presentation.ui.components.SearchItemBox
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
@@ -234,6 +235,9 @@ fun AddUpdateStockTransferItemScreen(
                         label = {
                             Text("Warehouse")
                         },
+                        placeholder = {
+                            PlaceHolder(text = "Warehouse")
+                        },
                         enabled = false,
                     )
                     SearchItemBox(
@@ -401,7 +405,7 @@ private fun Body(
     }
     Spacer(Modifier.height(8.dp))
     Row {
-        Textbox(
+        TextboxOutlined(
             value = qty,
             onValueChange = onQtyChange,
             modifier = Modifier
@@ -417,7 +421,7 @@ private fun Body(
         )
         if (HP.settings.saleCartons == true) {
             Spacer(Modifier.width(8.dp))
-            Textbox(
+            TextboxOutlined(
                 value = crtn,
                 onValueChange = onCrtnChange,
                 modifier = Modifier

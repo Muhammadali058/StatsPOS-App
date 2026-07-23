@@ -42,7 +42,7 @@ import com.graphees.statspos.presentation.ui.components.ExpandableSection
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.components.UpgradeToPremiumBottomSheet
 import com.graphees.statspos.presentation.ui.components.UploadImageView
@@ -307,7 +307,7 @@ private fun Basic(
         title = "Basic Details",
         initiallyExpanded = true,
     ) {
-        Textbox(
+        TextboxOutlined(
             value = accountName,
             onValueChange = onAccountNameChange,
             modifier = Modifier
@@ -316,7 +316,7 @@ private fun Basic(
                 Text("Vendor Name")
             }
         )
-        Textbox(
+        TextboxOutlined(
             value = contact,
             onValueChange = onContactChange,
             modifier = Modifier
@@ -325,7 +325,7 @@ private fun Basic(
                 Text("Contact")
             }
         )
-        Textbox(
+        TextboxOutlined(
             value = city,
             onValueChange = onCityChange,
             modifier = Modifier.fillMaxWidth(),
@@ -333,7 +333,7 @@ private fun Basic(
                 Text("City")
             }
         )
-        Textbox(
+        TextboxOutlined(
             value = address,
             onValueChange = onAddressChange,
             modifier = Modifier
@@ -359,7 +359,7 @@ private fun Tax(
         title = "NTN & STN",
         initiallyExpanded = true,
     ) {
-        Textbox(
+        TextboxOutlined(
             value = ntn,
             onValueChange = onNtnChange,
             modifier = Modifier
@@ -368,7 +368,7 @@ private fun Tax(
                 Text("NTN")
             }
         )
-        Textbox(
+        TextboxOutlined(
             value = stn,
             onValueChange = onStnChange,
             modifier = Modifier
@@ -438,7 +438,7 @@ private fun Others(
         title = "Others",
         initiallyExpanded = true,
     ) {
-        Textbox(
+        TextboxOutlined(
             value = remarks,
             onValueChange = onRemarksChange,
             modifier = Modifier
@@ -449,7 +449,7 @@ private fun Others(
             },
             singleLine = false,
         )
-        Textbox(
+        TextboxOutlined(
             value = openingBalance,
             onValueChange = onOpeningBalanceChange,
             modifier = Modifier.fillMaxWidth(),

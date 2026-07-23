@@ -44,6 +44,7 @@ import com.graphees.statspos.presentation.ui.components.ListHeading
 import com.graphees.statspos.presentation.ui.components.ListImageView
 import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.ListMainLabel
+import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.components.SearchTextbox
@@ -151,6 +152,9 @@ fun GatepassItemsBody(
                             },
                             label = {
                                 Text("Gatepass")
+                            },
+                            placeholder = {
+                                PlaceHolder(text = "Gatepass")
                             },
                             addNone = true,
                         )

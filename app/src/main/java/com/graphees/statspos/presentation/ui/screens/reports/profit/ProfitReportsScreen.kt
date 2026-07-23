@@ -49,6 +49,7 @@ import com.graphees.statspos.presentation.ui.components.BottomSheet
 import com.graphees.statspos.presentation.ui.components.ComboBox
 import com.graphees.statspos.presentation.ui.components.Dropdown
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
+import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.ReportCard
 import com.graphees.statspos.presentation.ui.components.ShowReportIcon
@@ -268,6 +269,7 @@ private fun Home(
                     },
                     addNone = true,
                     noneText = "Both",
+                    outlined = true,
                 )
                 ComboBox(
                     modifier = Modifier
@@ -282,6 +284,7 @@ private fun Home(
                     },
                     addNone = true,
                     noneText = "Both",
+                    outlined = true,
                 )
                 ComboBox(
                     modifier = Modifier
@@ -296,6 +299,7 @@ private fun Home(
                     },
                     addNone = true,
                     noneText = "Both",
+                    outlined = true,
                 )
                 ComboBox(
                     modifier = Modifier
@@ -310,6 +314,7 @@ private fun Home(
                     },
                     addNone = true,
                     noneText = "Both",
+                    outlined = true,
                 )
 
                 Button(onClick = {
@@ -542,6 +547,9 @@ private fun Dropdowns(
             label = {
                 Text(text = "Category")
             },
+            placeholder = {
+                PlaceHolder(text = "Category")
+            },
             trailingIcon = {
                 ShowReportIcon {
                     onCategoryClick()
@@ -560,6 +568,9 @@ private fun Dropdowns(
             label = {
                 Text(text = "Sub-Category")
             },
+            placeholder = {
+                PlaceHolder(text = "Sub-Category")
+            },
             trailingIcon = {
                 ShowReportIcon {
                     onSubCategoryClick()
@@ -576,6 +587,9 @@ private fun Dropdowns(
             },
             label = {
                 Text(text = "Vendor")
+            },
+            placeholder = {
+                PlaceHolder(text = "Vendor")
             },
             trailingIcon = {
                 ShowReportIcon {
@@ -594,6 +608,9 @@ private fun Dropdowns(
             label = {
                 Text(text = "Customer")
             },
+            placeholder = {
+                PlaceHolder(text = "Customer")
+            },
             trailingIcon = {
                 ShowReportIcon {
                     onCustomerClick()
@@ -610,6 +627,9 @@ private fun Dropdowns(
             },
             label = {
                 Text(text = "Customer Category")
+            },
+            placeholder = {
+                PlaceHolder(text = "Customer Category")
             },
             trailingIcon = {
                 ShowReportIcon {
@@ -628,6 +648,9 @@ private fun Dropdowns(
             label = {
                 Text(text = "Supplier")
             },
+            placeholder = {
+                PlaceHolder(text = "Supplier")
+            },
             trailingIcon = {
                 ShowReportIcon {
                     onSupplierClick()
@@ -644,6 +667,9 @@ private fun Dropdowns(
             },
             label = {
                 Text(text = "User")
+            },
+            placeholder = {
+                PlaceHolder(text = "User")
             },
             trailingIcon = {
                 ShowReportIcon {

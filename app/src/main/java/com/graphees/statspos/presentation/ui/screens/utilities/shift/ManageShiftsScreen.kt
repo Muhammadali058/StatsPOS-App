@@ -49,7 +49,7 @@ import com.graphees.statspos.presentation.ui.components.HeadingMedium
 import com.graphees.statspos.presentation.ui.components.LabelMedium
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.ReportButton
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.screens.reports.accounts.shiftReport
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
@@ -314,7 +314,7 @@ private fun Entry(
                         .fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Textbox(
+                    TextboxOutlined(
                         value = receivedAmount,
                         onValueChange = onReceivedAmountChange,
                         modifier = Modifier
@@ -336,7 +336,7 @@ private fun Entry(
                         .fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Textbox(
+                    TextboxOutlined(
                         value = paidAmount,
                         onValueChange = onPaidAmountChange,
                         modifier = Modifier

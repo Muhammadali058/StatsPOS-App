@@ -41,7 +41,7 @@ import com.graphees.statspos.presentation.ui.components.AppSwitch
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.components.UploadImageView
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
@@ -196,7 +196,7 @@ private fun ShopData(
     onContactChange: (String) -> Unit,
     onAddressChange: (String) -> Unit,
 ) {
-    Textbox(
+    TextboxOutlined(
         value = shopName,
         onValueChange = onShopNameChange,
         modifier = Modifier
@@ -205,7 +205,7 @@ private fun ShopData(
             Text("Shop Name")
         }
     )
-    Textbox(
+    TextboxOutlined(
         value = contact,
         onValueChange = onContactChange,
         modifier = Modifier
@@ -217,7 +217,7 @@ private fun ShopData(
             keyboardType = KeyboardType.Number
         )
     )
-    Textbox(
+    TextboxOutlined(
         value = address,
         onValueChange = onAddressChange,
         modifier = Modifier

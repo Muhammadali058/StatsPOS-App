@@ -41,7 +41,7 @@ import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ExpandableSection
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
@@ -256,7 +256,7 @@ private fun ShoppingApp(
             title = "Shopping App",
             initiallyExpanded = true,
         ) {
-            Textbox(
+            TextboxOutlined(
                 value = deliveryCharges,
                 onValueChange = onDeliveryChargesChange,
                 modifier = Modifier

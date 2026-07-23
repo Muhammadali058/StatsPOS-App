@@ -57,7 +57,7 @@ import com.graphees.statspos.presentation.ui.components.LabelMedium
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
 import com.graphees.statspos.presentation.ui.components.SearchItemBox
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.TextboxCB
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
@@ -393,7 +393,7 @@ private fun Body(
     onIsDiscRsPerChange: (Boolean) -> Unit,
 ) {
     Row {
-        Textbox(
+        TextboxOutlined(
             value = qty,
             onValueChange = onQtyChange,
             modifier = Modifier
@@ -440,7 +440,7 @@ private fun Body(
     }
     if (HP.settings.saleCartons == true) {
         Row {
-            Textbox(
+            TextboxOutlined(
                 value = if (HP.getIntValue(crtn) > 0) crtn else "",
                 onValueChange = onCrtnChange,
                 modifier = Modifier
@@ -455,7 +455,7 @@ private fun Body(
                 focusRequester = crtnFocusRequester,
             )
             Spacer(Modifier.width(8.dp))
-            Textbox(
+            TextboxOutlined(
                 value = crtnRate,
                 onValueChange = onCrtnRateChange,
                 modifier = Modifier

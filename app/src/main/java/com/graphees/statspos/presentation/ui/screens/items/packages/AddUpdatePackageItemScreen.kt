@@ -47,7 +47,7 @@ import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
 import com.graphees.statspos.presentation.ui.components.SearchItemBox
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
@@ -305,7 +305,7 @@ private fun Body(
     onRateChange: (String) -> Unit,
 ) {
     Row {
-        Textbox(
+        TextboxOutlined(
             value = qty,
             onValueChange = onQtyChange,
             modifier = Modifier
@@ -319,7 +319,7 @@ private fun Body(
             focusRequester = qtyFocusRequester,
         )
         Spacer(Modifier.width(8.dp))
-        Textbox(
+        TextboxOutlined(
             value = rate,
             onValueChange = onRateChange,
             modifier = Modifier
@@ -332,7 +332,7 @@ private fun Body(
             ),
         )
     }
-    Textbox(
+    TextboxOutlined(
         value = total,
         onValueChange = { },
         modifier = Modifier

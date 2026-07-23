@@ -37,7 +37,7 @@ import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.components.UploadImageView
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
@@ -252,7 +252,7 @@ private fun Basic(
     onEmailChange: (String) -> Unit,
     onAddressChange: (String) -> Unit,
 ) {
-    Textbox(
+    TextboxOutlined(
         value = accountName,
         onValueChange = onAccountNameChange,
         modifier = Modifier
@@ -261,7 +261,7 @@ private fun Basic(
             Text("Supplier Name")
         }
     )
-    Textbox(
+    TextboxOutlined(
         value = contact,
         onValueChange = onContactChange,
         modifier = Modifier
@@ -270,7 +270,7 @@ private fun Basic(
             Text("Contact")
         }
     )
-    Textbox(
+    TextboxOutlined(
         value = city,
         onValueChange = onCityChange,
         modifier = Modifier.fillMaxWidth(),
@@ -278,7 +278,7 @@ private fun Basic(
             Text("City")
         }
     )
-    Textbox(
+    TextboxOutlined(
         value = email,
         onValueChange = onEmailChange,
         modifier = Modifier.fillMaxWidth(),
@@ -289,7 +289,7 @@ private fun Basic(
             keyboardType = KeyboardType.Email
         )
     )
-    Textbox(
+    TextboxOutlined(
         value = address,
         onValueChange = onAddressChange,
         modifier = Modifier

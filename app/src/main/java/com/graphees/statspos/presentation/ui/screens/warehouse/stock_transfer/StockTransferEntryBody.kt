@@ -45,6 +45,7 @@ import com.graphees.statspos.presentation.ui.components.ListHeading
 import com.graphees.statspos.presentation.ui.components.ListImageView
 import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.ListMainLabel
+import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SaveButton
 import com.graphees.statspos.presentation.ui.components.SearchBox
@@ -228,6 +229,9 @@ private fun SearchBox(
             onItemSelected = onWaerhouseSelected,
             label = {
                 Text("Warehouse")
+            },
+            placeholder = {
+                PlaceHolder(text = "Warehouse")
             },
             addNone = true,
         )

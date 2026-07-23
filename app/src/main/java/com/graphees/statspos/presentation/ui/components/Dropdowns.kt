@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
@@ -78,28 +77,20 @@ fun Dropdown(
     singleLine: Boolean = true,
     changeIdOnEmpty: Boolean = false,
     trailingIcon: @Composable (() -> Unit)? = {
-        IconButton(
+        AppIconButton(
+            icon = Icons.Default.Clear,
+            size = 20.dp,
             onClick = {
                 onValueChange("")
                 onItemSelected(DropdownItem(0L, noneText))
             },
             enabled = enabled,
-        ) {
-            AppIcon(
-                icon = Icons.Default.Clear,
-                modifier = Modifier.size(20.dp)
-            )
-        }
+        )
     },
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     focusRequester: FocusRequester? = null,
-    contentPadding: PaddingValues = PaddingValues(
-        start = 15.dp,
-        top = 10.dp,
-        end = 10.dp,
-        bottom = 10.dp
-    ),
     padding: PaddingValues = ConstantPaddings.CUSTOM_TEXTBOX_OUTSIDE,
+    outlined: Boolean = false,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -131,46 +122,84 @@ fun Dropdown(
     Box(
         modifier = modifier
     ) {
-        Textbox(
-            value = value,
-            onValueChange = {
-                onValueChange(it)
-                expanded = it.isNotEmpty()
+        if(outlined){
+            TextboxOutlined(
+                value = value,
+                onValueChange = {
+                    onValueChange(it)
+                    expanded = it.isNotEmpty()
 
-                if (changeIdOnEmpty && it.isEmpty()) {
-                    onItemSelected(DropdownItem(0L, noneText))
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .onGloballyPositioned { coordinates ->
-                    textFieldSize = coordinates.size
+                    if (changeIdOnEmpty && it.isEmpty()) {
+                        onItemSelected(DropdownItem(0L, noneText))
+                    }
                 },
-            shape = shape,
-            enabled = enabled,
-            readOnly = readOnly,
-            singleLine = singleLine,
-            label = label,
-            textStyle = textStyle,
-            placeholder = placeholder,
-            leadingIcon = {
-                IconButton(
-                    onClick = {
-                        expanded = !expanded
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onGloballyPositioned { coordinates ->
+                        textFieldSize = coordinates.size
                     },
-                    enabled = enabled,
-                ) {
-                    AppIcon(
-                        icon = Icons.Default.ArrowDropDown
+                shape = shape,
+                enabled = enabled,
+                readOnly = readOnly,
+                singleLine = singleLine,
+                label = label,
+                textStyle = textStyle,
+                placeholder = placeholder,
+                leadingIcon = {
+                    IconButton(
+                        onClick = {
+                            expanded = !expanded
+                        },
+                        enabled = enabled,
+                    ) {
+                        AppIcon(
+                            icon = Icons.Default.ArrowDropDown
+                        )
+                    }
+                },
+                trailingIcon = trailingIcon,
+                keyboardActions = keyboardActions,
+                focusRequester = focusRequester,
+                padding = padding,
+            )
+        }else {
+            TextboxBasic(
+                value = value,
+                onValueChange = {
+                    onValueChange(it)
+                    expanded = it.isNotEmpty()
+
+                    if (changeIdOnEmpty && it.isEmpty()) {
+                        onItemSelected(DropdownItem(0L, noneText))
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onGloballyPositioned { coordinates ->
+                        textFieldSize = coordinates.size
+                    },
+                enabled = enabled,
+                readOnly = readOnly,
+                singleLine = singleLine,
+                textStyle = textStyle,
+                placeholder = placeholder,
+                leadingIcon = {
+                    AppIconButton(
+                        icon = Icons.Default.ArrowDropDown,
+                        buttonSize = 24.dp,
+                        size = 20.dp,
+                        onClick = {
+                            expanded = !expanded
+                        },
+                        enabled = enabled,
                     )
-                }
-            },
-            trailingIcon = trailingIcon,
-            keyboardActions = keyboardActions,
-            focusRequester = focusRequester,
-            contentPadding = contentPadding,
-            padding = padding,
-        )
+                },
+                trailingIcon = trailingIcon,
+                keyboardActions = keyboardActions,
+                focusRequester = focusRequester,
+                padding = padding,
+            )
+        }
 
         if (expanded && filteredItems.isNotEmpty()) {
             Popup(
@@ -239,26 +268,18 @@ fun SubDropdown(
     singleLine: Boolean = true,
     changeIdOnEmpty: Boolean = false,
     trailingIcon: @Composable (() -> Unit)? = {
-        IconButton(
+        AppIconButton(
+            icon = Icons.Default.Clear,
+            size = 20.dp,
             onClick = {
                 onValueChange("")
                 onItemSelected(DropdownItem(0L, noneText))
             },
             enabled = enabled,
-        ) {
-            AppIcon(
-                icon = Icons.Default.Clear,
-                modifier = Modifier.size(20.dp)
-            )
-        }
+        )
     },
     keyboardActions: KeyboardActions = KeyboardActions.Default,
-    contentPadding: PaddingValues = PaddingValues(
-        start = 15.dp,
-        top = 10.dp,
-        end = 10.dp,
-        bottom = 10.dp
-    ),
+    outlined: Boolean = false,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -314,44 +335,80 @@ fun SubDropdown(
     Box(
         modifier = modifier
     ) {
-        Textbox(
-            value = value,
-            onValueChange = {
-                onValueChange(it)
-                expanded = it.isNotEmpty()
+        if(outlined){
+            TextboxOutlined(
+                value = value,
+                onValueChange = {
+                    onValueChange(it)
+                    expanded = it.isNotEmpty()
 
-                if (changeIdOnEmpty && it.isEmpty()) {
-                    onItemSelected(DropdownItem(0L, noneText))
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .onGloballyPositioned { coordinates ->
-                    textFieldSize = coordinates.size
+                    if (changeIdOnEmpty && it.isEmpty()) {
+                        onItemSelected(DropdownItem(0L, noneText))
+                    }
                 },
-            shape = shape,
-            enabled = enabled,
-            readOnly = readOnly,
-            singleLine = singleLine,
-            label = label,
-            textStyle = textStyle,
-            placeholder = placeholder,
-            leadingIcon = {
-                IconButton(
-                    onClick = {
-                        expanded = !expanded
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onGloballyPositioned { coordinates ->
+                        textFieldSize = coordinates.size
                     },
-                    enabled = enabled,
-                ) {
-                    AppIcon(
-                        icon = Icons.Default.ArrowDropDown
+                shape = shape,
+                enabled = enabled,
+                readOnly = readOnly,
+                singleLine = singleLine,
+                label = label,
+                textStyle = textStyle,
+                placeholder = placeholder,
+                leadingIcon = {
+                    IconButton(
+                        onClick = {
+                            expanded = !expanded
+                        },
+                        enabled = enabled,
+                    ) {
+                        AppIcon(
+                            icon = Icons.Default.ArrowDropDown
+                        )
+                    }
+                },
+                trailingIcon = trailingIcon,
+                keyboardActions = keyboardActions,
+            )
+        }else {
+            TextboxBasic(
+                value = value,
+                onValueChange = {
+                    onValueChange(it)
+                    expanded = it.isNotEmpty()
+
+                    if (changeIdOnEmpty && it.isEmpty()) {
+                        onItemSelected(DropdownItem(0L, noneText))
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onGloballyPositioned { coordinates ->
+                        textFieldSize = coordinates.size
+                    },
+                enabled = enabled,
+                readOnly = readOnly,
+                singleLine = singleLine,
+                textStyle = textStyle,
+                placeholder = placeholder,
+                leadingIcon = {
+                    AppIconButton(
+                        icon = Icons.Default.ArrowDropDown,
+                        buttonSize = 24.dp,
+                        size = 20.dp,
+                        onClick = {
+                            expanded = !expanded
+                        },
+                        enabled = enabled,
                     )
-                }
-            },
-            trailingIcon = trailingIcon,
-            keyboardActions = keyboardActions,
-            contentPadding = contentPadding
-        )
+                },
+                trailingIcon = trailingIcon,
+                keyboardActions = keyboardActions,
+            )
+        }
 
         if (expanded && filteredItems.isNotEmpty()) {
             Popup(
@@ -421,6 +478,7 @@ fun ComboBox(
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     shape: Shape = OutlinedTextFieldDefaults.shape,
+    outlined: Boolean = false,
 ) {
     val itemsWithNone by remember(items) {
         derivedStateOf {
@@ -443,58 +501,114 @@ fun ComboBox(
                 expanded = !expanded
         }
     ) {
-        Textbox(
-            value = selectedItem?.name ?: "",
-            onValueChange = {},
-            modifier = modifier
-                .menuAnchor(),
-            shape = shape,
-            readOnly = true,
-            enabled = enabled,
-            label = label,
-            placeholder = placeholder,
-            leadingIcon = {
-                IconButton(
-                    onClick = {
-                        if (enabled)
-                            expanded = true
-                    },
-                    enabled = enabled,
-                ) {
-                    AppIcon(
-                        icon = Icons.Default.ArrowDropDown
-                    )
-                }
-            },
-            trailingIcon = if (showEndIcon) {
-                {
+        if(outlined)
+        {
+            TextboxOutlined(
+                value = selectedItem?.name ?: "",
+                onValueChange = {},
+                modifier = modifier
+                    .menuAnchor(),
+                shape = shape,
+                readOnly = true,
+                enabled = enabled,
+                label = label,
+                placeholder = placeholder,
+                leadingIcon = {
                     IconButton(
                         onClick = {
-                            if (enabled) {
-                                expanded = false
-
-                                if (onTrailingIconClick == null)
-                                    onItemSelected(itemsWithNone[0])
-                                else
-                                    onTrailingIconClick()
-                            }
+                            if (enabled)
+                                expanded = true
                         },
                         enabled = enabled,
                     ) {
-                        if (trailingIcon != null) {
-                            trailingIcon()
-                        } else {
-                            AppIcon(
-                                icon = Icons.Default.Clear,
-                                modifier = Modifier.size(20.dp)
-                            )
+                        AppIcon(
+                            icon = Icons.Default.ArrowDropDown
+                        )
+                    }
+                },
+                trailingIcon = if (showEndIcon) {
+                    {
+                        IconButton(
+                            onClick = {
+                                if (enabled) {
+                                    expanded = false
+
+                                    if (onTrailingIconClick == null)
+                                        onItemSelected(itemsWithNone[0])
+                                    else
+                                        onTrailingIconClick()
+                                }
+                            },
+                            enabled = enabled,
+                        ) {
+                            if (trailingIcon != null) {
+                                trailingIcon()
+                            } else {
+                                AppIcon(
+                                    icon = Icons.Default.Clear,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                         }
                     }
-                }
-            } else null,
-            showBorder = showBorder,
-            textStyle = textStyle,
-        )
+                } else null,
+                showBorder = showBorder,
+                textStyle = textStyle,
+            )
+        }else {
+            TextboxBasic(
+                value = selectedItem?.name ?: "",
+                onValueChange = {},
+                modifier = modifier
+                    .menuAnchor(),
+                readOnly = true,
+                enabled = enabled,
+                placeholder = placeholder,
+                leadingIcon = {
+                    AppIconButton(
+                        icon = Icons.Default.ArrowDropDown,
+                        buttonSize = 24.dp,
+                        size = 20.dp,
+                        onClick = {
+                            if (enabled) {
+                                expanded = true
+                            }
+                        },
+                        enabled = enabled,
+                    )
+                },
+                trailingIcon = if (showEndIcon) {
+                    {
+                        IconButton(
+                            modifier = Modifier
+                                .size(30.dp),
+                            onClick = {
+                                if (enabled) {
+                                    expanded = false
+
+                                    if (onTrailingIconClick == null)
+                                        onItemSelected(itemsWithNone[0])
+                                    else
+                                        onTrailingIconClick()
+                                }
+                            },
+                            enabled = enabled,
+                        ) {
+                            if (trailingIcon != null) {
+                                trailingIcon()
+                            } else {
+                                AppIcon(
+                                    icon = Icons.Default.Clear,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    }
+                } else null,
+                showBorder = showBorder,
+                textStyle = textStyle,
+            )
+        }
 
         ExposedDropdownMenu(
             expanded = expanded,
@@ -547,6 +661,7 @@ fun SubComboBox(
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     shape: Shape = OutlinedTextFieldDefaults.shape,
+    outlined: Boolean = false,
 ) {
     val itemsWithNone by remember(items) {
         derivedStateOf {
@@ -584,16 +699,6 @@ fun SubComboBox(
         }
     }
 
-//    var isFirstRun by rememberSaveable { mutableStateOf(true) }
-//    LaunchedEffect(mainId) {
-//        if (isFirstRun) {
-//            isFirstRun = false
-//            return@LaunchedEffect
-//        }
-//
-//        onItemSelected(DropdownItem(0L, noneText))
-//    }
-
     var expanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
@@ -603,57 +708,111 @@ fun SubComboBox(
                 expanded = !expanded
         }
     ) {
-        Textbox(
-            value = selectedItem?.name ?: "",
-            onValueChange = {},
-            modifier = modifier
-                .menuAnchor(),
-            shape = shape,
-            readOnly = true,
-            enabled = enabled,
-            label = label,
-            placeholder = placeholder,
-            leadingIcon = {
-                IconButton(
-                    onClick = {
-                        if (enabled)
-                            expanded = true
-                    },
-                    enabled = enabled,
-                ) {
-                    AppIcon(
-                        icon = Icons.Default.ArrowDropDown
-                    )
-                }
-            },
-            trailingIcon = if (showEndIcon) {
-                {
+        if(outlined){
+            TextboxOutlined(
+                value = selectedItem?.name ?: "",
+                onValueChange = {},
+                modifier = modifier
+                    .menuAnchor(),
+                shape = shape,
+                readOnly = true,
+                enabled = enabled,
+                label = label,
+                placeholder = placeholder,
+                leadingIcon = {
                     IconButton(
                         onClick = {
-                            if (enabled) {
-                                expanded = false
-
-                                if (onTrailingIconClick == null)
-                                    onItemSelected(itemsWithNone[0])
-                                else
-                                    onTrailingIconClick()
-                            }
+                            if (enabled)
+                                expanded = true
                         },
                         enabled = enabled,
                     ) {
-                        if (trailingIcon != null) {
-                            trailingIcon()
-                        } else {
-                            AppIcon(
-                                icon = Icons.Default.Clear,
-                                modifier = Modifier.size(20.dp)
-                            )
+                        AppIcon(
+                            icon = Icons.Default.ArrowDropDown
+                        )
+                    }
+                },
+                trailingIcon = if (showEndIcon) {
+                    {
+                        IconButton(
+                            onClick = {
+                                if (enabled) {
+                                    expanded = false
+
+                                    if (onTrailingIconClick == null)
+                                        onItemSelected(itemsWithNone[0])
+                                    else
+                                        onTrailingIconClick()
+                                }
+                            },
+                            enabled = enabled,
+                        ) {
+                            if (trailingIcon != null) {
+                                trailingIcon()
+                            } else {
+                                AppIcon(
+                                    icon = Icons.Default.Clear,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                         }
                     }
-                }
-            } else null,
-            showBorder = showBorder,
-        )
+                } else null,
+                showBorder = showBorder,
+            )
+        }else {
+            TextboxBasic(
+                value = selectedItem?.name ?: "",
+                onValueChange = {},
+                modifier = modifier
+                    .menuAnchor(),
+                readOnly = true,
+                enabled = enabled,
+                placeholder = placeholder,
+                leadingIcon = {
+                    AppIconButton(
+                        icon = Icons.Default.ArrowDropDown,
+                        buttonSize = 24.dp,
+                        size = 20.dp,
+                        onClick = {
+                            if (enabled) {
+                                expanded = true
+                            }
+                        },
+                        enabled = enabled,
+                    )
+                },
+                trailingIcon = if (showEndIcon) {
+                    {
+                        IconButton(
+                            modifier = Modifier
+                                .size(30.dp),
+                            onClick = {
+                                if (enabled) {
+                                    expanded = false
+
+                                    if (onTrailingIconClick == null)
+                                        onItemSelected(itemsWithNone[0])
+                                    else
+                                        onTrailingIconClick()
+                                }
+                            },
+                            enabled = enabled,
+                        ) {
+                            if (trailingIcon != null) {
+                                trailingIcon()
+                            } else {
+                                AppIcon(
+                                    icon = Icons.Default.Clear,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    }
+                } else null,
+                showBorder = showBorder,
+            )
+        }
 
         ExposedDropdownMenu(
             expanded = expanded,

@@ -37,6 +37,7 @@ import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListHeading
 import com.graphees.statspos.presentation.ui.components.ListLabel
+import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
@@ -164,8 +165,12 @@ private fun SearchBox(
             label = {
                 Text(text = "M.O.P")
             },
+            placeholder = {
+                PlaceHolder(text = "M.O.P")
+            },
             noneText = "Both",
             addNone = true,
+            outlined = true,
         )
         Row(
             modifier = Modifier

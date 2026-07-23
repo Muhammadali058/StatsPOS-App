@@ -38,7 +38,7 @@ import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.PasswordTextbox
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.components.UploadImageView
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
@@ -206,7 +206,7 @@ private fun Basic(
             .fillMaxWidth()
             .padding(ConstantPaddings.BODY_HORIZONTAL),
     ) {
-        Textbox(
+        TextboxOutlined(
             value = username,
             onValueChange = onUsernameChange,
             modifier = Modifier
@@ -233,7 +233,7 @@ private fun Basic(
                 Text("Confirm Password")
             }
         )
-        Textbox(
+        TextboxOutlined(
             value = contact,
             onValueChange = onContactChange,
             modifier = Modifier
@@ -242,7 +242,7 @@ private fun Basic(
                 Text("Contact")
             }
         )
-        Textbox(
+        TextboxOutlined(
             value = email,
             onValueChange = onEmailChange,
             modifier = Modifier
@@ -261,7 +261,7 @@ private fun Basic(
             onDateChange = onDateOfBirthChange,
             label = "Date of Birth"
         )
-        Textbox(
+        TextboxOutlined(
             value = address,
             onValueChange = onAddressChange,
             modifier = Modifier

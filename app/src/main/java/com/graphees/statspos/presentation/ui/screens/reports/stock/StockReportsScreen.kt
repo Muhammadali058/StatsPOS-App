@@ -58,6 +58,7 @@ import com.graphees.statspos.presentation.ui.components.BarcodeScannerDialog
 import com.graphees.statspos.presentation.ui.components.ComboBox
 import com.graphees.statspos.presentation.ui.components.Dropdown
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
+import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.ReportButton
 import com.graphees.statspos.presentation.ui.components.ReportCard
@@ -402,37 +403,20 @@ private fun ItemnameBox(
                     value = value,
                     onValueChange = onValueChange,
                     onItemSelected = onItemSelected,
-                    onEndIconClick = onEndIconClick,
                     onGoClick = onSearchClick,
-                    label = {
-                        Text(
-                            text = "Select Item"
-                        )
+                    placeholder = {
+                        PlaceHolder("Select Item")
                     },
                     trailingIcon = {
                         ShowReportIcon {
                             onEndIconClick(value)
                         }
-//                        IconButton(onClick = {
-//                            onEndIconClick(value)
-//                        }) {
-//                            AppIcon(
-//                                icon = Icons.Default.Clear,
-//                                size = 20.dp
-//                            )
-//                        }
                     },
                     keyboardOptions = KeyboardOptions(
                         imeAction = ImeAction.Go
                     ),
                     padding = PaddingValues(top = 4.dp),
                 )
-//                ReportButton(
-//                    modifier = Modifier.offset(y = (-1).dp),
-//                    shape = RoundedCornerShape(bottomEnd = 4.dp, bottomStart = 4.dp)
-//                ) {
-//                    onItemClick()
-//                }
             }
             Column {
                 Row {
@@ -508,6 +492,7 @@ private fun Dropdowns(
                     Text(text = "Showing")
                 },
                 showEndIcon = false,
+                outlined = true,
             )
             Spacer(Modifier.width(8.dp))
             ComboBox(
@@ -520,6 +505,7 @@ private fun Dropdowns(
                     Text(text = "Stock At")
                 },
                 showEndIcon = false,
+                outlined = true,
             )
         }
         Row(
@@ -536,6 +522,7 @@ private fun Dropdowns(
                     Text(text = "Expiry")
                 },
                 showEndIcon = false,
+                outlined = true,
             )
             Spacer(Modifier.width(8.dp))
             ComboBox(
@@ -548,6 +535,7 @@ private fun Dropdowns(
                     Text(text = "Type")
                 },
                 showEndIcon = false,
+                outlined = true,
             )
         }
         ComboBox(
@@ -558,6 +546,9 @@ private fun Dropdowns(
             onItemSelected = onWarehouseChange,
             label = {
                 Text(text = "Warehouse")
+            },
+            placeholder = {
+                PlaceHolder(text = "Warehouse")
             },
             addNone = true,
         )
@@ -570,6 +561,9 @@ private fun Dropdowns(
             },
             label = {
                 Text(text = "Category")
+            },
+            placeholder = {
+                PlaceHolder(text = "Category")
             },
             trailingIcon = {
                 ShowReportIcon {
@@ -589,6 +583,9 @@ private fun Dropdowns(
             label = {
                 Text(text = "Sub-Category")
             },
+            placeholder = {
+                PlaceHolder(text = "Sub-Category")
+            },
             trailingIcon = {
                 ShowReportIcon {
                     onSubCategoryClick()
@@ -605,6 +602,9 @@ private fun Dropdowns(
             },
             label = {
                 Text(text = "Vendor")
+            },
+            placeholder = {
+                PlaceHolder(text = "Vendor")
             },
             trailingIcon = {
                 ShowReportIcon {

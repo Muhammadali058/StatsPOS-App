@@ -47,7 +47,7 @@ import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
 import com.graphees.statspos.presentation.ui.components.SearchItemBox
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
@@ -307,7 +307,7 @@ private fun Body(
     onCostChange: (String) -> Unit,
 ) {
     Row {
-        Textbox(
+        TextboxOutlined(
             value = qty,
             onValueChange = onQtyChange,
             modifier = Modifier
@@ -323,7 +323,7 @@ private fun Body(
         )
         if (HP.settings.saleCartons == true) {
             Spacer(Modifier.width(8.dp))
-            Textbox(
+            TextboxOutlined(
                 value = crtn,
                 onValueChange = onCrtnChange,
                 modifier = Modifier
@@ -338,7 +338,7 @@ private fun Body(
             )
         }
     }
-    Textbox(
+    TextboxOutlined(
         value = cost,
         onValueChange = onCostChange,
         modifier = Modifier
@@ -350,7 +350,7 @@ private fun Body(
             keyboardType = KeyboardType.Decimal
         ),
     )
-    Textbox(
+    TextboxOutlined(
         value = total,
         onValueChange = { },
         modifier = Modifier

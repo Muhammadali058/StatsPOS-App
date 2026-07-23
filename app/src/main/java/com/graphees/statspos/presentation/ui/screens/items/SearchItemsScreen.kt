@@ -42,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.R
 import com.graphees.statspos.domain.models.items.Items
 import com.graphees.statspos.presentation.ui.components.AppIcon
+import com.graphees.statspos.presentation.ui.components.AppIconButton
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.AutoCompleteItemsTextbox
 import com.graphees.statspos.presentation.ui.components.BarcodeScannerDialog
@@ -332,35 +333,19 @@ private fun SearchBox(
             value = value,
             onValueChange = onValueChange,
             onItemSelected = onItemSelected,
-            onEndIconClick = {  },
             onGoClick = onGoClick,
             suggestions = false,
-            label = {
-                Text(
-                    text = "Search"
-                )
-            },
             trailingIcon = {
-                IconButton(onClick = {
-                    onBarcodeClick()
-                }) {
-                    AppIcon(
-                        icon = R.drawable.ic_barcode,
-                        size = 20.dp
-                    )
-                }
+                AppIconButton(
+                    icon = R.drawable.ic_barcode,
+                    size = 20.dp,
+                    onClick = {
+                        onBarcodeClick()
+                    }
+                )
             },
             focusRequester = itemFocusRequester,
         )
-//        Spacer(Modifier.width(4.dp))
-//        AppIconButton(
-//            onClick = {
-//                onBarcodeClick()
-//            },
-//            icon = R.drawable.ic_barcode,
-//            buttonSize = 32.dp,
-//            size = 26.dp
-//        )
         Spacer(Modifier.width(8.dp))
         FilterIcon {
             onFilterClick()

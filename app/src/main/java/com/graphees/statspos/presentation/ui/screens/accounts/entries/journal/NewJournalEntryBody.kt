@@ -41,9 +41,10 @@ import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndic
 import com.graphees.statspos.presentation.ui.components.DateTextbox
 import com.graphees.statspos.presentation.ui.components.Dropdown
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
+import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.accounts.entries.journal.NewJournalEntryViewModel
@@ -183,6 +184,9 @@ private fun Body(
             label = {
                 Text("Debit Account")
             },
+            placeholder = {
+                PlaceHolder(text = "Debit Account")
+            },
             addType = true,
         )
         Dropdown(
@@ -193,13 +197,16 @@ private fun Body(
             label = {
                 Text("Credit Account")
             },
+            placeholder = {
+                PlaceHolder(text = "Credit Account")
+            },
             addType = true,
         )
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            Textbox(
+            TextboxOutlined(
                 modifier = Modifier
                     .weight(1f),
                 value = amount,
@@ -221,7 +228,7 @@ private fun Body(
                 )
             }
         }
-        Textbox(
+        TextboxOutlined(
             modifier = Modifier
                 .fillMaxWidth(),
             value = naration,

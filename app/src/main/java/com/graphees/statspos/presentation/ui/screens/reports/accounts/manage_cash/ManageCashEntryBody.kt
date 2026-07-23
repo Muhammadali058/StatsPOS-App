@@ -50,7 +50,7 @@ import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.ReportButton
 import com.graphees.statspos.presentation.ui.components.ReportCard
 import com.graphees.statspos.presentation.ui.components.SaveButton
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.screens.reports.accounts.cashAccountReport
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.ui.utils.openPdf
@@ -234,7 +234,7 @@ private fun Basic(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            Textbox(
+            TextboxOutlined(
                 modifier = Modifier
                     .weight(1f),
                 value = amount,
@@ -256,7 +256,7 @@ private fun Basic(
                 )
             }
         }
-        Textbox(
+        TextboxOutlined(
             modifier = Modifier
                 .fillMaxWidth(),
             value = naration,

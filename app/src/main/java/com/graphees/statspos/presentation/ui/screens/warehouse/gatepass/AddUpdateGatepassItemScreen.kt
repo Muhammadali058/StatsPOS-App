@@ -43,10 +43,11 @@ import com.graphees.statspos.presentation.ui.components.BarcodeScannerDialog
 import com.graphees.statspos.presentation.ui.components.ConfirmDialog
 import com.graphees.statspos.presentation.ui.components.Dropdown
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
+import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
 import com.graphees.statspos.presentation.ui.components.SearchItemBox
-import com.graphees.statspos.presentation.ui.components.Textbox
+import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
@@ -227,6 +228,9 @@ fun AddUpdateGatepassItemScreen(
                         label = {
                             Text("Gatepass")
                         },
+                        placeholder = {
+                            PlaceHolder(text = "Gatepass")
+                        },
                         enabled = false,
                     )
                     SearchItemBox(
@@ -305,7 +309,7 @@ private fun Body(
     onCrtnChange: (String) -> Unit,
 ) {
     Row {
-        Textbox(
+        TextboxOutlined(
             value = qty,
             onValueChange = onQtyChange,
             modifier = Modifier
@@ -321,7 +325,7 @@ private fun Body(
         )
         if (HP.settings.saleCartons == true) {
             Spacer(Modifier.width(8.dp))
-            Textbox(
+            TextboxOutlined(
                 value = crtn,
                 onValueChange = onCrtnChange,
                 modifier = Modifier

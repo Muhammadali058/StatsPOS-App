@@ -209,12 +209,17 @@ fun ShowReportIcon(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
-    IconButton(
+    AppIconButton(
         modifier = modifier,
+        icon = Icons.Default.Download,
         onClick = onClick,
-    ) {
-        ShowReportIcon()
-    }
+    )
+//    IconButton(
+//        modifier = modifier,
+//        onClick = onClick,
+//    ) {
+//        ShowReportIcon()
+//    }
 }
 
 @Composable

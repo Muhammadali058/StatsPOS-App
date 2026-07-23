@@ -48,6 +48,7 @@ import com.graphees.statspos.presentation.ui.components.ComboBox
 import com.graphees.statspos.presentation.ui.components.DateTextbox
 import com.graphees.statspos.presentation.ui.components.Dropdown
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
+import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.ReportButton
 import com.graphees.statspos.presentation.ui.components.ReportCard
@@ -616,6 +617,9 @@ private fun Ledger(
             label = {
                 Text(text = "Customer")
             },
+            placeholder = {
+                PlaceHolder(text = "Customer")
+            },
             trailingIcon = {
                 ShowReportIcon {
                     onCustomerClick()
@@ -632,6 +636,9 @@ private fun Ledger(
             },
             label = {
                 Text(text = "Vendor")
+            },
+            placeholder = {
+                PlaceHolder(text = "Vendor")
             },
             trailingIcon = {
                 ShowReportIcon {
@@ -664,6 +671,9 @@ private fun BankStatement(
             label = {
                 Text("Bank")
             },
+            placeholder = {
+                PlaceHolder(text = "Bank")
+            },
             addNone = true,
         )
         SubComboBox(
@@ -674,6 +684,9 @@ private fun BankStatement(
             onItemSelected = onSubBankChange,
             label = {
                 Text("Bank Account")
+            },
+            placeholder = {
+                PlaceHolder(text = "Bank Account")
             },
             addNone = true,
             mainId = bank.id
@@ -714,6 +727,9 @@ private fun Expenses(
             label = {
                 Text("Expense")
             },
+            placeholder = {
+                PlaceHolder(text = "Expense")
+            },
             addNone = true,
             trailingIcon = {
                 ShowReportIcon()
@@ -730,6 +746,9 @@ private fun Expenses(
             onItemSelected = onSubExpenseChange,
             label = {
                 Text("Sub-Expense")
+            },
+            placeholder = {
+                PlaceHolder(text = "Sub-Expense")
             },
             addNone = true,
             mainId = expense.id,
@@ -778,6 +797,7 @@ private fun ReceiptsAndPayments(
             },
             addNone = true,
             noneText = "Both",
+            outlined = true,
         )
         Dropdown(
             value = username,
@@ -788,6 +808,9 @@ private fun ReceiptsAndPayments(
             },
             label = {
                 Text(text = "User")
+            },
+            placeholder = {
+                PlaceHolder(text = "User")
             },
             changeIdOnEmpty = true,
         )
@@ -852,6 +875,7 @@ private fun ReceivableAndPayable(
             label = {
                 Text("Type")
             },
+            outlined = true,
         )
         Dropdown(
             value = supplierName,
@@ -862,6 +886,9 @@ private fun ReceivableAndPayable(
             },
             label = {
                 Text(text = "Customers by supplier")
+            },
+            placeholder = {
+                PlaceHolder(text = "Customers by supplier")
             },
             trailingIcon = {
                 ShowReportIcon {
@@ -879,6 +906,9 @@ private fun ReceivableAndPayable(
             label = {
                 Text("Customers by category")
             },
+            placeholder = {
+                PlaceHolder(text = "Customers by category")
+            },
             addNone = true,
             trailingIcon = {
                 ShowReportIcon()
@@ -895,6 +925,9 @@ private fun ReceivableAndPayable(
             onItemSelected = onVendorCategoryChange,
             label = {
                 Text("Vendors by category")
+            },
+            placeholder = {
+                PlaceHolder(text = "Vendors by category")
             },
             addNone = true,
             trailingIcon = {

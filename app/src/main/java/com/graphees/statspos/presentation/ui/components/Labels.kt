@@ -14,6 +14,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun AppText(
@@ -38,7 +39,7 @@ fun LabelMedium(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onPrimaryContainer,
     textAlign: TextAlign = TextAlign.Start,
-    style: TextStyle = MaterialTheme.typography.labelMedium.copy(textAlign = textAlign),
+    style: TextStyle = TextStyle(fontSize = 14.sp, textAlign = textAlign),
 ) {
     Text(
         modifier = modifier,
@@ -53,7 +54,7 @@ fun LabelLarge(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onPrimaryContainer,
-    style: TextStyle = MaterialTheme.typography.labelLarge,
+    style: TextStyle = TextStyle(fontSize = 16.sp),
 ) {
     Text(
         modifier = modifier,
@@ -70,7 +71,8 @@ fun HeadingMedium(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onPrimaryContainer,
     textAlign: TextAlign = TextAlign.Start,
-    style: TextStyle = MaterialTheme.typography.labelMedium.copy(
+    style: TextStyle = TextStyle(
+        fontSize = 14.sp,
         fontWeight = FontWeight.Bold,
         textAlign = textAlign
     ),
@@ -88,7 +90,7 @@ fun HeadingLarge(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onPrimaryContainer,
-    style: TextStyle = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+    style: TextStyle = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold),
 ) {
     Text(
         modifier = modifier,
@@ -129,7 +131,8 @@ fun ListMainHeading(
         modifier = modifier,
         text = text,
         color = MaterialTheme.colorScheme.onPrimaryContainer,
-        style = MaterialTheme.typography.labelMedium.copy(
+        style = TextStyle(
+            fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             textAlign = textAlign
         )
@@ -146,7 +149,8 @@ fun ListMainLabel(
         modifier = modifier,
         text = text,
         color = MaterialTheme.colorScheme.onPrimaryContainer,
-        style = MaterialTheme.typography.labelMedium.copy(
+        style = TextStyle(
+            fontSize = 14.sp,
             textAlign = textAlign
         )
     )
@@ -163,9 +167,10 @@ fun ListHeading(
         modifier = modifier,
         text = text,
         color = color,
-        style = MaterialTheme.typography.labelSmall.copy(
+        style = TextStyle(
+            fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
-            textAlign = textAlign
+            textAlign = textAlign,
         )
     )
 }
@@ -181,8 +186,9 @@ fun ListLabel(
         modifier = modifier,
         text = text,
         color = color,
-        style = MaterialTheme.typography.labelSmall.copy(
-            textAlign = textAlign
+        style = TextStyle(
+            fontSize = 12.sp,
+            textAlign = textAlign,
         )
     )
 }

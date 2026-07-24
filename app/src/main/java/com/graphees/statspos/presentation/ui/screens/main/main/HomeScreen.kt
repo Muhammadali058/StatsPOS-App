@@ -888,31 +888,6 @@ private fun Title(
 //                )
             }
         }
-
-
-//        Row(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(vertical = 8.dp),
-//            verticalAlignment = Alignment.CenterVertically,
-//            horizontalArrangement = Arrangement.Start,
-//        ) {
-//            if (icon != null) {
-//                AppIcon(
-//                    icon = icon,
-//                    size = 26.dp,
-//                )
-//                Spacer(Modifier.width(8.dp))
-//            }
-//            Text(
-//                text = title,
-//                style = TextStyle(
-//                    fontSize = 14.sp,
-//                    fontWeight = FontWeight.Bold,
-//                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-//                ),
-//            )
-//        }
     }
 }
 
@@ -955,7 +930,8 @@ private fun HomeGrid(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(16.dp))
-                                .background(MaterialTheme.colorScheme.primary.copy(.1f))
+//                                .background(MaterialTheme.colorScheme.primary.copy(.1f))
+                                .background(MaterialTheme.colorScheme.secondaryContainer)
                                 .padding(10.dp),
                             contentAlignment = Alignment.Center,
                         ) {
@@ -981,6 +957,66 @@ private fun HomeGrid(
                             )
                         )
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeGridOld(
+    items: List<TopItem>,
+    onClick: (TopRoutes) -> Unit
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(3),
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(max = 400.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        val filteredItems = items.filter { it.access }
+        items(filteredItems) { item ->
+            Card(
+                modifier = Modifier
+                    .width(100.dp)
+                    .height(112.dp)
+                    .padding(vertical = 6.dp),
+                onClick = { onClick(item.screen) },
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = 2.dp
+                ),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                ),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.SpaceEvenly,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Spacer(Modifier.height(12.dp))
+                    item.icon?.run {
+                        AppIcon(
+                            modifier = Modifier
+                                .weight(1f),
+                            icon = item.icon,
+                            size = 26.dp,
+                        )
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        modifier = Modifier
+                            .weight(1f),
+                        text = item.text,
+                        style = TextStyle(
+                            textAlign = TextAlign.Center,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
+                    )
                 }
             }
         }
@@ -1081,65 +1117,4 @@ fun BranchesList(
         textContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
     )
 
-}
-
-
-@Composable
-private fun HomeGridOld(
-    items: List<TopItem>,
-    onClick: (TopRoutes) -> Unit
-) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(max = 400.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        val filteredItems = items.filter { it.access }
-        items(filteredItems) { item ->
-            Card(
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(112.dp)
-                    .padding(vertical = 6.dp),
-                onClick = { onClick(item.screen) },
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = 2.dp
-                ),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                ),
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.SpaceEvenly,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Spacer(Modifier.height(12.dp))
-                    item.icon?.run {
-                        AppIcon(
-                            modifier = Modifier
-                                .weight(1f),
-                            icon = item.icon,
-                            size = 26.dp,
-                        )
-                    }
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        modifier = Modifier
-                            .weight(1f),
-                        text = item.text,
-                        style = TextStyle(
-                            textAlign = TextAlign.Center,
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        )
-                    )
-                }
-            }
-        }
-    }
 }

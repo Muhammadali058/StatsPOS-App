@@ -1,6 +1,7 @@
 package com.graphees.statspos.presentation.ui.screens.items
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,7 +12,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
@@ -31,9 +37,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,6 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.R
 import com.graphees.statspos.domain.models.items.Items
 import com.graphees.statspos.presentation.ui.components.AccessDeniedBox
+import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.graphees.statspos.presentation.ui.components.AppFloatingActionButton
 import com.graphees.statspos.presentation.ui.components.AppIcon
 import com.graphees.statspos.presentation.ui.components.AppIconButton
@@ -65,6 +74,7 @@ import com.graphees.statspos.presentation.ui.components.ListImageView
 import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
 import com.graphees.statspos.presentation.ui.components.PlaceHolder
+import com.graphees.statspos.presentation.ui.components.PullToRefreshLayout
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SubChipsRow
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
@@ -649,6 +659,231 @@ private fun ListCard(
             }
         }
         // endregion
+    }
+}
+
+@Composable
+private fun BodyList2(
+    modifier: Modifier = Modifier,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
+    isLoadingNextPage: Boolean,
+    endReached: Boolean,
+    loadNextItems: () -> Unit,
+    items: List<Items>,
+    onItemClick: (Items) -> Unit,
+    onDeleteClick: (Items) -> Unit,
+) {
+    PullToRefreshLayout(
+        isRefreshing = isRefreshing,
+        onRefresh = onRefresh,
+        modifier = modifier
+    ) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+//            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            items(items.size) { i ->
+                val item = items[i]
+
+                if (
+                    i == items.lastIndex &&
+                    !endReached &&
+                    !isLoadingNextPage
+                ) {
+                    loadNextItems()
+                }
+
+                ListCard2(item = item) {
+                    onItemClick(it)
+                }
+            }
+            item {
+                if (isLoadingNextPage) {
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        AppCircularProgressIndicator()
+                    }
+                }else{
+                    Spacer(Modifier.height(12.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ListCard2(
+    modifier: Modifier = Modifier,
+    item: Items,
+    onItemClick: (Items) -> Unit,
+) {
+    val primaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
+    val secondaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.6f)
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp),
+        shape = RoundedCornerShape(10.dp),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 3.dp
+        ),
+        onClick = {
+            onItemClick(item)
+        },
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp))
+                .background(MaterialTheme.colorScheme.secondaryContainer)
+                .padding(4.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            ListImageView(
+                imageUrl = item.imageUrl,
+                modifier = Modifier
+                    .size(80.dp),
+                showIfNull = true,
+            ) {
+                Spacer(Modifier.height(8.dp))
+            }
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                text = item.itemname.toString(),
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                fontSize = 13.sp,
+                lineHeight = 16.sp,
+//                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Start
+            )
+
+            Spacer(Modifier.height(8.dp))
+            HorizontalDivider(
+                thickness = 0.5.dp,
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.2f)
+            )
+            Spacer(Modifier.height(8.dp))
+
+            // Itemname & Rows
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    ListHeading(
+                        text = "Retail",
+                        Modifier.weight(1f)
+                    )
+                    ListLabel(
+                        text = HP.formatDecimal(item.retail),
+                        Modifier.weight(1f)
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    ListHeading(
+                        text = "W.Sale",
+                        Modifier.weight(1f)
+                    )
+                    ListLabel(
+                        text = HP.formatDecimal(item.wholesale),
+                        Modifier.weight(1f)
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    ListHeading(
+                        text = if (HP.settings.saleCartons == true) "C.Rate" else "MP",
+                        Modifier.weight(1f)
+                    )
+                    ListLabel(
+                        text = if (HP.settings.saleCartons == true) HP.formatDecimal(item.crtnRate) else HP.formatDecimal(
+                            item.marketPrice
+                        ),
+                        Modifier.weight(1f)
+                    )
+                }
+            }
+
+            // region Stock
+            Spacer(Modifier.height(8.dp))
+            HorizontalDivider(
+                thickness = 0.5.dp,
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.2f)
+            )
+            Spacer(Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AppIcon(
+                    icon = R.drawable.stock,
+                    size = 14.dp,
+                    tint = primaryColor,
+                )
+                Spacer(Modifier.width(8.dp))
+
+                Row(
+                    modifier = Modifier
+                        .weight(1f),
+                ) {
+                    ListHeading(
+                        text = if (HP.settings.saleCartons == true) "Qty: " else "Qty: ",
+                        color = primaryColor,
+                    )
+                    ListLabel(
+                        text = HP.formatDecimal(item.stockPcs),
+                        color = secondaryColor,
+                    )
+                }
+                if (HP.settings.saleCartons == true) {
+                    Row(
+                        modifier = Modifier
+                            .weight(1f),
+                    ) {
+                        ListHeading(
+                            text = "Crtn: ",
+                            color = primaryColor,
+                        )
+                        ListLabel(
+                            text = item.stockCrtn.toString(),
+                            color = secondaryColor,
+                        )
+                    }
+                }
+            }
+            // endregion
+
+        }
     }
 }
 

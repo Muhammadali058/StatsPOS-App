@@ -127,7 +127,7 @@ fun NewStockEntryBody(
             Modifier
                 .fillMaxSize()
                 .padding(top = 8.dp)
-                .padding(bottom = 16.dp),
+                .padding(bottom = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Column(
@@ -245,9 +245,7 @@ private fun Body(
             label = {
                 Text("Expense")
             },
-            placeholder = {
-                PlaceHolder(text = "Expense")
-            },
+            outlined = true,
             addNone = true,
         )
         SubComboBox(
@@ -259,9 +257,7 @@ private fun Body(
             label = {
                 Text("Sub-Expense")
             },
-            placeholder = {
-                PlaceHolder(text = "Sub-Expense")
-            },
+            outlined = true,
             addNone = true,
             mainId = expense?.id ?: 0L
         )

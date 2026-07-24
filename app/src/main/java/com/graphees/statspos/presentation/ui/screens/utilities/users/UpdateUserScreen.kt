@@ -240,7 +240,10 @@ private fun Basic(
                 .fillMaxWidth(),
             label = {
                 Text("Contact")
-            }
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number
+            ),
         )
         TextboxOutlined(
             value = email,
@@ -252,7 +255,7 @@ private fun Basic(
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,
-            )
+            ),
         )
         DateTextbox(
             modifier = Modifier

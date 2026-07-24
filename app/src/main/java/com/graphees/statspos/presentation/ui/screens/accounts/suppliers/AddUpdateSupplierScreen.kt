@@ -3,11 +3,16 @@ package com.graphees.statspos.presentation.ui.screens.accounts.suppliers
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -138,6 +143,7 @@ fun AddUpdateSupplierScreen(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = {
             AppSnackbarHost(
                 snackbarHostState = snackbarHostState,
@@ -182,7 +188,8 @@ fun AddUpdateSupplierScreen(
         ) {
             Column(
                 Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .imePadding(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Column(
@@ -217,7 +224,13 @@ fun AddUpdateSupplierScreen(
                     )
                 }
 
-                Box {
+                Box(
+                    modifier = Modifier
+                        .windowInsetsPadding(
+                            WindowInsets.navigationBars
+                                .union(WindowInsets.ime)
+                        )
+                ) {
                     if (state.isSaving) {
                         AppCircularProgressIndicator()
                     } else {
@@ -268,7 +281,10 @@ private fun Basic(
             .fillMaxWidth(),
         label = {
             Text("Contact")
-        }
+        },
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Number
+        ),
     )
     TextboxOutlined(
         value = city,

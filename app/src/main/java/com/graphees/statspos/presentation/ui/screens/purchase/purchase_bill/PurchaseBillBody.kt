@@ -175,9 +175,7 @@ private fun Basic(
             label = {
                 Text("Vendor")
             },
-            placeholder = {
-                PlaceHolder(text = "Vendor")
-            },
+            outlined = true,
             padding = PaddingValues(top = 4.dp)
         )
         Row(
@@ -282,9 +280,7 @@ private fun Others(
                 label = {
                     Text(text = "Supplier")
                 },
-                placeholder = {
-                    PlaceHolder(text = "Supplier")
-                },
+                outlined = true,
                 addNone = true,
             )
         }

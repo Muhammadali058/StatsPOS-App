@@ -229,6 +229,7 @@ fun AddUpdatePackageItemScreen(
                         label = {
                             Text("Package")
                         },
+                        outlined = true,
                         enabled = false,
                     )
                     SearchItemBox(

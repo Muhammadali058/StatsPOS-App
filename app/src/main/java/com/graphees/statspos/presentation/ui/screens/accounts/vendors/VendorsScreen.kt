@@ -12,8 +12,12 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Call
+import androidx.compose.material.icons.outlined.Whatsapp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -32,7 +36,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -43,6 +49,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.graphees.statspos.domain.models.accounts.Accounts
 import com.graphees.statspos.presentation.ui.components.AppFloatingActionButton
+import com.graphees.statspos.presentation.ui.components.AppIconButton
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.BottomHeading
 import com.graphees.statspos.presentation.ui.components.BottomSheet
@@ -63,6 +70,8 @@ import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.screens.main.main.premium.HelpScreen
 import com.graphees.statspos.presentation.ui.screens.main.main.premium.PaymentScreen
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
+import com.graphees.statspos.presentation.ui.utils.openCall
+import com.graphees.statspos.presentation.ui.utils.openWhatsapp
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.accounts.vendors.VendorsViewModel
 import com.graphees.statspos.utils.HP
@@ -404,6 +413,10 @@ private fun ListCard(
     onItemClick: (Accounts) -> Unit,
     onDeleteClick: (Accounts) -> Unit,
 ) {
+    val context = LocalContext.current
+    val primaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
+    val secondaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.6f)
+
     ListCard(
         modifier = modifier
             .fillMaxWidth()
@@ -431,58 +444,86 @@ private fun ListCard(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                ListMainLabel(item.vendorName.toString())
-
-                // Contact
-                item.contact?.let {
-                    if (it.isNotEmpty()) {
-                        Spacer(Modifier.height(2.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            ListHeading("Contact: ")
-                            ListLabel(item.contact.toString())
-                        }
-                    }
-                }
-
-                // City
-                item.city?.let {
-                    if (it.isNotEmpty()) {
-                        Spacer(Modifier.height(2.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            ListHeading("City: ")
-                            ListLabel(item.city.toString())
-                        }
-                    }
-                }
-            }
-
-            if (HP.userRights.deleteAnything == true) {
-                Spacer(Modifier.width(8.dp))
-                DeleteIcon {
-                    onDeleteClick(item)
-                }
-            }
-        }
-
-        // Category
-        item.categoryName?.let {
-            if (it.isNotEmpty()) {
-                Spacer(Modifier.height(2.dp))
+                // region Name
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
                 ) {
-                    ListHeading("Category: ")
-                    ListLabel(item.categoryName.toString())
+                    Column(
+                        modifier = Modifier
+                            .weight(1f),
+                    ) {
+                        Text(
+                            modifier = modifier,
+                            text = item.vendorName.toString(),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+
+                    if (HP.userRights.deleteAnything == true) {
+                        Spacer(Modifier.width(8.dp))
+                        DeleteIcon {
+                            onDeleteClick(item)
+                        }
+                    }
                 }
+                // endregion
+
+                Spacer(Modifier.height(4.dp))
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.2f)
+                )
+                Spacer(Modifier.height(4.dp))
+
+                // region Details
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.Bottom,
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f),
+                    ) {
+                        Row {
+                            ListHeading("Contact: ", color = primaryColor)
+                            ListLabel(item.contact.toString(), color = secondaryColor)
+                        }
+                        Spacer(Modifier.height(4.dp))
+                        Row {
+                            ListHeading("Address: ", color = primaryColor)
+                            ListLabel(item.address.toString(), color = secondaryColor)
+                        }
+                    }
+
+                    // region WhatsApp & Call
+                    if (item.contact!!.isNotEmpty()) {
+                        Spacer(Modifier.width(8.dp))
+                        Row {
+                            AppIconButton(
+                                icon = Icons.Outlined.Whatsapp,
+                                size = 18.dp,
+                                onClick = {
+                                    openWhatsapp(context, HP.getContact(item.contact!!.replace("-", "")))
+                                }
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            AppIconButton(
+                                icon = Icons.Outlined.Call,
+                                size = 18.dp,
+                                onClick = {
+                                    openCall(context, item.contact!!.replace("-", ""))
+                                }
+                            )
+                        }
+                    }
+                    // endregion
+                }
+                // endregion
             }
         }
-
     }
 }

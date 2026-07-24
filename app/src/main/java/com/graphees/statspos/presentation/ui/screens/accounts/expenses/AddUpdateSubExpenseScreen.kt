@@ -205,6 +205,7 @@ fun AddUpdateSubExpenseScreen(
                         label = {
                             Text("Expense")
                         },
+                        outlined = true,
                         enabled = false,
                     )
                     Body(

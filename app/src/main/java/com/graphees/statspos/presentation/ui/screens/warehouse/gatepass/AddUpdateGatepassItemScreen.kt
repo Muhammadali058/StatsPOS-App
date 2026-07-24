@@ -228,9 +228,7 @@ fun AddUpdateGatepassItemScreen(
                         label = {
                             Text("Gatepass")
                         },
-                        placeholder = {
-                            PlaceHolder(text = "Gatepass")
-                        },
+                        outlined = true,
                         enabled = false,
                     )
                     SearchItemBox(

@@ -206,6 +206,7 @@ fun AddUpdateSubBankScreen(
                         label = {
                             Text("Bank")
                         },
+                        outlined = true,
                         enabled = false,
                     )
                     Body(

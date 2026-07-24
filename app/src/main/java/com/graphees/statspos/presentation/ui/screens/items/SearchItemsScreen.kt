@@ -69,6 +69,7 @@ import com.graphees.statspos.presentation.ui.components.ListHeading
 import com.graphees.statspos.presentation.ui.components.ListImageView
 import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.ListMainLabel
+import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.PullToRefreshLayout
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SubChipsRow
@@ -176,7 +177,11 @@ fun SearchItemsScreen(
                     },
                     label = {
                         Text(text = "Vendor")
-                    }
+                    },
+                    placeholder = {
+                        PlaceHolder(text = "Vendor")
+                    },
+                    outlined = true,
                 )
 
                 ComboBox(
@@ -190,6 +195,10 @@ fun SearchItemsScreen(
                     label = {
                         Text(text = "Search By")
                     },
+                    placeholder = {
+                        PlaceHolder(text = "Search By")
+                    },
+                    outlined = true,
                 )
 
                 Button(onClick = {

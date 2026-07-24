@@ -27,9 +27,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardType
@@ -55,6 +57,8 @@ import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
 import com.graphees.statspos.utils.showToast
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 import java.time.LocalDate
 
 @Composable
@@ -62,6 +66,7 @@ fun NewExpenseEntryBody(
     sharedViewModel: SharedViewModel,
     snackbarHostState: SnackbarHostState
 ) {
+    val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
     val context = LocalContext.current
     val viewModel = hiltViewModel<NewExpenseEntryViewModel>()
@@ -69,6 +74,7 @@ fun NewExpenseEntryBody(
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     var showErrorDialog by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
+    val amountFocusRequester = remember { FocusRequester() }
 
     LaunchedEffect(event) {
         checkEvent(
@@ -99,7 +105,7 @@ fun NewExpenseEntryBody(
             Modifier
                 .fillMaxSize()
                 .padding(top = 8.dp)
-                .padding(bottom = 16.dp),
+                .padding(bottom = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Column(
@@ -109,6 +115,7 @@ fun NewExpenseEntryBody(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Body(
+                    amountFocusRequester = amountFocusRequester,
                     expense = state.expense,
                     subExpense = state.subExpense,
                     amount = state.amount,
@@ -163,6 +170,7 @@ fun NewExpenseEntryBody(
 
 @Composable
 private fun Body(
+    amountFocusRequester: FocusRequester?,
     expense: DropdownItem?,
     subExpense: DropdownItem?,
     amount: String,
@@ -188,9 +196,7 @@ private fun Body(
             label = {
                 Text("Expense")
             },
-            placeholder = {
-                PlaceHolder(text = "Expense")
-            },
+            outlined = true,
             addNone = true,
         )
         SubComboBox(
@@ -202,9 +208,7 @@ private fun Body(
             label = {
                 Text("Sub-Expense")
             },
-            placeholder = {
-                PlaceHolder(text = "Sub-Expense")
-            },
+            outlined = true,
             addNone = true,
             mainId = expense?.id ?: 0L
         )
@@ -223,6 +227,7 @@ private fun Body(
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Decimal
                 ),
+                focusRequester = amountFocusRequester,
             )
             if (HP.userRights.dateWiseEntry == true) {
                 Spacer(Modifier.width(8.dp))
@@ -254,6 +259,7 @@ private fun Prev() {
             .fillMaxSize(),
     ) {
         Body(
+            null,
             null,
             null,
             "",

@@ -204,7 +204,7 @@ private fun Home(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(vertical = 8.dp)
+                .padding(bottom = 8.dp)
         ) {
             Column(
                 Modifier
@@ -364,13 +364,13 @@ private fun Basic(
     onDefaultRateSelected: (DropdownItem) -> Unit,
     onDefaultDiscountSelected: (DropdownItem) -> Unit,
     onPrintLanguageSelected: (DropdownItem) -> Unit,
-
     ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(ConstantPaddings.BODY_HORIZONTAL),
     ) {
+        Spacer(Modifier.height(8.dp))
         ComboBox(
             modifier = Modifier
                 .fillMaxWidth(),

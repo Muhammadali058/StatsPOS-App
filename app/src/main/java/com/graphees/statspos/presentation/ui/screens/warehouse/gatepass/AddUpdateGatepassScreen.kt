@@ -187,9 +187,7 @@ fun AddUpdateGatepassScreen(
                         label = {
                             Text("Warehouse")
                         },
-                        placeholder = {
-                            PlaceHolder(text = "Warehouse")
-                        },
+                        outlined = true,
                         enabled = false,
                     )
                     Body(

@@ -140,9 +140,11 @@ fun AddUpdatePurchaseItemScreen(
 
             if (isUpdate) {
                 viewModel.editData(updateId)
+                qtyFocusRequester.requestFocus()
+            }else{
+                itemFocusRequester.requestFocus()
             }
 
-            itemFocusRequester.requestFocus()
             viewModel.setHasLoadedOnce(true)
         }
     }

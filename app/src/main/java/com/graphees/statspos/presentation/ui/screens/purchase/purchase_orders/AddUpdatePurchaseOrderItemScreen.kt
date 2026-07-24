@@ -227,6 +227,7 @@ fun AddUpdatePurchaseOrderItemScreen(
                         label = {
                             Text("Order")
                         },
+                        outlined = true,
                         enabled = false,
                     )
                     SearchItemBox(

@@ -29,6 +29,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +61,8 @@ import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
 import com.graphees.statspos.utils.showToast
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 import java.time.LocalDate
 
 @Composable
@@ -67,6 +70,7 @@ fun NewReceiptEntryBody(
     sharedViewModel: SharedViewModel,
     snackbarHostState: SnackbarHostState
 ) {
+    val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
     val context = LocalContext.current
     val viewModel = hiltViewModel<NewReceiptEntryViewModel>()
@@ -105,7 +109,7 @@ fun NewReceiptEntryBody(
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(top = 8.dp, bottom = 16.dp),
+                .padding(top = 8.dp, bottom = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Column(
@@ -129,11 +133,17 @@ fun NewReceiptEntryBody(
                     onVendorNameChange = viewModel::onVendorNameChange,
                     onCustomerSelected = { customer ->
                         viewModel.onCustomerIdChange(customer.id)
-                        amountFocusRequester.requestFocus()
+                        scope.launch {
+                            yield()
+                            amountFocusRequester.requestFocus()
+                        }
                     },
                     onVendorSelected = { vendor ->
                         viewModel.onVendorIdChange(vendor.id)
-                        amountFocusRequester.requestFocus()
+                        scope.launch {
+                            yield()
+                            amountFocusRequester.requestFocus()
+                        }
                     },
                     onIsVendorChanged = viewModel::onIsVendorChange,
                     onAmountChanged = viewModel::onAmountChange,
@@ -236,9 +246,7 @@ private fun Body(
                 label = {
                     Text("Customer")
                 },
-                placeholder = {
-                    PlaceHolder(text = "Customer")
-                },
+                outlined = true,
                 padding = PaddingValues(top = 4.dp),
                 focusRequester = accountFocusRequester,
             )
@@ -252,9 +260,7 @@ private fun Body(
                 label = {
                     Text("Vendor")
                 },
-                placeholder = {
-                    PlaceHolder(text = "Vendor")
-                },
+                outlined = true,
                 padding = PaddingValues(top = 4.dp),
                 focusRequester = accountFocusRequester,
             )

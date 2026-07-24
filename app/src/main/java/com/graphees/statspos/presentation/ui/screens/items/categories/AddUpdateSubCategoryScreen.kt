@@ -243,6 +243,7 @@ private fun Body(
         label = {
             Text("Category")
         },
+        outlined = true,
         enabled = false,
     )
     TextboxOutlined(

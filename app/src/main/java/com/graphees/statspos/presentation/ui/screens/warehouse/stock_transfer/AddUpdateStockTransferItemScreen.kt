@@ -235,9 +235,7 @@ fun AddUpdateStockTransferItemScreen(
                         label = {
                             Text("Warehouse")
                         },
-                        placeholder = {
-                            PlaceHolder(text = "Warehouse")
-                        },
+                        outlined = true,
                         enabled = false,
                     )
                     SearchItemBox(

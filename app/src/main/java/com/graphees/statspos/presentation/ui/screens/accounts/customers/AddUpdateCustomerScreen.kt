@@ -5,11 +5,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -166,6 +171,7 @@ fun AddUpdateCustomerScreen(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = {
             AppSnackbarHost(
                 snackbarHostState = snackbarHostState,
@@ -208,7 +214,8 @@ fun AddUpdateCustomerScreen(
         ) {
             Column(
                 Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .imePadding(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Column(
@@ -280,8 +287,12 @@ fun AddUpdateCustomerScreen(
 
                 Box(
                     modifier = Modifier
+                        .windowInsetsPadding(
+                            WindowInsets.navigationBars
+                                .union(WindowInsets.ime)
+                        )
                         .padding(ConstantPaddings.BODY_HORIZONTAL)
-                        .padding(bottom = 16.dp)
+                        .padding(bottom = 8.dp)
                 ) {
                     if (state.isSaving) {
                         AppCircularProgressIndicator()
@@ -335,7 +346,10 @@ private fun Basic(
                 .fillMaxWidth(),
             label = {
                 Text("Contact")
-            }
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number
+            ),
         )
         TextboxOutlined(
             value = city,
@@ -432,7 +446,8 @@ private fun CategoryAndDiscount(
             },
             label = {
                 Text(text = "Category")
-            }
+            },
+            outlined = true,
         )
         Dropdown(
             value = supplierName,
@@ -443,7 +458,8 @@ private fun CategoryAndDiscount(
             },
             label = {
                 Text(text = "Supplier")
-            }
+            },
+            outlined = true,
         )
         DiscountTextbox(
             value = disc,

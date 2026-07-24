@@ -128,7 +128,7 @@ fun PaymentScreen(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Text(
-                            "Upgrade to Premium",
+                            "Send Payment",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )

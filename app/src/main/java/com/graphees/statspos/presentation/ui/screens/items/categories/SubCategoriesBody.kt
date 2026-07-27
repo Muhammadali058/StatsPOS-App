@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -29,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -41,7 +43,9 @@ import com.graphees.statspos.presentation.ui.components.DeleteIcon
 import com.graphees.statspos.presentation.ui.components.Dropdown
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ListCard
+import com.graphees.statspos.presentation.ui.components.ListHeading
 import com.graphees.statspos.presentation.ui.components.ListImageView
+import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.ListMainLabel
 import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
@@ -227,6 +231,9 @@ private fun ListCard(
     onItemClick: (SubCategories) -> Unit,
     onDeleteClick: (SubCategories) -> Unit,
 ) {
+    val primaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
+    val secondaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.6f)
+
     ListCard(
         modifier = modifier
             .fillMaxWidth()
@@ -246,21 +253,41 @@ private fun ListCard(
                 imageUrl = item.imageUrl,
                 modifier = Modifier
                     .size(60.dp),
+                showIfNull = true,
             ) {
                 Spacer(Modifier.width(8.dp))
             }
 
-            ListMainLabel(
+            Column(
                 modifier = Modifier
                     .weight(1f),
-                text=item.subCategoryName.toString()
-            )
+            ) {
+                // region Name
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f),
+                    ) {
+                        Text(
+                            modifier = modifier,
+                            text = item.subCategoryName.toString(),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
 
-            if (HP.userRights.deleteAnything == true) {
-                Spacer(Modifier.width(8.dp))
-                DeleteIcon {
-                    onDeleteClick(item)
+                    if (HP.userRights.deleteAnything == true) {
+                        Spacer(Modifier.width(8.dp))
+                        DeleteIcon {
+                            onDeleteClick(item)
+                        }
+                    }
                 }
+                // endregion
             }
         }
     }

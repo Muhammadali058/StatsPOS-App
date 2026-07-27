@@ -167,21 +167,32 @@ class LoginViewModel @Inject constructor(
                     HP.setDropdowns(result.data)
                     preloadImages(listOf(HP.getImageUrl(HP.printSettings.imageUrl.toString())))
 
-                    getClient{
-                        onSuccess()
-                    }
+                    getClient(
+                        onSuccess = {
+                            onSuccess()
+                        },
+                        onError = {
+                            onSuccess()
+                        }
+                    )
                 }
             }
         }
     }
 
-    fun getClient(onSuccess: () -> Unit) {
+    fun getClient(onSuccess: () -> Unit, onError: () -> Unit) {
         viewModelScope.launch {
             val clientId = dataStore.getClientId().first()
 
             when (val result = clientsRepo.getClientData(clientId)) {
-                is Resource.Error -> resultError(result.error)
-                is Resource.Information -> resultInformation(result.message)
+                is Resource.Error -> {
+                    resultError(result.error)
+                    onError()
+                }
+                is Resource.Information -> {
+                    resultInformation(result.message)
+                    onError()
+                }
                 is Resource.Success -> {
                     resultSuccess()
 

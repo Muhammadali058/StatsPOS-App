@@ -12,9 +12,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Print
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,11 +31,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.domain.models.accounts.Banks
 import com.graphees.statspos.presentation.ui.components.AppFloatingActionButton
+import com.graphees.statspos.presentation.ui.components.AppIconButton
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.BottomHeading
 import com.graphees.statspos.presentation.ui.components.ConfirmDialog
@@ -230,6 +237,9 @@ private fun ListCard(
     onItemClick: (Banks) -> Unit,
     onDeleteClick: (Banks) -> Unit,
 ) {
+    val primaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
+    val secondaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.6f)
+
     ListCard(
         modifier = modifier
             .fillMaxWidth()
@@ -246,23 +256,58 @@ private fun ListCard(
         ) {
             Column(
                 modifier = Modifier
-                    .weight(1f)
+                    .weight(1f),
             ) {
-                ListMainLabel(item.bankName.toString())
-                Spacer(Modifier.height(2.dp))
+                // region Name
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    ListHeading("Remarks: ")
-                    ListLabel(item.remarks.toString())
-                }
-            }
+                    Column(
+                        modifier = Modifier
+                            .weight(1f),
+                    ) {
+                        Text(
+                            modifier = modifier,
+                            text = item.bankName.toString(),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
 
-            if (HP.userRights.deleteAnything == true) {
-                Spacer(Modifier.width(8.dp))
-                DeleteIcon {
-                    onDeleteClick(item)
+                    if (HP.userRights.deleteAnything == true) {
+                        Spacer(Modifier.width(8.dp))
+                        DeleteIcon {
+                            onDeleteClick(item)
+                        }
+                    }
+                }
+                // endregion
+
+                Spacer(Modifier.height(4.dp))
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.2f)
+                )
+                Spacer(Modifier.height(4.dp))
+
+                Row (
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                        ) {
+                            ListHeading("Remarks: ", color = primaryColor)
+                            ListLabel(item.remarks.toString(), color = secondaryColor)
+                        }
+                    }
                 }
             }
         }

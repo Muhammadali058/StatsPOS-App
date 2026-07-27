@@ -14,9 +14,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,7 +31,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -288,6 +292,9 @@ private fun ListCard(
             onItemClick(item)
         }
     ) {
+        val primaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
+        val secondaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.6f)
+
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -307,21 +314,46 @@ private fun ListCard(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                ListMainLabel(item.username.toString())
-                Spacer(Modifier.height(2.dp))
+                // region Name
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
                 ) {
-                    ListHeading("User Type: ")
-                    ListLabel(item.userTypeDescription.toString())
-                }
-            }
+                    Column(
+                        modifier = Modifier
+                            .weight(1f),
+                    ) {
+                        Text(
+                            modifier = modifier,
+                            text = item.username.toString(),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
 
-            if (HP.userRights.deleteAnything == true) {
-                Spacer(Modifier.width(8.dp))
-                DeleteIcon {
-                    onDeleteClick(item)
+                    if (HP.userRights.deleteAnything == true) {
+                        Spacer(Modifier.width(8.dp))
+                        DeleteIcon {
+                            onDeleteClick(item)
+                        }
+                    }
+                }
+                // endregion
+
+                Spacer(Modifier.height(4.dp))
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.2f)
+                )
+                Spacer(Modifier.height(4.dp))
+
+                Row (
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    ListHeading("User Type: ", color = primaryColor)
+                    ListLabel(item.userTypeDescription.toString(), color = secondaryColor)
                 }
             }
         }

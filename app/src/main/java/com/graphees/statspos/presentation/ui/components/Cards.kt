@@ -20,6 +20,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.graphees.statspos.presentation.ui.utils.ConstantPaddings.DEFAULT_RADIUS
 
 @Composable
 fun AppCard(
@@ -51,7 +52,7 @@ fun AppCard(
 @Composable
 fun ListCard(
     modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(10.dp),
+    shape: Shape = RoundedCornerShape(DEFAULT_RADIUS),
     elevation: CardElevation = CardDefaults.cardElevation(
         defaultElevation = 3.dp
     ),

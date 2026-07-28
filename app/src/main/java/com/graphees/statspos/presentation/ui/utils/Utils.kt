@@ -26,7 +26,7 @@ object ConstantPaddings {
         16.dp
     )
     val CUSTOM_TEXTBOX_OUTSIDE = PaddingValues(
-        vertical = 4.dp
+        vertical = 5.dp
     )
     val CUSTOM_TEXTBOX_INSIDE = PaddingValues(
         start = 15.dp,
@@ -39,6 +39,7 @@ object ConstantPaddings {
     )
 
     val LIST_PADDING_VERTICAL = 8.dp
+    val DEFAULT_RADIUS = 10.dp
 }
 
 object ConstantSize {
@@ -54,6 +55,44 @@ const val REPORT_HEADINGS_FONT_SIZE = 12f
 const val REPORT_HEADER_FONT_SIZE = 10f
 const val REPORT_BODY_FONT_SIZE = 10f
 // endregion
+
+fun pdfToBitmap(file: File): Bitmap {
+    val fd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+    val renderer = PdfRenderer(fd)
+    val page = renderer.openPage(0)
+
+    val scale = 3
+
+    val bitmap = createBitmap(page.width * scale, page.height * scale)
+
+    val canvas = Canvas(bitmap)
+    canvas.drawColor(Color.WHITE)
+    canvas.scale(scale.toFloat(), scale.toFloat())
+
+    page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+
+    page.close()
+    renderer.close()
+    fd.close()
+
+    return bitmap
+}
+
+
+fun bitmapToFile(context: Context, bitmap: Bitmap): File {
+    val file = File(context.cacheDir, "receipt_${System.currentTimeMillis()}.jpg")
+
+    FileOutputStream(file).use { out ->
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out)
+    }
+
+    return file
+}
+
+fun getImageFromPdf(context: Context, file: File): File {
+    val bitmap = pdfToBitmap(file)
+    return bitmapToFile(context, bitmap)
+}
 
 fun openPdf(context: Context, file: File) {
     val uri = FileProvider.getUriForFile(
@@ -110,55 +149,6 @@ fun sharePdf(context: Context, file: File) {
 //        file.delete()
 //    }, 10_000)
     file.deleteOnExit()
-}
-
-fun openWhatsAppChat(context: Context, phone: String, message: String) {
-//    phone must be this format 923030454625
-    val url = "https://wa.me/$phone?text=${URLEncoder.encode(message, "UTF-8")}"
-
-    val intent = Intent(Intent.ACTION_VIEW).apply {
-        data = url.toUri()
-    }
-
-    context.startActivity(intent)
-}
-
-fun pdfToBitmap(file: File): Bitmap {
-    val fd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
-    val renderer = PdfRenderer(fd)
-    val page = renderer.openPage(0)
-
-    val scale = 3
-
-    val bitmap = createBitmap(page.width * scale, page.height * scale)
-
-    val canvas = Canvas(bitmap)
-    canvas.drawColor(Color.WHITE)
-    canvas.scale(scale.toFloat(), scale.toFloat())
-
-    page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-
-    page.close()
-    renderer.close()
-    fd.close()
-
-    return bitmap
-}
-
-
-fun bitmapToFile(context: Context, bitmap: Bitmap): File {
-    val file = File(context.cacheDir, "receipt_${System.currentTimeMillis()}.jpg")
-
-    FileOutputStream(file).use { out ->
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out)
-    }
-
-    return file
-}
-
-fun getImageFromPdf(context: Context, file: File): File {
-    val bitmap = pdfToBitmap(file)
-    return bitmapToFile(context, bitmap)
 }
 
 fun openCall(

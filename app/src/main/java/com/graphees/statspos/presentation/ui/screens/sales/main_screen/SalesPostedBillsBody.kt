@@ -287,8 +287,8 @@ fun SalesPostedBillsBody(
                         label = {
                             Text(text = "User")
                         },
-                        addNone = true,
                         outlined = true,
+                        addNone = true,
                     )
                 }
                 Row(
@@ -610,135 +610,6 @@ private fun BodyList(
 }
 
 @Composable
-private fun ListCard1(
-    modifier: Modifier = Modifier,
-    item: SalesBills,
-    onItemClick: (SalesBills) -> Unit,
-    onEditClick: (SalesBills) -> Unit,
-    onDeleteClick: (SalesBills) -> Unit,
-) {
-    val primaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
-    val secondaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.6f)
-
-    ListCard(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = ConstantPaddings.LIST_PADDING_VERTICAL),
-        shape = RoundedCornerShape(6.dp),
-        onClick = {
-            onItemClick(item)
-        }
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth(),
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .weight(1f),
-                    ) {
-                        Text(
-                            modifier = modifier,
-                            text = item.customerName.toString().ifEmpty { "Walk-in Customer" },
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            ListHeading("Sr. ", color = primaryColor)
-                            ListLabel(item.id.toString(), color = secondaryColor)
-                            Spacer(Modifier.width(8.dp))
-                            ListHeading("Inv No. ", color = primaryColor)
-                            ListLabel(item.invoiceNo.toString(), color = secondaryColor)
-                            Spacer(Modifier.width(8.dp))
-                            ListHeading("Date: ", color = primaryColor)
-                            ListLabel(item.date.toString(), color = secondaryColor)
-                        }
-                        Spacer(Modifier.height(4.dp))
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            ListHeading("User: ", color = primaryColor)
-                            ListLabel(item.username.toString(), color = secondaryColor)
-                        }
-                    }
-
-                    AppIconButton(
-                        icon = Icons.Default.Edit,
-                        onClick = {
-                            onEditClick(item)
-                        },
-                        buttonSize = 26.dp,
-                        size = 20.dp,
-                    )
-                }
-
-                Spacer(Modifier.height(4.dp))
-                ListHorizontalDivider()
-                Spacer(Modifier.height(4.dp))
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                )
-                {
-                    Column(
-                        modifier = Modifier
-                            .weight(1f),
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                        ) {
-                            ListMainHeading("Total", Modifier.weight(1f))
-                            ListHeading("On", Modifier.weight(.5f), color = primaryColor)
-                            ListHeading("Type", Modifier.weight(.5f), color = primaryColor)
-                            ListHeading("MOP", Modifier.weight(.5f), color = primaryColor)
-                            ListHeading("R/W", Modifier.weight(.5f), color = primaryColor)
-                        }
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                        ) {
-                            ListMainLabel(
-                                HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)),
-                                Modifier.weight(1f)
-                            )
-                            ListLabel(item.salesOn.toString(), Modifier.weight(.5f), color = secondaryColor)
-                            ListLabel(item.salesType.toString(), Modifier.weight(.5f), color = secondaryColor)
-                            ListLabel(item.mop.toString(), Modifier.weight(.5f), color = secondaryColor)
-                            ListLabel(item.type.toString(), Modifier.weight(.5f), color = secondaryColor)
-                        }
-                    }
-
-                    Spacer(Modifier.width(8.dp))
-                    DeleteIcon{
-                        onDeleteClick(item)
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
 private fun ListCard(
     modifier: Modifier = Modifier,
     item: SalesBills,
@@ -753,7 +624,6 @@ private fun ListCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = ConstantPaddings.LIST_PADDING_VERTICAL),
-        shape = RoundedCornerShape(6.dp),
         onClick = {
             onItemClick(item)
         }

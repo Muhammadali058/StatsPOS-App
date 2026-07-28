@@ -1,5 +1,6 @@
 package com.graphees.statspos.presentation.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -57,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import com.graphees.statspos.domain.models.DropdownItem
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
+import com.graphees.statspos.presentation.ui.utils.ConstantPaddings.DEFAULT_RADIUS
 
 @Composable
 fun Dropdown(
@@ -298,11 +300,6 @@ fun SubDropdown(
         derivedStateOf {
             if (mainId == 0L) {
                 listOf(DropdownItem(0L, noneText))
-//                if (items.any { it.id == 0L }) {
-//                    items
-//                } else {
-//                    listOf(DropdownItem(0L, noneText)) + items
-//                }
             } else {
                 if (value == noneText)
                     listOf(
@@ -319,14 +316,18 @@ fun SubDropdown(
         }
     }
 
-    var previousMainId by rememberSaveable { mutableLongStateOf(mainId) }
+    // when categoryId change also change subCategoryBox value
+    var previousMainId by remember { mutableLongStateOf(mainId) }
     LaunchedEffect(mainId) {
-        if (previousMainId != mainId) {
-            previousMainId = mainId
+        if(previousMainId != 0L) {
+            if (previousMainId != mainId) {
+                previousMainId = mainId
 
-            onValueChange("")
-            onItemSelected(DropdownItem(0L, noneText))
-        }
+                onValueChange("")
+                onItemSelected(DropdownItem(0L, noneText))
+            }
+        }else
+            previousMainId = mainId
     }
 
     var expanded by remember { mutableStateOf(false) }
@@ -693,10 +694,14 @@ fun SubComboBox(
 
     var previousMainId by rememberSaveable { mutableLongStateOf(mainId) }
     LaunchedEffect(mainId) {
-        if (previousMainId != mainId) {
+        if(previousMainId != 0L) {
+            if (previousMainId != mainId) {
+                previousMainId = mainId
+
+                onItemSelected(DropdownItem(0L, noneText))
+            }
+        }else
             previousMainId = mainId
-            onItemSelected(DropdownItem(0L, noneText))
-        }
     }
 
     var expanded by remember { mutableStateOf(false) }
@@ -851,7 +856,6 @@ fun ChipsRow(
     items: List<DropdownItem>,
     selectedItem: DropdownItem,
     onItemSelected: (DropdownItem) -> Unit,
-    shape: Shape = RoundedCornerShape(12.dp),
     addNone: Boolean = true,
     noneText: String = "None",
 ) {
@@ -880,7 +884,6 @@ fun ChipsRow(
                     isSelected = item.id == selectedItem.id,
                     item = item,
                     onItemSelected = onItemSelected,
-                    shape = shape,
                 )
             }
         }
@@ -894,7 +897,6 @@ fun SubChipsRow(
     selectedItem: DropdownItem,
     onItemSelected: (DropdownItem) -> Unit,
     mainId: Long = 0L,
-    shape: Shape = RoundedCornerShape(12.dp),
     addNone: Boolean = true,
     noneText: String = "None",
 ) {
@@ -929,16 +931,6 @@ fun SubChipsRow(
         }
     }
 
-//    var isFirstRun by rememberSaveable { mutableStateOf(true) }
-//    LaunchedEffect(mainId) {
-//        if (isFirstRun) {
-//            isFirstRun = false
-//            return@LaunchedEffect
-//        }
-//
-//        onItemSelected(DropdownItem(0L, noneText))
-//    }
-
     if (filteredItems.size > 1) {
         LazyRow(
             modifier = modifier
@@ -950,7 +942,6 @@ fun SubChipsRow(
                     isSelected = item.id == selectedItem.id,
                     item = item,
                     onItemSelected = onItemSelected,
-                    shape = shape,
                 )
             }
         }
@@ -962,7 +953,6 @@ private fun FilterChip(
     isSelected: Boolean,
     item: DropdownItem,
     onItemSelected: (DropdownItem) -> Unit,
-    shape: Shape,
 ) {
     FilterChip(
         modifier = Modifier
@@ -978,7 +968,7 @@ private fun FilterChip(
                 color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimaryContainer
             )
         },
-        shape = shape,
+        shape = RoundedCornerShape(DEFAULT_RADIUS),
         border = BorderStroke(
             width = 1.dp,
             color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimaryContainer.copy(.2f)

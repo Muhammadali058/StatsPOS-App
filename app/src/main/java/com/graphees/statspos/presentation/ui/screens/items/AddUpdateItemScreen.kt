@@ -78,6 +78,7 @@ import com.graphees.statspos.presentation.ui.components.SaveButton
 import com.graphees.statspos.presentation.ui.components.SmallButton
 import com.graphees.statspos.presentation.ui.components.SubDropdown
 import com.graphees.statspos.presentation.ui.components.TextboxOutlined
+import com.graphees.statspos.presentation.ui.components.TitleCard
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.components.UpgradeToPremiumBottomSheet
 import com.graphees.statspos.presentation.ui.components.UploadImageView
@@ -448,6 +449,7 @@ private fun Home(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.surface)
+                .padding(ConstantPaddings.BODY_HORIZONTAL)
         ) {
             Column(
                 Modifier
@@ -462,6 +464,7 @@ private fun Home(
                         .imePadding(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
+                    Spacer(Modifier.height(12.dp))
                     Basic(
                         itemnameFocusRequester = itemnameFocusRequester,
                         barcode = state.barcode,
@@ -501,7 +504,7 @@ private fun Home(
                             }
                         },
                     )
-
+                    Spacer(Modifier.height(12.dp))
                     CategoryAndVendor(
                         categoryName = state.categoryName,
                         subCategoryName = state.subCategoryName,
@@ -514,7 +517,7 @@ private fun Home(
                         onSubCategoryIdChange = viewModel::onSubCategoryIdChange,
                         onVendorIdChange = viewModel::onVendorIdChange,
                     )
-
+                    Spacer(Modifier.height(12.dp))
                     Stock(
                         stockWarningMin = state.stockWarningMin,
                         stockWarningMax = state.stockWarningMax,
@@ -537,7 +540,7 @@ private fun Home(
                         openingStockPcsTBEnabled = state.openingStockPcsTBEnabled,
                         openingStockCrtnTBEnabled = state.openingStockCrtnTBEnabled,
                     )
-
+                    Spacer(Modifier.height(12.dp))
                     DiscountExpiry(
                         expirable = state.expirable,
                         expiry = state.expiry,
@@ -553,7 +556,7 @@ private fun Home(
                         onPackingChange = viewModel::onPackingChange,
                         onLocationChange = viewModel::onLocationChange,
                     )
-
+                    Spacer(Modifier.height(12.dp))
                     Switches(
                         changeable = state.changeable,
                         repeatable = state.repeatable,
@@ -571,7 +574,7 @@ private fun Home(
                         onSearchAbleChange = viewModel::onSearchableChange,
                         onSaleUnderStockChange = viewModel::onSaleUnderStockChange,
                     )
-
+                    Spacer(Modifier.height(12.dp))
                     ImageExpandable(
                         isUploadingImage = state.isUploadingImage,
                         imageUrl = state.imageUrl,
@@ -580,6 +583,7 @@ private fun Home(
                         },
                         onClear = viewModel::deleteImage,
                     )
+                    Spacer(Modifier.height(12.dp))
                 }
 
                 Box(
@@ -588,7 +592,7 @@ private fun Home(
                             WindowInsets.navigationBars
                                 .union(WindowInsets.ime)
                         )
-                        .padding(ConstantPaddings.BODY_HORIZONTAL)
+//                        .padding(ConstantPaddings.BODY_HORIZONTAL)
                         .padding(bottom = 8.dp)
                 ) {
                     if (state.isSaving) {
@@ -655,9 +659,9 @@ private fun Basic(
         )
     }
 
-    ExpandableSection(
+    TitleCard(
         title = "Basic Details",
-        initiallyExpanded = true,
+        icon = R.drawable.basic,
     ) {
         // Barcode & Ref. Code
         Row {
@@ -689,7 +693,7 @@ private fun Basic(
                 value = refCode,
                 onValueChange = onRefCodeChange,
                 modifier = Modifier
-                    .width(150.dp),
+                    .width(130.dp),
                 label = {
                     Text("Ref #")
                 }
@@ -734,15 +738,6 @@ private fun Basic(
                 value = cost,
                 onValueChange = onCostChange,
                 modifier = Modifier.weight(1f),
-//                trailingIcon = {
-//                    AppIconButton(
-//                        icon = R.drawable.calculate,
-//                        onClick = {
-//                            onCostChange(HP.evaluateExpression(cost))
-//                        },
-//                        size = 20.dp,
-//                    )
-//                },
                 label = {
                     Text("Cost")
                 },
@@ -752,15 +747,6 @@ private fun Basic(
                 value = marketPrice,
                 onValueChange = onMarketPriceChange,
                 modifier = Modifier.weight(1f),
-//                trailingIcon = {
-//                    AppIconButton(
-//                        icon = R.drawable.calculate,
-//                        onClick = {
-//                            onMarketPriceChange(HP.evaluateExpression(marketPrice))
-//                        },
-//                        size = 20.dp,
-//                    )
-//                },
                 label = {
                     Text("Market Price")
                 }
@@ -773,15 +759,6 @@ private fun Basic(
                 value = retail,
                 onValueChange = onRetailChange,
                 modifier = Modifier.weight(1f),
-//                trailingIcon = {
-//                    AppIconButton(
-//                        icon = R.drawable.calculate,
-//                        onClick = {
-//                            onRetailChange(HP.evaluateExpression(retail))
-//                        },
-//                        size = 20.dp,
-//                    )
-//                },
                 label = {
                     Text(
                         text = if (HP.settings.fourRateSystem == true) "Rate 1" else "Retail"
@@ -793,15 +770,6 @@ private fun Basic(
                 value = wholesale,
                 onValueChange = onWholesaleChange,
                 modifier = Modifier.weight(1f),
-//                trailingIcon = {
-//                    AppIconButton(
-//                        icon = R.drawable.calculate,
-//                        onClick = {
-//                            onWholesaleChange(HP.evaluateExpression(wholesale))
-//                        },
-//                        size = 20.dp,
-//                    )
-//                },
                 label = {
                     Text(
                         text = if (HP.settings.fourRateSystem == true) "Rate 2" else "Wholesale"
@@ -817,15 +785,6 @@ private fun Basic(
                     value = rate3,
                     onValueChange = onRate3Change,
                     modifier = Modifier.weight(1f),
-//                    trailingIcon = {
-//                        AppIconButton(
-//                            icon = R.drawable.calculate,
-//                            onClick = {
-//                                onRate3Change(HP.evaluateExpression(rate3))
-//                            },
-//                            size = 20.dp,
-//                        )
-//                    },
                     label = {
                         Text("Rate 3")
                     }
@@ -835,15 +794,6 @@ private fun Basic(
                     value = rate4,
                     onValueChange = onRate4Change,
                     modifier = Modifier.weight(1f),
-//                    trailingIcon = {
-//                        AppIconButton(
-//                            icon = R.drawable.calculate,
-//                            onClick = {
-//                                onRate4Change(HP.evaluateExpression(rate4))
-//                            },
-//                            size = 20.dp,
-//                        )
-//                    },
                     label = {
                         Text("Rate 3")
                     }
@@ -858,15 +808,6 @@ private fun Basic(
                     value = crtnRate,
                     onValueChange = onCrtnRateChange,
                     modifier = Modifier.weight(1f),
-//                    trailingIcon = {
-//                        AppIconButton(
-//                            icon = R.drawable.calculate,
-//                            onClick = {
-//                                onCrtnRateChange(HP.evaluateExpression(crtnRate))
-//                            },
-//                            size = 20.dp,
-//                        )
-//                    },
                     label = {
                         Text("Crtn Rate")
                     },
@@ -904,9 +845,9 @@ private fun CategoryAndVendor(
     onSubCategoryIdChange: (Long) -> Unit,
     onVendorIdChange: (Long) -> Unit,
 ) {
-    ExpandableSection(
+    TitleCard(
         title = "Category & Vendor",
-        initiallyExpanded = true,
+        icon = R.drawable.categories,
     ) {
         Dropdown(
             value = categoryName,
@@ -980,9 +921,9 @@ private fun Stock(
     openingStockPcsTBEnabled: Boolean,
     openingStockCrtnTBEnabled: Boolean,
 ) {
-    ExpandableSection(
-        title = "Stock Warning, Opening Stock",
-        initiallyExpanded = true,
+    TitleCard(
+        title = "Stock & Inventory",
+        icon = R.drawable.inventory,
     ) {
         // Stock Warning Min & Max
         AppText(
@@ -1139,9 +1080,9 @@ private fun DiscountExpiry(
     onPackingChange: (String) -> Unit,
     onLocationChange: (String) -> Unit,
 ) {
-    ExpandableSection(
+    TitleCard(
         title = "Discount, Expiry, Location",
-        initiallyExpanded = true,
+        icon = R.drawable.discount,
     ) {
         Column(
             modifier = Modifier
@@ -1246,9 +1187,9 @@ private fun Switches(
     onSearchAbleChange: (Boolean) -> Unit,
     onSaleUnderStockChange: (Boolean) -> Unit,
 ) {
-    ExpandableSection(
+    TitleCard (
         title = "Lock & Others",
-        initiallyExpanded = true,
+        icon = R.drawable.others,
     ) {
         Row {
             AppSwitch(
@@ -1314,9 +1255,9 @@ private fun ImageExpandable(
     onImageUrlChange: (MultipartBody.Part) -> Unit,
     onClear: (String) -> Unit,
 ) {
-    ExpandableSection(
+    TitleCard (
         title = "Image",
-        initiallyExpanded = true,
+        icon = R.drawable.image,
     ) {
         Column(
             modifier = Modifier
@@ -1382,83 +1323,6 @@ private fun BodyPrev() {
                 onMarketPriceChange = { },
                 onGenerateBarcode = {},
                 onGenerateUrduname = {},
-            )
-
-            CategoryAndVendor(
-                categoryName = "",
-                subCategoryName = "",
-                vendorName = "",
-                categoryId = 1,
-                onCategoryNameChange = { },
-                onSubCategoryNameChange = { },
-                onVendorNameChange = { },
-                onCategoryIdChange = { },
-                onSubCategoryIdChange = { },
-                onVendorIdChange = { },
-            )
-
-            Stock(
-                stockWarningMin = "",
-                stockWarningMax = "",
-                maxSalePcs = "",
-                maxSaleCrtn = "",
-                openingStockPcs = "",
-                openingStockCrtn = "",
-                currentStockPcs = "",
-                currentStockCrtn = "",
-
-                onStockWarningMinChange = { },
-                onStockWarningMaxChange = { },
-                onMaxSalePcsChange = { },
-                onMaxSaleCrtnChange = { },
-                onOpeningStockPcsChange = { },
-                onOpeningStockCrtnChange = { },
-                onCurrentStockPcsChange = { },
-                onCurrentStockCrtnChange = { },
-
-                openingStockPcsTBEnabled = false,
-                openingStockCrtnTBEnabled = false,
-            )
-
-            DiscountExpiry(
-                expirable = false,
-                expiry = LocalDate.now(),
-                disc = "",
-                isDiscRsPer = true,
-                packing = "",
-                location = "",
-
-                onExpirableChange = { },
-                onExpiryChange = { },
-                onDiscChange = { },
-                onIsDiscRsPerChange = { },
-                onPackingChange = { },
-                onLocationChange = { },
-            )
-
-            Switches(
-                changeable = false,
-                repeatable = false,
-                lockPcs = false,
-                lockCrtn = false,
-                button = false,
-                searchable = false,
-                saleUnderStock = false,
-
-                onChangeableChange = {},
-                onRepeatableChange = {},
-                onLockPcsChange = {},
-                onLockCrtnChange = {},
-                onButtonChange = {},
-                onSearchAbleChange = {},
-                onSaleUnderStockChange = {},
-            )
-
-            ImageExpandable(
-                isUploadingImage = false,
-                imageUrl = "",
-                onImageUrlChange = { },
-                onClear = { },
             )
         }
 

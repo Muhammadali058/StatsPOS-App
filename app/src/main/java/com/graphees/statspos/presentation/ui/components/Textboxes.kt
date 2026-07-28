@@ -82,6 +82,7 @@ import androidx.compose.ui.window.Popup
 import com.graphees.statspos.R
 import com.graphees.statspos.domain.models.DropdownItem
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
+import com.graphees.statspos.presentation.ui.utils.ConstantPaddings.DEFAULT_RADIUS
 import com.graphees.statspos.presentation.ui.utils.ConstantSize
 import com.graphees.statspos.utils.HP
 import java.time.LocalDate
@@ -95,7 +96,7 @@ fun TextboxBasic(
         PlaceHolder("Search")
     },
     height: Dp = ConstantSize.DEFAULT_TEXTBOX_HEIGHT,
-    shape: Shape = RoundedCornerShape(12.dp),
+    shape: Shape = RoundedCornerShape(DEFAULT_RADIUS),
     textStyle: TextStyle = TextStyle(fontSize = 15.sp),
     enabled: Boolean = true,
     readOnly: Boolean = false,
@@ -207,6 +208,7 @@ fun TextboxOutlined(
     shape: Shape = OutlinedTextFieldDefaults.shape,
     colors: TextFieldColors = TextFieldDefaults.colors(
         focusedIndicatorColor = MaterialTheme.colorScheme.outlineVariant,
+//        unfocusedIndicatorColor = MaterialTheme.colorScheme.outline.copy(0.2f),
         unfocusedIndicatorColor = MaterialTheme.colorScheme.outlineVariant,
         focusedLabelColor = MaterialTheme.colorScheme.outlineVariant,
         unfocusedLabelColor = MaterialTheme.colorScheme.outline,
@@ -471,8 +473,6 @@ fun AutoCompleteItemsTextbox(
         imeAction = ImeAction.Go
     ),
     height: Dp = ConstantSize.DEFAULT_TEXTBOX_HEIGHT,
-//    shape: Shape = OutlinedTextFieldDefaults.shape,
-    shape: Shape = RoundedCornerShape(12.dp),
     textStyle: TextStyle = TextStyle(),
     enabled: Boolean = true,
     readOnly: Boolean = false,
@@ -511,7 +511,6 @@ fun AutoCompleteItemsTextbox(
             },
             height = height,
             placeholder = placeholder,
-            shape = shape,
             textStyle = textStyle,
             enabled = enabled,
             readOnly = readOnly,
@@ -895,7 +894,6 @@ fun SearchTextbox(
                 onSearchClick(value)
             }
         ),
-        shape = RoundedCornerShape(12.dp),
     )
 }
 

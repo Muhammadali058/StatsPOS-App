@@ -148,15 +148,6 @@ private fun BodyList(
     onRefresh: () -> Unit,
     items: List<WarehouseEntryItems>,
 ) {
-//    LazyColumn(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .background(MaterialTheme.colorScheme.background)
-//    ) {
-//        items(items) { item ->
-//            ListCard(item = item)
-//        }
-//    }
     PullToRefreshList(
         modifier = modifier,
         isRefreshing = false,
@@ -183,7 +174,6 @@ private fun ListCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = ConstantPaddings.LIST_PADDING_VERTICAL),
-        shape = RoundedCornerShape(6.dp),
         onClick = {
 
         }

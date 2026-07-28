@@ -29,6 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.graphees.statspos.R
+import com.graphees.statspos.presentation.ui.utils.ConstantPaddings.DEFAULT_RADIUS
 import com.graphees.statspos.presentation.ui.utils.ConstantSize
 
 @Composable
@@ -80,9 +81,8 @@ fun AppIconButtonBox(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(DEFAULT_RADIUS))
                 .background(tint.copy(.1f))
-//                .padding(4.dp)
             ,
             contentAlignment = Alignment.Center,
         ) {

@@ -95,6 +95,7 @@ import com.graphees.statspos.presentation.ui.screens.purchase.main_screen.Purcha
 import com.graphees.statspos.presentation.ui.screens.reports.ReportsScreen
 import com.graphees.statspos.presentation.ui.screens.sales.main_screen.SalesScreen
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
+import com.graphees.statspos.presentation.ui.utils.ConstantPaddings.DEFAULT_RADIUS
 import com.graphees.statspos.presentation.ui.utils.Navigator
 import com.graphees.statspos.presentation.ui.utils.rememberNavigationState
 import com.graphees.statspos.presentation.ui.utils.toEntries
@@ -276,7 +277,7 @@ fun HomeScreen(
 
     // Navigation
     val navigationState = rememberNavigationState(
-        startRoute = BottomRoutes.Purchase,
+        startRoute = BottomRoutes.Items,
         topLevelRoutes = BOTTOM_DESTINATIONS.keys,
         serializersModules = SerializersModule {
             polymorphic(NavKey::class) {
@@ -846,7 +847,7 @@ private fun Title(
         ) {
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
+                    .clip(RoundedCornerShape(DEFAULT_RADIUS))
                     .background(MaterialTheme.colorScheme.primary.copy(.1f))
                 ,
                 contentAlignment = Alignment.Center,

@@ -242,7 +242,6 @@ private fun ListCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = ConstantPaddings.LIST_PADDING_VERTICAL),
-        shape = RoundedCornerShape(6.dp),
         onClick = {
             onItemClick(item)
         }

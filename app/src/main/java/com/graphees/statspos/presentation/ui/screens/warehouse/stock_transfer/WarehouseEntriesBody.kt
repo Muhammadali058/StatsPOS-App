@@ -236,6 +236,7 @@ private fun ListCard(
             ListHeading("Date: ")
             ListLabel(item.date.toString())
         }
+        Spacer(Modifier.height(4.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth(),

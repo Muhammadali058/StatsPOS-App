@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -28,7 +29,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.domain.models.sales.Sales
 import com.graphees.statspos.domain.models.sales.SalesBillItems
@@ -40,6 +43,7 @@ import com.graphees.statspos.presentation.ui.components.HeadingMedium
 import com.graphees.statspos.presentation.ui.components.LabelMedium
 import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListHeading
+import com.graphees.statspos.presentation.ui.components.ListHorizontalDivider
 import com.graphees.statspos.presentation.ui.components.ListImageView
 import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.ListMainHeading
@@ -251,6 +255,9 @@ private fun ListCard(
     onItemClick: (SalesBillItems) -> Unit,
     onDeleteClick: (SalesBillItems) -> Unit,
 ) {
+    val primaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
+    val secondaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.6f)
+
     ListCard(
         modifier = modifier
             .fillMaxWidth()
@@ -263,7 +270,6 @@ private fun ListCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.Top,
         ) {
             // Image
             ListImageView(
@@ -279,85 +285,180 @@ private fun ListCard(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                // Itemname
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    ListMainLabel(
+                    Column(
                         modifier = Modifier
                             .weight(1f),
-                        text = item.itemname.toString()
-                    )
+                    ) {
+                        Text(
+                            modifier = modifier,
+                            text = item.itemname.toString(),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+
+                        Spacer(Modifier.height(4.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            ListHeading(text = "Total: ")
+                            ListLabel(text = HP.formatDecimal(item.total))
+                        }
+                    }
+
                     Spacer(Modifier.width(8.dp))
                     DeleteIcon {
                         onDeleteClick(item)
                     }
                 }
 
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .weight(.7f)
-                    ) {
-                        ListHeading(text = "Qty: ")
-                        ListLabel(text = HP.formatDecimal(item.qty))
-                    }
-                    Row(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        ListHeading(text = "Rate: ")
-                        ListLabel(text = HP.formatDecimal(item.rate))
-                    }
-                }
-                if (HP.settings.saleCartons == true) {
-                    Spacer(Modifier.height(2.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .weight(.7f)
-                        ) {
-                            ListHeading(text = "Crtn: ")
-                            ListLabel(text = item.crtn.toString())
-                        }
-                        Row(
-                            modifier = Modifier
-                                .weight(1f)
-                        ) {
-                            ListHeading(text = "Crtn Rate: ")
-                            ListLabel(text = HP.formatDecimal(item.crtnRate))
-                        }
-                    }
-                }
-                Spacer(Modifier.height(2.dp))
+                Spacer(Modifier.height(4.dp))
+                ListHorizontalDivider()
+                Spacer(Modifier.height(4.dp))
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    ListHeading(
+                        text = "Qty",
+                        Modifier.weight(1f),
+                        color = primaryColor,
+                    )
+                    ListHeading(
+                        text = "Rate",
+                        Modifier.weight(1f),
+                        color = primaryColor,
+                    )
+                    ListHeading(
+                        text = "Disc",
+                        Modifier.weight(1f),
+                        color = primaryColor,
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    ListLabel(
+                        text = HP.formatDecimal(item.qty),
+                        Modifier.weight(1f),
+                        color = secondaryColor,
+                    )
+                    ListLabel(
+                        text = HP.formatDecimal(item.rate),
+                        Modifier.weight(1f),
+                        color = secondaryColor,
+                    )
+                    ListLabel(
+                        text = HP.formatDecimal(item.disc),
+                        Modifier.weight(1f),
+                        color = secondaryColor,
+                    )
+                }
+                if (HP.settings.saleCartons == true) {
+                    Spacer(Modifier.height(4.dp))
+                    ListHorizontalDivider()
+                    Spacer(Modifier.height(4.dp))
                     Row(
                         modifier = Modifier
-                            .weight(.7f)
+                            .fillMaxWidth(),
                     ) {
-                        ListHeading(text = "Disc: ")
-                        ListLabel(text = HP.formatDecimal(item.disc))
+                        ListHeading(
+                            text = "Crtn",
+                            Modifier.weight(0.5f),
+                            color = primaryColor,
+                        )
+                        ListHeading(
+                            text = "Crtn Rate",
+                            Modifier.weight(1f),
+                            color = primaryColor,
+                        )
                     }
                     Row(
                         modifier = Modifier
-                            .weight(1f)
+                            .fillMaxWidth(),
                     ) {
-                        ListMainHeading(text = "Total: ")
-                        ListMainLabel(text = HP.formatDecimal(item.total))
+                        ListLabel(
+                            text = item.crtn.toString(),
+                            Modifier.weight(0.5f),
+                            color = secondaryColor,
+                        )
+                        ListLabel(
+                            text = HP.formatDecimal(item.crtnRate),
+                            Modifier.weight(1f),
+                            color = secondaryColor,
+                        )
                     }
                 }
+
+//                Row(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                ) {
+//                    Row(
+//                        modifier = Modifier
+//                            .weight(.7f)
+//                    ) {
+//                        ListHeading(text = "Qty: ", color = primaryColor)
+//                        ListLabel(text = HP.formatDecimal(item.qty), color = secondaryColor)
+//                    }
+//                    Row(
+//                        modifier = Modifier
+//                            .weight(1f)
+//                    ) {
+//                        ListHeading(text = "Rate: ", color = primaryColor)
+//                        ListLabel(text = HP.formatDecimal(item.rate), color = secondaryColor)
+//                    }
+//                }
+//                if (HP.settings.saleCartons == true) {
+//                    Spacer(Modifier.height(4.dp))
+//                    Row(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                    ) {
+//                        Row(
+//                            modifier = Modifier
+//                                .weight(.7f)
+//                        ) {
+//                            ListHeading(text = "Crtn: ", color = primaryColor)
+//                            ListLabel(text = item.crtn.toString(), color = secondaryColor)
+//                        }
+//                        Row(
+//                            modifier = Modifier
+//                                .weight(1f)
+//                        ) {
+//                            ListHeading(text = "Crtn Rate: ", color = primaryColor)
+//                            ListLabel(text = HP.formatDecimal(item.crtnRate), color = secondaryColor)
+//                        }
+//                    }
+//                }
+//                Spacer(Modifier.height(4.dp))
+//                Row(
+//                    modifier = Modifier
+//                        .fillMaxWidth(),
+//                    verticalAlignment = Alignment.CenterVertically,
+//                ) {
+//                    Row(
+//                        modifier = Modifier
+//                            .weight(.7f)
+//                    ) {
+//                        ListHeading(text = "Disc: ", color = primaryColor)
+//                        ListLabel(text = HP.formatDecimal(item.disc), color = secondaryColor)
+//                    }
+//                    Row(
+//                        modifier = Modifier
+//                            .weight(1f)
+//                    ) {
+//                        ListMainHeading(text = "Total: ")
+//                        ListMainLabel(text = HP.formatDecimal(item.total))
+//                    }
+//                }
             }
         }
     }

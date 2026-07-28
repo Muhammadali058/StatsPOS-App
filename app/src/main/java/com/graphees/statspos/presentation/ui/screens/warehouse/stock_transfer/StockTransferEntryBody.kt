@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -28,7 +29,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.domain.models.DropdownItem
@@ -42,6 +45,7 @@ import com.graphees.statspos.presentation.ui.components.HeadingMedium
 import com.graphees.statspos.presentation.ui.components.LabelMedium
 import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListHeading
+import com.graphees.statspos.presentation.ui.components.ListHorizontalDivider
 import com.graphees.statspos.presentation.ui.components.ListImageView
 import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.ListMainLabel
@@ -272,6 +276,9 @@ private fun ListCard(
     onItemClick: (StockEntries) -> Unit,
     onDeleteClick: (StockEntries) -> Unit,
 ) {
+    val primaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
+    val secondaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.6f)
+
     ListCard(
         modifier = modifier
             .fillMaxWidth()
@@ -291,6 +298,7 @@ private fun ListCard(
                 imageUrl = item.imageUrl,
                 modifier = Modifier
                     .size(60.dp),
+                showIfNull = true,
             ) {
                 Spacer(Modifier.width(8.dp))
             }
@@ -299,37 +307,51 @@ private fun ListCard(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                ListMainLabel(item.itemname.toString())
-                Spacer(Modifier.height(2.dp))
+                // region Name
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                 ) {
-                    Row(
+                    Column(
                         modifier = Modifier
                             .weight(1f),
                     ) {
-                        ListHeading("Qty: ")
-                        ListLabel(HP.formatDecimal(item.qty))
+                        Text(
+                            modifier = modifier,
+                            text = item.itemname.toString(),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
                     }
-                    if (HP.settings.saleCartons == true) {
-                        Spacer(Modifier.height(2.dp))
-                        Row(
-                            modifier = Modifier
-                                .weight(1f),
-                        ) {
-                            ListHeading("Crtn: ")
-                            ListLabel(item.crtn.toString())
+
+                    if (HP.userRights.deleteAnything == true) {
+                        Spacer(Modifier.width(8.dp))
+                        DeleteIcon {
+                            onDeleteClick(item)
                         }
                     }
                 }
-            }
+                // endregion
 
-            if (HP.userRights.deleteAnything == true) {
-                Spacer(Modifier.width(8.dp))
-                DeleteIcon {
-                    onDeleteClick(item)
+                Spacer(Modifier.height(4.dp))
+                ListHorizontalDivider()
+                Spacer(Modifier.height(4.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    ListHeading("Qty: ", color = primaryColor)
+                    ListLabel(HP.formatDecimal(item.qty), color = secondaryColor)
+
+                    if (HP.settings.saleCartons == true) {
+                        Spacer(Modifier.width(8.dp))
+                        ListHeading("Crtn: ", color = primaryColor)
+                        ListLabel(item.crtn.toString(), color = secondaryColor)
+                    }
                 }
+
             }
         }
     }

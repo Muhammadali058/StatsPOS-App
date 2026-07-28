@@ -9,12 +9,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -32,7 +34,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.domain.models.reports.accounts.AccountReport
@@ -50,11 +54,14 @@ import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.FilterIcon
 import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListHeading
+import com.graphees.statspos.presentation.ui.components.ListHorizontalDivider
+import com.graphees.statspos.presentation.ui.components.ListImageView
 import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.ListMainHeading
 import com.graphees.statspos.presentation.ui.components.ListMainLabel
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
 import com.graphees.statspos.presentation.ui.components.PlaceHolder
+import com.graphees.statspos.presentation.ui.components.PrintIcon
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.components.SearchTextbox
@@ -603,13 +610,16 @@ private fun BodyList(
 }
 
 @Composable
-private fun ListCard(
+private fun ListCard1(
     modifier: Modifier = Modifier,
     item: SalesBills,
     onItemClick: (SalesBills) -> Unit,
     onEditClick: (SalesBills) -> Unit,
     onDeleteClick: (SalesBills) -> Unit,
 ) {
+    val primaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
+    val secondaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.6f)
+
     ListCard(
         modifier = modifier
             .fillMaxWidth()
@@ -622,109 +632,301 @@ private fun ListCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(
                 modifier = Modifier
-                    .weight(1f),
+                    .fillMaxWidth(),
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    ListMainLabel(item.customerName.toString().ifEmpty { "Walk-in Customer" })
+                    Column(
+                        modifier = Modifier
+                            .weight(1f),
+                    ) {
+                        Text(
+                            modifier = modifier,
+                            text = item.customerName.toString().ifEmpty { "Walk-in Customer" },
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            ListHeading("Sr. ", color = primaryColor)
+                            ListLabel(item.id.toString(), color = secondaryColor)
+                            Spacer(Modifier.width(8.dp))
+                            ListHeading("Inv No. ", color = primaryColor)
+                            ListLabel(item.invoiceNo.toString(), color = secondaryColor)
+                            Spacer(Modifier.width(8.dp))
+                            ListHeading("Date: ", color = primaryColor)
+                            ListLabel(item.date.toString(), color = secondaryColor)
+                        }
+                        Spacer(Modifier.height(4.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            ListHeading("User: ", color = primaryColor)
+                            ListLabel(item.username.toString(), color = secondaryColor)
+                        }
+                    }
+
+                    AppIconButton(
+                        icon = Icons.Default.Edit,
+                        onClick = {
+                            onEditClick(item)
+                        },
+                        buttonSize = 26.dp,
+                        size = 20.dp,
+                    )
                 }
-                Spacer(Modifier.height(2.dp))
+
+                Spacer(Modifier.height(4.dp))
+                ListHorizontalDivider()
+                Spacer(Modifier.height(4.dp))
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    ListHeading("Sr. ")
-                    ListLabel(item.id.toString())
-                    Spacer(Modifier.width(16.dp))
-                    ListHeading("Inv No. ")
-                    ListLabel(item.invoiceNo.toString())
-                }
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    ListHeading("Date: ")
-                    ListLabel(item.date.toString())
-                }
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    ListHeading("User: ")
-                    ListLabel(item.username.toString())
-                }
-            }
-            Spacer(Modifier.width(8.dp))
-            Column {
-                AppIconButton(
-                    icon = Icons.Default.Edit,
-                    onClick = {
-                        onEditClick(item)
-                    },
-                    buttonSize = 26.dp,
-                    size = 20.dp,
                 )
-                if (HP.userRights.deleteAnything == true) {
-                    Spacer(Modifier.height(8.dp))
-                    DeleteIcon {
+                {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f),
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                        ) {
+                            ListMainHeading("Total", Modifier.weight(1f))
+                            ListHeading("On", Modifier.weight(.5f), color = primaryColor)
+                            ListHeading("Type", Modifier.weight(.5f), color = primaryColor)
+                            ListHeading("MOP", Modifier.weight(.5f), color = primaryColor)
+                            ListHeading("R/W", Modifier.weight(.5f), color = primaryColor)
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                        ) {
+                            ListMainLabel(
+                                HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)),
+                                Modifier.weight(1f)
+                            )
+                            ListLabel(item.salesOn.toString(), Modifier.weight(.5f), color = secondaryColor)
+                            ListLabel(item.salesType.toString(), Modifier.weight(.5f), color = secondaryColor)
+                            ListLabel(item.mop.toString(), Modifier.weight(.5f), color = secondaryColor)
+                            ListLabel(item.type.toString(), Modifier.weight(.5f), color = secondaryColor)
+                        }
+                    }
+
+                    Spacer(Modifier.width(8.dp))
+                    DeleteIcon{
                         onDeleteClick(item)
                     }
                 }
-//                if (HP.userRights.printDuplicates == true) {
-//                    AppIconButton(
-//                        icon = Icons.Default.Print,
-//                        onClick = {
-//                            onPrintClick(item, false)
-//                        },
-//                        buttonSize = 26.dp,
-//                        size = 20.dp,
-//                    )
-//                    AppIconButton(
-//                        icon = Icons.Default.Share,
-//                        onClick = {
-//                            onPrintClick(item, true)
-//                        },
-//                        buttonSize = 26.dp,
-//                        size = 20.dp,
-//                    )
-//                }
             }
-        }
-        Spacer(Modifier.height(2.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-        ) {
-            ListMainHeading("Total", Modifier.weight(1f))
-            ListHeading("On", Modifier.weight(.5f))
-            ListHeading("Type", Modifier.weight(.5f))
-            ListHeading("MOP", Modifier.weight(.5f))
-            ListHeading("R/W", Modifier.weight(.5f))
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-        ) {
-            ListMainLabel(
-                HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)),
-                Modifier.weight(1f)
-            )
-            ListLabel(item.salesOn.toString(), Modifier.weight(.5f))
-            ListLabel(item.salesType.toString(), Modifier.weight(.5f))
-            ListLabel(item.mop.toString(), Modifier.weight(.5f))
-            ListLabel(item.type.toString(), Modifier.weight(.5f))
         }
     }
 }
 
+
+@Composable
+private fun ListCard(
+    modifier: Modifier = Modifier,
+    item: SalesBills,
+    onItemClick: (SalesBills) -> Unit,
+    onEditClick: (SalesBills) -> Unit,
+    onDeleteClick: (SalesBills) -> Unit,
+) {
+    val primaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
+    val secondaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.6f)
+
+    ListCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = ConstantPaddings.LIST_PADDING_VERTICAL),
+        shape = RoundedCornerShape(6.dp),
+        onClick = {
+            onItemClick(item)
+        }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // Image
+            ListImageView(
+                imageUrl = item.imageUrl,
+                modifier = Modifier
+                    .size(60.dp),
+                showIfNull = true,
+            ) {
+                Spacer(Modifier.width(8.dp))
+            }
+
+            Column(
+                modifier = Modifier
+                    .weight(1f),
+            )
+            {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f),
+                    ) {
+                        Text(
+                            modifier = modifier,
+                            text = item.customerName.toString().ifEmpty { "Walk-in Customer" },
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            ListHeading("Total: ")
+                            ListLabel(HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)))
+                        }
+                    }
+
+                    Spacer(Modifier.width(8.dp))
+                    AppIconButton(
+                        icon = Icons.Default.Edit,
+                        onClick = {
+                            onEditClick(item)
+                        },
+                        buttonSize = 26.dp,
+                        size = 20.dp,
+                    )
+                }
+
+                Spacer(Modifier.height(8.dp))
+                ListHorizontalDivider()
+                Spacer(Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    ListHeading(
+                        text = "Sr.",
+                        Modifier.weight(0.5f),
+                        color = primaryColor
+                    )
+                    ListHeading(
+                        text = "Inv No.",
+                        Modifier.weight(0.5f),
+                        color = primaryColor
+                    )
+                    ListHeading(
+                        text = "User",
+                        Modifier.weight(1f),
+                        color = primaryColor
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    ListLabel(
+                        text = item.id.toString(),
+                        Modifier.weight(0.5f),
+                        color = secondaryColor
+                    )
+                    ListLabel(
+                        text = item.invoiceNo.toString(),
+                        Modifier.weight(0.5f),
+                        color = secondaryColor
+                    )
+                    ListLabel(
+                        text = item.username.toString(),
+                        Modifier.weight(1f),
+                        color = secondaryColor
+                    )
+                }
+
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+        ListHorizontalDivider()
+        Spacer(Modifier.height(8.dp))
+
+        Column (
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                ListHeading("Date: ")
+                ListLabel(item.date.toString())
+            }
+            Spacer(Modifier.height(4.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                    ) {
+                        ListHeading("On", Modifier.weight(1f), color = primaryColor)
+                        ListHeading("Type", Modifier.weight(1f), color = primaryColor)
+                        ListHeading("MOP", Modifier.weight(1f), color = primaryColor)
+                        ListHeading("R/W", Modifier.weight(1f), color = primaryColor)
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                    ) {
+                        ListLabel(
+                            item.salesOn.toString(),
+                            Modifier.weight(1f),
+                            color = secondaryColor
+                        )
+                        ListLabel(
+                            item.salesType.toString(),
+                            Modifier.weight(1f),
+                            color = secondaryColor
+                        )
+                        ListLabel(
+                            item.mop.toString(),
+                            Modifier.weight(1f),
+                            color = secondaryColor
+                        )
+                        ListLabel(
+                            item.type.toString(),
+                            Modifier.weight(1f),
+                            color = secondaryColor
+                        )
+                    }
+                }
+
+                Spacer(Modifier.width(8.dp))
+                DeleteIcon {
+                    onDeleteClick(item)
+                }
+            }
+        }
+    }
+}

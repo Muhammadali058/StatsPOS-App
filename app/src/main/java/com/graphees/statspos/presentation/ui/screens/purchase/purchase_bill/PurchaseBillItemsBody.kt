@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,7 +30,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.domain.models.purchase.Purchase
 import com.graphees.statspos.domain.models.purchase.PurchaseBillItems
@@ -41,6 +44,7 @@ import com.graphees.statspos.presentation.ui.components.HeadingMedium
 import com.graphees.statspos.presentation.ui.components.LabelMedium
 import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListHeading
+import com.graphees.statspos.presentation.ui.components.ListHorizontalDivider
 import com.graphees.statspos.presentation.ui.components.ListImageView
 import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.ListMainHeading
@@ -95,7 +99,7 @@ fun PurchaseBillItemsBody(
     // Edit data when update
     LaunchedEffect(Unit) {
         if (!state.hasLoadedOnce) {
-            purchaseItemsViewModel.loadData(purchaseViewModel::updateTotal){
+            purchaseItemsViewModel.loadData(purchaseViewModel::updateTotal) {
 //                if(purchaseItemsViewModel.state.value.list.isEmpty()) {
 //                    onAddButtonClick(0L, false, getPurchaseObject())
 //                }
@@ -162,7 +166,10 @@ fun PurchaseBillItemsBody(
                     SearchBox(
                         value = state.search,
                         onValueChange = {
-                            purchaseItemsViewModel.onSearchChange(it, purchaseViewModel::updateTotal)
+                            purchaseItemsViewModel.onSearchChange(
+                                it,
+                                purchaseViewModel::updateTotal
+                            )
                         },
                         onSearchClick = {
                             purchaseItemsViewModel.loadData(purchaseViewModel::updateTotal)
@@ -225,7 +232,7 @@ private fun BodyList(
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
     ) {
-        item{
+        item {
             Spacer(Modifier.height(4.dp))
         }
         items(items) { item ->
@@ -246,6 +253,9 @@ private fun ListCard(
     onItemClick: (PurchaseBillItems) -> Unit,
     onDeleteClick: (PurchaseBillItems) -> Unit,
 ) {
+    val primaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
+    val secondaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.6f)
+
     ListCard(
         modifier = modifier
             .fillMaxWidth()
@@ -258,7 +268,6 @@ private fun ListCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.Top,
         ) {
             // Image
             ListImageView(
@@ -270,95 +279,217 @@ private fun ListCard(
                 Spacer(Modifier.width(8.dp))
             }
 
+
             Column(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                // Itemname
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    ListMainLabel(
+                    Column(
                         modifier = Modifier
                             .weight(1f),
-                        text = item.itemname.toString()
-                    )
-                }
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .weight(.7f)
                     ) {
-                        ListHeading(text = "Qty: ")
-                        ListLabel(text = HP.formatDecimal(item.qty))
-                    }
-                    Row(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        ListHeading(text = "Cost: ")
-                        ListLabel(text = HP.formatDecimal(item.finalCost))
-                    }
-                }
-                if (HP.settings.saleCartons == true) {
-                    Spacer(Modifier.height(2.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
+                        Text(
+                            modifier = modifier,
+                            text = item.itemname.toString(),
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+
+                        Spacer(Modifier.height(4.dp))
                         Row(
                             modifier = Modifier
-                                .weight(.7f)
+                                .fillMaxWidth()
                         ) {
-                            ListHeading(text = "Crtn: ")
-                            ListLabel(text = item.crtn.toString())
-                        }
-                        Row(
-                            modifier = Modifier
-                                .weight(1f)
-                        ) {
-                            ListHeading(text = "Cost Crtn: ")
-                            ListLabel(text = if(item.crtn!! != 0) HP.formatDecimal((item.finalCost!! * item.crtnSize!!)) else "0")
+                            ListHeading(text = "Total: ")
+                            ListLabel(text = HP.formatDecimal(item.total))
                         }
                     }
-                }
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    ListHeading(text = "Gross Cost: ")
-                    ListLabel(text = HP.formatDecimal(item.cost))
-                    Spacer(Modifier.width(8.dp))
-                    ListHeading(text = "Disc: ")
-                    ListLabel(text = HP.formatDecimal(item.calculatedDisc))
-                    Spacer(Modifier.width(8.dp))
-                    ListHeading(text = "Tax: ")
-                    ListLabel(text = HP.formatDecimal(item.tax))
-                }
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .weight(1f)
-                    ) {
-                        ListMainHeading(text = "Total: ")
-                        ListMainLabel(text = HP.formatDecimal(item.total))
-                    }
+
                     Spacer(Modifier.width(8.dp))
                     DeleteIcon {
                         onDeleteClick(item)
                     }
+                }
+
+                Spacer(Modifier.height(4.dp))
+                ListHorizontalDivider()
+                Spacer(Modifier.height(4.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .weight(1f),
+                    ) {
+                        ListHeading(
+                            text = "Qty: ",
+                            color = primaryColor,
+                        )
+                        ListLabel(
+                            text = HP.formatDecimal(item.qty),
+                            color = secondaryColor,
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .weight(1f),
+                    ) {
+                        ListHeading(
+                            text = "Cost: ",
+                            color = primaryColor,
+                        )
+                        ListLabel(
+                            text = HP.formatDecimal(item.finalCost),
+                            color = secondaryColor,
+                        )
+                    }
+                }
+
+                if(HP.settings.saleCartons == true){
+                    Spacer(Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .weight(1f),
+                        ) {
+                            ListHeading(
+                                text = "Crtn: ",
+                                color = primaryColor,
+                            )
+                            ListLabel(
+                                text = item.crtn.toString(),
+                                color = secondaryColor,
+                            )
+                        }
+                        Row(
+                            modifier = Modifier
+                                .weight(1f),
+                        ) {
+                            ListHeading(
+                                text = "Cost Crtn: ",
+                                color = primaryColor,
+                            )
+                            ListLabel(
+                                text = if (item.crtn!! != 0) HP.formatDecimal((item.finalCost!! * item.crtnSize!!)) else "0",
+                                color = secondaryColor,
+                            )
+                        }
+                    }
+                }
+
+
+//                Row(
+//                    modifier = Modifier
+//                        .fillMaxWidth(),
+//                ) {
+//                    ListHeading(
+//                        text = "Qty",
+//                        Modifier.weight(1f),
+//                        color = primaryColor,
+//                    )
+//                    if (HP.settings.saleCartons == true) {
+//                        ListHeading(
+//                            text = "Crtn",
+//                            Modifier.weight(1f),
+//                            color = primaryColor,
+//                        )
+//                    }
+//                    ListHeading(
+//                        text = "Cost",
+//                        Modifier.weight(1f),
+//                        color = primaryColor,
+//                    )
+//                    if (HP.settings.saleCartons == true) {
+//                        ListHeading(
+//                            text = "Cost Crtn",
+//                            Modifier.weight(1f),
+//                            color = primaryColor,
+//                        )
+//                    }
+//                }
+//                Row(
+//                    modifier = Modifier
+//                        .fillMaxWidth(),
+//                ) {
+//                    ListLabel(
+//                        text = HP.formatDecimal(item.qty),
+//                        Modifier.weight(1f),
+//                        color = secondaryColor,
+//                    )
+//                    if (HP.settings.saleCartons == true) {
+//                        ListLabel(
+//                            text = item.crtn.toString(),
+//                            Modifier.weight(1f),
+//                            color = secondaryColor,
+//                        )
+//                    }
+//                    ListLabel(
+//                        text = HP.formatDecimal(item.finalCost),
+//                        Modifier.weight(1f),
+//                        color = secondaryColor,
+//                    )
+//                    if (HP.settings.saleCartons == true) {
+//                        ListLabel(
+//                            text = if (item.crtn!! != 0) HP.formatDecimal((item.finalCost!! * item.crtnSize!!)) else "0",
+//                            Modifier.weight(1f),
+//                            color = secondaryColor,
+//                        )
+//                    }
+//                }
+
+                Spacer(Modifier.height(4.dp))
+                ListHorizontalDivider()
+                Spacer(Modifier.height(4.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    ListHeading(
+                        text = "Gross Cost",
+                        Modifier.weight(1f),
+                        color = primaryColor,
+                    )
+                    ListHeading(
+                        text = "Disc",
+                        Modifier.weight(1f),
+                        color = primaryColor,
+                    )
+                    ListHeading(
+                        text = "Tax",
+                        Modifier.weight(1f),
+                        color = primaryColor,
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    ListLabel(
+                        text = HP.formatDecimal(item.cost),
+                        Modifier.weight(1f),
+                        color = secondaryColor,
+                    )
+                    ListLabel(
+                        text = HP.formatDecimal(item.calculatedDisc),
+                        Modifier.weight(1f),
+                        color = secondaryColor,
+                    )
+                    ListLabel(
+                        text = HP.formatDecimal(item.tax),
+                        Modifier.weight(1f),
+                        color = secondaryColor,
+                    )
                 }
             }
         }

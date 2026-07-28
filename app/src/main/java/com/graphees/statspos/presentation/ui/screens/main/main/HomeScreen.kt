@@ -276,7 +276,7 @@ fun HomeScreen(
 
     // Navigation
     val navigationState = rememberNavigationState(
-        startRoute = BottomRoutes.Home,
+        startRoute = BottomRoutes.Purchase,
         topLevelRoutes = BOTTOM_DESTINATIONS.keys,
         serializersModules = SerializersModule {
             polymorphic(NavKey::class) {

@@ -23,4 +23,5 @@ data class SalesBills(
     var type: String? = null,
 
     var username: String? = null,
+    var imageUrl: String? = null,
 )

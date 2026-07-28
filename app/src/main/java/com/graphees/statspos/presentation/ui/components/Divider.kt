@@ -20,3 +20,15 @@ fun AppHorizontalDivider(
         color = color,
     )
 }
+@Composable
+fun ListHorizontalDivider(
+    modifier: Modifier = Modifier,
+    thickness: Dp = 0.5.dp,
+    color: Color = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.2f),
+) {
+    HorizontalDivider(
+        modifier = modifier,
+        thickness = thickness,
+        color = color
+    )
+}

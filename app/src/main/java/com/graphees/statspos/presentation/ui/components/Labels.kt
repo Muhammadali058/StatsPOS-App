@@ -126,11 +126,12 @@ fun ListMainHeading(
     text: String,
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Start,
+    color: Color = MaterialTheme.colorScheme.onPrimaryContainer,
 ) {
     Text(
         modifier = modifier,
         text = text,
-        color = MaterialTheme.colorScheme.onPrimaryContainer,
+        color = color,
         style = TextStyle(
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
@@ -144,11 +145,12 @@ fun ListMainLabel(
     text: String,
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Start,
+    color: Color = MaterialTheme.colorScheme.onPrimaryContainer,
 ) {
     Text(
         modifier = modifier,
         text = text,
-        color = MaterialTheme.colorScheme.onPrimaryContainer,
+        color = color,
         style = TextStyle(
             fontSize = 14.sp,
             textAlign = textAlign

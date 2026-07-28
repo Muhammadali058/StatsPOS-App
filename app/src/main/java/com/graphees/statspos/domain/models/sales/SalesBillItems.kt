@@ -18,4 +18,5 @@ data class SalesBillItems(
     var cost: Double? = null,
     var profit: Double? = null,
     var imageUrl: String? = null,
+    var crtnSize: Int? = null,
 )

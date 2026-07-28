@@ -44,6 +44,7 @@ import com.graphees.statspos.presentation.ui.components.Dropdown
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListHeading
+import com.graphees.statspos.presentation.ui.components.ListHorizontalDivider
 import com.graphees.statspos.presentation.ui.components.ListImageView
 import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.ListMainLabel
@@ -287,10 +288,7 @@ private fun ListCard(
                 }
 
                 Spacer(Modifier.height(8.dp))
-                HorizontalDivider(
-                    thickness = 0.5.dp,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.2f)
-                )
+                ListHorizontalDivider()
                 Spacer(Modifier.height(8.dp))
 
                 Row(

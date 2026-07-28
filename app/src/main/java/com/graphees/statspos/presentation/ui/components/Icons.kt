@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Print
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
@@ -229,6 +230,19 @@ fun DeleteIcon(
 ) {
     AppIconButton(
         icon = Icons.Default.Delete,
+        onClick = onClick,
+        modifier = modifier,
+        size = 22.dp
+    )
+}
+
+@Composable
+fun PrintIcon(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    AppIconButton(
+        icon = Icons.Default.Print,
         onClick = onClick,
         modifier = modifier,
         size = 22.dp

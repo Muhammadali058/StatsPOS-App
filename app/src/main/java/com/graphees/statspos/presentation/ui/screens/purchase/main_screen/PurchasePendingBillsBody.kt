@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.filled.Print
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -28,11 +30,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.domain.models.purchase.PurchaseBill
 import com.graphees.statspos.domain.models.purchase.PurchaseBills
+import com.graphees.statspos.domain.models.sales.SalesBills
 import com.graphees.statspos.presentation.ui.components.AppFloatingActionButton
 import com.graphees.statspos.presentation.ui.components.AppIconButton
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
@@ -42,10 +47,13 @@ import com.graphees.statspos.presentation.ui.components.DeleteIcon
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListHeading
+import com.graphees.statspos.presentation.ui.components.ListHorizontalDivider
+import com.graphees.statspos.presentation.ui.components.ListImageView
 import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.ListMainHeading
 import com.graphees.statspos.presentation.ui.components.ListMainLabel
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
+import com.graphees.statspos.presentation.ui.components.PrintIcon
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.components.UpgradeToPremiumBottomSheet
@@ -303,6 +311,9 @@ private fun ListCard(
     onDeleteClick: (PurchaseBills) -> Unit,
     onPrintClick: (PurchaseBills) -> Unit,
 ) {
+    val primaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
+    val secondaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.6f)
+
     ListCard(
         modifier = modifier
             .fillMaxWidth()
@@ -317,6 +328,16 @@ private fun ListCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            // Image
+            ListImageView(
+                imageUrl = item.imageUrl,
+                modifier = Modifier
+                    .size(60.dp),
+                showIfNull = true,
+            ) {
+                Spacer(Modifier.width(8.dp))
+            }
+
             Column(
                 modifier = Modifier
                     .weight(1f),
@@ -325,80 +346,133 @@ private fun ListCard(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    ListHeading("Bill No. ")
-                    ListLabel(item.id.toString())
-                    Spacer(Modifier.width(8.dp))
-                    ListMainLabel(item.vendorName.toString().ifEmpty { "Vendor not selected" })
+                    Column(
+                        modifier = Modifier
+                            .weight(1f),
+                    ) {
+                        Text(
+                            modifier = modifier,
+                            text = item.vendorName.toString().ifEmpty { "Vendor not selected" },
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            ListHeading("Total: ")
+                            ListLabel(HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)))
+                        }
+                    }
+
+                    if (HP.userRights.printDuplicates == true) {
+                        Spacer(Modifier.width(8.dp))
+                        PrintIcon {
+                            onPrintClick(item)
+                        }
+                    }
                 }
-                Spacer(Modifier.height(2.dp))
+
+                Spacer(Modifier.height(8.dp))
+                ListHorizontalDivider()
+                Spacer(Modifier.height(8.dp))
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    ListHeading("Date: ")
-                    ListLabel(item.date.toString())
+                    ListHeading(
+                        text = "Bill No",
+                        Modifier.weight(0.5f),
+                        color = primaryColor
+                    )
+                    ListHeading(
+                        text = "User",
+                        Modifier.weight(1f),
+                        color = primaryColor
+                    )
                 }
-                if(item.warehouseName.toString().isNotEmpty()) {
-                    Spacer(Modifier.height(2.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    ListLabel(
+                        text = item.id.toString(),
+                        Modifier.weight(0.5f),
+                        color = secondaryColor
+                    )
+                    ListLabel(
+                        text = item.username.toString(),
+                        Modifier.weight(1f),
+                        color = secondaryColor
+                    )
+                }
+
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+        ListHorizontalDivider()
+        Spacer(Modifier.height(8.dp))
+
+        Column (
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                ListHeading("Date: ")
+                ListLabel(item.date.toString())
+            }
+            Spacer(Modifier.height(4.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f),
+                ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        ListHeading("Warehouse: ")
-                        ListLabel(item.warehouseName.toString())
+                        ListHeading("On", Modifier.weight(1f), color = primaryColor)
+                        ListHeading("Type", Modifier.weight(1f), color = primaryColor)
+                        ListHeading("MOP", Modifier.weight(1f), color = primaryColor)
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                    ) {
+                        ListLabel(
+                            item.purchaseOn.toString(),
+                            Modifier.weight(1f),
+                            color = secondaryColor
+                        )
+                        ListLabel(
+                            item.purchaseType.toString(),
+                            Modifier.weight(1f),
+                            color = secondaryColor
+                        )
+                        ListLabel(
+                            item.mop.toString(),
+                            Modifier.weight(1f),
+                            color = secondaryColor
+                        )
                     }
                 }
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    ListMainHeading("Total", Modifier.weight(1f))
-                    ListHeading("On", Modifier.weight(.5f))
-                    ListHeading("Type", Modifier.weight(.5f))
-                    ListHeading("MOP", Modifier.weight(.5f))
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    ListMainLabel(HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)), Modifier.weight(1f))
-                    ListLabel(item.purchaseOn.toString(), Modifier.weight(.5f))
-                    ListLabel(item.purchaseType.toString(), Modifier.weight(.5f))
-                    ListLabel(item.mop.toString(), Modifier.weight(.5f))
-                }
-            }
-            Spacer(Modifier.width(8.dp))
-            Column{
-                if (HP.userRights.printDuplicates == true) {
-                    AppIconButton(
-                        icon = Icons.Default.Print,
-                        onClick = {
-                            onPrintClick(item)
-                        }
-                    )
-                    Spacer(Modifier.height(8.dp))
-                }
+
+                Spacer(Modifier.width(8.dp))
                 DeleteIcon {
                     onDeleteClick(item)
                 }
             }
-//            if(HP.userRights.printDuplicates == true) {
-//                Spacer(Modifier.width(8.dp))
-//                Column {
-//                    AppIconButton(
-//                        icon = Icons.Default.Print,
-//                        onClick = {
-//                            onPrintClick(item)
-//                        }
-//                    )
-//                }
-//            }
         }
     }
 }
-

@@ -43,6 +43,7 @@ import com.graphees.statspos.presentation.ui.components.DeleteIcon
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListHeading
+import com.graphees.statspos.presentation.ui.components.ListHorizontalDivider
 import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.ListMainLabel
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
@@ -283,10 +284,7 @@ private fun ListCard(
                 // endregion
 
                 Spacer(Modifier.height(4.dp))
-                HorizontalDivider(
-                    thickness = 0.5.dp,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.2f)
-                )
+                ListHorizontalDivider()
                 Spacer(Modifier.height(4.dp))
 
                 Row (

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -32,7 +33,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.domain.models.purchase.PurchaseBill
@@ -49,10 +52,13 @@ import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.FilterIcon
 import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListHeading
+import com.graphees.statspos.presentation.ui.components.ListHorizontalDivider
+import com.graphees.statspos.presentation.ui.components.ListImageView
 import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.ListMainHeading
 import com.graphees.statspos.presentation.ui.components.ListMainLabel
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
+import com.graphees.statspos.presentation.ui.components.PrintIcon
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.components.SearchTextbox
@@ -580,7 +586,7 @@ private fun BodyList(
 }
 
 @Composable
-private fun ListCard(
+private fun ListCard1(
     modifier: Modifier = Modifier,
     item: PurchaseBills,
     onItemClick: (PurchaseBills) -> Unit,
@@ -719,3 +725,190 @@ private fun ListCard(
     }
 }
 
+
+@Composable
+private fun ListCard(
+    modifier: Modifier = Modifier,
+    item: PurchaseBills,
+    onItemClick: (PurchaseBills) -> Unit,
+    onEditClick: (PurchaseBills) -> Unit,
+    onDeleteClick: (PurchaseBills) -> Unit,
+) {
+    val primaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
+    val secondaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.6f)
+
+    ListCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = ConstantPaddings.LIST_PADDING_VERTICAL),
+        shape = RoundedCornerShape(6.dp),
+        onClick = {
+            onItemClick(item)
+        }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // Image
+            ListImageView(
+                imageUrl = item.imageUrl,
+                modifier = Modifier
+                    .size(60.dp),
+                showIfNull = true,
+            ) {
+                Spacer(Modifier.width(8.dp))
+            }
+
+            Column(
+                modifier = Modifier
+                    .weight(1f),
+            )
+            {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f),
+                    ) {
+                        Text(
+                            modifier = modifier,
+                            text = item.vendorName.toString().ifEmpty { "Vendor not selected" },
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            ListHeading("Total: ")
+                            ListLabel(HP.formatDecimal((item.grossTotal!! - item.totalDisc!!)))
+                        }
+                    }
+
+                    Spacer(Modifier.width(8.dp))
+                    AppIconButton(
+                        icon = Icons.Default.Edit,
+                        onClick = {
+                            onEditClick(item)
+                        },
+                        buttonSize = 26.dp,
+                        size = 20.dp,
+                    )
+                }
+
+                Spacer(Modifier.height(8.dp))
+                ListHorizontalDivider()
+                Spacer(Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    ListHeading(
+                        text = "Sr.",
+                        Modifier.weight(0.5f),
+                        color = primaryColor
+                    )
+                    ListHeading(
+                        text = "Inv No.",
+                        Modifier.weight(0.5f),
+                        color = primaryColor
+                    )
+                    ListHeading(
+                        text = "User",
+                        Modifier.weight(1f),
+                        color = primaryColor
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    ListLabel(
+                        text = item.id.toString(),
+                        Modifier.weight(0.5f),
+                        color = secondaryColor
+                    )
+                    ListLabel(
+                        text = item.invoiceNo.toString(),
+                        Modifier.weight(0.5f),
+                        color = secondaryColor
+                    )
+                    ListLabel(
+                        text = item.username.toString(),
+                        Modifier.weight(1f),
+                        color = secondaryColor
+                    )
+                }
+
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+        ListHorizontalDivider()
+        Spacer(Modifier.height(8.dp))
+
+        Column (
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                ListHeading("Date: ")
+                ListLabel(item.date.toString())
+            }
+            Spacer(Modifier.height(4.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                    ) {
+                        ListHeading("On", Modifier.weight(1f), color = primaryColor)
+                        ListHeading("Type", Modifier.weight(1f), color = primaryColor)
+                        ListHeading("MOP", Modifier.weight(1f), color = primaryColor)
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                    ) {
+                        ListLabel(
+                            item.purchaseOn.toString(),
+                            Modifier.weight(1f),
+                            color = secondaryColor
+                        )
+                        ListLabel(
+                            item.purchaseType.toString(),
+                            Modifier.weight(1f),
+                            color = secondaryColor
+                        )
+                        ListLabel(
+                            item.mop.toString(),
+                            Modifier.weight(1f),
+                            color = secondaryColor
+                        )
+                    }
+                }
+
+                Spacer(Modifier.width(8.dp))
+                DeleteIcon {
+                    onDeleteClick(item)
+                }
+            }
+        }
+    }
+}

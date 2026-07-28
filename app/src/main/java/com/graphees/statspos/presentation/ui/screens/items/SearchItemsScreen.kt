@@ -67,6 +67,7 @@ import com.graphees.statspos.presentation.ui.components.HeadingMedium
 import com.graphees.statspos.presentation.ui.components.LabelMedium
 import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListHeading
+import com.graphees.statspos.presentation.ui.components.ListHorizontalDivider
 import com.graphees.statspos.presentation.ui.components.ListImageView
 import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.ListMainLabel
@@ -713,10 +714,7 @@ private fun ListCard2(
             )
 
             Spacer(Modifier.height(8.dp))
-            HorizontalDivider(
-                thickness = 0.5.dp,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.2f)
-            )
+            ListHorizontalDivider()
             Spacer(Modifier.height(8.dp))
 
             // Itemname & Rows
@@ -769,10 +767,7 @@ private fun ListCard2(
 
             // region Stock
             Spacer(Modifier.height(8.dp))
-            HorizontalDivider(
-                thickness = 0.5.dp,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.2f)
-            )
+            ListHorizontalDivider()
             Spacer(Modifier.height(8.dp))
 
             Row(

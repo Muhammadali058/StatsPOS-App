@@ -400,6 +400,8 @@ class AddUpdateCustomerViewModel @Inject constructor(
 
                 categoryId = customer.categoryId!!,
                 supplierId = customer.supplierId!!,
+                categoryName =  HP.getDropdownNameById(customer.categoryId!!, HP.accountCategories),
+                supplierName =  HP.getDropdownNameById(customer.supplierId!!, HP.suppliers),
 
                 disc = customer.disc.toString(),
                 isDiscRsPer = customer.isDiscRsPer!!,

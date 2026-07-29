@@ -31,6 +31,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.graphees.statspos.R
 import com.graphees.statspos.domain.models.DropdownItem
 import com.graphees.statspos.presentation.ui.components.AppSwitch
 import com.graphees.statspos.presentation.ui.components.BalanceBox
@@ -130,14 +131,6 @@ fun SalesBillBody(
                     onDateChange = salesViewModel::onDateChange,
                     onDueDateChange = salesViewModel::onDueDateChange,
                 )
-                MOPSection(
-                    mop = state.mop,
-                    bank = state.bank,
-                    subBank = state.subBank,
-                    onMOPChange = salesViewModel::onMOPChange,
-                    onBankSelected = salesViewModel::onBankSelected,
-                    onSubBankSelected = salesViewModel::onSubBankSelected,
-                )
                 Others(
                     isRetail = state.isRetail,
                     supplier = state.supplier,
@@ -169,6 +162,14 @@ fun SalesBillBody(
                     onPaymentChange = salesViewModel::onPaymentChange,
                     onChangeChange = salesViewModel::onChangeChange,
                     onRemarksChange = salesViewModel::onRemarksChange,
+                )
+                MOPSection(
+                    mop = state.mop,
+                    bank = state.bank,
+                    subBank = state.subBank,
+                    onMOPChange = salesViewModel::onMOPChange,
+                    onBankSelected = salesViewModel::onBankSelected,
+                    onSubBankSelected = salesViewModel::onSubBankSelected,
                 )
                 Spacer(Modifier.height(8.dp))
             }
@@ -334,8 +335,8 @@ private fun Others(
     onRemarksChange: (String) -> Unit,
 ) {
     ExpandableSection(
-        title = "Others",
-        initiallyExpanded = true,
+        title = "Payment & Supplier",
+        icon = R.drawable.payment,
     ) {
         if (HP.settings.fourRateSystem == false) {
             Spacer(Modifier.height(8.dp))

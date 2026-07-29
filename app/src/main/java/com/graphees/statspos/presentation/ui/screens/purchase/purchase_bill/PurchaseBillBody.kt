@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.graphees.statspos.R
 import com.graphees.statspos.domain.models.DropdownItem
 import com.graphees.statspos.presentation.ui.components.BalanceBox
 import com.graphees.statspos.presentation.ui.components.ComboBox
@@ -268,7 +269,7 @@ private fun Others(
 ) {
     ExpandableSection(
         title = "Others",
-        initiallyExpanded = true,
+        icon = R.drawable.others,
     ) {
         if (HP.adminSettings.showSuppliersInPurchase == true) {
             ComboBox(

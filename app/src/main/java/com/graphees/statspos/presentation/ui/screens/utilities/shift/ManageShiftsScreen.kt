@@ -36,6 +36,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.graphees.statspos.R
 import com.graphees.statspos.domain.models.DropdownItem
 import com.graphees.statspos.domain.models.reports.TotalReport
 import com.graphees.statspos.domain.models.reports.accounts.ShiftReport
@@ -303,7 +304,7 @@ private fun Entry(
     if(status.equals("opened", ignoreCase = true)) {
         ExpandableSection(
             title = "Cash Entry",
-            initiallyExpanded = true,
+            icon = R.drawable.cash_entry,
         ) {
             Column(
                 modifier = Modifier

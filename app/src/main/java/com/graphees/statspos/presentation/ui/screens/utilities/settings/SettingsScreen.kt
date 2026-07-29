@@ -37,6 +37,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.graphees.statspos.R
 import com.graphees.statspos.domain.models.DropdownItem
 import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
@@ -465,7 +466,7 @@ private fun Settings(
 ) {
     ExpandableSection(
         title = "Settings",
-        initiallyExpanded = true,
+        icon = R.drawable.settings1,
     ) {
         Spacer(Modifier.height(12.dp))
         Row {
@@ -693,7 +694,7 @@ private fun Passwords(
 ) {
     ExpandableSection(
         title = "Passwords",
-        initiallyExpanded = true,
+        icon = R.drawable.passwords,
     ) {
         Row(
             modifier = Modifier

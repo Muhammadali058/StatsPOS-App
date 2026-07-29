@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.graphees.statspos.R
 import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.AppSwitch
@@ -111,7 +112,7 @@ fun AdminSettingsScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(bottom = 8.dp)
+                .padding(vertical = 8.dp)
         ) {
             Column(
                 Modifier
@@ -124,6 +125,7 @@ fun AdminSettingsScreen(
                         .verticalScroll(scrollState),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
+                    Spacer(Modifier.height(12.dp))
                     Settings(
                         showSuppliersInPurchase = state.showSuppliersInPurchase,
                         onShowSuppliersInPurchaseChange = viewModel::onShowSuppliersInPurchaseChange,
@@ -194,11 +196,10 @@ private fun Settings(
     detailedSearchInPOS: Boolean,
     onDetailedSearchInPOSChange: (Boolean) -> Unit,
 ) {
-    ExpandableSection(
-        title = "Settings",
-        initiallyExpanded = true,
+    Column (
+        modifier = Modifier
+            .padding(ConstantPaddings.BODY_HORIZONTAL)
     ) {
-        Spacer(Modifier.height(12.dp))
         Row {
             AppSwitch(
                 modifier = Modifier.weight(1f),
@@ -269,7 +270,7 @@ private fun Passwords(
 ) {
     ExpandableSection(
         title = "Passwords",
-        initiallyExpanded = true,
+        icon = R.drawable.passwords,
     ) {
         Row(
             modifier = Modifier

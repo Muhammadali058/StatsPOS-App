@@ -42,6 +42,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.graphees.statspos.R
 import com.graphees.statspos.domain.models.purchase.Purchase
 import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
@@ -707,7 +708,7 @@ private fun SaleRates(
 ) {
     ExpandableSection(
         title = "Sale Rates",
-        initiallyExpanded = true,
+        icon = R.drawable.sale_rates,
     ) {
         Spacer(Modifier.height(8.dp))
         // Retail & Wholesale
@@ -817,7 +818,7 @@ private fun Others(
 ) {
     ExpandableSection(
         title = "Others",
-        initiallyExpanded = true,
+        icon = R.drawable.others,
     ) {
         Spacer(Modifier.height(8.dp))
         AppSwitch(

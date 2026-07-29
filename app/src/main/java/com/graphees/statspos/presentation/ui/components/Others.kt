@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.graphees.statspos.R
 import com.graphees.statspos.domain.models.DropdownItem
 import com.graphees.statspos.utils.HP
 
@@ -18,8 +19,8 @@ fun MOPSection(
     onSubBankSelected: (DropdownItem) -> Unit,
 ) {
     ExpandableSection(
-        title = "M.O.P Bank",
-        initiallyExpanded = true,
+        title = "Mode of Payment",
+        icon = R.drawable.mop,
     ) {
         ComboBox(
             modifier = Modifier

@@ -34,6 +34,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.graphees.statspos.R
 import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.AppSwitch
@@ -117,7 +118,6 @@ fun AppSettingsScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(ConstantPaddings.BODY_HORIZONTAL)
                 .padding(vertical = 8.dp)
         ) {
             Column(
@@ -146,6 +146,7 @@ fun AppSettingsScreen(
                         fastSales = state.fastSales,
                         onFastSalesChange = viewModel::onFastSalesChange,
                     )
+                    Spacer(Modifier.height(12.dp))
                     ShoppingApp(
                         deliveryCharges = state.deliveryCharges,
                         onDeliveryChargesChange = viewModel::onDeliveryChargesChange,
@@ -159,6 +160,7 @@ fun AppSettingsScreen(
                             WindowInsets.navigationBars
                                 .union(WindowInsets.ime)
                         )
+                        .padding(ConstantPaddings.BODY_HORIZONTAL)
                 ) {
                     if (state.isSaving) {
                         AppCircularProgressIndicator()
@@ -198,6 +200,7 @@ private fun Body(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(ConstantPaddings.BODY_HORIZONTAL)
     ) {
         Row {
             AppSwitch(
@@ -254,7 +257,7 @@ private fun ShoppingApp(
     if(HP.client.hasShoppingApp == true) {
         ExpandableSection(
             title = "Shopping App",
-            initiallyExpanded = true,
+            icon = R.drawable.shopping,
         ) {
             TextboxOutlined(
                 value = deliveryCharges,

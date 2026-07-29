@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.graphees.statspos.R
 import com.graphees.statspos.domain.models.DropdownItem
 import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
@@ -488,7 +489,7 @@ private fun UserRights(
 ) {
     ExpandableSection(
         title = "User Rights",
-        initiallyExpanded = true,
+        icon = R.drawable.user_rights,
     ) {
         Spacer(Modifier.height(8.dp))
         Row {
@@ -810,7 +811,7 @@ private fun ImageExpandable(
 ) {
     ExpandableSection(
         title = "Image",
-        initiallyExpanded = true,
+        icon = R.drawable.image,
     ) {
         Column(
             modifier = Modifier

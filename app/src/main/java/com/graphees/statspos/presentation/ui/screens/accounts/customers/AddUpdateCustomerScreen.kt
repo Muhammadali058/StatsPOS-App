@@ -37,6 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.graphees.statspos.R
 import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.AppSwitch
@@ -225,6 +226,7 @@ fun AddUpdateCustomerScreen(
                         .imePadding(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
+                    Spacer(Modifier.height(12.dp))
                     Basic(
                         accountName = state.accountName,
                         contact = state.contact,
@@ -326,9 +328,9 @@ private fun Basic(
     onCityChange: (String) -> Unit,
     onAddressChange: (String) -> Unit,
 ) {
-    ExpandableSection(
-        title = "Basic Details",
-        initiallyExpanded = true,
+    Column (
+        modifier = Modifier
+            .padding(ConstantPaddings.BODY_HORIZONTAL)
     ) {
         TextboxOutlined(
             value = accountName,
@@ -385,7 +387,7 @@ private fun Tax(
 ) {
     ExpandableSection(
         title = "NTN & STN",
-        initiallyExpanded = true,
+        icon = R.drawable.cnic,
     ) {
         TextboxOutlined(
             value = ntn,
@@ -435,7 +437,7 @@ private fun CategoryAndDiscount(
 ) {
     ExpandableSection(
         title = "Category & Discount",
-        initiallyExpanded = true,
+        icon = R.drawable.categories1,
     ) {
         Dropdown(
             value = categoryName,
@@ -503,7 +505,7 @@ private fun Others(
 ) {
     ExpandableSection(
         title = "Others",
-        initiallyExpanded = true,
+        icon = R.drawable.others,
     ) {
         TextboxOutlined(
             value = email,
@@ -563,7 +565,7 @@ private fun ImageExpandable(
 ) {
     ExpandableSection(
         title = "Image",
-        initiallyExpanded = true,
+        icon = R.drawable.image,
     ) {
         Column(
             modifier = Modifier

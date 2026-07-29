@@ -78,7 +78,6 @@ import com.graphees.statspos.presentation.ui.components.SaveButton
 import com.graphees.statspos.presentation.ui.components.SmallButton
 import com.graphees.statspos.presentation.ui.components.SubDropdown
 import com.graphees.statspos.presentation.ui.components.TextboxOutlined
-import com.graphees.statspos.presentation.ui.components.TitleCard
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.components.UpgradeToPremiumBottomSheet
 import com.graphees.statspos.presentation.ui.components.UploadImageView
@@ -89,8 +88,8 @@ import com.graphees.statspos.presentation.ui.screens.items.sub_barcodes.SubBarco
 import com.graphees.statspos.presentation.ui.screens.main.main.premium.HelpScreen
 import com.graphees.statspos.presentation.ui.screens.main.main.premium.PaymentScreen
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
-import com.graphees.statspos.presentation.viewmodels.items.AddUpdateItemViewModel
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
+import com.graphees.statspos.presentation.viewmodels.items.AddUpdateItemViewModel
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.PasswordFor
 import com.graphees.statspos.utils.UiEvent
@@ -449,7 +448,7 @@ private fun Home(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(ConstantPaddings.BODY_HORIZONTAL)
+//                .padding(ConstantPaddings.BODY_HORIZONTAL)
         ) {
             Column(
                 Modifier
@@ -592,7 +591,7 @@ private fun Home(
                             WindowInsets.navigationBars
                                 .union(WindowInsets.ime)
                         )
-//                        .padding(ConstantPaddings.BODY_HORIZONTAL)
+                        .padding(ConstantPaddings.BODY_HORIZONTAL)
                         .padding(bottom = 8.dp)
                 ) {
                     if (state.isSaving) {
@@ -659,9 +658,9 @@ private fun Basic(
         )
     }
 
-    TitleCard(
-        title = "Basic Details",
-        icon = R.drawable.basic,
+    Column (
+        modifier = Modifier
+            .padding(ConstantPaddings.BODY_HORIZONTAL)
     ) {
         // Barcode & Ref. Code
         Row {
@@ -845,9 +844,9 @@ private fun CategoryAndVendor(
     onSubCategoryIdChange: (Long) -> Unit,
     onVendorIdChange: (Long) -> Unit,
 ) {
-    TitleCard(
+    ExpandableSection(
         title = "Category & Vendor",
-        icon = R.drawable.categories,
+        icon = R.drawable.categories1,
     ) {
         Dropdown(
             value = categoryName,
@@ -921,9 +920,9 @@ private fun Stock(
     openingStockPcsTBEnabled: Boolean,
     openingStockCrtnTBEnabled: Boolean,
 ) {
-    TitleCard(
+    ExpandableSection(
         title = "Stock & Inventory",
-        icon = R.drawable.inventory,
+        icon = R.drawable.inventory1,
     ) {
         // Stock Warning Min & Max
         AppText(
@@ -1080,7 +1079,7 @@ private fun DiscountExpiry(
     onPackingChange: (String) -> Unit,
     onLocationChange: (String) -> Unit,
 ) {
-    TitleCard(
+    ExpandableSection(
         title = "Discount, Expiry, Location",
         icon = R.drawable.discount,
     ) {
@@ -1187,7 +1186,7 @@ private fun Switches(
     onSearchAbleChange: (Boolean) -> Unit,
     onSaleUnderStockChange: (Boolean) -> Unit,
 ) {
-    TitleCard (
+    ExpandableSection (
         title = "Lock & Others",
         icon = R.drawable.others,
     ) {
@@ -1255,7 +1254,7 @@ private fun ImageExpandable(
     onImageUrlChange: (MultipartBody.Part) -> Unit,
     onClear: (String) -> Unit,
 ) {
-    TitleCard (
+    ExpandableSection (
         title = "Image",
         icon = R.drawable.image,
     ) {

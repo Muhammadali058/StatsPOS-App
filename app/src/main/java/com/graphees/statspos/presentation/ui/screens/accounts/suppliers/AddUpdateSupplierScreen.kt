@@ -3,6 +3,7 @@ package com.graphees.statspos.presentation.ui.screens.accounts.suppliers
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,10 +36,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.graphees.statspos.R
 import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.ConfirmDialog
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
+import com.graphees.statspos.presentation.ui.components.ExpandableSection
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
@@ -183,8 +186,6 @@ fun AddUpdateSupplierScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(ConstantPaddings.BODY_HORIZONTAL)
-                .padding(vertical = 8.dp)
         ) {
             Column(
                 Modifier
@@ -199,7 +200,7 @@ fun AddUpdateSupplierScreen(
                         .imePadding(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-
+                    Spacer(Modifier.height(12.dp))
                     Basic(
                         accountName = state.accountName,
                         contact = state.contact,
@@ -230,6 +231,8 @@ fun AddUpdateSupplierScreen(
                             WindowInsets.navigationBars
                                 .union(WindowInsets.ime)
                         )
+                        .padding(ConstantPaddings.BODY_HORIZONTAL)
+                        .padding(bottom = 8.dp)
                 ) {
                     if (state.isSaving) {
                         AppCircularProgressIndicator()
@@ -265,57 +268,62 @@ private fun Basic(
     onEmailChange: (String) -> Unit,
     onAddressChange: (String) -> Unit,
 ) {
-    TextboxOutlined(
-        value = accountName,
-        onValueChange = onAccountNameChange,
+    Column (
         modifier = Modifier
-            .fillMaxWidth(),
-        label = {
-            Text("Supplier Name")
-        }
-    )
-    TextboxOutlined(
-        value = contact,
-        onValueChange = onContactChange,
-        modifier = Modifier
-            .fillMaxWidth(),
-        label = {
-            Text("Contact")
-        },
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Number
-        ),
-    )
-    TextboxOutlined(
-        value = city,
-        onValueChange = onCityChange,
-        modifier = Modifier.fillMaxWidth(),
-        label = {
-            Text("City")
-        }
-    )
-    TextboxOutlined(
-        value = email,
-        onValueChange = onEmailChange,
-        modifier = Modifier.fillMaxWidth(),
-        label = {
-            Text("Email")
-        },
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Email
+            .padding(ConstantPaddings.BODY_HORIZONTAL)
+    ) {
+        TextboxOutlined(
+            value = accountName,
+            onValueChange = onAccountNameChange,
+            modifier = Modifier
+                .fillMaxWidth(),
+            label = {
+                Text("Supplier Name")
+            }
         )
-    )
-    TextboxOutlined(
-        value = address,
-        onValueChange = onAddressChange,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(84.dp),
-        label = {
-            Text("Address")
-        },
-        singleLine = false,
-    )
+        TextboxOutlined(
+            value = contact,
+            onValueChange = onContactChange,
+            modifier = Modifier
+                .fillMaxWidth(),
+            label = {
+                Text("Contact")
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number
+            ),
+        )
+        TextboxOutlined(
+            value = city,
+            onValueChange = onCityChange,
+            modifier = Modifier.fillMaxWidth(),
+            label = {
+                Text("City")
+            }
+        )
+        TextboxOutlined(
+            value = email,
+            onValueChange = onEmailChange,
+            modifier = Modifier.fillMaxWidth(),
+            label = {
+                Text("Email")
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email
+            )
+        )
+        TextboxOutlined(
+            value = address,
+            onValueChange = onAddressChange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(84.dp),
+            label = {
+                Text("Address")
+            },
+            singleLine = false,
+        )
+    }
 }
 
 @Composable
@@ -325,20 +333,25 @@ private fun ImageExpandable(
     onImageUrlChange: (MultipartBody.Part) -> Unit,
     onClear: (String) -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+    ExpandableSection(
+        title = "Image",
+        icon = R.drawable.image,
     ) {
-        if (isUploadingImage) {
-            AppCircularProgressIndicator()
-        } else {
-            UploadImageView(
-                imageUrl = imageUrl,
-                onImageUrlChange = onImageUrlChange,
-                onClear = onClear,
-            )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            if (isUploadingImage) {
+                AppCircularProgressIndicator()
+            } else {
+                UploadImageView(
+                    imageUrl = imageUrl,
+                    onImageUrlChange = onImageUrlChange,
+                    onClear = onClear,
+                )
+            }
         }
     }
 }

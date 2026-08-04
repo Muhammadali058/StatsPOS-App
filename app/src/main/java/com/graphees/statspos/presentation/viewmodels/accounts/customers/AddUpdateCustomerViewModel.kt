@@ -231,6 +231,7 @@ class AddUpdateCustomerViewModel @Inject constructor(
                 customer.id = state.value.updateId
                 api.updateCustomer(customer)
             } else {
+                customer.userId = HP.user.id
                 api.insertCustomer(customer)
             }
 

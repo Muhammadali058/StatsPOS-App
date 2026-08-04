@@ -9,6 +9,7 @@ data class AppSettings(
     var onlinePrints: Boolean? = null,
     var defaultPrintOn: Boolean? = null,
     var fastSales: Boolean? = null,
+    var userWiseCustomers: Boolean? = null,
 
     var deliveryCharges: Double? = null,
 

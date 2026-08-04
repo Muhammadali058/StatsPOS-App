@@ -56,7 +56,7 @@ class ClientsRepositoryImpl @Inject constructor(
 
     override suspend fun updateShoppingAppFCMToken(fcmToken:String): Resource<JsonObject> {
         val body = JsonObject().apply {
-            addProperty("id", HP.clientId)
+            addProperty("id", HP.branchId)
             addProperty("fcmToken", fcmToken)
         }
 

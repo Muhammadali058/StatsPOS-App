@@ -27,6 +27,7 @@ class MainRepositoryImpl @Inject constructor(
     override suspend fun loadData(): Resource<JsonObject> {
         val body = JsonObject().apply {
             addProperty("branchGroupId", HP.branchGroupId)
+            addProperty("userId", HP.user.id)
         }
 
         return safeApiCall {

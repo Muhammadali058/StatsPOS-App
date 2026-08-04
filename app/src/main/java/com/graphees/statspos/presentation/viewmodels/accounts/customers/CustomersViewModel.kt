@@ -110,7 +110,7 @@ class CustomersViewModel @Inject constructor(
     fun onSearchChange(value: String) {
         state.update { it.copy(search = value) }
 
-        if(HP.appSettings.instantSearch == true)
+        if (HP.appSettings.instantSearch == true)
             loadData()
     }
 
@@ -153,7 +153,8 @@ class CustomersViewModel @Inject constructor(
                 is Resource.Success -> {
                     resultSuccess()
 
-                    val resultTotal = result.data.get("total").asJsonObject.get("totalCustomers").asInt
+                    val resultTotal =
+                        result.data.get("total").asJsonObject.get("totalCustomers").asInt
                     val resultList = Gson().getListOf<Accounts>(result.data.get("rows").asJsonArray)
                     state.update {
                         it.copy(
@@ -174,7 +175,7 @@ class CustomersViewModel @Inject constructor(
             if (state.value.isLoadingNextPage)
                 return@launch
 
-            if(state.value.list.size < HP.ITEMS_PER_PAGE)
+            if (state.value.list.size < HP.ITEMS_PER_PAGE)
                 return@launch
 
             state.update {
@@ -201,7 +202,8 @@ class CustomersViewModel @Inject constructor(
                 is Resource.Success -> {
                     state.update { it.copy(isLoadingNextPage = false, error = null) }
 
-                    val resultTotal = result.data.get("total").asJsonObject.get("totalCustomers").asInt
+                    val resultTotal =
+                        result.data.get("total").asJsonObject.get("totalCustomers").asInt
                     val resultList = Gson().getListOf<Accounts>(result.data.get("rows").asJsonArray)
                     state.update {
                         it.copy(
@@ -268,6 +270,16 @@ class CustomersViewModel @Inject constructor(
         addProperty("itemsPerPage", HP.ITEMS_PER_PAGE)
         addProperty("searchType", state.value.selectedSearchType?.id ?: 0L)
         addProperty("categoryId", state.value.categoryId)
+        addProperty(
+            "userId",
+            if (HP.appSettings.userWiseCustomers == true)
+                if (HP.user.userType == 1)
+                    0
+                else
+                    HP.user.id
+            else
+                0
+        )
         addProperty("text", state.value.search)
     }
 

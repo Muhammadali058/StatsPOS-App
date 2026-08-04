@@ -32,6 +32,7 @@ class AppSettingsViewModel @Inject constructor(
         val onlinePrints: Boolean = false,
         val defaultPrintOn: Boolean = false,
         val fastSales: Boolean = false,
+        val userWiseCustomers: Boolean = false,
 
         val deliveryCharges: String = "",
 
@@ -124,6 +125,10 @@ class AppSettingsViewModel @Inject constructor(
         state.update { it.copy(fastSales = value) }
     }
 
+    fun onUserWiseCustomersChange(value: Boolean) {
+        state.update { it.copy(userWiseCustomers = value) }
+    }
+
     fun setHasLoadedOnce(value: Boolean) {
         state.update { it.copy(hasLoadedOnce = value) }
     }
@@ -183,6 +188,7 @@ class AppSettingsViewModel @Inject constructor(
             onlinePrints = state.value.onlinePrints,
             defaultPrintOn = state.value.defaultPrintOn,
             fastSales = state.value.fastSales,
+            userWiseCustomers = state.value.userWiseCustomers,
 
             deliveryCharges = HP.getDoubleValue(state.value.deliveryCharges),
         )
@@ -197,6 +203,7 @@ class AppSettingsViewModel @Inject constructor(
                 onlinePrints = appSettings.onlinePrints!!,
                 defaultPrintOn = appSettings.defaultPrintOn!!,
                 fastSales = appSettings.fastSales!!,
+                userWiseCustomers = appSettings.userWiseCustomers!!,
 
                 deliveryCharges = appSettings.deliveryCharges.toString(),
             )

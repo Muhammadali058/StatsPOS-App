@@ -26,6 +26,7 @@ data class Accounts(
     val accountType: Int? = null,
     var isRetail: Boolean? = null,
     var categoryId: Long? = null,
+    var userId: Long? = null,
 
     var disc: Double? = null,
     var isDiscRsPer: Boolean? = null,

@@ -145,6 +145,8 @@ fun AppSettingsScreen(
                         onDefaultPrintOnChange = viewModel::onDefaultPrintOnChange,
                         fastSales = state.fastSales,
                         onFastSalesChange = viewModel::onFastSalesChange,
+                        userWiseCustomers = state.userWiseCustomers,
+                        onUserWiseCustomersChange = viewModel::onUserWiseCustomersChange
                     )
                     Spacer(Modifier.height(12.dp))
                     ShoppingApp(
@@ -196,6 +198,8 @@ private fun Body(
     onDefaultPrintOnChange: (Boolean) -> Unit,
     fastSales: Boolean,
     onFastSalesChange: (Boolean) -> Unit,
+    userWiseCustomers: Boolean,
+    onUserWiseCustomersChange: (Boolean) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -244,6 +248,15 @@ private fun Body(
                 checked = fastSales,
                 onCheckedChange = onFastSalesChange,
                 label = "Fast Sales"
+            )
+        }
+        Spacer(Modifier.height(24.dp))
+        Row {
+            AppSwitch(
+                modifier = Modifier.weight(1f),
+                checked = userWiseCustomers,
+                onCheckedChange = onUserWiseCustomersChange,
+                label = "User wise Customers"
             )
         }
     }

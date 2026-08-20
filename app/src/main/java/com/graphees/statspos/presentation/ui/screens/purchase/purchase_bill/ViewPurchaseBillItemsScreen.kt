@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Whatsapp
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -61,6 +62,7 @@ import com.graphees.statspos.presentation.ui.screens.purchase.main_screen.purcha
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.ui.utils.openPdf
 import com.graphees.statspos.presentation.ui.utils.sharePdf
+import com.graphees.statspos.presentation.ui.utils.sharePdfToWhatsApp
 import com.graphees.statspos.presentation.viewmodels.purchase.purchase_bill.PurchaseItemsViewModel
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.PasswordFor
@@ -126,7 +128,8 @@ fun ViewPurchaseBillItemsScreen(
         )
 
         if (shareBill)
-            sharePdf(context, file)
+            sharePdfToWhatsApp(context, file, purchaseBill.contact!!)
+//            sharePdf(context, file)
         else
             openPdf(context, file)
     }
@@ -208,7 +211,7 @@ fun ViewPurchaseBillItemsScreen(
                                 }
                             }) {
                                 AppIcon(
-                                    icon = Icons.Default.Share,
+                                    icon = Icons.Default.Whatsapp,
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }

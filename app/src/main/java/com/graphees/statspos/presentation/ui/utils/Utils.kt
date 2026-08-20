@@ -3,12 +3,14 @@ package com.graphees.statspos.presentation.ui.utils
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import android.os.ParcelFileDescriptor
+import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
@@ -118,7 +120,118 @@ fun openPdf(context: Context, file: File) {
     file.deleteOnExit()
 }
 
-fun sharePdf(context: Context, file: File) {
+fun sharePdfToWhatsApp(
+    context: Context,
+    file: File,
+    contact: String
+) {
+    val uri = FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.provider",
+        file
+    )
+
+    val phone = contact
+        .replace(Regex("[^0-9]"), "")
+        .let {
+            when {
+                it.startsWith("0") -> "92${it.substring(1)}"
+                it.startsWith("92") -> it
+                else -> it
+            }
+        }
+
+    val whatsappPackage = "com.whatsapp"
+    val businessPackage = "com.whatsapp.w4b"
+
+    val pm = context.packageManager
+
+    fun isInstalled(packageName: String): Boolean {
+        return try {
+            pm.getPackageInfo(packageName, 0)
+            true
+        } catch (e: PackageManager.NameNotFoundException) {
+            false
+        }
+    }
+
+    val whatsappInstalled = isInstalled(whatsappPackage)
+    val businessInstalled = isInstalled(businessPackage)
+
+    if (!whatsappInstalled && !businessInstalled) {
+        Toast.makeText(
+            context,
+            "WhatsApp is not installed",
+            Toast.LENGTH_LONG
+        ).show()
+        return
+    }
+
+    fun createWhatsAppIntent(packageName: String): Intent {
+        return Intent(Intent.ACTION_SEND).apply {
+            type = "application/pdf"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            putExtra("jid", "$phone@s.whatsapp.net")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            `package` = packageName
+        }
+    }
+
+    when {
+        whatsappInstalled && businessInstalled -> {
+
+            // Both installed → show chooser
+            val whatsappIntent = createWhatsAppIntent(whatsappPackage)
+            val businessIntent = createWhatsAppIntent(businessPackage)
+
+            val chooser = Intent.createChooser(
+                whatsappIntent,
+                "Share with"
+            ).apply {
+                putExtra(
+                    Intent.EXTRA_INITIAL_INTENTS,
+                    arrayOf(businessIntent)
+                )
+            }
+
+            context.startActivity(chooser)
+        }
+
+        whatsappInstalled -> {
+            // Only normal WhatsApp
+            context.startActivity(
+                createWhatsAppIntent(whatsappPackage)
+            )
+        }
+
+        businessInstalled -> {
+            // Only WhatsApp Business
+            context.startActivity(
+                createWhatsAppIntent(businessPackage)
+            )
+        }
+    }
+}
+private fun isAppInstalled(
+    context: Context,
+    packageName: String
+): Boolean {
+    return try {
+        context.packageManager.getPackageInfo(
+            packageName,
+            0
+        )
+        true
+    } catch (e: PackageManager.NameNotFoundException) {
+        false
+    }
+}
+
+fun sharePdf(
+    context: Context,
+    file: File,
+    contact: String = "",
+) {
     val uri = FileProvider.getUriForFile(
         context,
         "${context.packageName}.provider",
@@ -132,12 +245,10 @@ fun sharePdf(context: Context, file: File) {
 //        `package` = "com.whatsapp" // To share only with WhatsApp
     }
 
-    // To share only with WhatsApp
-//    try {
-//        context.startActivity(intent)
-//    } catch (e: ActivityNotFoundException) {
-//        Toast.makeText(context, "WhatsApp not installed", Toast.LENGTH_SHORT).show()
-//    }
+//    val intent = Intent(
+//        Intent.ACTION_VIEW,
+//        "https://wa.me/$contact?text=${if (addClient) message1 else message}".toUri()
+//    )
 
     // Share
     context.startActivity(
@@ -145,9 +256,6 @@ fun sharePdf(context: Context, file: File) {
     )
 
     // Delete
-//    Handler(Looper.getMainLooper()).postDelayed({
-//        file.delete()
-//    }, 10_000)
     file.deleteOnExit()
 }
 

@@ -25,4 +25,5 @@ data class PurchaseBills(
     var refInvoiceNo: String? = null,
     var warehouseId: Long? = null,
     var imageUrl: String? = null,
+    var contact: String? = null,
 )

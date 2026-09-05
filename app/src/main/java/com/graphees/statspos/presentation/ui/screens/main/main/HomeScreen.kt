@@ -1,6 +1,7 @@
 package com.graphees.statspos.presentation.ui.screens.main.main
 
 import android.app.Activity
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.DrawableRes
@@ -112,115 +113,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
-
-private val items = listOf(
-    TopItem(
-        "Categories",
-        TopRoutes.Categories,
-        R.drawable.categories,
-        HP.userRights.categories == true
-    ),
-    TopItem("Packages", TopRoutes.Packages, R.drawable.packages, HP.userRights.items == true),
-    TopItem(
-        "Purchase\nOrders",
-        TopRoutes.PurchaseOrders,
-        R.drawable.purchase_orders,
-        HP.userRights.purchase == true
-    ),
-    TopItem("Users", TopRoutes.Users, R.drawable.users, HP.userRights.users == true),
-    TopItem("Settings", TopRoutes.Settings, R.drawable.settings, HP.userRights.settings == true),
-    TopItem(
-        "Shopping\nApp",
-        TopRoutes.ShoppingApp,
-        R.drawable.sales_orders,
-        (HP.user.userType == 1 && HP.client.hasShoppingApp == true)
-    ),
-)
-private val accounts = listOf(
-    TopItem(
-        "Customers",
-        TopRoutes.Customers,
-        R.drawable.customers,
-        HP.userRights.customers == true
-    ),
-    TopItem(
-        "Vendors",
-        TopRoutes.Vendors,
-        R.drawable.vendors,
-        HP.userRights.vendors == true
-    ),
-    TopItem(
-        "Suppliers",
-        TopRoutes.Suppliers,
-        R.drawable.suppliers,
-        HP.userRights.suppliers == true
-    ),
-    TopItem("Banks", TopRoutes.Banks, R.drawable.banks, HP.userRights.banks == true),
-    TopItem(
-        "Expenses",
-        TopRoutes.Expenses,
-        R.drawable.expenses,
-        HP.userRights.expenses == true
-    ),
-    TopItem(
-        "Account\nCategories",
-        TopRoutes.AccountCategories,
-        R.drawable.account_categories,
-        (HP.userRights.customers == true || HP.userRights.vendors == true)
-    ),
-)
-private val entries = listOf(
-    TopItem(
-        "Receipt",
-        TopRoutes.ReceiptEntry,
-        R.drawable.receipt_entry,
-        access = HP.userRights.entry == true
-    ),
-    TopItem(
-        "Payment",
-        TopRoutes.PaymentEntry,
-        R.drawable.payment_entry,
-        access = HP.userRights.entry == true
-    ),
-    TopItem(
-        "Expense",
-        TopRoutes.ExpenseEntry,
-        R.drawable.expense_entry,
-        access = HP.userRights.entry == true
-    ),
-    TopItem(
-        "Journal",
-        TopRoutes.JournalEntry,
-        R.drawable.journal_entry,
-        access = HP.userRights.entry == true
-    ),
-    TopItem(
-        "Stock",
-        TopRoutes.StockEntry,
-        R.drawable.stock_entry,
-        access = HP.userRights.entry == true
-    ),
-)
-private val warehouse = listOf(
-    TopItem(
-        "Warehouses",
-        TopRoutes.Warehouses,
-        R.drawable.warehouses,
-        HP.userRights.warehouse == true
-    ),
-    TopItem(
-        "Transfer\nStock",
-        TopRoutes.TransferStock,
-        R.drawable.transfer_stock,
-        HP.userRights.warehouse == true
-    ),
-    TopItem(
-        "Gatepass",
-        TopRoutes.Gatepass,
-        R.drawable.gatepass,
-        HP.userRights.warehouse == true
-    ),
-)
 
 @Composable
 fun HomeScreen(
@@ -797,31 +689,187 @@ private fun HomeBody(
         }
 
         item {
-            Title("Inventory & Operations", subTitle = "Manage orders, users and settings", icon = R.drawable.inventory, access = true)
+            Title(
+                "Inventory & Operations",
+                subTitle = "Manage orders, users and settings",
+                icon = R.drawable.inventory,
+                access = true
+            )
         }
         item {
-            HomeGrid(items, onTopRouteClick)
+            HomeGrid(
+                items = listOf(
+                    TopItem(
+                        "Categories",
+                        TopRoutes.Categories,
+                        R.drawable.categories,
+                        HP.userRights.categories == true
+                    ),
+                    TopItem(
+                        "Packages",
+                        TopRoutes.Packages,
+                        R.drawable.packages,
+                        HP.userRights.items == true
+                    ),
+                    TopItem(
+                        "Purchase\nOrders",
+                        TopRoutes.PurchaseOrders,
+                        R.drawable.purchase_orders,
+                        HP.userRights.purchase == true
+                    ),
+                    TopItem(
+                        "Users",
+                        TopRoutes.Users,
+                        R.drawable.users,
+                        HP.userRights.users == true
+                    ),
+                    TopItem(
+                        "Settings",
+                        TopRoutes.Settings,
+                        R.drawable.settings,
+                        HP.userRights.settings == true
+                    ),
+                    TopItem(
+                        "Shopping\nApp",
+                        TopRoutes.ShoppingApp,
+                        R.drawable.sales_orders,
+                        (HP.user.userType == 1 && HP.client.hasShoppingApp == true)
+                    ),
+                ),
+                onClick = onTopRouteClick
+            )
         }
 
         item {
-            Title("Create Accounts", subTitle = "Manage your financial accounts", icon = R.drawable.accounts, access = HP.userRights.accounts == true)
+            Title(
+                "Create Accounts",
+                subTitle = "Manage your financial accounts",
+                icon = R.drawable.accounts,
+                access = HP.userRights.accounts == true
+            )
         }
         item {
-            HomeGrid(accounts, onTopRouteClick)
+            HomeGrid(
+                items = listOf(
+                    TopItem(
+                        "Customers",
+                        TopRoutes.Customers,
+                        R.drawable.customers,
+                        HP.userRights.customers == true
+                    ),
+                    TopItem(
+                        "Vendors",
+                        TopRoutes.Vendors,
+                        R.drawable.vendors,
+                        HP.userRights.vendors == true
+                    ),
+                    TopItem(
+                        "Suppliers",
+                        TopRoutes.Suppliers,
+                        R.drawable.suppliers,
+                        HP.userRights.suppliers == true
+                    ),
+                    TopItem(
+                        "Banks",
+                        TopRoutes.Banks,
+                        R.drawable.banks,
+                        HP.userRights.banks == true
+                    ),
+                    TopItem(
+                        "Expenses",
+                        TopRoutes.Expenses,
+                        R.drawable.expenses,
+                        HP.userRights.expenses == true
+                    ),
+                    TopItem(
+                        "Account\nCategories",
+                        TopRoutes.AccountCategories,
+                        R.drawable.account_categories,
+                        (HP.userRights.customers == true || HP.userRights.vendors == true)
+                    ),
+                ),
+                onClick = onTopRouteClick
+            )
         }
 
         item {
-            Title("Transactions", subTitle = "Record and manage your business transactions", icon = R.drawable.transactions, access = HP.userRights.entry == true)
+            Title(
+                "Transactions",
+                subTitle = "Record and manage your business transactions",
+                icon = R.drawable.transactions,
+                access = HP.userRights.entry == true
+            )
         }
         item {
-            HomeGrid(entries, onTopRouteClick)
+            HomeGrid(
+                items = listOf(
+                    TopItem(
+                        "Receipt",
+                        TopRoutes.ReceiptEntry,
+                        R.drawable.receipt_entry,
+                        access = HP.userRights.entry == true
+                    ),
+                    TopItem(
+                        "Payment",
+                        TopRoutes.PaymentEntry,
+                        R.drawable.payment_entry,
+                        access = HP.userRights.entry == true
+                    ),
+                    TopItem(
+                        "Expense",
+                        TopRoutes.ExpenseEntry,
+                        R.drawable.expense_entry,
+                        access = HP.userRights.entry == true
+                    ),
+                    TopItem(
+                        "Journal",
+                        TopRoutes.JournalEntry,
+                        R.drawable.journal_entry,
+                        access = HP.userRights.entry == true
+                    ),
+                    TopItem(
+                        "Stock",
+                        TopRoutes.StockEntry,
+                        R.drawable.stock_entry,
+                        access = HP.userRights.entry == true
+                    ),
+                ),
+                onClick = onTopRouteClick
+            )
         }
 
         item {
-            Title("Warehouse", subTitle = "Manage stock in different warehouses", icon = R.drawable.warehouse, access = HP.userRights.warehouse == true)
+            Title(
+                "Warehouse",
+                subTitle = "Manage stock in different warehouses",
+                icon = R.drawable.warehouse,
+                access = HP.userRights.warehouse == true
+            )
         }
         item {
-            HomeGrid(warehouse, onTopRouteClick)
+            HomeGrid(
+                items = listOf(
+                    TopItem(
+                        "Warehouses",
+                        TopRoutes.Warehouses,
+                        R.drawable.warehouses,
+                        HP.userRights.warehouse == true
+                    ),
+                    TopItem(
+                        "Transfer\nStock",
+                        TopRoutes.TransferStock,
+                        R.drawable.transfer_stock,
+                        HP.userRights.warehouse == true
+                    ),
+                    TopItem(
+                        "Gatepass",
+                        TopRoutes.Gatepass,
+                        R.drawable.gatepass,
+                        HP.userRights.warehouse == true
+                    ),
+                ),
+                onClick = onTopRouteClick
+            )
         }
 
         item {
@@ -848,8 +896,7 @@ private fun Title(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(DEFAULT_RADIUS))
-                    .background(MaterialTheme.colorScheme.primary.copy(.1f))
-                ,
+                    .background(MaterialTheme.colorScheme.primary.copy(.1f)),
                 contentAlignment = Alignment.Center,
             ) {
                 if (icon != null) {
@@ -906,6 +953,7 @@ private fun HomeGrid(
     ) {
         val filteredItems = items.filter { it.access }
         items(filteredItems) { item ->
+            Log.d("TAG", "${item.text} = ${item.access}")
             Card(
                 modifier = Modifier
                     .width(100.dp)
@@ -948,7 +996,7 @@ private fun HomeGrid(
                             .fillMaxSize(),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally,
-                    ){
+                    ) {
                         Text(
                             text = item.text,
                             style = TextStyle(
@@ -958,66 +1006,6 @@ private fun HomeGrid(
                             )
                         )
                     }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun HomeGridOld(
-    items: List<TopItem>,
-    onClick: (TopRoutes) -> Unit
-) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(max = 400.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        val filteredItems = items.filter { it.access }
-        items(filteredItems) { item ->
-            Card(
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(112.dp)
-                    .padding(vertical = 6.dp),
-                onClick = { onClick(item.screen) },
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = 2.dp
-                ),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                ),
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.SpaceEvenly,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Spacer(Modifier.height(12.dp))
-                    item.icon?.run {
-                        AppIcon(
-                            modifier = Modifier
-                                .weight(1f),
-                            icon = item.icon,
-                            size = 26.dp,
-                        )
-                    }
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        modifier = Modifier
-                            .weight(1f),
-                        text = item.text,
-                        style = TextStyle(
-                            textAlign = TextAlign.Center,
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        )
-                    )
                 }
             }
         }

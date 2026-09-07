@@ -250,6 +250,19 @@ fun PrintIcon(
 }
 
 @Composable
+fun WhatsappIcon(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    AppIconButton(
+        icon = R.drawable.whatsapp,
+        onClick = onClick,
+        modifier = modifier,
+        size = 19.dp
+    )
+}
+
+@Composable
 fun FilterIcon(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,

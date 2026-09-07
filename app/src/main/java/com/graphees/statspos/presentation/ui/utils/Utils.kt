@@ -20,7 +20,6 @@ import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.showToast
 import java.io.File
 import java.io.FileOutputStream
-import java.net.URLEncoder
 
 // region Paddings
 object ConstantPaddings {
@@ -120,7 +119,7 @@ fun openPdf(context: Context, file: File) {
     file.deleteOnExit()
 }
 
-fun sharePdfToWhatsApp(
+fun shareFileToWhatsApp(
     context: Context,
     file: File,
     contact: String

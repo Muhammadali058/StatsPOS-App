@@ -254,16 +254,30 @@ fun HomeScreen(
                     },
                     actions = {
                         Row {
-                            IconButton(
-                                onClick = {
-                                    onTopRouteClick(TopRoutes.Help)
+                            if (HP.appSubscription.isActive == true) {
+                                IconButton(
+                                    onClick = {
+                                        onTopRouteClick(TopRoutes.Subscriptions)
+                                    }
+                                ) {
+                                    AppIcon(
+                                        icon = R.drawable.subscription,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        size = 20.dp
+                                    )
                                 }
-                            ) {
-                                AppIcon(
-                                    icon = R.drawable.help,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    size = 22.dp
-                                )
+                            } else {
+                                IconButton(
+                                    onClick = {
+                                        showUpgradeToPremiumSheet = true
+                                    }
+                                ) {
+                                    AppIcon(
+                                        icon = R.drawable.upgrade_to_premium,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        size = 22.dp
+                                    )
+                                }
                             }
 
                             IconButton(
@@ -334,6 +348,17 @@ fun HomeScreen(
                                     onClick = {
                                         menuExpanded = false
                                         onLogout()
+                                    }
+                                )
+
+                                DropdownItem(
+                                    text = "Help",
+                                    icon = {
+                                        AppIcon(R.drawable.help, size = 20.dp)
+                                    },
+                                    onClick = {
+                                        menuExpanded = false
+                                        onTopRouteClick(TopRoutes.Help)
                                     }
                                 )
                             }

@@ -76,6 +76,7 @@ class AddUpdateSalesViewModel @Inject constructor(
         val salesBill: SalesBills? = null,
 
         var print: Boolean = HP.appSettings.defaultPrintOn == true,
+        val isNewBill: Boolean = false,
         val hasLoadedOnce: Boolean = false,
 
         val isLoading: Boolean = false,
@@ -377,8 +378,10 @@ class AddUpdateSalesViewModel @Inject constructor(
                         if (HP.settings.autoCreditSelect!! && HP.userRights.creditBill!!) {
                             state.update { it.copy(salesOn = HP.salesOn[1]) }
                         } else {
-                            if (account.isCredit!! && HP.userRights.creditBill!!) {
-                                state.update { it.copy(salesOn = HP.salesOn[1]) }
+                            if(state.value.isNewBill) {
+                                if (account.isCredit!! && HP.userRights.creditBill!!) {
+                                    state.update { it.copy(salesOn = HP.salesOn[1]) }
+                                }
                             }
                         }
 
@@ -640,6 +643,7 @@ class AddUpdateSalesViewModel @Inject constructor(
                 isPendingBill = isPendingBill,
                 isPostedBill = isPostedBill,
                 salesBill = salesBill,
+                isNewBill = salesBill == null,
             )
         }
 

@@ -250,35 +250,3 @@ private fun Body(
         )
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-private fun Prev() {
-    Column(
-        Modifier
-            .fillMaxSize(),
-    ) {
-        Body(
-            null,
-            null,
-            null,
-            "",
-            LocalDate.now(),
-            "",
-            { },
-            { },
-            { },
-            { },
-            { },
-        )
-        MOPSection(
-            mop = HP.mop[0],
-            bank = HP.getNoneDropdownItem(),
-            subBank = HP.getNoneDropdownItem(),
-            onMOPChange = {},
-            onBankSelected = {},
-            onSubBankSelected = {},
-        )
-        Spacer(Modifier.height(8.dp))
-    }
-}

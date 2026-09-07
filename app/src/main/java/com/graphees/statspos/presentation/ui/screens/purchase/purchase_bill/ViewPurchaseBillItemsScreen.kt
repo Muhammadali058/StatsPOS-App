@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Print
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Whatsapp
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,7 +42,6 @@ import com.graphees.statspos.domain.models.purchase.PurchaseBill
 import com.graphees.statspos.domain.models.purchase.PurchaseBillItems
 import com.graphees.statspos.domain.models.purchase.PurchaseBills
 import com.graphees.statspos.presentation.ui.components.AppIcon
-import com.graphees.statspos.presentation.ui.components.DeleteIcon
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.HeadingMedium
 import com.graphees.statspos.presentation.ui.components.LabelMedium
@@ -52,17 +50,14 @@ import com.graphees.statspos.presentation.ui.components.ListHeading
 import com.graphees.statspos.presentation.ui.components.ListHorizontalDivider
 import com.graphees.statspos.presentation.ui.components.ListImageView
 import com.graphees.statspos.presentation.ui.components.ListLabel
-import com.graphees.statspos.presentation.ui.components.ListMainHeading
-import com.graphees.statspos.presentation.ui.components.ListMainLabel
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.components.TopAppBar
-import com.graphees.statspos.presentation.ui.screens.purchase.main_screen.purchaseBillVoucher
+import com.graphees.statspos.presentation.ui.screens.purchase.invoices.purchaseBillA4
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.ui.utils.openPdf
-import com.graphees.statspos.presentation.ui.utils.sharePdf
-import com.graphees.statspos.presentation.ui.utils.sharePdfToWhatsApp
+import com.graphees.statspos.presentation.ui.utils.shareFileToWhatsApp
 import com.graphees.statspos.presentation.viewmodels.purchase.purchase_bill.PurchaseItemsViewModel
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.PasswordFor
@@ -122,13 +117,13 @@ fun ViewPurchaseBillItemsScreen(
     fun showBill(
         bill: List<PurchaseBill>,
     ) {
-        val file = purchaseBillVoucher(
+        val file = purchaseBillA4(
             context = context,
             bill = bill,
         )
 
         if (shareBill)
-            sharePdfToWhatsApp(context, file, purchaseBill.contact!!)
+            shareFileToWhatsApp(context, file, purchaseBill.contact!!)
 //            sharePdf(context, file)
         else
             openPdf(context, file)

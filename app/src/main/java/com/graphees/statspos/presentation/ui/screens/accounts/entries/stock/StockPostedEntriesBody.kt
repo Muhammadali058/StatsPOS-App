@@ -25,7 +25,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.domain.models.DropdownItem
@@ -33,9 +35,11 @@ import com.graphees.statspos.domain.models.accounts.Entries
 import com.graphees.statspos.presentation.ui.components.BottomHeading
 import com.graphees.statspos.presentation.ui.components.ComboBox
 import com.graphees.statspos.presentation.ui.components.DateTextbox
+import com.graphees.statspos.presentation.ui.components.DeleteIcon
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListHeading
+import com.graphees.statspos.presentation.ui.components.ListHorizontalDivider
 import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
@@ -221,6 +225,9 @@ private fun ListCard(
     modifier: Modifier = Modifier,
     item: Entries
 ) {
+    val primaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
+    val secondaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.6f)
+
     ListCard(
         modifier = modifier
             .fillMaxWidth()
@@ -229,48 +236,55 @@ private fun ListCard(
 
         }
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                ListHeading("Amount: ")
+                ListLabel(HP.formatDecimal((item.amount)))
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+        ListHorizontalDivider()
+        Spacer(Modifier.height(8.dp))
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                ListHeading("User", Modifier.width(120.dp))
+                ListHeading("MOP", Modifier.width(50.dp))
+                ListHeading("Date", Modifier.weight(1f))
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                ListLabel(item.username.toString(), Modifier.width(120.dp))
+                ListLabel(item.mop.toString(), Modifier.width(50.dp))
+                ListLabel(item.date.toString(), Modifier.weight(1f))
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+        ListHorizontalDivider()
+        Spacer(Modifier.height(8.dp))
+
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f),
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    ListHeading("Amount", Modifier.width(120.dp))
-                    ListHeading("MOP", Modifier.width(50.dp))
-                    ListHeading("Date", Modifier.weight(1f))
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    ListLabel(HP.formatDecimal(item.amount), Modifier.width(120.dp))
-                    ListLabel(item.mop.toString(), Modifier.width(50.dp))
-                    ListLabel(item.date.toString(), Modifier.weight(1f))
-                }
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    ListHeading("User: ")
-                    ListLabel(item.username.toString())
-                }
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    ListHeading("Naration: ")
-                    ListLabel(item.naration.toString())
-                }
-            }
+            ListHeading("Naration: ", color = primaryColor)
+            ListLabel(item.naration.toString(), color = secondaryColor)
         }
     }
 }

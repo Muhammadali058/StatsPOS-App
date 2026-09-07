@@ -52,14 +52,14 @@ fun entryVoucher(
         document.add(
             Paragraph(HP.printSettings.shopName.toString())
                 .setFont(boldFont)
-                .setFontSize(18f)
+                .setFontSize(14f)
                 .setTextAlignment(TextAlignment.CENTER)
         )
     }
 
     val title = Paragraph("${if (entryType == EntryType.RECEIPT) "Receipt" else "Payment"} Voucher")
         .setFont(boldFont)
-        .setFontSize(14f)
+        .setFontSize(12f)
         .setTextAlignment(TextAlignment.CENTER)
 
     document.add(title)

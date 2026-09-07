@@ -28,6 +28,8 @@ data class Entries(
     var accountName: String? = null,
     var mop: String? = null,
     var username: String? = null,
+    var contact: String? = null,
+    var imageUrl: String? = null,
     var debitAccountName: String? = null,
     var creditAccountName: String? = null,
 )

@@ -10,12 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Print
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -31,14 +28,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.domain.models.DropdownItem
 import com.graphees.statspos.domain.models.accounts.Entries
 import com.graphees.statspos.domain.models.accounts.EntryVoucher
 import com.graphees.statspos.domain.models.reports.accounts.AccountReport
-import com.graphees.statspos.presentation.ui.components.AppIconButton
 import com.graphees.statspos.presentation.ui.components.BottomHeading
 import com.graphees.statspos.presentation.ui.components.ComboBox
 import com.graphees.statspos.presentation.ui.components.ConfirmDialog
@@ -47,18 +45,21 @@ import com.graphees.statspos.presentation.ui.components.DeleteIcon
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListHeading
+import com.graphees.statspos.presentation.ui.components.ListHorizontalDivider
+import com.graphees.statspos.presentation.ui.components.ListImageView
 import com.graphees.statspos.presentation.ui.components.ListLabel
-import com.graphees.statspos.presentation.ui.components.ListMainLabel
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
 import com.graphees.statspos.presentation.ui.components.PlaceHolder
+import com.graphees.statspos.presentation.ui.components.PrintIcon
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.components.SearchTextbox
+import com.graphees.statspos.presentation.ui.components.WhatsappIcon
 import com.graphees.statspos.presentation.ui.screens.accounts.entries.vouchers.entryVoucher
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.ui.utils.getImageFromPdf
 import com.graphees.statspos.presentation.ui.utils.openPdf
-import com.graphees.statspos.presentation.ui.utils.sharePdf
+import com.graphees.statspos.presentation.ui.utils.shareFileToWhatsApp
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.accounts.entries.receipt.ReceiptEntriesViewModel
 import com.graphees.statspos.utils.EntryType
@@ -144,22 +145,23 @@ fun ReceiptPostedEntriesBody(
     }
 
     fun showVoucher(
-        entry: EntryVoucher,
+        entryVoucher: EntryVoucher,
         ledger: List<AccountReport>?,
-        share:Boolean = false,
-    ) {
+        share: Boolean = false,
+        entry: Entries,
+        ) {
         val file = entryVoucher(
             context = context,
             entryType = EntryType.RECEIPT,
-            entry = entry,
+            entry = entryVoucher,
             ledger = ledger,
         )
 
-        if(share) {
+        if (share) {
             val image = getImageFromPdf(context, file)
-            sharePdf(context, image)
-        }
-        else
+//            sharePdf(context, image)
+            shareFileToWhatsApp(context, image, entry.contact!!)
+        } else
             openPdf(context, file)
     }
 
@@ -222,8 +224,8 @@ fun ReceiptPostedEntriesBody(
                     onPrintClick = { entry, share ->
                         viewModel.getEntry(
                             entryId = entry.id!!,
-                            onSuccess = { entry, ledger ->
-                                showVoucher(entry, ledger, share)
+                            onSuccess = { entryVoucher, ledger ->
+                                showVoucher(entryVoucher, ledger, share, entry)
                             }
                         )
                     },
@@ -326,7 +328,7 @@ private fun BodyList(
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
     ) {
-        item{
+        item {
             Spacer(Modifier.height(4.dp))
         }
         items(items) { item ->
@@ -346,6 +348,9 @@ private fun ListCard(
     onDeleteClick: (Entries) -> Unit,
     onPrintClick: (Entries, Boolean) -> Unit,
 ) {
+    val primaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
+    val secondaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.6f)
+
     ListCard(
         modifier = modifier
             .fillMaxWidth()
@@ -359,70 +364,93 @@ private fun ListCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            // Image
+            ListImageView(
+                imageUrl = item.imageUrl,
+                modifier = Modifier
+                    .size(60.dp),
+                showIfNull = true,
+            ) {
+                Spacer(Modifier.width(8.dp))
+            }
+
             Column(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                ListMainLabel(item.accountName.toString())
-                Spacer(Modifier.height(2.dp))
+                Text(
+                    modifier = modifier,
+                    text = item.accountName.toString(),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                )
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
                 ) {
-                    ListHeading("Amount", Modifier.width(120.dp))
-                    ListHeading("MOP", Modifier.width(50.dp))
-                    ListHeading("Date", Modifier.weight(1f))
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    ListLabel(HP.formatDecimal(item.amount), Modifier.width(120.dp))
-                    ListLabel(item.mop.toString(), Modifier.width(50.dp))
-                    ListLabel(item.date.toString(), Modifier.weight(1f))
-                }
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    ListHeading("User: ")
-                    ListLabel(item.username.toString())
-                }
-                Spacer(Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    ListHeading("Naration: ")
-                    ListLabel(item.naration.toString())
+                    ListHeading("Amount: ")
+                    ListLabel(HP.formatDecimal((item.amount)))
                 }
             }
-            Spacer(Modifier.width(8.dp))
-            Column(
-                modifier = Modifier,
+
+            Row {
+                PrintIcon {
+                    onPrintClick(item, false)
+                }
+                Spacer(Modifier.width(8.dp))
+                WhatsappIcon {
+                    onPrintClick(item, true)
+                }
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+        ListHorizontalDivider()
+        Spacer(Modifier.height(8.dp))
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
             ) {
-                AppIconButton(
-                    icon = Icons.Default.Share,
-                    onClick = {
-                        onPrintClick(item, true)
-                    },
-                    buttonSize = 26.dp,
-                    size = 20.dp,
-                )
-                AppIconButton(
-                    icon = Icons.Default.Print,
-                    onClick = {
-                        onPrintClick(item, false)
-                    },
-                    buttonSize = 26.dp,
-                    size = 20.dp,
-                )
-                Spacer(Modifier.height(8.dp))
-                if (HP.userRights.deleteAnything == true) {
-                    DeleteIcon {
-                        onDeleteClick(item)
-                    }
+                ListHeading("User", Modifier.width(120.dp))
+                ListHeading("MOP", Modifier.width(50.dp))
+                ListHeading("Date", Modifier.weight(1f))
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                ListLabel(item.username.toString(),Modifier.width(120.dp))
+                ListLabel(item.mop.toString(), Modifier.width(50.dp))
+                ListLabel(item.date.toString(), Modifier.weight(1f))
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+        ListHorizontalDivider()
+        Spacer(Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Row(
+                modifier = Modifier
+                    .weight(1f),
+            ) {
+                ListHeading("Naration: ", color = primaryColor)
+                ListLabel(item.naration.toString(), color = secondaryColor)
+            }
+
+            if (HP.userRights.deleteAnything == true) {
+                DeleteIcon {
+                    onDeleteClick(item)
                 }
             }
         }

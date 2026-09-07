@@ -163,19 +163,19 @@ fun PurchaseBillItemsBody(
                     modifier = Modifier
                         .weight(1f)
                 ) {
-                    SearchBox(
-                        value = state.search,
-                        onValueChange = {
-                            purchaseItemsViewModel.onSearchChange(
-                                it,
-                                purchaseViewModel::updateTotal
-                            )
-                        },
-                        onSearchClick = {
-                            purchaseItemsViewModel.loadData(purchaseViewModel::updateTotal)
-                            keyboardController?.hide()
-                        },
-                    )
+//                    SearchBox(
+//                        value = state.search,
+//                        onValueChange = {
+//                            purchaseItemsViewModel.onSearchChange(
+//                                it,
+//                                purchaseViewModel::updateTotal
+//                            )
+//                        },
+//                        onSearchClick = {
+//                            purchaseItemsViewModel.loadData(purchaseViewModel::updateTotal)
+//                            keyboardController?.hide()
+//                        },
+//                    )
                     BodyList(
                         modifier = Modifier
                             .weight(1f)

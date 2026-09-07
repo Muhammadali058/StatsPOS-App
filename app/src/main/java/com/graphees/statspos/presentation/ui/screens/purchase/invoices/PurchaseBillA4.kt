@@ -1,8 +1,7 @@
-package com.graphees.statspos.presentation.ui.screens.sales.main_screen
+package com.graphees.statspos.presentation.ui.screens.purchase.invoices
 
 import android.content.Context
-import com.graphees.statspos.domain.models.reports.accounts.AccountReport
-import com.graphees.statspos.domain.models.sales.SalesBill
+import com.graphees.statspos.domain.models.purchase.PurchaseBill
 import com.graphees.statspos.presentation.ui.components.PageXofYEventHandler
 import com.graphees.statspos.presentation.ui.utils.REPORT_BODY_FONT_SIZE
 import com.graphees.statspos.presentation.ui.utils.REPORT_HEADER_FONT_SIZE
@@ -14,10 +13,8 @@ import com.itextpdf.io.font.constants.StandardFonts
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.events.PdfDocumentEvent
 import com.itextpdf.kernel.font.PdfFontFactory
-import com.itextpdf.kernel.pdf.CompressionConstants
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
-import com.itextpdf.kernel.pdf.WriterProperties
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.borders.SolidBorder
 import com.itextpdf.layout.element.Cell
@@ -29,16 +26,14 @@ import com.itextpdf.layout.properties.HorizontalAlignment
 import com.itextpdf.layout.properties.TextAlignment
 import com.itextpdf.layout.properties.UnitValue
 import java.io.File
-import java.io.FileOutputStream
 import kotlin.math.abs
 
-fun salesBillVoucher(
+fun purchaseBillA4(
     context: Context,
-    bill: List<SalesBill>,
-    ledger: List<AccountReport>?,
+    bill: List<PurchaseBill>,
 ): File {
     // region Document
-    val file = File(context.cacheDir, "Sales_Bill_${System.currentTimeMillis()}.pdf")
+    val file = File(context.cacheDir, "Purchase_Bill_${System.currentTimeMillis()}.pdf")
     if (file.exists()) {
         file.delete()
     }
@@ -57,9 +52,16 @@ fun salesBillVoucher(
     // region Header
     // ---------------- Top ----------------
     val shopTable =
-        Table(UnitValue.createPercentArray(if(HP.printSettings.showLogo == true) floatArrayOf(20f, 80f) else floatArrayOf(100f))).useAllAvailableWidth()
+        Table(
+            UnitValue.createPercentArray(
+                if (HP.printSettings.showLogo == true) floatArrayOf(
+                    20f,
+                    80f
+                ) else floatArrayOf(100f)
+            )
+        ).useAllAvailableWidth()
 
-    if(HP.printSettings.showLogo == true) {
+    if (HP.printSettings.showLogo == true) {
         val imageCell = getDefaultImageCell(
             imageUrl = HP.getImageUrl(HP.printSettings.imageUrl.toString()),
             horizontalAlignment = HorizontalAlignment.LEFT,
@@ -94,6 +96,13 @@ fun salesBillVoucher(
 
     document.add(shopTable)
 
+    document.add(
+        Paragraph("Purchase Invoice")
+            .setFont(boldFont)
+            .setFontSize(14f)
+            .setTextAlignment(TextAlignment.CENTER)
+    )
+
     // Horizontal Line
     document.add(
         Paragraph()
@@ -116,8 +125,8 @@ fun salesBillVoucher(
         Cell()
             .add(
                 Paragraph()
-                    .add(Text("Customer: ").setFont(boldFont))
-                    .add(Text(bill[0].customerName))
+                    .add(Text("Vendor: ").setFont(boldFont))
+                    .add(Text(bill[0].vendorName))
 //                    .setMarginTop(-5f)
             )
             .setFontSize(REPORT_HEADINGS_FONT_SIZE)
@@ -143,7 +152,7 @@ fun salesBillVoucher(
             .add(
                 Paragraph()
                     .add(Text("Contact: ").setFont(boldFont))
-                    .add(Text(bill[0].customerContact))
+                    .add(Text(bill[0].vendorContact))
 //                    .setMarginTop(-5f)
             )
             .setFontSize(REPORT_HEADINGS_FONT_SIZE)
@@ -169,7 +178,7 @@ fun salesBillVoucher(
             .add(
                 Paragraph()
                     .add(Text("Address: ").setFont(boldFont))
-                    .add(Text(bill[0].customerAddress))
+                    .add(Text(bill[0].vendorAddress))
 //                    .setMarginTop(-5f)
             )
             .setFontSize(REPORT_HEADINGS_FONT_SIZE)
@@ -209,7 +218,7 @@ fun salesBillVoucher(
     val columnWidths = if (HP.settings.saleCartons == true)
         floatArrayOf(0.5f, 3f, 0.7f, 0.7f, 0.8f, 0.8f, 1f)
     else
-        floatArrayOf(0.5f, 3f, 0.7f, 0.8f, 0.7f, 1f)
+        floatArrayOf(0.5f, 3f, 0.7f, 0.8f, 1f)
 
     val bodyTable = Table(UnitValue.createPercentArray(columnWidths), true)
     bodyTable.setWidth(UnitValue.createPercentValue(100f))
@@ -221,8 +230,8 @@ fun salesBillVoucher(
             "Itemname",
             "Qty",
             "Crtn",
-            "Rate",
-            "C.Rate",
+            "Cost",
+            "C.Cost",
             "Total",
         )
     else
@@ -230,8 +239,7 @@ fun salesBillVoucher(
             "Sr.",
             "Itemname",
             "Qty",
-            "Rate",
-            "Disc",
+            "Cost",
             "Total",
         )
 
@@ -264,7 +272,7 @@ fun salesBillVoucher(
                 .setBorder(null)
         )
 
-        if (HP.printSettings.showUrdu == true && item.urduname!!.isNotEmpty()) {
+        if (HP.printSettings.showUrdu == true) {
             val image = urduTextToPdfImage(context, item.urduname.toString())
             image.setHorizontalAlignment(HorizontalAlignment.RIGHT)
 
@@ -294,28 +302,13 @@ fun salesBillVoucher(
         }
 
         bodyTable.addCell(
-            Cell().add(Paragraph(if(item.qty!! == 0.0) "0" else HP.formatDecimal(item.rate)).setFontSize(REPORT_BODY_FONT_SIZE))
+            Cell().add(Paragraph(HP.formatDecimal(item.cost)).setFontSize(REPORT_BODY_FONT_SIZE))
                 .setTextAlignment(TextAlignment.CENTER)
         )
 
         if (HP.settings.saleCartons == true) {
             bodyTable.addCell(
-                Cell().add(
-                    Paragraph(if(item.crtn!! == 0) "0" else HP.formatDecimal(item.crtnRate)).setFontSize(
-                        REPORT_BODY_FONT_SIZE
-                    )
-                )
-                    .setTextAlignment(TextAlignment.CENTER)
-            )
-        }
-
-        if (HP.settings.saleCartons == false) {
-            bodyTable.addCell(
-                Cell().add(
-                    Paragraph(HP.formatDecimal(item.totalDisc)).setFontSize(
-                        REPORT_BODY_FONT_SIZE
-                    )
-                )
+                Cell().add(Paragraph(HP.formatDecimal(item.costCrtn)).setFontSize(REPORT_BODY_FONT_SIZE))
                     .setTextAlignment(TextAlignment.CENTER)
             )
         }
@@ -431,8 +424,8 @@ fun salesBillVoucher(
                             .setWidth(UnitValue.createPointValue(100f))
                             .setBorderBottom(
                                 SolidBorder(
-                                    if (bill[0].salesOn == "Credit") ColorConstants.WHITE else ColorConstants.BLACK,
-                                    if (bill[0].salesOn == "Credit") 0f else 1f
+                                    if (bill[0].purchaseOn == "Credit") ColorConstants.WHITE else ColorConstants.BLACK,
+                                    if (bill[0].purchaseOn == "Credit") 0f else 1f
                                 )
                             )
                             .add(
@@ -447,7 +440,7 @@ fun salesBillVoucher(
             .setTextAlignment(TextAlignment.RIGHT)
     )
 
-    if (bill[0].salesOn == "Credit") {
+    if (bill[0].purchaseOn == "Credit") {
         footerTable.addCell(
             Cell()
                 .add(
@@ -493,68 +486,6 @@ fun salesBillVoucher(
             Cell()
                 .add(
                     Paragraph()
-                        .add(Text("Total: ").setFont(boldFont))
-                        .add(
-                            Div()
-                                .setWidth(UnitValue.createPointValue(100f))
-//                            .setBorderBottom(SolidBorder(ColorConstants.BLACK, 1f))
-                                .add(
-                                    Paragraph(HP.formatDecimal(abs(bill[0].grandTotal!! + bill[0].oldBalance!!)))
-                                        .setTextAlignment(TextAlignment.RIGHT)
-                                )
-                        )
-                        .setMarginTop(-5f)
-                )
-                .setFontSize(REPORT_HEADINGS_FONT_SIZE)
-                .setBorder(null)
-                .setTextAlignment(TextAlignment.RIGHT)
-        )
-
-        footerTable.addCell(
-            Cell()
-                .add(
-                    Paragraph()
-                )
-                .setFontSize(REPORT_HEADINGS_FONT_SIZE)
-                .setBorder(null)
-                .setTextAlignment(TextAlignment.LEFT)
-        )
-
-        footerTable.addCell(
-            Cell()
-                .add(
-                    Paragraph()
-                        .add(Text("Payment: ").setFont(boldFont))
-                        .add(
-                            Div()
-                                .setWidth(UnitValue.createPointValue(100f))
-                                .setBorderBottom(SolidBorder(ColorConstants.BLACK, 1f))
-                                .add(
-                                    Paragraph(bill[0].payment.toString())
-                                        .setTextAlignment(TextAlignment.RIGHT)
-                                )
-                        )
-                        .setMarginTop(-5f)
-                )
-                .setFontSize(REPORT_HEADINGS_FONT_SIZE)
-                .setBorder(null)
-                .setTextAlignment(TextAlignment.RIGHT)
-        )
-
-        footerTable.addCell(
-            Cell()
-                .add(
-                    Paragraph()
-                )
-                .setFontSize(REPORT_HEADINGS_FONT_SIZE)
-                .setBorder(null)
-                .setTextAlignment(TextAlignment.LEFT)
-        )
-
-        footerTable.addCell(
-            Cell()
-                .add(
-                    Paragraph()
                         .add(Text("New Balance: ").setFont(boldFont))
                         .add(
                             Div()
@@ -573,95 +504,7 @@ fun salesBillVoucher(
         )
     }
 
-
-
-
-
-
     document.add(footerTable)
-    // endregion
-
-    // region Ledger
-    if (HP.settings.showLedgerInBill == true) {
-        document.add(Paragraph("\n"))
-
-        document.add(
-            Paragraph("Last Five Entries")
-                .setFont(boldFont)
-                .setFontSize(12f)
-                .setTextAlignment(TextAlignment.CENTER)
-        )
-
-        // ---------------- Table ----------------
-        val columnWidths = floatArrayOf(0.7f, 3f, 1f, 1f, 1f)
-
-        val bodyTable = Table(UnitValue.createPercentArray(columnWidths), true)
-        bodyTable.setWidth(UnitValue.createPercentValue(100f))
-        document.add(bodyTable)
-
-        val headers = listOf(
-            "Date",
-            "Details",
-            "Debit",
-            "Credit",
-            "Balance",
-        )
-
-        headers.forEachIndexed { index, item ->
-            val cell = Cell().add(
-                Paragraph(item)
-                    .setFont(boldFont)
-                    .setFontSize(REPORT_HEADER_FONT_SIZE)
-            )
-
-            cell.setTextAlignment(TextAlignment.CENTER)
-            bodyTable.addHeaderCell(cell)
-        }
-
-        var counter = 0
-
-        ledger?.forEach { item ->
-            bodyTable.addCell(
-                Cell().add(Paragraph(item.date.toString()).setFontSize(REPORT_BODY_FONT_SIZE))
-                    .setTextAlignment(TextAlignment.CENTER)
-            )
-
-            bodyTable.addCell(
-                Cell().add(Paragraph(item.naration.toString()).setFontSize(REPORT_BODY_FONT_SIZE))
-                    .setTextAlignment(TextAlignment.LEFT)
-            )
-
-            bodyTable.addCell(
-                Cell().add(Paragraph(HP.formatDecimal(item.debit)).setFontSize(REPORT_BODY_FONT_SIZE))
-                    .setTextAlignment(TextAlignment.CENTER)
-            )
-
-            bodyTable.addCell(
-                Cell().add(
-                    Paragraph(HP.formatDecimal(item.credit)).setFontSize(
-                        REPORT_BODY_FONT_SIZE
-                    )
-                )
-                    .setTextAlignment(TextAlignment.CENTER)
-            )
-
-            bodyTable.addCell(
-                Cell().add(
-                    Paragraph(HP.formatDecimal(abs(item.balance!!))).setFontSize(
-                        REPORT_BODY_FONT_SIZE
-                    )
-                )
-                    .setTextAlignment(TextAlignment.CENTER)
-            )
-
-            counter++
-            if (counter % 100 == 0) {
-                bodyTable.flush()
-            }
-        }
-
-        bodyTable.complete()
-    }
     // endregion
 
     pageHandler.writeTotal(pdf)

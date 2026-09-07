@@ -166,16 +166,16 @@ fun SalesBillItemsBody(
                     modifier = Modifier
                         .weight(1f)
                 ) {
-                    SearchBox(
-                        value = state.search,
-                        onValueChange = {
-                            salesItemsViewModel.onSearchChange(it, salesViewModel::updateTotal)
-                        },
-                        onSearchClick = {
-                            salesItemsViewModel.loadData(salesViewModel::updateTotal)
-                            keyboardController?.hide()
-                        },
-                    )
+//                    SearchBox(
+//                        value = state.search,
+//                        onValueChange = {
+//                            salesItemsViewModel.onSearchChange(it, salesViewModel::updateTotal)
+//                        },
+//                        onSearchClick = {
+//                            salesItemsViewModel.loadData(salesViewModel::updateTotal)
+//                            keyboardController?.hide()
+//                        },
+//                    )
                     BodyList(
                         modifier = Modifier
                             .weight(1f)

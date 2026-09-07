@@ -71,6 +71,7 @@ class AddUpdatePurchaseViewModel @Inject constructor(
         val purchaseBill: PurchaseBills? = null,
 
         var print: Boolean = HP.appSettings.defaultPrintOn == true,
+        val isNewBill: Boolean = false,
         val hasLoadedOnce: Boolean = false,
 
         val isLoading: Boolean = false,
@@ -363,8 +364,10 @@ class AddUpdatePurchaseViewModel @Inject constructor(
                         }
 
                         // Auto Credit Select
-                        if (account.isCredit!!) {
-                            state.update { it.copy(purchaseOn = HP.purchaseOn[1]) }
+                        if (account.isCredit!! && HP.userRights.creditBill!!) {
+                            if(state.value.isNewBill) {
+                                state.update { it.copy(purchaseOn = HP.purchaseOn[1]) }
+                            }
                         }
 
                         if(HP.getDoubleValue(account.disc.toString()) > 0.0){
@@ -537,6 +540,7 @@ class AddUpdatePurchaseViewModel @Inject constructor(
                 isPendingBill = isPendingBill,
                 isPostedBill = isPostedBill,
                 purchaseBill = purchaseBill,
+                isNewBill = purchaseBill == null,
             )
         }
 

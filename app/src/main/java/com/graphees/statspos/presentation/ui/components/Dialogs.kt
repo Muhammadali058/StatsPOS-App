@@ -330,6 +330,14 @@ fun PasswordDialog(
                         }
                     }
 
+                    PasswordFor.RETURN_SALES_BILL -> {
+                        if (value == HP.passwords.returnSalesBill.toString()) {
+                            onConfirm()
+                        } else {
+                            isWrongPassword = true
+                        }
+                    }
+
                     PasswordFor.PRINT_DUPLICATES -> {
                         if (value == HP.adminPasswords.printDuplicates.toString()) {
                             onConfirm()

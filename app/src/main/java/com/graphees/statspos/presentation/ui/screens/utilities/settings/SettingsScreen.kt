@@ -289,6 +289,7 @@ private fun Home(
                         deleteSalesBill = state.deleteSalesBill,
                         deletePurchaseBill = state.deletePurchaseBill,
                         deleteEntry = state.deleteEntry,
+                        returnSalesBill = state.returnSalesBill,
                         onDeleteItemChange = viewModel::onDeleteItemChange,
                         onDeleteAccountChange = viewModel::onDeleteAccountChange,
                         onEditSalesBillChange = viewModel::onEditSalesBillChange,
@@ -296,6 +297,7 @@ private fun Home(
                         onDeleteSalesBillChange = viewModel::onDeleteSalesBillChange,
                         onDeletePurchaseBillChange = viewModel::onDeletePurchaseBillChange,
                         onDeleteEntryChange = viewModel::onDeleteEntryChange,
+                        onReturnSalesBillChange = viewModel::onReturnSalesBillChange,
                         useDeleteItem = state.useDeleteItem,
                         useDeleteAccount = state.useDeleteAccount,
                         useEditSalesBill = state.useEditSalesBill,
@@ -303,6 +305,7 @@ private fun Home(
                         useDeleteSalesBill = state.useDeleteSalesBill,
                         useDeletePurchaseBill = state.useDeletePurchaseBill,
                         useDeleteEntry = state.useDeleteEntry,
+                        useReturnSalesBill = state.useReturnSalesBill,
                         onUseDeleteItemChange = viewModel::onUseDeleteItemChange,
                         onUseDeleteAccountChange = viewModel::onUseDeleteAccountChange,
                         onUseEditSalesBillChange = viewModel::onUseEditSalesBillChange,
@@ -310,6 +313,7 @@ private fun Home(
                         onUseDeleteSalesBillChange = viewModel::onUseDeleteSalesBillChange,
                         onUseDeletePurchaseBillChange = viewModel::onUseDeletePurchaseBillChange,
                         onUseDeleteEntryChange = viewModel::onUseDeleteEntryChange,
+                        onUseReturnSalesBillChange = viewModel::onUseReturnSalesBillChange,
                     )
 
                     Spacer(Modifier.height(12.dp))
@@ -670,6 +674,7 @@ private fun Passwords(
     deleteSalesBill: String,
     deletePurchaseBill: String,
     deleteEntry: String,
+    returnSalesBill: String,
     onDeleteItemChange: (String) -> Unit,
     onDeleteAccountChange: (String) -> Unit,
     onEditSalesBillChange: (String) -> Unit,
@@ -677,6 +682,7 @@ private fun Passwords(
     onDeleteSalesBillChange: (String) -> Unit,
     onDeletePurchaseBillChange: (String) -> Unit,
     onDeleteEntryChange: (String) -> Unit,
+    onReturnSalesBillChange: (String) -> Unit,
     useDeleteItem: Boolean,
     useDeleteAccount: Boolean,
     useEditSalesBill: Boolean,
@@ -684,6 +690,7 @@ private fun Passwords(
     useDeleteSalesBill: Boolean,
     useDeletePurchaseBill: Boolean,
     useDeleteEntry: Boolean,
+    useReturnSalesBill: Boolean,
     onUseDeleteItemChange: (Boolean) -> Unit,
     onUseDeleteAccountChange: (Boolean) -> Unit,
     onUseEditSalesBillChange: (Boolean) -> Unit,
@@ -691,6 +698,7 @@ private fun Passwords(
     onUseDeleteSalesBillChange: (Boolean) -> Unit,
     onUseDeletePurchaseBillChange: (Boolean) -> Unit,
     onUseDeleteEntryChange: (Boolean) -> Unit,
+    onUseReturnSalesBillChange: (Boolean) -> Unit,
 ) {
     ExpandableSection(
         title = "Passwords",
@@ -843,6 +851,27 @@ private fun Passwords(
                 label = "Use"
             )
         }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            PasswordTextbox(
+                value = returnSalesBill,
+                onValueChange = onReturnSalesBillChange,
+                modifier = Modifier
+                    .weight(1f),
+                label = {
+                    Text("Return Sales Bill")
+                }
+            )
+            Spacer(Modifier.width(8.dp))
+            AppSwitch(
+                checked = useReturnSalesBill,
+                onCheckedChange = onUseReturnSalesBillChange,
+                label = "Use"
+            )
+        }
     }
 }
 
@@ -932,6 +961,8 @@ private fun BodyPrev() {
                 "",
                 "",
                 "",
+                "",
+                {},
                 {},
                 {},
                 {},
@@ -946,6 +977,8 @@ private fun BodyPrev() {
                 false,
                 false,
                 false,
+                false,
+                {},
                 {},
                 {},
                 {},

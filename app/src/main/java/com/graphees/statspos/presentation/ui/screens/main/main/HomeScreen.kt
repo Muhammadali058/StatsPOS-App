@@ -1,7 +1,6 @@
 package com.graphees.statspos.presentation.ui.screens.main.main
 
 import android.app.Activity
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.DrawableRes
@@ -714,7 +713,7 @@ private fun HomeBody(
         }
 
         item {
-            Title(
+            HomeTitle(
                 "Inventory & Operations",
                 subTitle = "Manage orders, users and settings",
                 icon = R.drawable.inventory,
@@ -766,7 +765,7 @@ private fun HomeBody(
         }
 
         item {
-            Title(
+            HomeTitle(
                 "Create Accounts",
                 subTitle = "Manage your financial accounts",
                 icon = R.drawable.accounts,
@@ -818,7 +817,7 @@ private fun HomeBody(
         }
 
         item {
-            Title(
+            HomeTitle(
                 "Transactions",
                 subTitle = "Record and manage your business transactions",
                 icon = R.drawable.transactions,
@@ -864,7 +863,7 @@ private fun HomeBody(
         }
 
         item {
-            Title(
+            HomeTitle(
                 "Warehouse",
                 subTitle = "Manage stock in different warehouses",
                 icon = R.drawable.warehouse,
@@ -904,7 +903,7 @@ private fun HomeBody(
 }
 
 @Composable
-private fun Title(
+fun HomeTitle(
     title: String,
     subTitle: String = "",
     @DrawableRes icon: Int? = null,
@@ -965,7 +964,7 @@ private fun Title(
 }
 
 @Composable
-private fun HomeGrid(
+fun HomeGrid(
     items: List<TopItem>,
     onClick: (TopRoutes) -> Unit
 ) {
@@ -978,7 +977,6 @@ private fun HomeGrid(
     ) {
         val filteredItems = items.filter { it.access }
         items(filteredItems) { item ->
-            Log.d("TAG", "${item.text} = ${item.access}")
             Card(
                 modifier = Modifier
                     .width(100.dp)

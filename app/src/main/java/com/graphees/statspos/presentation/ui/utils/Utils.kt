@@ -41,6 +41,7 @@ object ConstantPaddings {
 
     val LIST_PADDING_VERTICAL = 8.dp
     val DEFAULT_RADIUS = 10.dp
+    val DEFAULT_TEXTBOX_RADIUS = 4.dp
 }
 
 object ConstantSize {

@@ -42,6 +42,7 @@ import com.graphees.statspos.presentation.ui.components.Dropdown
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ExpandableSection
 import com.graphees.statspos.presentation.ui.components.MOPSection
+import com.graphees.statspos.presentation.ui.components.PasswordDialog
 import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
@@ -51,6 +52,7 @@ import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.sales.sales_bill.AddUpdateSalesViewModel
 import com.graphees.statspos.presentation.viewmodels.sales.sales_bill.SalesItemsViewModel
 import com.graphees.statspos.utils.HP
+import com.graphees.statspos.utils.PasswordFor
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
 import java.time.LocalDate
@@ -67,6 +69,7 @@ fun SalesBillBody(
     val state by salesViewModel.state.collectAsStateWithLifecycle()
     val event by salesViewModel.event.collectAsState(UiEvent.Idle)
     var showErrorDialog by remember { mutableStateOf(false) }
+    var showReturnBillPasswordDialog by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
     LaunchedEffect(event) {
@@ -89,6 +92,23 @@ fun SalesBillBody(
         )
     }
 
+    if (showReturnBillPasswordDialog) {
+        if(state.salesType.id == 2L) {
+            PasswordDialog(
+                passwordFor = PasswordFor.RETURN_SALES_BILL,
+                onDismiss = {
+                    showReturnBillPasswordDialog = false
+                    salesViewModel.onSalesTypeChange(HP.salesType[0])
+                },
+                onConfirm = {
+                    showReturnBillPasswordDialog = false
+                }
+            )
+        }else{
+            showReturnBillPasswordDialog = false
+        }
+    }
+
     Box(
         Modifier
             .fillMaxSize()
@@ -103,8 +123,7 @@ fun SalesBillBody(
             Column(
                 Modifier
                     .weight(1f)
-                    .verticalScroll(scrollState)
-                ,
+                    .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Basic(
@@ -127,7 +146,13 @@ fun SalesBillBody(
                     onDiscChange = salesViewModel::onDiscChange,
                     onIsDiscRsPerChange = salesViewModel::onIsDiscRsPerChange,
                     onSalesOnChange = salesViewModel::onSalesOnChange,
-                    onSalesTypeChange = salesViewModel::onSalesTypeChange,
+                    onSalesTypeChange = { salesType ->
+                        salesViewModel.onSalesTypeChange(salesType)
+
+                        if (HP.passwords.useReturnSalesBill == true) {
+                            showReturnBillPasswordDialog = true
+                        }
+                    },
                     onDateChange = salesViewModel::onDateChange,
                     onDueDateChange = salesViewModel::onDueDateChange,
                 )

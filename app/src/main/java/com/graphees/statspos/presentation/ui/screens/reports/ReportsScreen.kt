@@ -63,6 +63,7 @@ import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.components.ShowReportIcon
 import com.graphees.statspos.presentation.ui.components.TopItem
 import com.graphees.statspos.presentation.ui.screens.TopRoutes
+import com.graphees.statspos.presentation.ui.screens.main.main.HomeGrid
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.reports.ReportsViewModel
@@ -158,7 +159,7 @@ fun ReportsScreen(
                 .padding(ConstantPaddings.BODY_HORIZONTAL),
         ) {
             Spacer(Modifier.height(8.dp))
-            ReportsGrid(reports, onTopRouteClick)
+            HomeGrid (reports, onTopRouteClick)
             Spacer(Modifier.height(8.dp))
 
             Column(
@@ -403,6 +404,7 @@ fun TodaySales(
         modifier = modifier,
         heading = "Sales",
         subHeading = "Summary of sales",
+        icon = R.drawable.sales_report,
     ) {
         Row(
             modifier = Modifier
@@ -460,6 +462,7 @@ fun TodayPurchase(
         modifier = modifier,
         heading = "Purchase",
         subHeading = "Summary of purchase",
+        icon = R.drawable.purchase_report,
     ) {
         Row(
             modifier = Modifier
@@ -516,6 +519,7 @@ fun TodayProfit(
         modifier = modifier,
         heading = "Profit",
         subHeading = "Summary of profit",
+        icon = R.drawable.profit_report,
     ) {
         Row(
             modifier = Modifier
@@ -565,6 +569,7 @@ fun TodayStock(
         modifier = modifier,
         heading = "Stock",
         subHeading = "Value of current stock",
+        icon = R.drawable.stock_report,
     ) {
         Row(
             modifier = Modifier
@@ -609,6 +614,7 @@ private fun TodayAccounts(
         modifier = modifier,
         heading = "Accounts",
         subHeading = "Summary of daily accounts",
+        icon = R.drawable.accounts_report,
     ) {
         Row(
             modifier = Modifier
@@ -659,6 +665,7 @@ private fun TodayCashAccount(
         modifier = modifier,
         heading = "Cash Account",
         subHeading = "Summary of daily cash",
+        icon = R.drawable.reports,
     ) {
         Row(
             modifier = Modifier
@@ -730,60 +737,6 @@ fun TodayBox(
         )
     }
 }
-
-@Composable
-private fun ReportsGrid1(
-    items: List<TopItem>,
-    onClick: (TopRoutes) -> Unit
-) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(max = 400.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        val filteredItems = items.filter { it.access }
-        items(filteredItems) { item ->
-            Card(
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(112.dp)
-                    .padding(vertical = 6.dp),
-                onClick = { onClick(item.screen) },
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = 2.dp
-                ),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                ),
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.SpaceEvenly,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    item.icon?.run {
-                        AppIcon(
-                            icon = item.icon,
-                            size = 30.dp,
-                        )
-                    }
-//                    Spacer(Modifier.height(4.dp))
-                    AppText(
-                        text = item.text,
-                        style = TextStyle(
-                            textAlign = TextAlign.Center,
-                        )
-                    )
-                }
-            }
-        }
-    }
-}
-
 
 @Composable
 private fun ReportsGrid(

@@ -9,6 +9,7 @@ data class Passwords(
     var deleteSalesBill: String? = null,
     var deletePurchaseBill: String? = null,
     var deleteEntry: String? = null,
+    var returnSalesBill: String? = null,
 
     var useDeleteItem: Boolean? = null,
     var useDeleteAccount: Boolean? = null,
@@ -17,6 +18,7 @@ data class Passwords(
     var useDeleteSalesBill: Boolean? = null,
     var useDeletePurchaseBill: Boolean? = null,
     var useDeleteEntry: Boolean? = null,
+    var useReturnSalesBill: Boolean? = null,
 
     val clientId:Int? = null,
     val branchId:Int? = null,

@@ -83,6 +83,7 @@ import com.graphees.statspos.R
 import com.graphees.statspos.domain.models.DropdownItem
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings.DEFAULT_RADIUS
+import com.graphees.statspos.presentation.ui.utils.ConstantPaddings.DEFAULT_TEXTBOX_RADIUS
 import com.graphees.statspos.presentation.ui.utils.ConstantSize
 import com.graphees.statspos.utils.HP
 import java.time.LocalDate
@@ -96,7 +97,7 @@ fun TextboxBasic(
         PlaceHolder("Search")
     },
     height: Dp = ConstantSize.DEFAULT_TEXTBOX_HEIGHT,
-    shape: Shape = RoundedCornerShape(DEFAULT_RADIUS),
+    shape: Shape = RoundedCornerShape(DEFAULT_TEXTBOX_RADIUS),
     textStyle: TextStyle = TextStyle(fontSize = 15.sp),
     enabled: Boolean = true,
     readOnly: Boolean = false,

@@ -47,6 +47,7 @@ enum class PasswordFor {
     DELETE_SALES_BILL,
     DELETE_PURCHASE_BILL,
     DELETE_ENTRY,
+    RETURN_SALES_BILL,
     PRINT_DUPLICATES,
     AUDIT,
 }

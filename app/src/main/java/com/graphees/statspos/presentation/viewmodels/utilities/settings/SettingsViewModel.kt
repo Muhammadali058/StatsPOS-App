@@ -70,6 +70,7 @@ class SettingsViewModel @Inject constructor(
         val deleteSalesBill: String = "",
         val deletePurchaseBill: String = "",
         val deleteEntry: String = "",
+        val returnSalesBill: String = "",
 
         val useDeleteItem: Boolean = false,
         val useDeleteAccount: Boolean = false,
@@ -78,6 +79,7 @@ class SettingsViewModel @Inject constructor(
         val useDeleteSalesBill: Boolean = false,
         val useDeletePurchaseBill: Boolean = false,
         val useDeleteEntry: Boolean = false,
+        val useReturnSalesBill: Boolean = false,
 
         // Extras
         val hasLoadedOnce: Boolean = false,
@@ -318,6 +320,10 @@ class SettingsViewModel @Inject constructor(
         state.update { it.copy(deleteEntry = value) }
     }
 
+    fun onReturnSalesBillChange(value: String) {
+        state.update { it.copy(deleteEntry = value) }
+    }
+
     fun onUseDeleteItemChange(value: Boolean) {
         state.update { it.copy(useDeleteItem = value) }
     }
@@ -344,6 +350,10 @@ class SettingsViewModel @Inject constructor(
 
     fun onUseDeleteEntryChange(value: Boolean) {
         state.update { it.copy(useDeleteEntry = value) }
+    }
+
+    fun onUseReturnSalesBillChange(value: Boolean) {
+        state.update { it.copy(useReturnSalesBill = value) }
     }
 
     fun setHasLoadedOnce(value: Boolean) {
@@ -436,6 +446,7 @@ class SettingsViewModel @Inject constructor(
             deleteSalesBill = state.value.deleteSalesBill,
             deletePurchaseBill = state.value.deletePurchaseBill,
             deleteEntry = state.value.deleteEntry,
+            returnSalesBill = state.value.returnSalesBill,
 
             useDeleteItem = state.value.useDeleteItem,
             useDeleteAccount = state.value.useDeleteAccount,
@@ -444,6 +455,7 @@ class SettingsViewModel @Inject constructor(
             useDeleteSalesBill = state.value.useDeleteSalesBill,
             useDeletePurchaseBill = state.value.useDeletePurchaseBill,
             useDeleteEntry = state.value.useDeleteEntry,
+            useReturnSalesBill = state.value.useReturnSalesBill,
         )
     }
 
@@ -497,6 +509,7 @@ class SettingsViewModel @Inject constructor(
                 deleteSalesBill = password.deleteSalesBill.toString(),
                 deletePurchaseBill = password.deletePurchaseBill.toString(),
                 deleteEntry = password.deleteEntry.toString(),
+                returnSalesBill = password.returnSalesBill.toString(),
 
                 useDeleteItem = password.useDeleteItem!!,
                 useDeleteAccount = password.useDeleteAccount!!,
@@ -505,6 +518,7 @@ class SettingsViewModel @Inject constructor(
                 useDeleteSalesBill = password.useDeleteSalesBill!!,
                 useDeletePurchaseBill = password.useDeletePurchaseBill!!,
                 useDeleteEntry = password.useDeleteEntry!!,
+                useReturnSalesBill = password.useReturnSalesBill!!,
             )
         }
     }

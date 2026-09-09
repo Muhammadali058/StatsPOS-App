@@ -4,10 +4,12 @@ import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -70,6 +72,7 @@ import com.graphees.statspos.presentation.viewmodels.main.MainViewModel
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
 
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun MainScreen(
     onLogout: () -> Unit,
@@ -81,6 +84,17 @@ fun MainScreen(
         rememberLauncherForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { isGranted -> }
+
+    val bluetoothPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+            val connectGranted =
+                permissions[Manifest.permission.BLUETOOTH_CONNECT] == true
+
+            val scanGranted =
+                permissions[Manifest.permission.BLUETOOTH_SCAN] == true
+        }
 
     LaunchedEffect(Unit) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -94,6 +108,29 @@ fun MainScreen(
                     Manifest.permission.POST_NOTIFICATIONS
                 )
             }
+        }
+
+        // Bluetooth permissions
+        val connectGranted =
+            ContextCompat.checkSelfPermission(
+                activity,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) == PackageManager.PERMISSION_GRANTED
+
+        val scanGranted =
+            ContextCompat.checkSelfPermission(
+                activity,
+                Manifest.permission.BLUETOOTH_SCAN
+            ) == PackageManager.PERMISSION_GRANTED
+
+        if (!connectGranted || !scanGranted) {
+
+            bluetoothPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.BLUETOOTH_SCAN
+                )
+            )
         }
     }
     // endregion

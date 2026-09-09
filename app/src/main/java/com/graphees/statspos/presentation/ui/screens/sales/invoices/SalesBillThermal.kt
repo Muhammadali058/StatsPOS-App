@@ -11,6 +11,7 @@ import com.itextpdf.io.font.constants.StandardFonts
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.font.PdfFontFactory
 import com.itextpdf.kernel.geom.PageSize
+import com.itextpdf.kernel.geom.Rectangle
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
@@ -44,10 +45,10 @@ fun salesBillThermal(
     val writer = PdfWriter(file)
     val pdf = PdfDocument(writer)
     val pageWidth = 226.77f
-    val pageHeight = 3200f
+    val pageHeight = 260f + (30f * bill.size)
     val pageSize = PageSize(pageWidth, pageHeight)
     val document = Document(pdf, pageSize)
-    document.setMargins(3f, 3f, 3f, 3f)
+    document.setMargins(0f, 2f, 2f, 2f)
 
     // endregion
 

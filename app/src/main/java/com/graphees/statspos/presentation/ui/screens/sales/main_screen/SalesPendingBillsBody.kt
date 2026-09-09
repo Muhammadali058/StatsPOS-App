@@ -1,5 +1,9 @@
 package com.graphees.statspos.presentation.ui.screens.sales.main_screen
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.util.Log
+import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +26,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +35,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.domain.models.reports.accounts.AccountReport
@@ -51,10 +57,11 @@ import com.graphees.statspos.presentation.ui.components.PrintIcon
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.components.UpgradeToPremiumBottomSheet
-import com.graphees.statspos.presentation.ui.screens.sales.invoices.salesBillA4
 import com.graphees.statspos.presentation.ui.screens.sales.invoices.salesBillThermal
+import com.graphees.statspos.presentation.ui.utils.BluetoothPrinterManager
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.ui.utils.openPdf
+import com.graphees.statspos.presentation.ui.utils.printPdf
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.sales.main_screen.SalesPendingBillsViewModel
 import com.graphees.statspos.utils.HP
@@ -63,6 +70,7 @@ import com.graphees.statspos.utils.SocketManager
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
 import com.graphees.statspos.utils.showToast
+import kotlinx.coroutines.launch
 
 @Composable
 fun SalesPendingBillsBody(
@@ -82,6 +90,7 @@ fun SalesPendingBillsBody(
     var bill by remember { mutableStateOf<SalesBills?>(null) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showUpgradeToPremiumSheet by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(event) {
         checkEvent(
@@ -92,6 +101,46 @@ fun SalesPendingBillsBody(
                 showErrorDialog = true
             }
         )
+
+//        val printerManager = BluetoothPrinterManager()
+//
+//        val printers =
+//            printerManager.getPairedPrinters()
+//
+//        val printer = printers.firstOrNull()
+//        if (printer != null) {
+//            if (ActivityCompat.checkSelfPermission(
+//                    context,
+//                    Manifest.permission.BLUETOOTH_CONNECT
+//                ) != PackageManager.PERMISSION_GRANTED
+//            ) {
+//                // TODO: Consider calling
+//                //    ActivityCompat#requestPermissions
+//                // here to request the missing permissions, and then overriding
+//                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//                //                                          int[] grantResults)
+//                // to handle the case where the user grants the permission. See the documentation
+//                // for ActivityCompat#requestPermissions for more details.
+//                return@LaunchedEffect
+//            }
+//
+//            Log.d(
+//                "TAG PRINTER",
+//                "Name = ${printer.name}, Address = ${printer.address}"
+//            )
+//
+//            val receiptPrinter =
+//                ReceiptPrinter(printerManager)
+//
+//            val success =
+//                receiptPrinter.printTest(printer)
+//
+//            if (success) {
+//                Log.d("TAG PRINTER Success", "Printed successfully")
+//            } else {
+//                Log.e("TAG PRINTER Error", "Printing failed")
+//            }
+//        }
     }
 
     val sharedViewModelState by sharedViewModel.state.collectAsStateWithLifecycle()
@@ -110,6 +159,7 @@ fun SalesPendingBillsBody(
         }
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun showBill(
         bill: List<SalesBill>,
         ledger: List<AccountReport>?,
@@ -119,6 +169,39 @@ fun SalesPendingBillsBody(
             bill = bill,
             ledger = ledger,
         )
+
+        val printerManager = BluetoothPrinterManager()
+        val printer = printerManager.getPairedPrinters().firstOrNull()
+
+        if (printer != null) {
+            if (ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.BLUETOOTH_CONNECT
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                return
+            }
+
+            scope.launch {
+                val success = printPdf(
+                    context = context,
+                    pdfFile = file,
+                    printer = printer
+                )
+
+                if (success) {
+                    Log.d(
+                        "TAG PDF_PRINTER",
+                        "PDF printed successfully"
+                    )
+                } else {
+                    Log.e(
+                        "TAG PDF_PRINTER",
+                        "PDF printing failed"
+                    )
+                }
+            }
+        }
 
         openPdf(context, file)
     }

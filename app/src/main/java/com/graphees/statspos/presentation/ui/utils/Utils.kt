@@ -59,6 +59,121 @@ const val REPORT_BODY_FONT_SIZE = 10f
 // endregion
 
 fun pdfToBitmap(file: File): Bitmap {
+
+    val fd = ParcelFileDescriptor.open(
+        file,
+        ParcelFileDescriptor.MODE_READ_ONLY
+    )
+
+    val renderer = PdfRenderer(fd)
+    val page = renderer.openPage(0)
+
+    // 3x resolution
+    val scale = 3
+
+    val bitmap = Bitmap.createBitmap(
+        page.width * scale,
+        page.height * scale,
+        Bitmap.Config.ARGB_8888
+    )
+
+    // White background
+    bitmap.eraseColor(Color.WHITE)
+
+    // Render PDF
+    page.render(
+        bitmap,
+        null,
+        null,
+        PdfRenderer.Page.RENDER_MODE_FOR_PRINT
+    )
+
+    page.close()
+    renderer.close()
+    fd.close()
+
+
+    // ============================================================
+    // Crop bottom white area
+    // ============================================================
+
+    val width = bitmap.width
+    val height = bitmap.height
+
+    var lastContentRow = -1
+
+    // Scan from bottom to top
+    for (y in height - 1 downTo 0) {
+
+        var hasContent = false
+
+        for (x in 0 until width) {
+
+            val pixel = bitmap.getPixel(x, y)
+
+            val red = Color.red(pixel)
+            val green = Color.green(pixel)
+            val blue = Color.blue(pixel)
+
+            /*
+             * Anything darker than almost-white is considered
+             * receipt content.
+             */
+            if (
+                red < 245 ||
+                green < 245 ||
+                blue < 245
+            ) {
+                hasContent = true
+                break
+            }
+        }
+
+        if (hasContent) {
+            lastContentRow = y
+            break
+        }
+    }
+
+
+    // If no content was found, return original bitmap
+    if (lastContentRow == -1) {
+        return bitmap
+    }
+
+
+    // ============================================================
+    // Bottom padding
+    // ============================================================
+
+    val bottomPadding = 8
+
+    val croppedHeight =
+        (lastContentRow + 1 + bottomPadding)
+            .coerceAtMost(height)
+
+
+    // ============================================================
+    // Create cropped bitmap
+    // ============================================================
+
+    val croppedBitmap = Bitmap.createBitmap(
+        bitmap,
+        0,
+        0,
+        width,
+        croppedHeight
+    )
+
+    // Release original bitmap
+    if (!bitmap.isRecycled) {
+        bitmap.recycle()
+    }
+
+    return croppedBitmap
+}
+
+fun pdfToBitmap1(file: File): Bitmap {
     val fd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
     val renderer = PdfRenderer(fd)
     val page = renderer.openPage(0)
@@ -117,6 +232,33 @@ fun openPdf(context: Context, file: File) {
 //    Handler(Looper.getMainLooper()).postDelayed({
 //        file.delete()
 //    }, 10_000)
+    file.deleteOnExit()
+}
+
+fun openImage(context: Context, file: File) {
+
+    val uri = FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.provider",
+        file
+    )
+
+    val mimeType = when (file.extension.lowercase()) {
+        "jpg", "jpeg" -> "image/jpeg"
+        "png" -> "image/png"
+        "webp" -> "image/webp"
+        "bmp" -> "image/bmp"
+        else -> "image/*"
+    }
+
+    val intent = Intent(Intent.ACTION_VIEW).apply {
+        setDataAndType(uri, mimeType)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+
+    context.startActivity(intent)
+
     file.deleteOnExit()
 }
 

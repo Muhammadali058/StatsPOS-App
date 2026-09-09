@@ -140,4 +140,6 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database.ktx)
     implementation(libs.firebase.messaging)
+
+//    implementation("com.github.DantSu:ESCPOS-ThermalPrinter-Android:3.3.0")
 }

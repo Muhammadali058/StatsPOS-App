@@ -115,7 +115,6 @@ fun AddUpdatePurchaseOrderItemScreen(
 
     val sharedViewModelState by sharedViewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(sharedViewModelState.dataChanged) {
-        Log.d("TAG Search Item", sharedViewModelState.dataChanged.toString())
         if (sharedViewModelState.dataChanged) {
             val item = sharedViewModelState.item
             item?.run {

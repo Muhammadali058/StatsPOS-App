@@ -1,11 +1,15 @@
 package com.graphees.statspos.presentation.ui.utils
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
+import android.content.pm.PackageManager
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.OutputStream
 import java.util.UUID
@@ -235,3 +239,37 @@ class BluetoothPrinterManager {
         Log.d(TAG, "Printer disconnected")
     }
 }
+
+
+//val printerManager = BluetoothPrinterManager()
+//val printer = printerManager.getPairedPrinters().firstOrNull()
+//
+//if (printer != null) {
+//    if (ActivityCompat.checkSelfPermission(
+//            context,
+//            Manifest.permission.BLUETOOTH_CONNECT
+//        ) != PackageManager.PERMISSION_GRANTED
+//    ) {
+//        return
+//    }
+//
+//    scope.launch {
+//        val success = printPdf(
+//            context = context,
+//            pdfFile = file,
+//            printer = printer
+//        )
+//
+//        if (success) {
+//            Log.d(
+//                "TAG PDF_PRINTER",
+//                "PDF printed successfully"
+//            )
+//        } else {
+//            Log.e(
+//                "TAG PDF_PRINTER",
+//                "PDF printing failed"
+//            )
+//        }
+//    }
+//}

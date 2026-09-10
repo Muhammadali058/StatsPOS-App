@@ -57,10 +57,9 @@ import com.graphees.statspos.presentation.ui.components.SearchTextbox
 import com.graphees.statspos.presentation.ui.components.WhatsappIcon
 import com.graphees.statspos.presentation.ui.screens.accounts.entries.vouchers.entryVoucher
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
-import com.graphees.statspos.presentation.ui.utils.getImageFromPdf
+import com.graphees.statspos.presentation.ui.utils.pdfToImage
 import com.graphees.statspos.presentation.ui.utils.openPdf
 import com.graphees.statspos.presentation.ui.utils.shareFileToWhatsApp
-import com.graphees.statspos.presentation.ui.utils.sharePdf
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.accounts.entries.payment.PaymentEntriesViewModel
 import com.graphees.statspos.utils.EntryType
@@ -159,7 +158,7 @@ fun PaymentPostedEntriesBody(
         )
 
         if(share) {
-            val image = getImageFromPdf(context, file)
+            val image = pdfToImage(context, file)
 //            sharePdf(context, image)
             shareFileToWhatsApp(context, image, entry.contact!!)
         }

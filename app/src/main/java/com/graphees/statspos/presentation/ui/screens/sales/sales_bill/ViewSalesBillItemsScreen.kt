@@ -92,7 +92,7 @@ fun ViewSalesBillItemsScreen(
     }
 
     fun loadData() {
-        viewModel.loadData({ a, b -> }) {
+        viewModel.loadData({ _, _ -> }) {
 
         }
     }
@@ -126,9 +126,10 @@ fun ViewSalesBillItemsScreen(
             ledger = ledger,
         )
 
-        if (shareBill)
+        if (shareBill) {
             shareFileToWhatsApp(context, file, salesBill.contact!!)
 //            sharePdf(context, file)
+        }
         else
             openPdf(context, file)
     }
@@ -195,7 +196,7 @@ fun ViewSalesBillItemsScreen(
 //                                    showPrintPasswordDialog = true
 //                                },
 //                                buttonSize = 26.dp,
-//                                size = 20.dp,
+//                                size = 20.dp
 //                            )
 
 //                            AppIconButton(
@@ -260,7 +261,7 @@ fun ViewSalesBillItemsScreen(
                     SearchBox(
                         value = state.search,
                         onValueChange = {
-                            viewModel.onSearchChange(it, { a, b -> })
+                            viewModel.onSearchChange(it) { _, _ -> }
                         },
                         onSearchClick = {
                             loadData()
@@ -276,7 +277,7 @@ fun ViewSalesBillItemsScreen(
                             loadData()
                         },
                         items = state.list,
-                        onItemClick = { salesBillItem ->
+                        onItemClick = { _ ->
 
                         }
                     )

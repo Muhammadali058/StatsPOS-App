@@ -126,7 +126,11 @@ dependencies {
     implementation(libs.exp4j)
 
 //    iText for Reports
-    implementation(libs.itext7.core)
+//    implementation(libs.itext7.core)
+    implementation(libs.itext7.core) {
+        exclude(group = "org.bouncycastle", module = "bcprov-jdk15on")
+        exclude(group = "org.bouncycastle", module = "bcpkix-jdk15on")
+    }
 
 //    Vico for charts
     implementation(libs.vico.compose)
@@ -142,4 +146,6 @@ dependencies {
     implementation(libs.firebase.messaging)
 
 //    implementation("com.github.DantSu:ESCPOS-ThermalPrinter-Android:3.3.0")
+    implementation(libs.pdfbox.android)
+
 }

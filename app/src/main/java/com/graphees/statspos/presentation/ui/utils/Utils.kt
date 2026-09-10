@@ -15,9 +15,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.core.graphics.createBitmap
+import androidx.core.graphics.get
 import androidx.core.net.toUri
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.showToast
+import com.tom_roush.pdfbox.pdmodel.PDDocument
+import com.tom_roush.pdfbox.pdmodel.common.PDRectangle
+import com.tom_roush.pdfbox.text.PDFTextStripper
+import com.tom_roush.pdfbox.text.TextPosition
 import java.io.File
 import java.io.FileOutputStream
 
@@ -58,7 +63,7 @@ const val REPORT_HEADER_FONT_SIZE = 10f
 const val REPORT_BODY_FONT_SIZE = 10f
 // endregion
 
-fun pdfToBitmap(file: File): Bitmap {
+private fun pdfToBitmapCropped(file: File): Bitmap {
 
     val fd = ParcelFileDescriptor.open(
         file,
@@ -71,11 +76,7 @@ fun pdfToBitmap(file: File): Bitmap {
     // 3x resolution
     val scale = 3
 
-    val bitmap = Bitmap.createBitmap(
-        page.width * scale,
-        page.height * scale,
-        Bitmap.Config.ARGB_8888
-    )
+    val bitmap = createBitmap(page.width * scale, page.height * scale)
 
     // White background
     bitmap.eraseColor(Color.WHITE)
@@ -109,7 +110,7 @@ fun pdfToBitmap(file: File): Bitmap {
 
         for (x in 0 until width) {
 
-            val pixel = bitmap.getPixel(x, y)
+            val pixel = bitmap[x, y]
 
             val red = Color.red(pixel)
             val green = Color.green(pixel)
@@ -173,7 +174,7 @@ fun pdfToBitmap(file: File): Bitmap {
     return croppedBitmap
 }
 
-fun pdfToBitmap1(file: File): Bitmap {
+private fun pdfToBitmap(file: File): Bitmap {
     val fd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
     val renderer = PdfRenderer(fd)
     val page = renderer.openPage(0)
@@ -195,7 +196,6 @@ fun pdfToBitmap1(file: File): Bitmap {
     return bitmap
 }
 
-
 fun bitmapToFile(context: Context, bitmap: Bitmap): File {
     val file = File(context.cacheDir, "receipt_${System.currentTimeMillis()}.jpg")
 
@@ -206,7 +206,8 @@ fun bitmapToFile(context: Context, bitmap: Bitmap): File {
     return file
 }
 
-fun getImageFromPdf(context: Context, file: File): File {
+fun pdfToImage(context: Context, file: File): File {
+//    val bitmap = pdfToBitmapCropped(file)
     val bitmap = pdfToBitmap(file)
     return bitmapToFile(context, bitmap)
 }
@@ -354,6 +355,7 @@ fun shareFileToWhatsApp(
         }
     }
 }
+
 private fun isAppInstalled(
     context: Context,
     packageName: String
@@ -513,4 +515,249 @@ fun openGoogleMaps(
         )
         context.startActivity(browserIntent)
     }
+}
+
+//fun cropPdf1(pdfFile: File): File {
+//
+//    val outputFile = File(
+//        pdfFile.parentFile,
+//        "${pdfFile.nameWithoutExtension}_cropped.pdf"
+//    )
+//
+//    val parcelFileDescriptor = ParcelFileDescriptor.open(
+//        pdfFile,
+//        ParcelFileDescriptor.MODE_READ_ONLY
+//    )
+//
+//    val renderer = PdfRenderer(parcelFileDescriptor)
+//    val outputPdf = PdfDocument()
+//
+//    try {
+//
+//        for (pageIndex in 0 until renderer.pageCount) {
+//
+//            val page = renderer.openPage(pageIndex)
+//
+//            // Render at 2x resolution
+//            val scale = 2f
+//
+//            val bitmapWidth = (page.width * scale).toInt()
+//            val bitmapHeight = (page.height * scale).toInt()
+//
+//            val bitmap = createBitmap(bitmapWidth, bitmapHeight)
+//
+//            bitmap.eraseColor(Color.WHITE)
+//
+//            page.render(
+//                bitmap,
+//                null,
+//                null,
+//                PdfRenderer.Page.RENDER_MODE_FOR_PRINT
+//            )
+//
+//            page.close()
+//
+//            // Find only the bottom of the content
+//            val bottom = findContentBottom(bitmap)
+//
+//            // Extra whitespace after the content.
+//            // Increase this if you want more space at the bottom.
+//            val bottomMargin = (20 * scale).toInt()
+//
+//            val croppedBottom = (
+//                    bottom + bottomMargin
+//                    ).coerceAtMost(bitmap.height)
+//
+//            // Keep ORIGINAL WIDTH
+//            val croppedWidth = page.width
+//
+//            // Convert pixel height back to PDF points
+//            val croppedHeight = (
+//                    croppedBottom / scale
+//                    ).toInt()
+//
+//            val pageInfo = PdfDocument.PageInfo.Builder(
+//                croppedWidth,
+//                croppedHeight,
+//                pageIndex
+//            ).create()
+//
+//            val outputPage = outputPdf.startPage(pageInfo)
+//
+//            val canvas = outputPage.canvas
+//
+//            val sourceRect = Rect(
+//                0,
+//                0,
+//                bitmap.width,
+//                croppedBottom
+//            )
+//
+//            val destinationRect = Rect(
+//                0,
+//                0,
+//                croppedWidth,
+//                croppedHeight
+//            )
+//
+//            canvas.drawBitmap(
+//                bitmap,
+//                sourceRect,
+//                destinationRect,
+//                null
+//            )
+//
+//            outputPdf.finishPage(outputPage)
+//
+//            bitmap.recycle()
+//        }
+//
+//        outputPdf.writeTo(outputFile.outputStream())
+//
+//    } finally {
+//        outputPdf.close()
+//        renderer.close()
+//        parcelFileDescriptor.close()
+//    }
+//
+//    return outputFile
+//}
+
+private fun findContentBottom(bitmap: Bitmap): Int {
+
+    val width = bitmap.width
+    val height = bitmap.height
+
+    // Pixel must be darker than this to be considered content
+    val threshold = 245
+
+    // Number of non-white pixels required in a row
+    // to consider that row as actual content.
+    val minimumContentPixels = (width * 0.005f).toInt().coerceAtLeast(2)
+
+    var lastContentRow = 0
+
+    for (y in 0 until height) {
+
+        var contentPixels = 0
+
+        for (x in 0 until width) {
+
+            val pixel = bitmap[x, y]
+
+            val r = Color.red(pixel)
+            val g = Color.green(pixel)
+            val b = Color.blue(pixel)
+
+            if (
+                r < threshold ||
+                g < threshold ||
+                b < threshold
+            ) {
+                contentPixels++
+            }
+
+            if (contentPixels >= minimumContentPixels) {
+                break
+            }
+        }
+
+        if (contentPixels >= minimumContentPixels) {
+            lastContentRow = y
+        }
+    }
+
+    return lastContentRow + 1
+}
+
+private class ContentPositionExtractor : PDFTextStripper() {
+
+    var lowestContentPoint = 0f
+
+    override fun processTextPosition(text: TextPosition) {
+
+        // Distance from TOP of page
+        val bottom = text.yDirAdj + text.heightDir
+
+        if (bottom > lowestContentPoint) {
+            lowestContentPoint = bottom
+        }
+
+        super.processTextPosition(text)
+    }
+}
+
+private fun findContentBottom(
+    document: PDDocument,
+    pageIndex: Int
+): Float {
+
+    val extractor = ContentPositionExtractor()
+
+    extractor.startPage = pageIndex + 1
+    extractor.endPage = pageIndex + 1
+
+    extractor.getText(document)
+
+    return extractor.lowestContentPoint
+}
+
+fun cropPdf(pdfFile: File): File {
+
+    val outputFile = File(
+        pdfFile.parentFile,
+        "${pdfFile.nameWithoutExtension}_cropped.pdf"
+    )
+
+    PDDocument.load(pdfFile).use { document ->
+
+        for (pageIndex in 0 until document.numberOfPages) {
+
+            val page = document.getPage(pageIndex)
+
+            val mediaBox = page.getMediaBox()
+
+            val originalWidth = mediaBox.getWidth()
+            val originalHeight = mediaBox.getHeight()
+
+            // Bottom of actual text measured from TOP
+            val contentBottom = findContentBottom(
+                document,
+                pageIndex
+            )
+
+            // Extra space below content
+            val margin = 10f
+
+            val newHeight = (
+                    contentBottom + margin
+                    ).coerceAtMost(originalHeight)
+
+            /*
+             * PDF coordinates start from bottom-left.
+             *
+             * We want:
+             *
+             * top    = originalHeight
+             * bottom = originalHeight - newHeight
+             */
+
+            val newBottom =
+                originalHeight - newHeight
+
+            val cropBox = PDRectangle(
+                0f,
+                newBottom,
+                originalWidth,
+                newHeight
+            )
+
+            // IMPORTANT:
+            page.setCropBox(cropBox)
+        }
+
+        document.save(outputFile)
+    }
+
+    return outputFile
 }

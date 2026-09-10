@@ -1,7 +1,14 @@
 package com.graphees.statspos
 
 import android.app.Application
+import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class BaseApplication: Application(){}
+class BaseApplication: Application(){
+    override fun onCreate() {
+        super.onCreate()
+
+        PDFBoxResourceLoader.init(this)
+    }
+}

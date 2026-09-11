@@ -9,6 +9,11 @@ data class PrintSettings(
 
     var showUrdu: Boolean? = null,
     var showLogo: Boolean? = null,
+    var showItemDiscPercent: Boolean? = null,
+    var showItemDisc: Boolean? = null,
+    var showTotalDisc: Boolean? = null,
+
+    var defaultPrintSize: Int? = null,
     var imageUrl: String? = null,
 
     val clientId:Int? = null,

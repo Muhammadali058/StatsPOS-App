@@ -174,6 +174,14 @@ object HP {
         DropdownItem(1L, "Simple List"),
         DropdownItem(2L, "Images List"),
     )
+
+    // Settings
+    val defaultPrintSize = listOf(
+        DropdownItem(1L, "Thermal"),
+        DropdownItem(2L, "A4"),
+        DropdownItem(3L, "Ask Every Time"),
+    )
+
     // endregion
 
     fun setDropdowns(jsonObject: JsonObject) {

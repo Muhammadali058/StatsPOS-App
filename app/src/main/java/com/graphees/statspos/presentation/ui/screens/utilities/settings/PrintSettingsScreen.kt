@@ -35,9 +35,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.graphees.statspos.domain.models.DropdownItem
 import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.AppSwitch
+import com.graphees.statspos.presentation.ui.components.ComboBox
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
@@ -47,6 +49,7 @@ import com.graphees.statspos.presentation.ui.components.UploadImageView
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.utilities.settings.PrintSettingsViewModel
+import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
 import okhttp3.MultipartBody
@@ -137,16 +140,24 @@ fun PrintSettingsScreen(
                         shopName = state.shopName,
                         contact = state.contact,
                         address = state.address,
+                        defaultPrintSize = state.defaultPrintSize,
                         onShopNameChange = viewModel::onShopNameChange,
                         onContactChange = viewModel::onContactChange,
                         onAddressChange = viewModel::onAddressChange,
+                        onDefaultPrintSizeSelected = viewModel::onDefaultPrintSizeChange,
                     )
                     Spacer(Modifier.height(12.dp))
                     Body(
                         showUrdu = state.showUrdu,
                         showLogo = state.showLogo,
+                        showItemDiscPercent = state.showItemDiscPercent,
+                        showItemDisc = state.showItemDisc,
+                        showTotalDisc = state.showTotalDisc,
                         onShowUrduChange = viewModel::onShowUrduChange,
                         onShowLogoChange = viewModel::onShowLogoChange,
+                        onShowItemDiscPercentChange = viewModel::onShowItemDiscPercentChange,
+                        onShowItemDiscChange = viewModel::onShowItemDiscChange,
+                        onShowTotalDiscChange = viewModel::onShowTotalDiscChange,
                     )
                     Spacer(Modifier.height(12.dp))
                     ImageExpandable(
@@ -192,9 +203,11 @@ private fun ShopData(
     shopName: String,
     contact: String,
     address: String,
+    defaultPrintSize: DropdownItem,
     onShopNameChange: (String) -> Unit,
     onContactChange: (String) -> Unit,
     onAddressChange: (String) -> Unit,
+    onDefaultPrintSizeSelected: (DropdownItem) -> Unit,
 ) {
     TextboxOutlined(
         value = shopName,
@@ -228,19 +241,37 @@ private fun ShopData(
         },
         singleLine = false,
     )
+    ComboBox(
+        modifier = Modifier
+            .fillMaxWidth(),
+        items = HP.defaultPrintSize,
+        selectedItem = defaultPrintSize,
+        onItemSelected = onDefaultPrintSizeSelected,
+        label = {
+            Text("Default Print Size")
+        },
+        showEndIcon = false,
+        outlined = true,
+    )
 }
 
 @Composable
 private fun Body(
     showUrdu: Boolean,
     showLogo: Boolean,
+    showItemDiscPercent: Boolean,
+    showItemDisc: Boolean,
+    showTotalDisc: Boolean,
     onShowUrduChange: (Boolean) -> Unit,
     onShowLogoChange: (Boolean) -> Unit,
+    onShowItemDiscPercentChange: (Boolean) -> Unit,
+    onShowItemDiscChange: (Boolean) -> Unit,
+    onShowTotalDiscChange: (Boolean) -> Unit,
 ) {
     Row (
         modifier = Modifier
             .fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceAround,
+        horizontalArrangement = Arrangement.SpaceBetween,
     ){
         AppSwitch(
             checked = showUrdu,
@@ -251,6 +282,35 @@ private fun Body(
             checked = showLogo,
             onCheckedChange = onShowLogoChange,
             label = "Show Logo"
+        )
+    }
+    Spacer(Modifier.height(24.dp))
+    Row (
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ){
+        AppSwitch(
+            checked = showItemDiscPercent,
+            onCheckedChange = onShowItemDiscPercentChange,
+            label = "Show Percent Disc"
+        )
+        AppSwitch(
+            checked = showItemDisc,
+            onCheckedChange = onShowItemDiscChange,
+            label = "Show Item Disc"
+        )
+    }
+    Spacer(Modifier.height(24.dp))
+    Row (
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ){
+        AppSwitch(
+            checked = showTotalDisc,
+            onCheckedChange = onShowTotalDiscChange,
+            label = "Show Total Disc"
         )
     }
 }

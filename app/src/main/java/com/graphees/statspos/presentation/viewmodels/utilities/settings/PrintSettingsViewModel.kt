@@ -11,6 +11,7 @@ import com.graphees.statspos.utils.SnackbarType
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.get
 import com.google.gson.Gson
+import com.graphees.statspos.domain.models.DropdownItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,6 +36,11 @@ class PrintSettingsViewModel @Inject constructor(
 
         val showUrdu: Boolean = false,
         val showLogo: Boolean = false,
+        val showItemDiscPercent: Boolean = false,
+        val showItemDisc: Boolean = false,
+        val showTotalDisc: Boolean = false,
+
+        val defaultPrintSize: DropdownItem = HP.defaultPrintSize[1],
         val imageUrl: String = "",
 
         // Extras
@@ -121,6 +127,22 @@ class PrintSettingsViewModel @Inject constructor(
 
     fun onShowLogoChange(value: Boolean) {
         state.update { it.copy(showLogo = value) }
+    }
+
+    fun onShowItemDiscPercentChange(value: Boolean) {
+        state.update { it.copy(showItemDiscPercent = value) }
+    }
+
+    fun onShowItemDiscChange(value: Boolean) {
+        state.update { it.copy(showItemDisc = value) }
+    }
+
+    fun onShowTotalDiscChange(value: Boolean) {
+        state.update { it.copy(showTotalDisc = value) }
+    }
+
+    fun onDefaultPrintSizeChange(value: DropdownItem) {
+        state.update { it.copy(defaultPrintSize = value) }
     }
 
     fun setHasLoadedOnce(value: Boolean) {
@@ -227,6 +249,11 @@ class PrintSettingsViewModel @Inject constructor(
 
             showUrdu = state.value.showUrdu,
             showLogo = state.value.showLogo,
+            showItemDiscPercent = state.value.showItemDiscPercent,
+            showItemDisc = state.value.showItemDisc,
+            showTotalDisc = state.value.showTotalDisc,
+
+            defaultPrintSize = state.value.defaultPrintSize.id.toInt(),
             imageUrl = state.value.imageUrl,
         )
     }
@@ -240,6 +267,11 @@ class PrintSettingsViewModel @Inject constructor(
 
                 showUrdu = printSettings.showUrdu!!,
                 showLogo = printSettings.showLogo!!,
+                showItemDiscPercent = printSettings.showItemDiscPercent!!,
+                showItemDisc = printSettings.showItemDisc!!,
+                showTotalDisc = printSettings.showTotalDisc!!,
+
+                defaultPrintSize = HP.defaultPrintSize[printSettings.defaultPrintSize!! - 1],
                 imageUrl = printSettings.imageUrl!!,
             )
         }

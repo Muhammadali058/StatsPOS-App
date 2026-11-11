@@ -30,8 +30,9 @@ class PackageItemsViewModel @Inject constructor(
         val totalPackageItems: Int = 0,
 
         val search: String = "",
-        val packageName: String = "",
         val packageId: Long = 0L,
+
+        val hasLoadedOnce: Boolean = false,
 
         val isLoading: Boolean = false,
         val error: String? = null,
@@ -103,11 +104,8 @@ class PackageItemsViewModel @Inject constructor(
         if(HP.appSettings.instantSearch == true)
             loadData()
     }
-    fun onPackageNameChange(value: String) {
-        state.update { it.copy(packageName = value) }
-    }
-    fun onPackageIdChange(value: Long) {
-        state.update { it.copy(packageId = value) }
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
     }
     // endregion
 
@@ -190,5 +188,12 @@ class PackageItemsViewModel @Inject constructor(
     private fun resultSuccess() {
         state.update { it.copy(isLoading = false, error = null) }
     }
+
+    fun updateInitialState(packageId: Long) {
+        state.update { it.copy(
+            packageId = packageId,
+        ) }
+    }
+
     // endregion
 }

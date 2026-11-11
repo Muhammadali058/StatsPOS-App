@@ -30,8 +30,9 @@ class PurchaseOrderItemsViewModel @Inject constructor(
         val totalPurchaseOrderItems: Int = 0,
 
         val search: String = "",
-        val purchaseOrderName: String = "",
         val purchaseOrderId: Long = 0L,
+
+        val hasLoadedOnce: Boolean = false,
 
         val isLoading: Boolean = false,
         val error: String? = null,
@@ -103,11 +104,8 @@ class PurchaseOrderItemsViewModel @Inject constructor(
         if(HP.appSettings.instantSearch == true)
             loadData()
     }
-    fun onPurchaseOrderNameChange(value: String) {
-        state.update { it.copy(purchaseOrderName = value) }
-    }
-    fun onPurchaseOrderIdChange(value: Long) {
-        state.update { it.copy(purchaseOrderId = value) }
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
     }
     // endregion
 
@@ -190,5 +188,12 @@ class PurchaseOrderItemsViewModel @Inject constructor(
     private fun resultSuccess() {
         state.update { it.copy(isLoading = false, error = null) }
     }
+
+    fun updateInitialState(purchaseOrderId: Long) {
+        state.update { it.copy(
+            purchaseOrderId = purchaseOrderId,
+        ) }
+    }
+
     // endregion
 }

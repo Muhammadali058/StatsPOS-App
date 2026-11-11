@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,6 +29,7 @@ class AddUpdatePurchaseOrderViewModel @Inject constructor(
     data class ScreenState(
         val id: Long = 0L,
         val purchaseOrderName: String = "",
+        val date: LocalDate = LocalDate.now(),
         val remarks: String = "",
 
         // Extra
@@ -100,6 +102,9 @@ class AddUpdatePurchaseOrderViewModel @Inject constructor(
     // region onChangeMethods
     fun onPurchaseOrderNameChange(value: String) {
         state.update { it.copy(purchaseOrderName = value) }
+    }
+    fun onDateChange(value: LocalDate) {
+        state.update { it.copy(date = value) }
     }
     fun onRemarksChange(value: String) {
         state.update { it.copy(remarks = value) }
@@ -194,6 +199,7 @@ class AddUpdatePurchaseOrderViewModel @Inject constructor(
     private fun getFormData(): PurchaseOrders {
         return PurchaseOrders(
             purchaseOrderName = state.value.purchaseOrderName,
+            date = HP.getZonedDate(state.value.date),
             remarks = state.value.remarks,
         )
     }
@@ -202,6 +208,7 @@ class AddUpdatePurchaseOrderViewModel @Inject constructor(
         state.update {
             it.copy(
                 purchaseOrderName =  purchaseOrder.purchaseOrderName.toString(),
+                date = HP.toLocalDate(purchaseOrder.date.toString()),
                 remarks =  purchaseOrder.remarks.toString(),
             )
         }
@@ -211,6 +218,7 @@ class AddUpdatePurchaseOrderViewModel @Inject constructor(
         state.update {
             it.copy(
                 purchaseOrderName = "",
+                date = LocalDate.now(),
                 remarks = "",
 
                 isUpdate = false,

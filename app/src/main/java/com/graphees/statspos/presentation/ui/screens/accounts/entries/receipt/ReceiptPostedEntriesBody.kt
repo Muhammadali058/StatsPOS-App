@@ -41,7 +41,7 @@ import com.graphees.statspos.presentation.ui.components.BottomHeading
 import com.graphees.statspos.presentation.ui.components.ComboBox
 import com.graphees.statspos.presentation.ui.components.ConfirmDialog
 import com.graphees.statspos.presentation.ui.components.DateTextbox
-import com.graphees.statspos.presentation.ui.components.DeleteIcon
+import com.graphees.statspos.presentation.ui.components.DeleteIconButton
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListHeading
@@ -50,7 +50,7 @@ import com.graphees.statspos.presentation.ui.components.ListImageView
 import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
 import com.graphees.statspos.presentation.ui.components.PlaceHolder
-import com.graphees.statspos.presentation.ui.components.PrintIcon
+import com.graphees.statspos.presentation.ui.components.PrintIconButton
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.components.SearchTextbox
@@ -395,7 +395,7 @@ private fun ListCard(
             }
 
             Row {
-                PrintIcon {
+                PrintIconButton {
                     onPrintClick(item, false)
                 }
                 Spacer(Modifier.width(8.dp))
@@ -449,7 +449,7 @@ private fun ListCard(
             }
 
             if (HP.userRights.deleteAnything == true) {
-                DeleteIcon {
+                DeleteIconButton {
                     onDeleteClick(item)
                 }
             }

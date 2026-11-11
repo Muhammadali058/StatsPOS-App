@@ -1,4 +1,4 @@
-package com.graphees.statspos.presentation.ui.screens.purchase.purchase_orders
+package com.graphees.statspos.presentation.ui.screens.items.categories
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -8,12 +8,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -35,41 +34,100 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.graphees.statspos.domain.models.purchase.PurchaseOrderItems
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
+import com.graphees.statspos.domain.models.items.SubCategories
 import com.graphees.statspos.presentation.ui.components.AppFloatingActionButton
 import com.graphees.statspos.presentation.ui.components.BottomHeading
 import com.graphees.statspos.presentation.ui.components.ConfirmDialog
-import com.graphees.statspos.presentation.ui.components.DeleteIcon
+import com.graphees.statspos.presentation.ui.components.DeleteIconButton
 import com.graphees.statspos.presentation.ui.components.Dropdown
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ListCard
-import com.graphees.statspos.presentation.ui.components.ListHeading
 import com.graphees.statspos.presentation.ui.components.ListImageView
-import com.graphees.statspos.presentation.ui.components.ListLabel
-import com.graphees.statspos.presentation.ui.components.ListMainLabel
 import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.components.SearchTextbox
+import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
-import com.graphees.statspos.presentation.viewmodels.purchase.purchase_orders.PurchaseOrderItemsViewModel
+import com.graphees.statspos.presentation.viewmodels.items.categories.SubCategoriesViewModel
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
 import com.graphees.statspos.utils.showToast
+import kotlinx.serialization.Serializable
+
+private sealed class SubRoutes : NavKey {
+    @Serializable
+    data object Home : SubRoutes()
+
+    @Serializable
+    data class AddUpdateSubCategory(val updateId: Long, val isUpdate: Boolean, val categoryId: Long) : SubRoutes()
+}
 
 @Composable
-fun PurchaseOrderItemsBody(
+fun SubCategoriesScreen(
     sharedViewModel: SharedViewModel,
-    snackbarHostState: SnackbarHostState,
-    onAddButtonClick: (Long, Boolean, Long) -> Unit,
+    categoryId: Long,
+    onBack: () -> Unit,
+) {
+    val backStack = rememberNavBackStack(SubRoutes.Home)
+    fun navigate(key: NavKey) {
+        if (backStack.lastOrNull() != key) {
+            backStack.add(key)
+        }
+    }
+    NavDisplay(
+        backStack = backStack,
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
+        entryProvider = entryProvider {
+            entry<SubRoutes.Home> {
+                Home(
+                    sharedViewModel = sharedViewModel,
+                    categoryId = categoryId,
+                    onAddButtonClick = { updateId, isUpdated ->
+                        navigate(SubRoutes.AddUpdateSubCategory(updateId, isUpdated, categoryId))
+                    },
+                    onBack = onBack,
+                )
+            }
+            entry<SubRoutes.AddUpdateSubCategory> { key ->
+                AddUpdateSubCategoryScreen(
+                    sharedViewModel = sharedViewModel,
+                    updateId = key.updateId,
+                    isUpdate = key.isUpdate,
+                    categoryId = key.categoryId,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+        }
+    )
+}
+
+@Composable
+private fun Home(
+    sharedViewModel: SharedViewModel,
+    categoryId: Long,
+    onAddButtonClick: (Long, Boolean) -> Unit,
+    onBack: () -> Unit,
 ) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<PurchaseOrderItemsViewModel>()
+    val viewModel = hiltViewModel<SubCategoriesViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
+    val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var selectedId by remember { mutableLongStateOf(0L) }
@@ -82,6 +140,17 @@ fun PurchaseOrderItemsBody(
                 showErrorDialog = true
             }
         )
+    }
+
+    // Edit data when update
+    LaunchedEffect(Unit) {
+        if (!state.hasLoadedOnce) {
+            viewModel.updateInitialState(
+                categoryId = categoryId
+            )
+            viewModel.loadData()
+            viewModel.setHasLoadedOnce(true)
+        }
     }
 
     val sharedViewModelState by sharedViewModel.state.collectAsStateWithLifecycle()
@@ -103,15 +172,16 @@ fun PurchaseOrderItemsBody(
 
     if (showDeleteDialog) {
         ConfirmDialog(
-            text = "Are you sure to delete this order item",
+            text = "Are you sure to delete this sub-category",
             onDismiss = {
                 showDeleteDialog = false
             },
             onConfirm = {
                 showDeleteDialog = false
                 viewModel.deleteData(selectedId) {
+//                    viewModel.loadData()
                     selectedId = 0L
-                    context.showToast("Order item deleted successfully")
+                    context.showToast("Sub-Category deleted successfully")
                 }
             }
         )
@@ -119,20 +189,26 @@ fun PurchaseOrderItemsBody(
 
     Scaffold(
         floatingActionButton = {
-            AppFloatingActionButton {
-                if (state.purchaseOrderId == 0L) {
-                    viewModel.onEvent(UiEvent.ShowSnackbar("Please select order"))
-                } else {
-                    onAddButtonClick(0L, false, state.purchaseOrderId)
-                }
+            AppFloatingActionButton(
+                modifier = Modifier
+                    .navigationBarsPadding()
+            ) {
+                onAddButtonClick(0L, false)
             }
         },
+        topBar = {
+            TopAppBar(
+                onNavigationClick = {
+                    onBack()
+                },
+                title = "Sub-Categories",
+            )
+        }
     ) { innerPadding ->
-        Box(Modifier.padding(innerPadding))
-
         Box(
             Modifier
                 .fillMaxSize()
+                .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
             Column(
@@ -143,31 +219,14 @@ fun PurchaseOrderItemsBody(
                     modifier = Modifier
                         .weight(1f)
                 ) {
-                    SearchBox {
-                        Dropdown(
-                            value = state.purchaseOrderName,
-                            onValueChange = viewModel::onPurchaseOrderNameChange,
-                            items = HP.purchaseOrders,
-                            onItemSelected = { dropdownItem ->
-                                viewModel.onPurchaseOrderIdChange(dropdownItem.id)
-                                viewModel.loadData()
-                            },
-                            label = {
-                                Text("Order")
-                            },
-                            placeholder = {
-                                PlaceHolder(text = "Order")
-                            },
-                        )
-                        SearchTextbox(
-                            value = state.search,
-                            onValueChange = viewModel::onSearchChange,
-                            onSearchClick = {
-                                viewModel.loadData()
-                                keyboardController?.hide()
-                            },
-                        )
-                    }
+                    SearchBox(
+                        value = state.search,
+                        onValueChange = viewModel::onSearchChange,
+                        onSearchClick = {
+                            viewModel.loadData()
+                            keyboardController?.hide()
+                        },
+                    )
                     BodyList(
                         modifier = Modifier
                             .weight(1f)
@@ -177,47 +236,22 @@ fun PurchaseOrderItemsBody(
                             viewModel.loadData()
                         },
                         items = state.list,
-                        onItemClick = { purchaseOrderItem ->
-                            onAddButtonClick(purchaseOrderItem.id!!, true, state.purchaseOrderId)
+                        onItemClick = { subCategory ->
+                            onAddButtonClick(subCategory.id!!, true)
                         },
-                        onDeleteClick = { purchaseOrderItem ->
-                            selectedId = purchaseOrderItem.id!!
+                        onDeleteClick = { subCategory ->
+                            selectedId = subCategory.id!!
                             showDeleteDialog = true
                         },
                     )
                 }
 
                 BottomHeading(
-                    text = "Total Order Items: ",
-                    value = state.totalPurchaseOrderItems.toString()
+                    text = "Total Sub-Categories: ",
+                    value = state.totalSubCategories.toString()
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun SearchBox(
-    modifier: Modifier = Modifier,
-    value: String,
-    onValueChange: (String) -> Unit,
-    onSearchClick: (String) -> Unit,
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        SearchTextbox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            value = value,
-            onValueChange = onValueChange,
-            onEndIconClick = {
-                onValueChange("")
-            },
-            onSearchClick = onSearchClick,
-        )
     }
 }
 
@@ -226,16 +260,16 @@ private fun BodyList(
     modifier: Modifier = Modifier,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
-    items: List<PurchaseOrderItems>,
-    onItemClick: (PurchaseOrderItems) -> Unit,
-    onDeleteClick: (PurchaseOrderItems) -> Unit,
+    items: List<SubCategories>,
+    onItemClick: (SubCategories) -> Unit,
+    onDeleteClick: (SubCategories) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
     ) {
-        item {
+        item{
             Spacer(Modifier.height(4.dp))
         }
         items(items) { item ->
@@ -251,10 +285,13 @@ private fun BodyList(
 @Composable
 private fun ListCard(
     modifier: Modifier = Modifier,
-    item: PurchaseOrderItems,
-    onItemClick: (PurchaseOrderItems) -> Unit,
-    onDeleteClick: (PurchaseOrderItems) -> Unit,
+    item: SubCategories,
+    onItemClick: (SubCategories) -> Unit,
+    onDeleteClick: (SubCategories) -> Unit,
 ) {
+    val primaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
+    val secondaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.6f)
+
     ListCard(
         modifier = modifier
             .fillMaxWidth()
@@ -278,12 +315,11 @@ private fun ListCard(
                 Spacer(Modifier.width(8.dp))
             }
 
-            // Itemname & Rows
             Column(
                 modifier = Modifier
                     .weight(1f),
             ) {
-                // region Itemname
+                // region Name
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -294,7 +330,7 @@ private fun ListCard(
                     ) {
                         Text(
                             modifier = modifier,
-                            text = item.itemname.toString(),
+                            text = item.subCategoryName.toString(),
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
@@ -303,43 +339,14 @@ private fun ListCard(
 
                     if (HP.userRights.deleteAnything == true) {
                         Spacer(Modifier.width(8.dp))
-                        DeleteIcon {
+                        DeleteIconButton {
                             onDeleteClick(item)
                         }
                     }
                 }
                 // endregion
-
-                Spacer(Modifier.height(8.dp))
-                HorizontalDivider(
-                    thickness = 0.5.dp,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.2f)
-                )
-                Spacer(Modifier.height(8.dp))
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    ListHeading("Qty", Modifier.weight(1f))
-                    if (HP.settings.saleCartons == true) {
-                        ListHeading("Crtn", Modifier.weight(1f))
-                    }
-                    ListHeading("Cost", Modifier.weight(1f))
-                    ListHeading("Total", Modifier.weight(1f))
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    ListLabel(HP.formatDecimal(item.qty), Modifier.weight(1f))
-                    if (HP.settings.saleCartons == true) {
-                        ListLabel(item.crtn.toString(), Modifier.weight(1f))
-                    }
-                    ListLabel(HP.formatDecimal(item.cost), Modifier.weight(1f))
-                    ListLabel(HP.formatDecimal(item.total), Modifier.weight(1f))
-                }
             }
         }
     }
 }
+

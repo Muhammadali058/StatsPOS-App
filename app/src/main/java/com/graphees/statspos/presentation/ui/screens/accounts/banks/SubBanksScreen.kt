@@ -1,4 +1,4 @@
-package com.graphees.statspos.presentation.ui.screens.items.categories
+package com.graphees.statspos.presentation.ui.screens.accounts.banks
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -8,16 +8,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,46 +27,106 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.graphees.statspos.domain.models.items.Categories
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
+import com.graphees.statspos.domain.models.accounts.Accounts
 import com.graphees.statspos.presentation.ui.components.AppFloatingActionButton
-import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.BottomHeading
 import com.graphees.statspos.presentation.ui.components.ConfirmDialog
-import com.graphees.statspos.presentation.ui.components.DeleteIcon
+import com.graphees.statspos.presentation.ui.components.DeleteIconButton
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ListCard
-import com.graphees.statspos.presentation.ui.components.ListHeading
-import com.graphees.statspos.presentation.ui.components.ListHorizontalDivider
-import com.graphees.statspos.presentation.ui.components.ListImageView
-import com.graphees.statspos.presentation.ui.components.ListLabel
+import com.graphees.statspos.presentation.ui.components.ListMainLabel
+import com.graphees.statspos.presentation.ui.components.PasswordDialog
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
+import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
-import com.graphees.statspos.presentation.viewmodels.items.categories.CategoriesViewModel
+import com.graphees.statspos.presentation.viewmodels.accounts.banks.SubBanksViewModel
 import com.graphees.statspos.utils.HP
+import com.graphees.statspos.utils.PasswordFor
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
 import com.graphees.statspos.utils.showToast
+import kotlinx.serialization.Serializable
+
+private sealed class SubRoutes : NavKey {
+    @Serializable
+    data object Home : SubRoutes()
+
+    @Serializable
+    data class AddUpdateSubBank(val updateId: Long, val isUpdate: Boolean, val bankId: Long) :
+        SubRoutes()
+}
 
 @Composable
-fun CategoriesBody(
+fun SubBanksScreen(
     sharedViewModel: SharedViewModel,
+    bankId: Long,
+    onBack: () -> Unit,
+) {
+    val backStack = rememberNavBackStack(SubRoutes.Home)
+    fun navigate(key: NavKey) {
+        if (backStack.lastOrNull() != key) {
+            backStack.add(key)
+        }
+    }
+    NavDisplay(
+        backStack = backStack,
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
+        entryProvider = entryProvider {
+            entry<SubRoutes.Home> {
+                Home(
+                    sharedViewModel = sharedViewModel,
+                    bankId = bankId,
+                    onAddButtonClick = { updateId, isUpdated ->
+                        navigate(SubRoutes.AddUpdateSubBank(updateId, isUpdated, bankId))
+                    },
+                    onBack = onBack,
+                )
+            }
+            entry<SubRoutes.AddUpdateSubBank> { key ->
+                AddUpdateSubBankScreen (
+                    sharedViewModel = sharedViewModel,
+                    updateId = key.updateId,
+                    isUpdate = key.isUpdate,
+                    bankId = key.bankId,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+        }
+    )
+}
+
+@Composable
+private fun Home(
+    sharedViewModel: SharedViewModel,
+    bankId: Long,
     onAddButtonClick: (Long, Boolean) -> Unit,
+    onBack: () -> Unit,
 ) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    val viewModel = hiltViewModel<CategoriesViewModel>()
+    val viewModel = hiltViewModel<SubBanksViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showPasswordDialog by remember { mutableStateOf(false) }
     var selectedId by remember { mutableLongStateOf(0L) }
     LaunchedEffect(event) {
         checkEvent(
@@ -80,6 +137,17 @@ fun CategoriesBody(
                 showErrorDialog = true
             }
         )
+    }
+
+    // Edit data when update
+    LaunchedEffect(Unit) {
+        if (!state.hasLoadedOnce) {
+            viewModel.updateInitialState(
+                bankId = bankId
+            )
+            viewModel.loadData()
+            viewModel.setHasLoadedOnce(true)
+        }
     }
 
     val sharedViewModelState by sharedViewModel.state.collectAsStateWithLifecycle()
@@ -101,38 +169,58 @@ fun CategoriesBody(
 
     if (showDeleteDialog) {
         ConfirmDialog(
-            text = "Are you sure to delete this category",
+            text = "Are you sure to delete this bank account",
             onDismiss = {
                 showDeleteDialog = false
             },
             onConfirm = {
                 showDeleteDialog = false
                 viewModel.deleteData(selectedId) {
-//                    viewModel.loadData()
                     selectedId = 0L
-                    context.showToast("Category deleted successfully")
+                    context.showToast("Bank account deleted successfully")
+                }
+            }
+        )
+    }
+
+    if (showPasswordDialog) {
+        PasswordDialog(
+            passwordFor = PasswordFor.DELETE_ACCOUNT,
+            onDismiss = {
+                showPasswordDialog = false
+            },
+            onConfirm = {
+                showPasswordDialog = false
+                viewModel.deleteData(selectedId) {
+                    selectedId = 0L
+                    context.showToast("Bank account deleted successfully")
                 }
             }
         )
     }
 
     Scaffold(
-        snackbarHost = {
-            AppSnackbarHost(
-                snackbarHostState = snackbarHostState,
-            )
-        },
         floatingActionButton = {
-            AppFloatingActionButton {
+            AppFloatingActionButton(
+                modifier = Modifier
+                    .navigationBarsPadding()
+            ) {
                 onAddButtonClick(0L, false)
             }
         },
+        topBar = {
+            TopAppBar(
+                onNavigationClick = {
+                    onBack()
+                },
+                title = "Bank Accounts",
+            )
+        }
     ) { innerPadding ->
-        Box(Modifier.padding(innerPadding))
-
         Box(
             Modifier
                 .fillMaxSize()
+                .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
             Column(
@@ -160,19 +248,24 @@ fun CategoriesBody(
                             viewModel.loadData()
                         },
                         items = state.list,
-                        onItemClick = { category ->
-                            onAddButtonClick(category.id!!, true)
+                        onItemClick = { subBank ->
+                            onAddButtonClick(subBank.id!!, true)
                         },
-                        onDeleteClick = { category ->
-                            selectedId = category.id!!
-                            showDeleteDialog = true
+                        onDeleteClick = { subBank ->
+                            selectedId = subBank.id!!
+
+                            if (HP.passwords.useDeleteAccount == true) {
+                                showPasswordDialog = true
+                            } else {
+                                showDeleteDialog = true
+                            }
                         },
                     )
                 }
 
                 BottomHeading(
-                    text = "Total Categories: ",
-                    value = state.totalCategories.toString()
+                    text = "Total Bank Accounts: ",
+                    value = state.totalSubBanks.toString()
                 )
             }
         }
@@ -184,16 +277,16 @@ private fun BodyList(
     modifier: Modifier = Modifier,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
-    items: List<Categories>,
-    onItemClick: (Categories) -> Unit,
-    onDeleteClick: (Categories) -> Unit,
+    items: List<Accounts>,
+    onItemClick: (Accounts) -> Unit,
+    onDeleteClick: (Accounts) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
     ) {
-        item {
+        item{
             Spacer(Modifier.height(4.dp))
         }
         items(items) { item ->
@@ -209,13 +302,10 @@ private fun BodyList(
 @Composable
 private fun ListCard(
     modifier: Modifier = Modifier,
-    item: Categories,
-    onItemClick: (Categories) -> Unit,
-    onDeleteClick: (Categories) -> Unit,
+    item: Accounts,
+    onItemClick: (Accounts) -> Unit,
+    onDeleteClick: (Accounts) -> Unit,
 ) {
-    val primaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
-    val secondaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.6f)
-
     ListCard(
         modifier = modifier
             .fillMaxWidth()
@@ -229,60 +319,18 @@ private fun ListCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Image
-            ListImageView(
-                imageUrl = item.imageUrl,
-                modifier = Modifier
-                    .size(60.dp),
-                showIfNull = true,
-            ) {
-                Spacer(Modifier.width(8.dp))
-            }
-
-            Column(
+            ListMainLabel(
                 modifier = Modifier
                     .weight(1f),
-            ) {
-                // region Name
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .weight(1f),
-                    ) {
-                        Text(
-                            modifier = modifier,
-                            text = item.categoryName.toString(),
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                    }
+                text = item.subBankName.toString()
+            )
 
-                    if (HP.userRights.deleteAnything == true) {
-                        Spacer(Modifier.width(8.dp))
-                        DeleteIcon {
-                            onDeleteClick(item)
-                        }
-                    }
-                }
-                // endregion
-
-                Spacer(Modifier.height(4.dp))
-                ListHorizontalDivider()
-                Spacer(Modifier.height(4.dp))
-
-                Row (
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                ) {
-                    ListHeading("Remarks: ", color = primaryColor)
-                    ListLabel(item.remarks.toString(), color = secondaryColor)
+            if (HP.userRights.deleteAnything == true) {
+                Spacer(Modifier.width(8.dp))
+                DeleteIconButton {
+                    onDeleteClick(item)
                 }
             }
         }
     }
 }
-

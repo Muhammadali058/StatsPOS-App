@@ -35,7 +35,7 @@ import com.graphees.statspos.presentation.ui.components.AppFloatingActionButton
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.BottomHeading
 import com.graphees.statspos.presentation.ui.components.ConfirmDialog
-import com.graphees.statspos.presentation.ui.components.DeleteIcon
+import com.graphees.statspos.presentation.ui.components.DeleteIconButton
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListHeading
@@ -261,7 +261,7 @@ private fun ListCard(
 
             if (HP.userRights.deleteAnything == true) {
                 Spacer(Modifier.width(8.dp))
-                DeleteIcon {
+                DeleteIconButton {
                     onDeleteClick(item)
                 }
             }

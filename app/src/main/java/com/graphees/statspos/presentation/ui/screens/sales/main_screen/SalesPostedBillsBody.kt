@@ -47,7 +47,8 @@ import com.graphees.statspos.presentation.ui.components.BottomSheet
 import com.graphees.statspos.presentation.ui.components.ComboBox
 import com.graphees.statspos.presentation.ui.components.ConfirmDialog
 import com.graphees.statspos.presentation.ui.components.DateTextbox
-import com.graphees.statspos.presentation.ui.components.DeleteIcon
+import com.graphees.statspos.presentation.ui.components.DeleteIconButton
+import com.graphees.statspos.presentation.ui.components.EditIconButton
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.FilterIcon
 import com.graphees.statspos.presentation.ui.components.ListCard
@@ -669,14 +670,9 @@ private fun ListCard(
                     }
 
                     Spacer(Modifier.width(8.dp))
-                    AppIconButton(
-                        icon = Icons.Default.Edit,
-                        onClick = {
-                            onEditClick(item)
-                        },
-                        buttonSize = 26.dp,
-                        size = 20.dp,
-                    )
+                    EditIconButton{
+                        onEditClick(item)
+                    }
                 }
 
                 Spacer(Modifier.height(8.dp))
@@ -788,7 +784,7 @@ private fun ListCard(
                 }
 
                 Spacer(Modifier.width(8.dp))
-                DeleteIcon {
+                DeleteIconButton {
                     onDeleteClick(item)
                 }
             }

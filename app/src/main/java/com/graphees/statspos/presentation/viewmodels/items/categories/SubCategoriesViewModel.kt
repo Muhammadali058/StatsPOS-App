@@ -31,8 +31,9 @@ class SubCategoriesViewModel @Inject constructor(
         val totalSubCategories: Int = 0,
 
         val search: String = "",
-        val categoryName: String = "",
         val categoryId: Long = 0L,
+
+        val hasLoadedOnce: Boolean = false,
 
         val isLoading: Boolean = false,
         val error: String? = null,
@@ -95,6 +96,9 @@ class SubCategoriesViewModel @Inject constructor(
         state.update { it.copy(error = error) }
         onEvent(UiEvent.ShowError(error ?: ""))
     }
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
+    }
     // endregion
 
     // region onChangeMethods
@@ -103,9 +107,6 @@ class SubCategoriesViewModel @Inject constructor(
 
         if(HP.appSettings.instantSearch == true)
             loadData()
-    }
-    fun onCategoryNameChange(value: String) {
-        state.update { it.copy(categoryName = value) }
     }
     fun onCategoryIdChange(value: Long) {
         state.update { it.copy(categoryId = value) }
@@ -192,5 +193,12 @@ class SubCategoriesViewModel @Inject constructor(
     private fun resultSuccess() {
         state.update { it.copy(isLoading = false, error = null) }
     }
+
+    fun updateInitialState(categoryId: Long) {
+        state.update { it.copy(
+            categoryId = categoryId,
+        ) }
+    }
+
     // endregion
 }

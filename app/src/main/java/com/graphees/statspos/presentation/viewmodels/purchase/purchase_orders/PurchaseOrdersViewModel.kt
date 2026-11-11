@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,6 +33,8 @@ class PurchaseOrdersViewModel @Inject constructor(
         val totalPurchaseOrders: Int = 0,
 
         val search: String = "",
+        val fromDate: LocalDate = LocalDate.now(),
+        val toDate: LocalDate = LocalDate.now(),
 
         val isLoading: Boolean = false,
         val error: String? = null,
@@ -107,6 +110,14 @@ class PurchaseOrdersViewModel @Inject constructor(
         if(HP.appSettings.instantSearch == true)
             loadData()
     }
+    fun onFromDateChange(value: LocalDate) {
+        state.update { it.copy(fromDate = value) }
+        loadData()
+    }
+    fun onToDateChange(value: LocalDate) {
+        state.update { it.copy(toDate = value) }
+        loadData()
+    }
     // endregion
 
     // region Network calls
@@ -119,6 +130,8 @@ class PurchaseOrdersViewModel @Inject constructor(
 
             val params = JsonObject().apply {
                 addProperty("text", state.value.search)
+                addProperty("fromDate", HP.getZonedDate(state.value.fromDate))
+                addProperty("toDate", HP.getZonedDate(state.value.toDate))
             }
 
             when (val result = api.loadPurchaseOrders(params)) {

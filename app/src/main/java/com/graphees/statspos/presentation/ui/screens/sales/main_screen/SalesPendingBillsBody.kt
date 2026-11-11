@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -30,7 +28,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,16 +40,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.domain.models.DropdownItem
-import com.graphees.statspos.domain.models.main.Branches
-import com.graphees.statspos.domain.models.reports.accounts.AccountReport
-import com.graphees.statspos.domain.models.sales.SalesBill
 import com.graphees.statspos.domain.models.sales.SalesBills
 import com.graphees.statspos.presentation.ui.components.AppFloatingActionButton
-import com.graphees.statspos.presentation.ui.components.AppIcon
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.BottomHeading
 import com.graphees.statspos.presentation.ui.components.ConfirmDialog
-import com.graphees.statspos.presentation.ui.components.DeleteIcon
+import com.graphees.statspos.presentation.ui.components.DeleteIconButton
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListHeading
@@ -60,11 +53,10 @@ import com.graphees.statspos.presentation.ui.components.ListHorizontalDivider
 import com.graphees.statspos.presentation.ui.components.ListImageView
 import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
-import com.graphees.statspos.presentation.ui.components.PrintIcon
+import com.graphees.statspos.presentation.ui.components.PrintIconButton
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.components.UpgradeToPremiumBottomSheet
-import com.graphees.statspos.presentation.ui.screens.main.main.BranchesList
 import com.graphees.statspos.presentation.ui.screens.sales.invoices.salesBillA4
 import com.graphees.statspos.presentation.ui.screens.sales.invoices.salesBillThermal
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
@@ -72,7 +64,6 @@ import com.graphees.statspos.presentation.ui.utils.cropPdf
 import com.graphees.statspos.presentation.ui.utils.openPdf
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.sales.main_screen.SalesPendingBillsViewModel
-import com.graphees.statspos.utils.DB
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.PasswordFor
 import com.graphees.statspos.utils.SocketManager
@@ -427,7 +418,7 @@ private fun ListCard(
 
                     if (HP.userRights.printDuplicates == true) {
                         Spacer(Modifier.width(8.dp))
-                        PrintIcon {
+                        PrintIconButton {
                             onPrintClick(item)
                         }
                     }
@@ -532,7 +523,7 @@ private fun ListCard(
                 }
 
                 Spacer(Modifier.width(8.dp))
-                DeleteIcon {
+                DeleteIconButton {
                     onDeleteClick(item)
                 }
             }

@@ -57,7 +57,7 @@ fun AddUpdateSubCategoryScreen(
     sharedViewModel: SharedViewModel,
     updateId: Long = 0,
     isUpdate: Boolean = false,
-    categoryId: Long = 0,
+    categoryId: Long,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current

@@ -3,6 +3,7 @@ package com.graphees.statspos.domain.models.purchase
 data class PurchaseOrders(
     var id: Long? = null,
     var purchaseOrderName: String? = null,
+    var date: String? = null,
     var remarks: String? = null,
 
     val clientId:Int? = null,

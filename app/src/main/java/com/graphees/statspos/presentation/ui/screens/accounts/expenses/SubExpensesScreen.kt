@@ -8,14 +8,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -31,20 +30,24 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
 import com.graphees.statspos.domain.models.accounts.Accounts
 import com.graphees.statspos.presentation.ui.components.AppFloatingActionButton
 import com.graphees.statspos.presentation.ui.components.BottomHeading
-import com.graphees.statspos.presentation.ui.components.ComboBox
 import com.graphees.statspos.presentation.ui.components.ConfirmDialog
-import com.graphees.statspos.presentation.ui.components.DeleteIcon
+import com.graphees.statspos.presentation.ui.components.DeleteIconButton
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListMainLabel
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
-import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
-import com.graphees.statspos.presentation.ui.components.SearchTextbox
+import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.accounts.expenses.SubExpensesViewModel
@@ -53,18 +56,74 @@ import com.graphees.statspos.utils.PasswordFor
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
 import com.graphees.statspos.utils.showToast
+import kotlinx.serialization.Serializable
+
+private sealed class SubRoutes : NavKey {
+    @Serializable
+    data object Home : SubRoutes()
+
+    @Serializable
+    data class AddUpdateSubExpense(val updateId: Long, val isUpdate: Boolean, val expenseId: Long) :
+        SubRoutes()
+}
 
 @Composable
-fun SubExpensesBody(
+fun SubExpensesScreen(
     sharedViewModel: SharedViewModel,
-    snackbarHostState: SnackbarHostState,
-    onAddButtonClick: (Long, Boolean, Long) -> Unit,
+    expenseId: Long,
+    onBack: () -> Unit,
+) {
+    val backStack = rememberNavBackStack(SubRoutes.Home)
+    fun navigate(key: NavKey) {
+        if (backStack.lastOrNull() != key) {
+            backStack.add(key)
+        }
+    }
+    NavDisplay(
+        backStack = backStack,
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
+        entryProvider = entryProvider {
+            entry<SubRoutes.Home> {
+                Home(
+                    sharedViewModel = sharedViewModel,
+                    expenseId = expenseId,
+                    onAddButtonClick = { updateId, isUpdated ->
+                        navigate(SubRoutes.AddUpdateSubExpense(updateId, isUpdated, expenseId))
+                    },
+                    onBack = onBack,
+                )
+            }
+            entry<SubRoutes.AddUpdateSubExpense> { key ->
+                AddUpdateSubExpenseScreen (
+                    sharedViewModel = sharedViewModel,
+                    updateId = key.updateId,
+                    isUpdate = key.isUpdate,
+                    expenseId = key.expenseId,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+        }
+    )
+}
+
+@Composable
+private fun Home(
+    sharedViewModel: SharedViewModel,
+    expenseId: Long,
+    onAddButtonClick: (Long, Boolean) -> Unit,
+    onBack: () -> Unit,
 ) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val viewModel = hiltViewModel<SubExpensesViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
+    val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showPasswordDialog by remember { mutableStateOf(false) }
@@ -78,6 +137,17 @@ fun SubExpensesBody(
                 showErrorDialog = true
             }
         )
+    }
+
+    // Edit data when update
+    LaunchedEffect(Unit) {
+        if (!state.hasLoadedOnce) {
+            viewModel.updateInitialState(
+                expenseId = expenseId
+            )
+            viewModel.loadData()
+            viewModel.setHasLoadedOnce(true)
+        }
     }
 
     val sharedViewModelState by sharedViewModel.state.collectAsStateWithLifecycle()
@@ -131,20 +201,26 @@ fun SubExpensesBody(
 
     Scaffold(
         floatingActionButton = {
-            AppFloatingActionButton {
-                if (state.expense.id == 0L) {
-                    viewModel.onEvent(UiEvent.ShowSnackbar("Please select expense"))
-                } else {
-                    onAddButtonClick(0L, false, state.expense.id)
-                }
+            AppFloatingActionButton(
+                modifier = Modifier
+                    .navigationBarsPadding()
+            ) {
+                onAddButtonClick(0L, false)
             }
         },
+        topBar = {
+            TopAppBar(
+                onNavigationClick = {
+                    onBack()
+                },
+                title = "Sub-Expenses",
+            )
+        }
     ) { innerPadding ->
-        Box(Modifier.padding(innerPadding))
-
         Box(
             Modifier
                 .fillMaxSize()
+                .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
             Column(
@@ -155,33 +231,14 @@ fun SubExpensesBody(
                     modifier = Modifier
                         .weight(1f)
                 ) {
-                    SearchBox {
-                        ComboBox(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            selectedItem = state.expense,
-                            items = HP.expenses,
-                            onItemSelected = { dropdownItem ->
-                                viewModel.onExpenseSelected(dropdownItem)
-                                viewModel.loadData()
-                            },
-                            label = {
-                                Text("Expense")
-                            },
-                            placeholder = {
-                                PlaceHolder(text = "Expense")
-                            },
-                            addNone = true,
-                        )
-                        SearchTextbox(
-                            value = state.search,
-                            onValueChange = viewModel::onSearchChange,
-                            onSearchClick = {
-                                viewModel.loadData()
-                                keyboardController?.hide()
-                            },
-                        )
-                    }
+                    SearchBox(
+                        value = state.search,
+                        onValueChange = viewModel::onSearchChange,
+                        onSearchClick = {
+                            viewModel.loadData()
+                            keyboardController?.hide()
+                        },
+                    )
                     BodyList(
                         modifier = Modifier
                             .weight(1f)
@@ -192,7 +249,7 @@ fun SubExpensesBody(
                         },
                         items = state.list,
                         onItemClick = { subExpense ->
-                            onAddButtonClick(subExpense.id!!, true, state.expense.id)
+                            onAddButtonClick(subExpense.id!!, true)
                         },
                         onDeleteClick = { subExpense ->
                             selectedId = subExpense.id!!
@@ -270,7 +327,7 @@ private fun ListCard(
 
             if (HP.userRights.deleteAnything == true) {
                 Spacer(Modifier.width(8.dp))
-                DeleteIcon {
+                DeleteIconButton {
                     onDeleteClick(item)
                 }
             }

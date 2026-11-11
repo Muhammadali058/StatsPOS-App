@@ -36,6 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.ConfirmDialog
+import com.graphees.statspos.presentation.ui.components.DateTextbox
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
@@ -47,6 +48,7 @@ import com.graphees.statspos.presentation.viewmodels.purchase.purchase_orders.Ad
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
 import com.graphees.statspos.utils.showToast
+import java.time.LocalDate
 
 @Composable
 fun AddUpdatePurchaseOrderScreen(
@@ -175,8 +177,10 @@ fun AddUpdatePurchaseOrderScreen(
                 ) {
                     Body(
                         purchaseOrderName = state.purchaseOrderName,
+                        date = state.date,
                         remarks = state.remarks,
                         onPackageNameChange = viewModel::onPurchaseOrderNameChange,
+                        onDateChange = viewModel::onDateChange,
                         onRemarksChange = viewModel::onRemarksChange,
                     )
                 }
@@ -211,8 +215,10 @@ fun AddUpdatePurchaseOrderScreen(
 @Composable
 private fun Body(
     purchaseOrderName: String,
+    date: LocalDate,
     remarks: String,
     onPackageNameChange: (String) -> Unit,
+    onDateChange: (LocalDate) -> Unit,
     onRemarksChange: (String) -> Unit,
 ) {
     TextboxOutlined(
@@ -223,6 +229,13 @@ private fun Body(
         label = {
             Text("Order Name")
         }
+    )
+    DateTextbox(
+        modifier = Modifier
+            .fillMaxWidth(),
+        date = date,
+        onDateChange = onDateChange,
+        label = "Date"
     )
     TextboxOutlined(
         value = remarks,
@@ -247,7 +260,9 @@ private fun Prev() {
         Body(
             purchaseOrderName = "",
             remarks = "",
+            date = LocalDate.now(),
             onPackageNameChange = {},
+            onDateChange = {},
             onRemarksChange = {},
         )
     }

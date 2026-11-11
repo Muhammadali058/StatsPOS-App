@@ -31,7 +31,9 @@ class SubBanksViewModel @Inject constructor(
         val totalSubBanks: Int = 0,
 
         val search: String = "",
-        val bank: DropdownItem = HP.getNoneDropdownItem(),
+        val bankId: Long = 0L,
+
+        val hasLoadedOnce: Boolean = false,
 
         val isLoading: Boolean = false,
         val error: String? = null,
@@ -103,8 +105,8 @@ class SubBanksViewModel @Inject constructor(
         if(HP.appSettings.instantSearch == true)
             loadData()
     }
-    fun onBankSelected(value: DropdownItem) {
-        state.update { it.copy(bank = value) }
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
     }
     // endregion
 
@@ -117,7 +119,7 @@ class SubBanksViewModel @Inject constructor(
             beforeRequest()
 
             val params = JsonObject().apply {
-                addProperty("bankId", state.value.bank.id)
+                addProperty("bankId", state.value.bankId)
                 addProperty("text", state.value.search)
             }
 
@@ -194,5 +196,12 @@ class SubBanksViewModel @Inject constructor(
     private fun resultSuccess() {
         state.update { it.copy(isLoading = false, error = null) }
     }
+
+    fun updateInitialState(bankId: Long) {
+        state.update { it.copy(
+            bankId = bankId,
+        ) }
+    }
+
     // endregion
 }

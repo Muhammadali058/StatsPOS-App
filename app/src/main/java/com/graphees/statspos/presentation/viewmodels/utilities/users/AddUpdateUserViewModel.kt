@@ -720,6 +720,7 @@ class AddUpdateUserViewModel @Inject constructor(
                     it.copy(
                         sales = true,
                         printDuplicates = true,
+                        searchItems = true,
                     )
                 }
             }

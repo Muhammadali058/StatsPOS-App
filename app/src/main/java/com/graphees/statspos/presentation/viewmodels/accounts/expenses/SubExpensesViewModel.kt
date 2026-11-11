@@ -31,8 +31,9 @@ class SubExpensesViewModel @Inject constructor(
         val totalSubExpenses: Int = 0,
 
         val search: String = "",
-        val expenseName: String = "",
-        val expense: DropdownItem = HP.getNoneDropdownItem(),
+        val expenseId: Long = 0L,
+
+        val hasLoadedOnce: Boolean = false,
 
         val isLoading: Boolean = false,
         val error: String? = null,
@@ -104,8 +105,8 @@ class SubExpensesViewModel @Inject constructor(
         if(HP.appSettings.instantSearch == true)
             loadData()
     }
-    fun onExpenseSelected(value: DropdownItem) {
-        state.update { it.copy(expense = value) }
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
     }
     // endregion
 
@@ -118,7 +119,7 @@ class SubExpensesViewModel @Inject constructor(
             beforeRequest()
 
             val params = JsonObject().apply {
-                addProperty("expenseId", state.value.expense.id)
+                addProperty("expenseId", state.value.expenseId)
                 addProperty("text", state.value.search)
             }
 
@@ -195,5 +196,12 @@ class SubExpensesViewModel @Inject constructor(
     private fun resultSuccess() {
         state.update { it.copy(isLoading = false, error = null) }
     }
+
+    fun updateInitialState(expenseId: Long) {
+        state.update { it.copy(
+            expenseId = expenseId,
+        ) }
+    }
+
     // endregion
 }

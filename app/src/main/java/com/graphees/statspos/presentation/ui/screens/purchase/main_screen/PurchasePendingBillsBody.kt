@@ -12,10 +12,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,6 +39,7 @@ import com.graphees.statspos.domain.models.purchase.PurchaseBills
 import com.graphees.statspos.presentation.ui.components.AppFloatingActionButton
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.BottomHeading
+import com.graphees.statspos.presentation.ui.components.BottomSheet
 import com.graphees.statspos.presentation.ui.components.ConfirmDialog
 import com.graphees.statspos.presentation.ui.components.DeleteIconButton
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
@@ -51,10 +54,12 @@ import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.components.UpgradeToPremiumBottomSheet
 import com.graphees.statspos.presentation.ui.screens.purchase.invoices.purchaseBillA4
+import com.graphees.statspos.presentation.ui.screens.purchase.purchase_bill.PurchaseVendorBottomSheet
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.ui.utils.openPdf
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.purchase.main_screen.PurchasePendingBillsViewModel
+import com.graphees.statspos.presentation.viewmodels.purchase.purchase_bill.AddUpdatePurchaseViewModel
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.PasswordFor
 import com.graphees.statspos.utils.SocketManager
@@ -62,6 +67,7 @@ import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
 import com.graphees.statspos.utils.showToast
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PurchasePendingBillsBody(
     sharedViewModel: SharedViewModel,
@@ -71,6 +77,10 @@ fun PurchasePendingBillsBody(
 ) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showBottomSheet by remember { mutableStateOf(false) }
+
+    val purchaseViewModel = hiltViewModel<AddUpdatePurchaseViewModel>()
     val viewModel = hiltViewModel<PurchasePendingBillsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
@@ -201,14 +211,39 @@ fun PurchasePendingBillsBody(
         },
         floatingActionButton = {
             AppFloatingActionButton {
-                viewModel.makeNewBill { invoiceId ->
-                    sharedViewModel.notifyBillSaved()
-                    onAddUpdateButtonClick(invoiceId, true, null)
-                }
+                showBottomSheet = true
             }
         },
     ) { innerPadding ->
         Box(Modifier.padding(innerPadding))
+
+        // Bottom Sheet
+        if (showBottomSheet) {
+            BottomSheet(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                sheetState = sheetState,
+                onDismissRequest = {
+                    showBottomSheet = false
+                    purchaseViewModel.clearTextboxes()
+                },
+            ) {
+                PurchaseVendorBottomSheet (
+                    isCreatingNewBill = true,
+                    purchaseViewModel = purchaseViewModel,
+                    onClick = {
+                        showBottomSheet = false
+                        viewModel.makeNewBill(
+                            purchaseViewModel.getFormData()
+                        ) { invoiceId ->
+                            sharedViewModel.notifyBillSaved()
+                            onAddUpdateButtonClick(invoiceId, true, null)
+                            purchaseViewModel.clearTextboxes()
+                        }
+                    },
+                )
+            }
+        }
 
         Box(
             Modifier

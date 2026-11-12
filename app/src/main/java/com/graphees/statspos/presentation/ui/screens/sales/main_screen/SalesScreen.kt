@@ -45,17 +45,6 @@ fun SalesScreen(
                 tabs = tabs,
             )
 
-//        SegmentedTabs(
-//            tabs = listOf("Pending Bills", "Posted Bills"),
-//            selectedIndex = selectedTab,
-//            onTabSelected = {
-//                selectedTab = it
-//                scope.launch {
-//                    pagerState.animateScrollToPage(selectedTab)
-//                }
-//            }
-//        )
-
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier

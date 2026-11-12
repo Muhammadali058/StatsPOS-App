@@ -144,7 +144,7 @@ class SalesPendingBillsViewModel @Inject constructor(
         }
     }
 
-    fun makeNewBill(onSuccess: (Long) -> Unit) {
+    fun makeNewBill(sale: Sales, onSuccess: (Long) -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -158,7 +158,10 @@ class SalesPendingBillsViewModel @Inject constructor(
                     resultSuccess()
 
                     val invoiceId = result.data.get("invoiceId").asLong
-                    tempClose(invoiceId) {
+                    sale.salesId = invoiceId
+                    sale.isPendingBill = false
+
+                    tempClose(sale) {
                         onSuccess(invoiceId)
                     }
                 }
@@ -166,23 +169,23 @@ class SalesPendingBillsViewModel @Inject constructor(
         }
     }
 
-    fun tempClose(invoiceId: Long, onSuccess: () -> Unit) {
+    fun tempClose(sale: Sales, onSuccess: () -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
 
             beforeRequest()
 
-            val sale = Sales(
-                salesId = invoiceId,
-
-                date = HP.getZonedDate(LocalDate.now()),
-                dueDate = HP.getZonedDate(LocalDate.now().plusDays(7)),
-                isDiscRsPer = HP.settings.isDefaultDiscRs == true,
-                isRetail = HP.settings.isDefaultRateRetail == true,
-
-                isPendingBill = false,
-            )
+//            val sale1 = Sales(
+//                salesId = invoiceId,
+//
+//                date = HP.getZonedDate(LocalDate.now()),
+//                dueDate = HP.getZonedDate(LocalDate.now().plusDays(7)),
+//                isDiscRsPer = HP.settings.isDefaultDiscRs == true,
+//                isRetail = HP.settings.isDefaultRateRetail == true,
+//
+//                isPendingBill = false,
+//            )
 
             when (val result = api.tempClose(sale)) {
                 is Resource.Error -> resultError(result.error)

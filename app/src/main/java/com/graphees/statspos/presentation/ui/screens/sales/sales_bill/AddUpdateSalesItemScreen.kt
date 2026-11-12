@@ -348,7 +348,9 @@ fun AddUpdateSalesItemScreen(
                     if (state.isSaving) {
                         AppCircularProgressIndicator()
                     } else {
-                        SaveButton {
+                        SaveButton(
+                            text = if(isUpdate)  "Update Item" else "Add Item"
+                        ) {
                             onSaveButtonClick()
                         }
                     }

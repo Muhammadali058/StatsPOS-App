@@ -345,7 +345,7 @@ class AddUpdatePurchaseViewModel @Inject constructor(
         }
     }
 
-    private fun getBalance(accountId: Long) {
+    private fun getBalance(accountId: Long, checkAccount: Boolean = true) {
         viewModelScope.launch {
             if (accountId != 0L) {
                 when (val result = accountsRepo.getBalance(accountId)) {
@@ -363,18 +363,20 @@ class AddUpdatePurchaseViewModel @Inject constructor(
                             )
                         }
 
-                        // Auto Credit Select
-                        if (account.isCredit!! && HP.userRights.creditBill!!) {
-                            if(state.value.isNewBill) {
-                                state.update { it.copy(purchaseOn = HP.purchaseOn[1]) }
+                        if(checkAccount) {
+                            // Auto Credit Select
+                            if (account.isCredit!! && HP.userRights.creditBill!!) {
+                                if (state.value.isNewBill) {
+                                    state.update { it.copy(purchaseOn = HP.purchaseOn[1]) }
+                                }
                             }
-                        }
 
-                        if(HP.getDoubleValue(account.disc.toString()) > 0.0){
-                            if(account.isDiscRsPer!!){
-                                state.update { it.copy(vendorDiscount = "Rs.${account.disc}") }
-                            }else{
-                                state.update { it.copy(vendorDiscount = "${account.disc}%") }
+                            if (HP.getDoubleValue(account.disc.toString()) > 0.0) {
+                                if (account.isDiscRsPer!!) {
+                                    state.update { it.copy(vendorDiscount = "Rs.${account.disc}") }
+                                } else {
+                                    state.update { it.copy(vendorDiscount = "${account.disc}%") }
+                                }
                             }
                         }
                     }
@@ -451,32 +453,34 @@ class AddUpdatePurchaseViewModel @Inject constructor(
         }
 
         if (purchase.vendorId!! != 0L)
-            getBalance(purchase.vendorId!!)
+            getBalance(purchase.vendorId!!, false)
     }
 
-    private fun clearTextboxes() {
+    fun clearTextboxes() {
         state.update {
             it.copy(
-                vendorId = 0L,
-                vendorName = "",
+                total = 0.0,
+                isDiscRsPer = HP.settings.isDefaultDiscRs!!,
+                disc = "",
+                totalDisc = 0.0,
 
                 expense = "",
                 refInvoiceNo = "",
-                remarks = "",
 
+                date = LocalDate.now(),
                 purchaseOn = HP.purchaseOn[0],
                 purchaseType = HP.purchaseType[0],
                 mop = HP.mop[0],
+
+                vendorId = 0L,
+                vendorName = "",
                 bank = HP.getNoneDropdownItem(),
                 subBank = HP.getNoneDropdownItem(),
                 supplier = HP.getNoneDropdownItem(),
                 warehouse = HP.getNoneDropdownItem(),
 
+                remarks = "",
                 balance = "Balance: 0 (P)",
-                isDiscRsPer = HP.settings.isDefaultDiscRs!!,
-                disc = "",
-                totalDisc = 0.0,
-                date = LocalDate.now(),
 
                 // Extras
                 isPendingBill = false,

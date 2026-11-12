@@ -1,13 +1,14 @@
 package com.graphees.statspos.presentation.ui.components
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.graphees.statspos.R
 import com.graphees.statspos.domain.models.DropdownItem
+import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.utils.HP
-
 
 @Composable
 fun MOPSection(
@@ -17,10 +18,12 @@ fun MOPSection(
     onMOPChange: (DropdownItem) -> Unit,
     onBankSelected: (DropdownItem) -> Unit,
     onSubBankSelected: (DropdownItem) -> Unit,
+    padding: PaddingValues = ConstantPaddings.BODY_HORIZONTAL,
 ) {
     ExpandableSection(
         title = "Mode of Payment",
         icon = R.drawable.mop,
+        padding = padding,
     ) {
         ComboBox(
             modifier = Modifier

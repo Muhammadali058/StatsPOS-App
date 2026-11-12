@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -41,6 +43,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.graphees.statspos.domain.models.accounts.Banks
 import com.graphees.statspos.presentation.ui.components.AppFloatingActionButton
+import com.graphees.statspos.presentation.ui.components.AppIconButton
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.BottomHeading
 import com.graphees.statspos.presentation.ui.components.ConfirmDialog
@@ -358,9 +361,14 @@ private fun ListCard(
                         fontWeight = FontWeight.SemiBold,
                     )
                     Spacer(Modifier.width(8.dp))
-                    EditIconButton {
-                        onEditClick(item)
-                    }
+                    AppIconButton(
+                        icon = Icons.Default.ArrowForward,
+                        onClick = {
+                            onItemClick(item)
+                        },
+                        buttonSize = 26.dp,
+                        size = 20.dp,
+                    )
                 }
                 // endregion
 
@@ -384,6 +392,10 @@ private fun ListCard(
                         DeleteIconButton {
                             onDeleteClick(item)
                         }
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    EditIconButton {
+                        onEditClick(item)
                     }
                 }
             }

@@ -28,11 +28,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.R
 import com.graphees.statspos.domain.models.DropdownItem
+import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.graphees.statspos.presentation.ui.components.AppSwitch
 import com.graphees.statspos.presentation.ui.components.BalanceBox
 import com.graphees.statspos.presentation.ui.components.ComboBox
@@ -48,9 +48,7 @@ import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.SaveButton
 import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
-import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.sales.sales_bill.AddUpdateSalesViewModel
-import com.graphees.statspos.presentation.viewmodels.sales.sales_bill.SalesItemsViewModel
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.PasswordFor
 import com.graphees.statspos.utils.UiEvent
@@ -58,16 +56,16 @@ import com.graphees.statspos.utils.checkEvent
 import java.time.LocalDate
 
 @Composable
-fun SalesBillBody(
-    sharedViewModel: SharedViewModel,
+fun SalesCustomerBottomSheet(
+    isCreatingNewBill: Boolean = false,
     salesViewModel: AddUpdateSalesViewModel,
-    salesItemsViewModel: SalesItemsViewModel,
-    snackbarHostState: SnackbarHostState,
-    isPendingBill: Boolean,
-    isPostedBill: Boolean,
+    onRetailChange: (Boolean) -> Unit,
+    onClick: () -> Unit,
+
 ) {
     val state by salesViewModel.state.collectAsStateWithLifecycle()
     val event by salesViewModel.event.collectAsState(UiEvent.Idle)
+    val snackbarHostState = remember { SnackbarHostState() }
     var showErrorDialog by remember { mutableStateOf(false) }
     var showReturnBillPasswordDialog by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
@@ -93,7 +91,7 @@ fun SalesBillBody(
     }
 
     if (showReturnBillPasswordDialog) {
-        if(state.salesType.id == 2L) {
+        if (state.salesType.id == 2L) {
             PasswordDialog(
                 passwordFor = PasswordFor.RETURN_SALES_BILL,
                 onDismiss = {
@@ -104,7 +102,7 @@ fun SalesBillBody(
                     showReturnBillPasswordDialog = false
                 }
             )
-        }else{
+        } else {
             showReturnBillPasswordDialog = false
         }
     }
@@ -164,24 +162,7 @@ fun SalesBillBody(
                     change = state.change,
                     remarks = state.remarks,
                     onIsRetailChange = { value ->
-                        salesViewModel.onIsRetailChange(value)
-                        if (isPendingBill || isPostedBill) {
-                            salesViewModel.changeBillType(value) {
-                                salesItemsViewModel.loadData(salesViewModel::updateTotal)
-
-                                if (isPendingBill) {
-                                    salesViewModel.tempClose {
-                                        sharedViewModel.notifyBillSaved()
-                                    }
-                                }
-
-                                if (isPostedBill) {
-                                    salesViewModel.postBill {
-                                        sharedViewModel.notifyBillPosted()
-                                    }
-                                }
-                            }
-                        }
+                        onRetailChange(value)
                     },
                     onSupplierSelected = salesViewModel::onSupplierSelected,
                     onPaymentChange = salesViewModel::onPaymentChange,
@@ -195,10 +176,23 @@ fun SalesBillBody(
                     onMOPChange = salesViewModel::onMOPChange,
                     onBankSelected = salesViewModel::onBankSelected,
                     onSubBankSelected = salesViewModel::onSubBankSelected,
+                    padding = PaddingValues(),
                 )
                 Spacer(Modifier.height(8.dp))
             }
+
+            if (state.isSaving) {
+                AppCircularProgressIndicator()
+            } else {
+                SaveButton(
+                    text = if (isCreatingNewBill) "Create new bill" else "Save"
+                ) {
+                    onClick()
+                }
+            }
         }
+
+
 
         if (state.isLoading) {
             ProgressBarLayout()
@@ -232,7 +226,7 @@ private fun Basic(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(ConstantPaddings.BODY_HORIZONTAL)
+//            .padding(ConstantPaddings.BODY_HORIZONTAL)
     ) {
         Dropdown(
             value = selectedCustomerName,
@@ -362,6 +356,7 @@ private fun Others(
     ExpandableSection(
         title = "Payment & Supplier",
         icon = R.drawable.payment,
+        padding = PaddingValues(),
     ) {
         if (HP.settings.fourRateSystem == false) {
             Spacer(Modifier.height(8.dp))
@@ -428,76 +423,5 @@ private fun Others(
             },
             singleLine = false,
         )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun BodyPrev() {
-    val scrollState = rememberScrollState()
-
-    Column(
-        Modifier
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Column(
-            Modifier
-                .weight(1f)
-                .verticalScroll(scrollState),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Basic(
-                0L,
-                "",
-                "",
-                "",
-                "",
-                true,
-                0.0,
-                LocalDate.now(),
-                LocalDate.now(),
-                HP.salesOn[0],
-                HP.salesType[0],
-                { },
-                { },
-                { },
-                { },
-                { },
-                { },
-                { },
-                { },
-                { },
-            )
-            Spacer(Modifier.height(8.dp))
-            Others(
-                true,
-                HP.getNoneDropdownItem(),
-                "",
-                true,
-                "",
-                "",
-                {},
-                {},
-                {},
-                {},
-                {},
-            )
-            MOPSection(
-                mop = HP.mop[0],
-                bank = HP.getNoneDropdownItem(),
-                subBank = HP.getNoneDropdownItem(),
-                onMOPChange = {},
-                onBankSelected = {},
-                onSubBankSelected = {},
-            )
-        }
-        Box(
-            modifier = Modifier
-                .padding(16.dp),
-        ) {
-            SaveButton {}
-        }
-
     }
 }

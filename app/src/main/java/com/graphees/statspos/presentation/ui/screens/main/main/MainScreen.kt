@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Build
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -49,17 +48,17 @@ import com.graphees.statspos.presentation.ui.screens.main.login.CloseAppScreen
 import com.graphees.statspos.presentation.ui.screens.main.main.premium.HelpScreen
 import com.graphees.statspos.presentation.ui.screens.main.main.premium.PaymentScreen
 import com.graphees.statspos.presentation.ui.screens.main.main.premium.SubscriptionsScreen
-import com.graphees.statspos.presentation.ui.screens.purchase.purchase_bill.PurchaseBillScreen
 import com.graphees.statspos.presentation.ui.screens.purchase.purchase_bill.ViewPurchaseBillItemsScreen
 import com.graphees.statspos.presentation.ui.screens.purchase.purchase_orders.PurchaseOrdersScreen
+import com.graphees.statspos.presentation.ui.screens.purchase.purchase_bill.PurchaseItemsScreen
 import com.graphees.statspos.presentation.ui.screens.reports.accounts.AccountsReportsScreen
 import com.graphees.statspos.presentation.ui.screens.reports.items.ItemsReportsScreen
 import com.graphees.statspos.presentation.ui.screens.reports.profit.ProfitReportsScreen
 import com.graphees.statspos.presentation.ui.screens.reports.purchase.PurchaseReportsScreen
 import com.graphees.statspos.presentation.ui.screens.reports.sales.SalesReportsScreen
 import com.graphees.statspos.presentation.ui.screens.reports.stock.StockReportsScreen
-import com.graphees.statspos.presentation.ui.screens.sales.sales_bill.SalesBillScreen
 import com.graphees.statspos.presentation.ui.screens.sales.sales_bill.ViewSalesBillItemsScreen
+import com.graphees.statspos.presentation.ui.screens.sales.sales_bill.SalesItemsScreen
 import com.graphees.statspos.presentation.ui.screens.shopping_app.ShoppingAppScreen
 import com.graphees.statspos.presentation.ui.screens.utilities.settings.SettingsScreen
 import com.graphees.statspos.presentation.ui.screens.utilities.users.UpdateUserScreen
@@ -288,7 +287,7 @@ fun MainScreen(
 
             // region Sales
             entry<TopRoutes.AddUpdateSales> { key ->
-                SalesBillScreen(
+                SalesItemsScreen (
                     sharedViewModel = sharedViewModel,
                     invoiceId = key.updateId,
                     isPendingBill = key.isPendingBill,
@@ -311,7 +310,7 @@ fun MainScreen(
             // endregion
             // region Purchase
             entry<TopRoutes.AddUpdatePurchase> { key ->
-                PurchaseBillScreen(
+                PurchaseItemsScreen (
                     sharedViewModel = sharedViewModel,
                     invoiceId = key.updateId,
                     isPendingBill = key.isPendingBill,

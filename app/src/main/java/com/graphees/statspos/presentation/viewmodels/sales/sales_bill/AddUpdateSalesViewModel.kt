@@ -357,7 +357,7 @@ class AddUpdateSalesViewModel @Inject constructor(
         }
     }
 
-    private fun getBalance(accountId: Long) {
+    private fun getBalance(accountId: Long, checkAccount: Boolean = true) {
         viewModelScope.launch {
             if (accountId != 0L) {
                 when (val result = accountsRepo.getBalance(accountId)) {
@@ -374,42 +374,44 @@ class AddUpdateSalesViewModel @Inject constructor(
                             )
                         }
 
-                        // Auto Credit Select
-                        if (HP.settings.autoCreditSelect!! && HP.userRights.creditBill!!) {
-                            state.update { it.copy(salesOn = HP.salesOn[1]) }
-                        } else {
-                            if(state.value.isNewBill) {
-                                if (account.isCredit!! && HP.userRights.creditBill!!) {
-                                    state.update { it.copy(salesOn = HP.salesOn[1]) }
+                        if(checkAccount) {
+                            // Auto Credit Select
+                            if (HP.settings.autoCreditSelect!! && HP.userRights.creditBill!!) {
+                                state.update { it.copy(salesOn = HP.salesOn[1]) }
+                            } else {
+                                if (state.value.isNewBill) {
+                                    if (account.isCredit!! && HP.userRights.creditBill!!) {
+                                        state.update { it.copy(salesOn = HP.salesOn[1]) }
+                                    }
                                 }
                             }
-                        }
 
-                        // Due Days
-                        if (account.dueDays!! > 0) {
-                            state.update {
-                                it.copy(
-                                    dueDate = LocalDate.now().plusDays(account.dueDays.toLong())
-                                )
-                            }
-                        }
-
-                        // Select Supplier
-                        if (account.supplierId!! != 0L) {
-                            state.update {
-                                it.copy(
-                                    supplier = HP.getDropdownById(
-                                        account.supplierId!!,
-                                        HP.suppliers
+                            // Due Days
+                            if (account.dueDays!! > 0) {
+                                state.update {
+                                    it.copy(
+                                        dueDate = LocalDate.now().plusDays(account.dueDays.toLong())
                                     )
-                                )
+                                }
                             }
-                        }
 
-                        // Select Retail
-                        if (HP.settings.fourRateSystem == false) {
-                            if (HP.settings.autoRetailChange!!) {
-                                state.update { it.copy(isRetail = account.isRetail!!) }
+                            // Select Supplier
+                            if (account.supplierId!! != 0L) {
+                                state.update {
+                                    it.copy(
+                                        supplier = HP.getDropdownById(
+                                            account.supplierId!!,
+                                            HP.suppliers
+                                        )
+                                    )
+                                }
+                            }
+
+                            // Select Retail
+                            if (HP.settings.fourRateSystem == false) {
+                                if (HP.settings.autoRetailChange!!) {
+                                    state.update { it.copy(isRetail = account.isRetail!!) }
+                                }
                             }
                         }
                     }
@@ -532,35 +534,39 @@ class AddUpdateSalesViewModel @Inject constructor(
         }
 
         if (sale.customerId!! != 0L)
-            getBalance(sale.customerId!!)
+            getBalance(sale.customerId!!, false)
     }
 
-    private fun clearTextboxes() {
+    fun clearTextboxes() {
         state.update {
             it.copy(
-                customerId = 0L,
-                selectedCustomerName = "",
-                customerName = "",
-                payment = "",
-                change = "",
-                remarks = "",
-
-                salesOn = HP.salesOn[0],
-                salesType = HP.salesType[0],
-                mop = HP.mop[0],
-                bank = HP.getNoneDropdownItem(),
-                subBank = HP.getNoneDropdownItem(),
-                supplier = HP.getNoneDropdownItem(),
-
-                balance = "Balance: 0 (R)",
+                total = 0.0,
+                cost = 0.0,
+                profit = 0.0,
                 isDiscRsPer = HP.settings.isDefaultDiscRs!!,
                 disc = "",
                 totalDisc = 0.0,
                 tax = "",
+
+                payment = "",
+                change = "",
+                salesOn = HP.salesOn[0],
+                salesType = HP.salesType[0],
+                mop = HP.mop[0],
+
+                customerId = 0L,
+                selectedCustomerName = "",
+                customerName = "",
+                bank = HP.getNoneDropdownItem(),
+                subBank = HP.getNoneDropdownItem(),
+                supplier = HP.getNoneDropdownItem(),
+
+                isRetail = HP.settings.isDefaultRateRetail!!,
                 date = LocalDate.now(),
                 dueDate = LocalDate.now(),
-                isRetail = HP.settings.isDefaultRateRetail!!,
                 isEstimatedBill = false,
+                remarks = "",
+                balance = "Balance: 0 (R)",
 
                 // Extras
                 isPendingBill = false,

@@ -143,7 +143,7 @@ class PurchasePendingBillsViewModel @Inject constructor(
         }
     }
 
-    fun makeNewBill(onSuccess: (Long) -> Unit) {
+    fun makeNewBill(purchase: Purchase, onSuccess: (Long) -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
@@ -157,7 +157,10 @@ class PurchasePendingBillsViewModel @Inject constructor(
                     resultSuccess()
 
                     val invoiceId = result.data.get("invoiceId").asLong
-                    tempClose(invoiceId) {
+                    purchase.purchaseId = invoiceId
+                    purchase.isPendingBill = false
+
+                    tempClose(purchase) {
                         onSuccess(invoiceId)
                     }
                 }
@@ -165,21 +168,21 @@ class PurchasePendingBillsViewModel @Inject constructor(
         }
     }
 
-    fun tempClose(invoiceId: Long, onSuccess: () -> Unit) {
+    fun tempClose(purchase: Purchase, onSuccess: () -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
 
             beforeRequest()
 
-            val purchase = Purchase(
-                purchaseId = invoiceId,
-
-                date = HP.getZonedDate(LocalDate.now()),
-                isDiscRsPer = HP.settings.isDefaultDiscRs == true,
-
-                isPendingBill = false,
-            )
+//            val purchase = Purchase(
+//                purchaseId = invoiceId,
+//
+//                date = HP.getZonedDate(LocalDate.now()),
+//                isDiscRsPer = HP.settings.isDefaultDiscRs == true,
+//
+//                isPendingBill = false,
+//            )
 
             when (val result = api.tempClose(purchase)) {
                 is Resource.Error -> resultError(result.error)

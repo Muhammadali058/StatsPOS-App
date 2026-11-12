@@ -17,10 +17,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -28,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +47,7 @@ import com.graphees.statspos.domain.models.sales.SalesBills
 import com.graphees.statspos.presentation.ui.components.AppFloatingActionButton
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.BottomHeading
+import com.graphees.statspos.presentation.ui.components.BottomSheet
 import com.graphees.statspos.presentation.ui.components.ConfirmDialog
 import com.graphees.statspos.presentation.ui.components.DeleteIconButton
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
@@ -59,11 +63,13 @@ import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.components.UpgradeToPremiumBottomSheet
 import com.graphees.statspos.presentation.ui.screens.sales.invoices.salesBillA4
 import com.graphees.statspos.presentation.ui.screens.sales.invoices.salesBillThermal
+import com.graphees.statspos.presentation.ui.screens.sales.sales_bill.SalesCustomerBottomSheet
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.ui.utils.cropPdf
 import com.graphees.statspos.presentation.ui.utils.openPdf
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.sales.main_screen.SalesPendingBillsViewModel
+import com.graphees.statspos.presentation.viewmodels.sales.sales_bill.AddUpdateSalesViewModel
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.PasswordFor
 import com.graphees.statspos.utils.SocketManager
@@ -71,6 +77,7 @@ import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
 import com.graphees.statspos.utils.showToast
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SalesPendingBillsBody(
     sharedViewModel: SharedViewModel,
@@ -80,6 +87,10 @@ fun SalesPendingBillsBody(
 ) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showBottomSheet by remember { mutableStateOf(false) }
+
+    val salesViewModel = hiltViewModel<AddUpdateSalesViewModel>()
     val viewModel = hiltViewModel<SalesPendingBillsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
@@ -118,20 +129,6 @@ fun SalesPendingBillsBody(
             sharedViewModel.consumeRefreshSalesScreen()
         }
     }
-
-//    fun showBill(
-//        bill: List<SalesBill>,
-//        ledger: List<AccountReport>?,
-//    ) {
-//        val file = salesBillThermal(
-//            context = context,
-//            bill = bill,
-//            ledger = ledger,
-//        )
-//
-//        openPdf(context, cropPdf(file))
-////        openPdf(context, file)
-//    }
 
     fun showBill() {
         bill?.run {
@@ -257,14 +254,40 @@ fun SalesPendingBillsBody(
         },
         floatingActionButton = {
             AppFloatingActionButton {
-                viewModel.makeNewBill { invoiceId ->
-                    sharedViewModel.notifyBillSaved()
-                    onAddUpdateButtonClick(invoiceId, true, null)
-                }
+                showBottomSheet = true
             }
         },
     ) { innerPadding ->
         Box(Modifier.padding(innerPadding))
+
+        // Bottom Sheet
+        if (showBottomSheet) {
+            BottomSheet(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                sheetState = sheetState,
+                onDismissRequest = {
+                    showBottomSheet = false
+                    salesViewModel.clearTextboxes()
+                },
+            ) {
+                SalesCustomerBottomSheet(
+                    isCreatingNewBill = true,
+                    salesViewModel = salesViewModel,
+                    onRetailChange = { isRetail -> },
+                    onClick = {
+                        showBottomSheet = false
+                        viewModel.makeNewBill(
+                            salesViewModel.getFormData()
+                        ) { invoiceId ->
+                            sharedViewModel.notifyBillSaved()
+                            onAddUpdateButtonClick(invoiceId, true, null)
+                            salesViewModel.clearTextboxes()
+                        }
+                    },
+                )
+            }
+        }
 
         Box(
             Modifier

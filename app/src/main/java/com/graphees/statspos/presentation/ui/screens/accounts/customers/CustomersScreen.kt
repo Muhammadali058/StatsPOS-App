@@ -1,6 +1,8 @@
 package com.graphees.statspos.presentation.ui.screens.accounts.customers
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.outlined.Call
 import androidx.compose.material.icons.outlined.Whatsapp
 import androidx.compose.material3.Button
@@ -34,6 +37,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
@@ -49,15 +53,18 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.graphees.statspos.domain.models.DropdownItem
 import com.graphees.statspos.domain.models.accounts.Accounts
+import com.graphees.statspos.domain.models.items.Categories
 import com.graphees.statspos.presentation.ui.components.AppFloatingActionButton
 import com.graphees.statspos.presentation.ui.components.AppIconButton
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
+import com.graphees.statspos.presentation.ui.components.ArrowIconButton
 import com.graphees.statspos.presentation.ui.components.BottomHeading
 import com.graphees.statspos.presentation.ui.components.BottomSheet
 import com.graphees.statspos.presentation.ui.components.ComboBox
 import com.graphees.statspos.presentation.ui.components.ConfirmDialog
 import com.graphees.statspos.presentation.ui.components.DeleteIconButton
 import com.graphees.statspos.presentation.ui.components.Dropdown
+import com.graphees.statspos.presentation.ui.components.EditIconButton
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListHeading
@@ -368,6 +375,9 @@ private fun Home(
                         },
                         items = state.list,
                         onItemClick = { account ->
+//                            onAddButtonClick(account.id!!, true)
+                        },
+                        onEditClick = { account ->
                             onAddButtonClick(account.id!!, true)
                         },
                         onDeleteClick = { account ->
@@ -402,6 +412,7 @@ private fun BodyList(
     loadNextItems: () -> Unit,
     items: List<Accounts>,
     onItemClick: (Accounts) -> Unit,
+    onEditClick: (Accounts) -> Unit,
     onDeleteClick: (Accounts) -> Unit,
 ) {
     PullToRefreshList(
@@ -427,6 +438,7 @@ private fun BodyList(
             ListCard(
                 item = item,
                 onItemClick = onItemClick,
+                onEditClick = onEditClick,
                 onDeleteClick = onDeleteClick,
             )
         }
@@ -438,6 +450,7 @@ private fun ListCard(
     modifier: Modifier = Modifier,
     item: Accounts,
     onItemClick: (Accounts) -> Unit,
+    onEditClick: (Accounts) -> Unit,
     onDeleteClick: (Accounts) -> Unit,
 ) {
     val context = LocalContext.current
@@ -452,101 +465,112 @@ private fun ListCard(
             onItemClick(item)
         }
     ) {
-        Row(
+        Column (
             modifier = Modifier
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Image
-            ListImageView(
-                imageUrl = item.imageUrl,
+            Row(
                 modifier = Modifier
-                    .size(60.dp),
-                showIfNull = true,
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Spacer(Modifier.width(8.dp))
-            }
-
-            Column(
-                modifier = Modifier
-                    .weight(1f),
-            ) {
-                // region Name
-                Row(
+                // Image
+                ListImageView(
+                    imageUrl = item.imageUrl,
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .size(60.dp),
+                    showIfNull = true,
                 ) {
-                    Column(
+                    Spacer(Modifier.width(8.dp))
+                }
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f),
+                ) {
+                    // region Name
+                    Row(
                         modifier = Modifier
-                            .weight(1f),
+                            .fillMaxWidth(),
                     ) {
                         Text(
-                            modifier = modifier,
+                            modifier = modifier
+                                .weight(1f),
                             text = item.customerName.toString(),
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                         )
+                        Spacer(Modifier.width(8.dp))
+                        ArrowIconButton {
+                            onItemClick(item)
+                        }
                     }
+                    // endregion
 
+                    Spacer(Modifier.height(4.dp))
+                    ListHorizontalDivider()
+                    Spacer(Modifier.height(4.dp))
+
+                    Row {
+                        ListHeading("Contact: ", color = primaryColor)
+                        ListLabel(item.contact.toString(), color = secondaryColor)
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    Row {
+                        ListHeading("Address: ", color = primaryColor)
+                        ListLabel(item.address.toString(), color = secondaryColor)
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(4.dp))
+            ListHorizontalDivider()
+            Spacer(Modifier.height(4.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = if (item.contact!!.isNotEmpty()) Arrangement.SpaceBetween else Arrangement.End,
+            ) {
+                // region WhatsApp & Call
+                if (item.contact!!.isNotEmpty()) {
+//                            Spacer(Modifier.width(8.dp))
+                    Row {
+                        AppIconButton(
+                            icon = Icons.Outlined.Whatsapp,
+                            size = 18.dp,
+                            onClick = {
+                                openWhatsapp(
+                                    context,
+                                    HP.getContact(item.contact!!)
+                                )
+                            }
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        AppIconButton(
+                            icon = Icons.Outlined.Call,
+                            size = 18.dp,
+                            onClick = {
+                                openCall(context, item.contact!!)
+                            }
+                        )
+                    }
+                }
+                // endregion
+
+                Row {
                     if (HP.userRights.deleteAnything == true) {
                         Spacer(Modifier.width(8.dp))
                         DeleteIconButton {
                             onDeleteClick(item)
                         }
                     }
-                }
-                // endregion
-
-                Spacer(Modifier.height(4.dp))
-                ListHorizontalDivider()
-                Spacer(Modifier.height(4.dp))
-
-                // region Details
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.Bottom,
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .weight(1f),
-                    ) {
-                        Row {
-                            ListHeading("Contact: ", color = primaryColor)
-                            ListLabel(item.contact.toString(), color = secondaryColor)
-                        }
-                        Spacer(Modifier.height(4.dp))
-                        Row {
-                            ListHeading("Address: ", color = primaryColor)
-                            ListLabel(item.address.toString(), color = secondaryColor)
-                        }
+                    Spacer(Modifier.width(8.dp))
+                    EditIconButton {
+                        onEditClick(item)
                     }
-
-                    // region WhatsApp & Call
-                    if (item.contact!!.isNotEmpty()) {
-                        Spacer(Modifier.width(8.dp))
-                        Row {
-                            AppIconButton(
-                                icon = Icons.Outlined.Whatsapp,
-                                size = 18.dp,
-                                onClick = {
-                                    openWhatsapp(context, HP.getContact(item.contact!!.replace("-", "")))
-                                }
-                            )
-                            Spacer(Modifier.width(4.dp))
-                            AppIconButton(
-                                icon = Icons.Outlined.Call,
-                                size = 18.dp,
-                                onClick = {
-                                    openCall(context, item.contact!!.replace("-", ""))
-                                }
-                            )
-                        }
-                    }
-                    // endregion
                 }
-                // endregion
             }
         }
     }

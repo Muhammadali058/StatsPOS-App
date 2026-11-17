@@ -31,10 +31,6 @@ fun SalesScreen(
         pageCount = { tabs.size }
     )
 
-    val scope = rememberCoroutineScope()
-    var selectedTab by remember { mutableIntStateOf(0) }
-
-
     if (HP.userRights.sales == true) {
         Column(
             modifier = Modifier

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
@@ -245,6 +246,20 @@ fun EditIconButton(
     AppIconButton(
         modifier = modifier,
         icon = Icons.Default.Edit,
+        onClick = onClick,
+        buttonSize = 26.dp,
+        size = 20.dp,
+    )
+}
+
+@Composable
+fun ArrowIconButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    AppIconButton(
+        modifier = modifier,
+        icon = Icons.Default.ArrowForward,
         onClick = onClick,
         buttonSize = 26.dp,
         size = 20.dp,

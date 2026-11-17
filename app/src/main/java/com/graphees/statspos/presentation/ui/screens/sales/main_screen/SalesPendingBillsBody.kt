@@ -246,6 +246,16 @@ fun SalesPendingBillsBody(
         )
     }
 
+    fun createNewBill(){
+        viewModel.makeNewBill(
+            salesViewModel.getFormData()
+        ) { invoiceId ->
+            sharedViewModel.notifyBillSaved()
+            onAddUpdateButtonClick(invoiceId, true, null)
+            salesViewModel.clearTextboxes()
+        }
+    }
+
     Scaffold(
         snackbarHost = {
             AppSnackbarHost(
@@ -254,7 +264,11 @@ fun SalesPendingBillsBody(
         },
         floatingActionButton = {
             AppFloatingActionButton {
-                showBottomSheet = true
+                if(HP.appSettings.fastSales == true){
+                    createNewBill()
+                }else{
+                    showBottomSheet = true
+                }
             }
         },
     ) { innerPadding ->
@@ -277,13 +291,7 @@ fun SalesPendingBillsBody(
                     onRetailChange = { isRetail -> },
                     onClick = {
                         showBottomSheet = false
-                        viewModel.makeNewBill(
-                            salesViewModel.getFormData()
-                        ) { invoiceId ->
-                            sharedViewModel.notifyBillSaved()
-                            onAddUpdateButtonClick(invoiceId, true, null)
-                            salesViewModel.clearTextboxes()
-                        }
+                        createNewBill()
                     },
                 )
             }

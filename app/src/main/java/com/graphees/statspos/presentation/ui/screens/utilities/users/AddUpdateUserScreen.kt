@@ -196,15 +196,6 @@ fun AddUpdateUserScreen(
                         onIsMainUserChange = viewModel::onIsMainUserChange,
                     )
 
-                    ImageExpandable(
-                        isUploadingImage = state.isUploadingImage,
-                        imageUrl = state.imageUrl,
-                        onImageUrlChange = {
-                            viewModel.uploadImage(it)
-                        },
-                        onClear = viewModel::deleteImage,
-                    )
-
                     UserRights(
                         items = state.items,
                         onItemsChange = viewModel::onItemsChange,
@@ -290,6 +281,16 @@ fun AddUpdateUserScreen(
                         fbrInvoice = state.fbrInvoice,
                         onFbrInvoiceChange = viewModel::onFbrInvoiceChange,
                     )
+
+                    ImageExpandable(
+                        isUploadingImage = state.isUploadingImage,
+                        imageUrl = state.imageUrl,
+                        onImageUrlChange = {
+                            viewModel.uploadImage(it)
+                        },
+                        onClear = viewModel::deleteImage,
+                    )
+
                 }
 
                 Box(

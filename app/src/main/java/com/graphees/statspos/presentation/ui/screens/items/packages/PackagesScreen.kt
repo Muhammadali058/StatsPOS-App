@@ -45,6 +45,7 @@ import com.graphees.statspos.domain.models.items.Packages
 import com.graphees.statspos.presentation.ui.components.AppFloatingActionButton
 import com.graphees.statspos.presentation.ui.components.AppIconButton
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
+import com.graphees.statspos.presentation.ui.components.ArrowIconButton
 import com.graphees.statspos.presentation.ui.components.BottomHeading
 import com.graphees.statspos.presentation.ui.components.ConfirmDialog
 import com.graphees.statspos.presentation.ui.components.DeleteIconButton
@@ -336,14 +337,9 @@ private fun ListCard(
                         fontWeight = FontWeight.SemiBold,
                     )
                     Spacer(Modifier.width(8.dp))
-                    AppIconButton(
-                        icon = Icons.Default.ArrowForward,
-                        onClick = {
-                            onItemClick(item)
-                        },
-                        buttonSize = 26.dp,
-                        size = 20.dp,
-                    )
+                    ArrowIconButton{
+                        onItemClick(item)
+                    }
                 }
                 // endregion
 

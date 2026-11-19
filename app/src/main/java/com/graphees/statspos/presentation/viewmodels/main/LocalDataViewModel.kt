@@ -42,6 +42,13 @@ class LocalDataViewModel @Inject constructor(
         }
     }
 
+    fun setIsOnline(isOnline: Boolean){
+        viewModelScope.launch {
+            dataStore.setIsOnline(isOnline)
+        }
+    }
+
+
     // baseUrl
     fun getBaseUrl(): Flow<String> {
         return dataStore.getBaseUrl()

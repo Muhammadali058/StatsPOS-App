@@ -70,6 +70,12 @@ class LocalDataStore @Inject constructor(
         }
     }
 
+    suspend fun setIsOnline(isOnline: Boolean){
+        dataStore.edit { settings ->
+            settings[isOnlineKey] = isOnline
+        }
+    }
+
     // baseUrl
     fun getBaseUrl(): Flow<String>{
         return dataStore.data.map { preferences -> preferences[baseUrlKey] ?: "" }

@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.graphees.statspos.R
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings.DEFAULT_RADIUS
 import com.graphees.statspos.presentation.ui.utils.ConstantSize
+import com.graphees.statspos.presentation.ui.utils.openCall
 
 @Composable
 fun AppIconBox(
@@ -68,6 +69,7 @@ fun AppIconButtonBox(
     size: Dp = ConstantSize.DEFAULT_ICON,
     enabled: Boolean = true,
     tint: Color = MaterialTheme.colorScheme.primary,
+    cornerRadius:Dp = DEFAULT_RADIUS,
     colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     interactionSource: MutableInteractionSource? = null,
 ) {
@@ -83,7 +85,7 @@ fun AppIconButtonBox(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(DEFAULT_RADIUS))
+                .clip(RoundedCornerShape(cornerRadius))
                 .background(tint.copy(.1f))
             ,
             contentAlignment = Alignment.Center,
@@ -231,10 +233,13 @@ fun DeleteIconButton(
     onClick: () -> Unit,
 ) {
     AppIconButton(
-        icon = Icons.Default.Delete,
-        onClick = onClick,
         modifier = modifier,
-        size = 22.dp
+        icon = Icons.Default.Delete,
+//        icon = R.drawable.delete,
+        onClick = onClick,
+        buttonSize = 26.dp,
+//        size = 18.dp,
+        size = 22.dp,
     )
 }
 
@@ -246,8 +251,10 @@ fun EditIconButton(
     AppIconButton(
         modifier = modifier,
         icon = Icons.Default.Edit,
+//        icon = R.drawable.edit,
         onClick = onClick,
         buttonSize = 26.dp,
+//        size = 18.dp,
         size = 20.dp,
     )
 }
@@ -259,10 +266,10 @@ fun ArrowIconButton(
 ) {
     AppIconButton(
         modifier = modifier,
-        icon = Icons.Default.ArrowForward,
+        icon = Icons.Default.ArrowForwardIos,
         onClick = onClick,
         buttonSize = 26.dp,
-        size = 20.dp,
+        size = 16.dp,
     )
 }
 
@@ -305,11 +312,25 @@ fun FilterIcon(
             onClick()
         }
     )
-//    AppIconButton(
-//        icon = R.drawable.filter,
-//        onClick = onClick,
-//        modifier = modifier,
-//        size = 18.dp,
-//        buttonSize = 26.dp,
-//    )
+}
+
+@Composable
+fun ListColorIcon(
+    modifier: Modifier = Modifier,
+    @DrawableRes icon: Int,
+    buttonSize: Dp = 26.dp,
+    size: Dp = 14.dp,
+    cornerRadius: Dp = 5.dp,
+    color: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    onClick: () -> Unit,
+){
+    AppIconButtonBox(
+        modifier = modifier,
+        icon = icon,
+        size = size,
+        buttonSize = buttonSize,
+        cornerRadius = cornerRadius,
+        tint = color,
+        onClick = onClick,
+    )
 }

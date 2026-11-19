@@ -1,6 +1,7 @@
 package com.graphees.statspos.presentation.ui.screens.main.main
 
 import android.app.Activity
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.DrawableRes
@@ -144,6 +145,15 @@ fun HomeScreen(
                 showErrorDialog = true
             }
         )
+    }
+
+    LaunchedEffect(Unit) {
+        val providerInfo = context.packageManager.resolveContentProvider(
+            "com.graphees.statspos.settings",
+            0
+        )
+
+        Log.d("TAG ProviderTest", "Provider: $providerInfo")
     }
 
     if (showErrorDialog) {

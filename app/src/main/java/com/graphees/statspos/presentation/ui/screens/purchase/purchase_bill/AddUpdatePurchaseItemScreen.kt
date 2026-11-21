@@ -60,7 +60,7 @@ import com.graphees.statspos.presentation.ui.components.HeadingMedium
 import com.graphees.statspos.presentation.ui.components.LabelLarge
 import com.graphees.statspos.presentation.ui.components.LabelMedium
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
-import com.graphees.statspos.presentation.ui.components.SaveButton
+import com.graphees.statspos.presentation.ui.components.AppSaveButton
 import com.graphees.statspos.presentation.ui.components.SearchItemBox
 import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.TopAppBar
@@ -378,7 +378,7 @@ fun AddUpdatePurchaseItemScreen(
                     if (state.isSaving) {
                         AppCircularProgressIndicator()
                     } else {
-                        SaveButton(
+                        AppSaveButton(
                             text = if(isUpdate)  "Update Item" else "Add Item"
                         ) {
                             onSaveButtonClick()

@@ -457,7 +457,7 @@ private fun ListCard(
                     .weight(1f),
             ) {
                 Text(
-                    modifier = modifier,
+                    modifier = Modifier,
                     text = item.itemname.toString(),
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontSize = 14.sp,
@@ -543,66 +543,6 @@ private fun ListCard(
                         }
                     }
                 }
-
-
-//                Row(
-//                    modifier = Modifier
-//                        .fillMaxWidth(),
-//                ) {
-//                    ListHeading(
-//                        text = "Qty",
-//                        Modifier.weight(1f),
-//                        color = primaryColor,
-//                    )
-//                    if (HP.settings.saleCartons == true) {
-//                        ListHeading(
-//                            text = "Crtn",
-//                            Modifier.weight(1f),
-//                            color = primaryColor,
-//                        )
-//                    }
-//                    ListHeading(
-//                        text = "Cost",
-//                        Modifier.weight(1f),
-//                        color = primaryColor,
-//                    )
-//                    if (HP.settings.saleCartons == true) {
-//                        ListHeading(
-//                            text = "Cost Crtn",
-//                            Modifier.weight(1f),
-//                            color = primaryColor,
-//                        )
-//                    }
-//                }
-//                Row(
-//                    modifier = Modifier
-//                        .fillMaxWidth(),
-//                ) {
-//                    ListLabel(
-//                        text = HP.formatDecimal(item.qty),
-//                        Modifier.weight(1f),
-//                        color = secondaryColor,
-//                    )
-//                    if (HP.settings.saleCartons == true) {
-//                        ListLabel(
-//                            text = item.crtn.toString(),
-//                            Modifier.weight(1f),
-//                            color = secondaryColor,
-//                        )
-//                    }
-//                    ListLabel(
-//                        text = HP.formatDecimal(item.finalCost),
-//                        Modifier.weight(1f),
-//                        color = secondaryColor,
-//                    )
-//                    if (HP.settings.saleCartons == true) {
-//                        ListLabel(
-//                            text = if (item.crtn!! != 0) HP.formatDecimal((item.finalCost!! * item.crtnSize!!)) else "0",
-//                            Modifier.weight(1f),
-//                            color = secondaryColor,
-//                        )
-//                    }
-//                }
 
                 Spacer(Modifier.height(4.dp))
                 ListHorizontalDivider()

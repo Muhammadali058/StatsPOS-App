@@ -69,7 +69,7 @@ import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
-import com.graphees.statspos.presentation.ui.components.SaveButton
+import com.graphees.statspos.presentation.ui.components.AppSaveButton
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.components.UpgradeToPremiumBottomSheet
 import com.graphees.statspos.presentation.ui.screens.items.SearchItemsScreen
@@ -523,7 +523,7 @@ private fun Home(
                                     if (salesState.isSaving) {
                                         AppCircularProgressIndicator()
                                     } else {
-                                        SaveButton(text = "Temp Close") {
+                                        AppSaveButton(text = "Temp Close") {
                                             salesViewModel.tempClose {
                                                 sharedViewModel.notifyBillSaved()
                                                 onBack()
@@ -542,7 +542,7 @@ private fun Home(
                                     if (salesState.isPosting) {
                                         AppCircularProgressIndicator()
                                     } else {
-                                        SaveButton(text = "Post") {
+                                        AppSaveButton(text = "Post") {
                                             salesViewModel.postBill { id ->
                                                 printBill(id)
                                                 sharedViewModel.notifyBillPosted()
@@ -793,7 +793,7 @@ private fun ListCard(
                             .weight(1f),
                     ) {
                         Text(
-                            modifier = modifier,
+                            modifier = Modifier,
                             text = item.itemname.toString(),
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontSize = 14.sp,
@@ -895,69 +895,6 @@ private fun ListCard(
                         )
                     }
                 }
-
-//                Row(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                ) {
-//                    Row(
-//                        modifier = Modifier
-//                            .weight(.7f)
-//                    ) {
-//                        ListHeading(text = "Qty: ", color = primaryColor)
-//                        ListLabel(text = HP.formatDecimal(item.qty), color = secondaryColor)
-//                    }
-//                    Row(
-//                        modifier = Modifier
-//                            .weight(1f)
-//                    ) {
-//                        ListHeading(text = "Rate: ", color = primaryColor)
-//                        ListLabel(text = HP.formatDecimal(item.rate), color = secondaryColor)
-//                    }
-//                }
-//                if (HP.settings.saleCartons == true) {
-//                    Spacer(Modifier.height(4.dp))
-//                    Row(
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                    ) {
-//                        Row(
-//                            modifier = Modifier
-//                                .weight(.7f)
-//                        ) {
-//                            ListHeading(text = "Crtn: ", color = primaryColor)
-//                            ListLabel(text = item.crtn.toString(), color = secondaryColor)
-//                        }
-//                        Row(
-//                            modifier = Modifier
-//                                .weight(1f)
-//                        ) {
-//                            ListHeading(text = "Crtn Rate: ", color = primaryColor)
-//                            ListLabel(text = HP.formatDecimal(item.crtnRate), color = secondaryColor)
-//                        }
-//                    }
-//                }
-//                Spacer(Modifier.height(4.dp))
-//                Row(
-//                    modifier = Modifier
-//                        .fillMaxWidth(),
-//                    verticalAlignment = Alignment.CenterVertically,
-//                ) {
-//                    Row(
-//                        modifier = Modifier
-//                            .weight(.7f)
-//                    ) {
-//                        ListHeading(text = "Disc: ", color = primaryColor)
-//                        ListLabel(text = HP.formatDecimal(item.disc), color = secondaryColor)
-//                    }
-//                    Row(
-//                        modifier = Modifier
-//                            .weight(1f)
-//                    ) {
-//                        ListMainHeading(text = "Total: ")
-//                        ListMainLabel(text = HP.formatDecimal(item.total))
-//                    }
-//                }
             }
         }
     }

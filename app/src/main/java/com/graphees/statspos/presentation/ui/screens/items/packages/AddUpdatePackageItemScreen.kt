@@ -45,7 +45,7 @@ import com.graphees.statspos.presentation.ui.components.ConfirmDialog
 import com.graphees.statspos.presentation.ui.components.Dropdown
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
-import com.graphees.statspos.presentation.ui.components.SaveButton
+import com.graphees.statspos.presentation.ui.components.AppSaveButton
 import com.graphees.statspos.presentation.ui.components.SearchItemBox
 import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.TopAppBar
@@ -277,7 +277,7 @@ fun AddUpdatePackageItemScreen(
                     if (state.isSaving) {
                         AppCircularProgressIndicator()
                     } else {
-                        SaveButton {
+                        AppSaveButton {
                             viewModel.insertOrUpdateData {
                                 sharedViewModel.notifyDataChanged()
                                 itemFocusRequester.requestFocus()

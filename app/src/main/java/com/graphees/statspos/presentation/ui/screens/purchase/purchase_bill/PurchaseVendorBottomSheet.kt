@@ -41,9 +41,8 @@ import com.graphees.statspos.presentation.ui.components.ExpandableSection
 import com.graphees.statspos.presentation.ui.components.MOPSection
 import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
-import com.graphees.statspos.presentation.ui.components.SaveButton
+import com.graphees.statspos.presentation.ui.components.AppSaveButton
 import com.graphees.statspos.presentation.ui.components.TextboxOutlined
-import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.purchase.purchase_bill.AddUpdatePurchaseViewModel
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.UiEvent
@@ -143,7 +142,7 @@ fun PurchaseVendorBottomSheet(
             if (state.isSaving) {
                 AppCircularProgressIndicator()
             } else {
-                SaveButton(
+                AppSaveButton(
                     text = if (isCreatingNewBill) "Create new bill" else "Save"
                 ) {
                     onClick()

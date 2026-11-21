@@ -323,7 +323,7 @@ private fun ListCard(
                             .weight(1f),
                     ) {
                         Text(
-                            modifier = modifier,
+                            modifier = Modifier,
                             text = item.username.toString(),
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontSize = 14.sp,

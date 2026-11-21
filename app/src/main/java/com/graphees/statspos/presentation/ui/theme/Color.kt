@@ -15,7 +15,9 @@ val tertiaryContainerLight = Color(0xFFF6F7FB)
 val textLight = Color.Black
 val text2Light = Color(0xFF81898C)
 val blue = Color(0xFF0554F2)
-val green = Color(0xFF22C063)
+val greenWhatsapp = Color(0xFF22C063)
+val red = Color(0xFF991B1B)
+val green = Color(0xFF1B7129)
 
 
 // Dark mode colors

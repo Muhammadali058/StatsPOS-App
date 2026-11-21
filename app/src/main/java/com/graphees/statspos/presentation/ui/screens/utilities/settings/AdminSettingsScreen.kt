@@ -36,7 +36,7 @@ import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ExpandableSection
 import com.graphees.statspos.presentation.ui.components.PasswordTextbox
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
-import com.graphees.statspos.presentation.ui.components.SaveButton
+import com.graphees.statspos.presentation.ui.components.AppSaveButton
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
@@ -162,7 +162,7 @@ fun AdminSettingsScreen(
                     if (state.isSaving) {
                         AppCircularProgressIndicator()
                     } else {
-                        SaveButton {
+                        AppSaveButton {
                             viewModel.updateAdminSettings {
                                 goBackWithResult()
                             }

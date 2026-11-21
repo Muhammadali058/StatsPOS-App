@@ -43,9 +43,8 @@ import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndic
 import com.graphees.statspos.presentation.ui.components.DateTextbox
 import com.graphees.statspos.presentation.ui.components.Dropdown
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
-import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
-import com.graphees.statspos.presentation.ui.components.SaveButton
+import com.graphees.statspos.presentation.ui.components.AppSaveButton
 import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
@@ -148,7 +147,7 @@ fun NewJournalEntryBody(
                 if (state.isSaving) {
                     AppCircularProgressIndicator()
                 } else {
-                    SaveButton(
+                    AppSaveButton(
                         text = "Post"
                     ) {
                         viewModel.passEntry {

@@ -431,7 +431,7 @@ private fun ListCard(
                             .weight(1f),
                     ) {
                         Text(
-                            modifier = modifier,
+                            modifier = Modifier,
                             text = item.customerName.toString().ifEmpty { "Walk-in Customer" },
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontSize = 14.sp,

@@ -164,6 +164,7 @@ fun ListHeading(
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Start,
     color: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    fontWeight: FontWeight = FontWeight.Bold,
 ) {
     Text(
         modifier = modifier,
@@ -171,7 +172,7 @@ fun ListHeading(
         color = color,
         style = TextStyle(
             fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = fontWeight,
             textAlign = textAlign,
         )
     )
@@ -183,6 +184,7 @@ fun ListLabel(
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Start,
     color: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    fontWeight: FontWeight = FontWeight.Normal,
 ) {
     Text(
         modifier = modifier,
@@ -190,6 +192,7 @@ fun ListLabel(
         color = color,
         style = TextStyle(
             fontSize = 12.sp,
+            fontWeight = fontWeight,
             textAlign = textAlign,
         )
     )

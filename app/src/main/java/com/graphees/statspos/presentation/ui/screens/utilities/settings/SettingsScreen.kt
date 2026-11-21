@@ -47,7 +47,7 @@ import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ExpandableSection
 import com.graphees.statspos.presentation.ui.components.PasswordTextbox
 import com.graphees.statspos.presentation.ui.components.ReportButton
-import com.graphees.statspos.presentation.ui.components.SaveButton
+import com.graphees.statspos.presentation.ui.components.AppSaveButton
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
@@ -348,7 +348,7 @@ private fun Home(
                     if (state.isLoading) {
                         AppCircularProgressIndicator()
                     } else {
-                        SaveButton {
+                        AppSaveButton {
                             viewModel.updateSettings {
                                 context.showToast("Settings saved successfully")
                                 goBackWithResult()
@@ -993,7 +993,7 @@ private fun BodyPrev() {
             modifier = Modifier
                 .padding(24.dp),
         ) {
-            SaveButton {}
+            AppSaveButton {}
         }
 
     }

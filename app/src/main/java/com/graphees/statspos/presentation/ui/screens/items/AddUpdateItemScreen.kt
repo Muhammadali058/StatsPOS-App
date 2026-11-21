@@ -74,7 +74,7 @@ import com.graphees.statspos.presentation.ui.components.ExpandableSection
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
 import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
-import com.graphees.statspos.presentation.ui.components.SaveButton
+import com.graphees.statspos.presentation.ui.components.AppSaveButton
 import com.graphees.statspos.presentation.ui.components.SmallButton
 import com.graphees.statspos.presentation.ui.components.SubDropdown
 import com.graphees.statspos.presentation.ui.components.TextboxOutlined
@@ -597,7 +597,7 @@ private fun Home(
                     if (state.isSaving) {
                         AppCircularProgressIndicator()
                     } else {
-                        SaveButton {
+                        AppSaveButton {
                             viewModel.insertOrUpdateData {
                                 goBackWithResult()
                             }
@@ -1330,7 +1330,7 @@ private fun BodyPrev() {
 //                .background(Color.Red)
                 .padding(16.dp),
         ) {
-            SaveButton {}
+            AppSaveButton {}
         }
 
     }

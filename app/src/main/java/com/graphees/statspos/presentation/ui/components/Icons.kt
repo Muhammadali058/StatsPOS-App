@@ -31,9 +31,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.graphees.statspos.R
+import com.graphees.statspos.presentation.ui.theme.blue
+import com.graphees.statspos.presentation.ui.theme.greenWhatsapp
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings.DEFAULT_RADIUS
 import com.graphees.statspos.presentation.ui.utils.ConstantSize
-import com.graphees.statspos.presentation.ui.utils.openCall
 
 @Composable
 fun AppIconBox(
@@ -332,5 +333,31 @@ fun ListColorIcon(
         cornerRadius = cornerRadius,
         tint = color,
         onClick = onClick,
+    )
+}
+
+@Composable
+fun ListWhatsappIcon(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    ListColorIcon(
+        modifier = modifier,
+        icon = R.drawable.whatsapp_outlined,
+        color = greenWhatsapp,
+        onClick = onClick
+    )
+}
+
+@Composable
+fun ListCallIcon(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    ListColorIcon(
+        modifier = modifier,
+        icon = R.drawable.call,
+        color = blue,
+        onClick = onClick
     )
 }

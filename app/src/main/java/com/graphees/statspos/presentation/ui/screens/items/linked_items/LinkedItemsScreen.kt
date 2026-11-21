@@ -252,7 +252,7 @@ private fun ListCard(
             }
 
             Text(
-                modifier = modifier
+                modifier = Modifier
                     .weight(1f),
                 text = item.itemname.toString(),
                 color = MaterialTheme.colorScheme.onPrimaryContainer,

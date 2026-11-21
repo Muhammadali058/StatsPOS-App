@@ -630,7 +630,7 @@ private fun ListCard(
                             .weight(1f),
                     ) {
                         Text(
-                            modifier = modifier,
+                            modifier = Modifier,
                             text = item.vendorName.toString().ifEmpty { "Vendor not selected" },
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontSize = 14.sp,

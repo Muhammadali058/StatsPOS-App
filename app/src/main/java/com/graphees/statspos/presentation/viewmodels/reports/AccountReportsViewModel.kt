@@ -699,8 +699,8 @@ class AccountReportsViewModel @Inject constructor(
 
     private fun getParams(): JsonObject {
         return JsonObject().apply {
-            addProperty("fromDate", HP.getZonedDateWithFromTime(state.value.fromDate))
-            addProperty("toDate", HP.getZonedDateWithToTime(state.value.toDate))
+            addProperty("fromDate", HP.getZonedDate(state.value.fromDate))
+            addProperty("toDate", HP.getZonedDate(state.value.toDate))
         }
     }
 

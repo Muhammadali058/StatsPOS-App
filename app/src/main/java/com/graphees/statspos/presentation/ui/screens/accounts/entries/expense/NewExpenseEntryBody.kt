@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -35,7 +34,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -45,9 +43,8 @@ import com.graphees.statspos.presentation.ui.components.ComboBox
 import com.graphees.statspos.presentation.ui.components.DateTextbox
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.MOPSection
-import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
-import com.graphees.statspos.presentation.ui.components.SaveButton
+import com.graphees.statspos.presentation.ui.components.AppSaveButton
 import com.graphees.statspos.presentation.ui.components.SubComboBox
 import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
@@ -57,8 +54,6 @@ import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
 import com.graphees.statspos.utils.showToast
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.yield
 import java.time.LocalDate
 
 @Composable
@@ -149,7 +144,7 @@ fun NewExpenseEntryBody(
                 if (state.isSaving) {
                     AppCircularProgressIndicator()
                 } else {
-                    SaveButton(
+                    AppSaveButton(
                         text = "Post"
                     ) {
                         viewModel.passEntry {

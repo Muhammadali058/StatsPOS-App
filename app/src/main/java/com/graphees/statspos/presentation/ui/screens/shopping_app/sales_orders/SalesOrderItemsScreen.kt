@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Outbox
 import androidx.compose.material.icons.filled.ShareLocation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,7 +36,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -49,7 +47,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.domain.models.sales.SalesOrderItems
 import com.graphees.statspos.domain.models.sales.SalesOrders
-import com.graphees.statspos.presentation.ui.components.AppCard
 import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.graphees.statspos.presentation.ui.components.AppIcon
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
@@ -61,7 +58,7 @@ import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListImageView
 import com.graphees.statspos.presentation.ui.components.PrimaryButton
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
-import com.graphees.statspos.presentation.ui.components.SaveButton
+import com.graphees.statspos.presentation.ui.components.AppSaveButton
 import com.graphees.statspos.presentation.ui.components.SecondaryButton
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
@@ -208,7 +205,7 @@ fun SalesOrderItemsScreen(
                     if (state.isGeneratingBill) {
                         AppCircularProgressIndicator()
                     } else {
-                        SaveButton(
+                        AppSaveButton(
                             text = "Generate Bill",
                         ) {
                             viewModel.generateBill(salesOrder.id!!) {

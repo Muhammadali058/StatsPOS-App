@@ -353,7 +353,7 @@ private fun ListCard(
                         .fillMaxWidth(),
                 ) {
                     Text(
-                        modifier = modifier
+                        modifier = Modifier
                             .weight(1f),
                         text = item.expenseName.toString(),
                         color = MaterialTheme.colorScheme.onPrimaryContainer,

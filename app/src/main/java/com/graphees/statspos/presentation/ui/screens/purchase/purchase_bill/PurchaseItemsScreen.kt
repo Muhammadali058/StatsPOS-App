@@ -65,7 +65,7 @@ import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
-import com.graphees.statspos.presentation.ui.components.SaveButton
+import com.graphees.statspos.presentation.ui.components.AppSaveButton
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.components.UpgradeToPremiumBottomSheet
 import com.graphees.statspos.presentation.ui.screens.items.SearchItemsScreen
@@ -447,7 +447,7 @@ private fun Home(
                                     if (purchaseState.isSaving) {
                                         AppCircularProgressIndicator()
                                     } else {
-                                        SaveButton(text = "Temp Close") {
+                                        AppSaveButton(text = "Temp Close") {
                                             purchaseViewModel.tempClose {
                                                 sharedViewModel.notifyBillSaved()
                                                 onBack()
@@ -466,7 +466,7 @@ private fun Home(
                                     if (purchaseState.isPosting) {
                                         AppCircularProgressIndicator()
                                     } else {
-                                        SaveButton(text = "Post") {
+                                        AppSaveButton(text = "Post") {
                                             purchaseViewModel.postBill { id ->
 //                                                printBill(id)
                                                 sharedViewModel.notifyBillPosted()
@@ -721,7 +721,7 @@ private fun ListCard(
                             .weight(1f),
                     ) {
                         Text(
-                            modifier = modifier,
+                            modifier = Modifier,
                             text = item.itemname.toString(),
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontSize = 14.sp,

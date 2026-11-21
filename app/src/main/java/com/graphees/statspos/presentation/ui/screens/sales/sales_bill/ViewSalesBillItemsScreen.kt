@@ -126,10 +126,8 @@ fun ViewSalesBillItemsScreen(
             ledger = ledger,
         )
 
-        if (shareBill) {
+        if (shareBill)
             shareFileToWhatsApp(context, file, salesBill.contact!!)
-//            sharePdf(context, file)
-        }
         else
             openPdf(context, file)
     }

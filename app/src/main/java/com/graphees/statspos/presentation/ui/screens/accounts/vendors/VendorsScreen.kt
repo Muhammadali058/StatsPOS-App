@@ -59,16 +59,19 @@ import com.graphees.statspos.presentation.ui.components.DeleteIconButton
 import com.graphees.statspos.presentation.ui.components.Dropdown
 import com.graphees.statspos.presentation.ui.components.EditIconButton
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
+import com.graphees.statspos.presentation.ui.components.ListCallIcon
 import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListHeading
 import com.graphees.statspos.presentation.ui.components.ListHorizontalDivider
 import com.graphees.statspos.presentation.ui.components.ListImageView
 import com.graphees.statspos.presentation.ui.components.ListLabel
+import com.graphees.statspos.presentation.ui.components.ListWhatsappIcon
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
 import com.graphees.statspos.presentation.ui.components.PlaceHolder
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.components.TopAppBar
+import com.graphees.statspos.presentation.ui.screens.accounts.entries.LedgerScreen
 import com.graphees.statspos.presentation.ui.screens.main.main.premium.HelpScreen
 import com.graphees.statspos.presentation.ui.screens.main.main.premium.PaymentScreen
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
@@ -97,6 +100,8 @@ private sealed class Routes : NavKey {
     @Serializable
     data object Help : Routes()
 
+    @Serializable
+    data class Ledger(val account: Accounts) : Routes()
 }
 
 @Composable
@@ -122,6 +127,9 @@ fun VendorsScreen(
                     sharedViewModel = sharedViewModel,
                     onAddButtonClick = { updateId, isUpdate ->
                         navigate(Routes.AddUpdateVendor(updateId, isUpdate))
+                    },
+                    onLedgerClick = { account ->
+                        navigate(Routes.Ledger(account))
                     },
                     onBack = {
                         onBack()
@@ -158,6 +166,14 @@ fun VendorsScreen(
                     },
                 )
             }
+            entry<Routes.Ledger> { key ->
+                LedgerScreen (
+                    account = key.account,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                )
+            }
         }
     )
 }
@@ -167,6 +183,7 @@ fun VendorsScreen(
 private fun Home(
     sharedViewModel: SharedViewModel,
     onAddButtonClick: (Long, Boolean) -> Unit,
+    onLedgerClick: (Accounts) -> Unit,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -344,7 +361,7 @@ private fun Home(
                         },
                         items = state.list,
                         onItemClick = { account ->
-//                            onAddButtonClick(account.id!!, true)
+                            onLedgerClick(account)
                         },
                         onEditClick = { account ->
                             onAddButtonClick(account.id!!, true)
@@ -430,10 +447,12 @@ private fun ListCard(
             .fillMaxWidth()
             .padding(vertical = ConstantPaddings.LIST_PADDING_VERTICAL),
         onClick = {
-            onItemClick(item)
+            if(HP.userRights.accountsReport == true){
+                onItemClick(item)
+            }
         }
     ) {
-        Column (
+        Column(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
@@ -464,14 +483,16 @@ private fun ListCard(
                         Text(
                             modifier = Modifier
                                 .weight(1f),
-                            text = item.vendorName.toString(),
+                            text = item.accountName.toString(),
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                         )
-                        Spacer(Modifier.width(8.dp))
-                        ArrowIconButton {
-                            onItemClick(item)
+                        if(HP.userRights.accountsReport == true) {
+                            Spacer(Modifier.width(8.dp))
+                            ArrowIconButton {
+                                onItemClick(item)
+                            }
                         }
                     }
                     // endregion
@@ -500,25 +521,18 @@ private fun ListCard(
                 modifier = Modifier
                     .fillMaxWidth(),
                 horizontalArrangement = if (item.contact!!.isNotEmpty()) Arrangement.SpaceBetween else Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 // region WhatsApp & Call
                 if (item.contact!!.isNotEmpty()) {
                     Row {
-                        AppIconButton(
-                            icon = Icons.Outlined.Whatsapp,
-                            size = 18.dp,
-                            onClick = {
-                                openWhatsapp(context, HP.getContact(item.contact!!))
-                            }
-                        )
+                        ListWhatsappIcon {
+                            openWhatsapp(context, HP.getContact(item.contact!!))
+                        }
                         Spacer(Modifier.width(4.dp))
-                        AppIconButton(
-                            icon = Icons.Outlined.Call,
-                            size = 18.dp,
-                            onClick = {
-                                openCall(context, item.contact!!)
-                            }
-                        )
+                        ListCallIcon {
+                            openCall(context, item.contact!!)
+                        }
                     }
                 }
                 // endregion

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -36,13 +35,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
 import com.graphees.statspos.domain.models.accounts.Accounts
 import com.graphees.statspos.domain.models.reports.TotalReport
 import com.graphees.statspos.domain.models.reports.accounts.AccountReport
 import com.graphees.statspos.presentation.ui.components.AppButton
 import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndicator
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
-import com.graphees.statspos.presentation.ui.components.BottomHeading
 import com.graphees.statspos.presentation.ui.components.DateTextbox
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ListHeading
@@ -51,24 +55,81 @@ import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.ListMainHeading
 import com.graphees.statspos.presentation.ui.components.ListMainLabel
 import com.graphees.statspos.presentation.ui.components.ListWhatsappIcon
-import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.screens.reports.accounts.ledgerReport
 import com.graphees.statspos.presentation.ui.theme.green
 import com.graphees.statspos.presentation.ui.theme.red
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings.DEFAULT_RADIUS
+import com.graphees.statspos.presentation.ui.utils.openPdf
 import com.graphees.statspos.presentation.ui.utils.shareFileToWhatsApp
+import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.reports.LedgerViewModel
+import com.graphees.statspos.utils.EntryType
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
+import kotlinx.serialization.Serializable
 import java.time.LocalDate
 import kotlin.math.abs
+
+private sealed class Routes : NavKey {
+    @Serializable
+    data object Home : Routes()
+
+    @Serializable
+    data class Entry(val entryType: EntryType) : Routes()
+}
 
 @Composable
 fun LedgerScreen(
     account: Accounts,
+    onBack: () -> Unit,
+) {
+    val sharedViewModel = hiltViewModel<SharedViewModel>()
+
+    val backStack = rememberNavBackStack(Routes.Home)
+    fun navigate(key: NavKey) {
+        if (backStack.lastOrNull() != key) {
+            backStack.add(key)
+        }
+    }
+    NavDisplay(
+        backStack = backStack,
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
+        entryProvider = entryProvider {
+            entry<Routes.Home> {
+                Home(
+                    sharedViewModel = sharedViewModel,
+                    account = account,
+                    onEntryClick = { entryType ->
+                        navigate(Routes.Entry(entryType))
+                    },
+                    onBack = onBack,
+                )
+            }
+            entry<Routes.Entry> { key->
+                EntryScreen(
+                    sharedViewModel = sharedViewModel,
+                    account = account,
+                    entryType = key.entryType,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+        }
+    )
+}
+
+@Composable
+private fun Home(
+    sharedViewModel: SharedViewModel,
+    account: Accounts,
+    onEntryClick: (EntryType) -> Unit,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -108,6 +169,14 @@ fun LedgerScreen(
                 showErrorDialog = false
             },
         )
+    }
+
+    val sharedViewModelState by sharedViewModel.state.collectAsStateWithLifecycle()
+    LaunchedEffect(sharedViewModelState.dataChanged) {
+        if (sharedViewModelState.dataChanged) {
+            viewModel.loadLedger()
+            sharedViewModel.consumeDataChanged()
+        }
     }
 
     fun sendLedger(
@@ -192,7 +261,7 @@ fun LedgerScreen(
                                     state.totalReport.newBalance?.let {
                                         Text(
                                             modifier = Modifier,
-                                            text = "Rs.${HP.formatDecimal(it, 1)}",
+                                            text = "Rs.${HP.formatDecimal(abs(it), 1)}",
                                             color = if (it >= 0) green else red,
                                             fontSize = 16.sp,
                                             fontWeight = FontWeight.Bold,
@@ -236,7 +305,6 @@ fun LedgerScreen(
                             .fillMaxWidth()
                             .background(MaterialTheme.colorScheme.surface)
                             .padding(ConstantPaddings.BODY_HORIZONTAL)
-//                            .padding(horizontal = 8.dp)
                             .padding(vertical = 8.dp),
                     ) {
                         Row(
@@ -303,31 +371,33 @@ fun LedgerScreen(
                 }
 
                 // region Buttons
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(ConstantPaddings.BODY_HORIZONTAL)
-                        .padding(vertical = 8.dp),
-                ) {
-                    AppButton(
+                if (HP.userRights.entry == true) {
+                    Row(
                         modifier = Modifier
-                            .weight(1f),
-                        text = "Pay",
-                        backgroundColor = red,
-                        onClick = {
-
-                        }
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    AppButton(
-                        modifier = Modifier
-                            .weight(1f),
-                        text = "Receive",
-                        backgroundColor = green,
-                        onClick = {
-
-                        }
-                    )
+                            .fillMaxWidth()
+                            .padding(ConstantPaddings.BODY_HORIZONTAL)
+                            .padding(vertical = 8.dp),
+                    ) {
+                        AppButton(
+                            modifier = Modifier
+                                .weight(1f),
+                            text = "Pay",
+                            backgroundColor = red,
+                            onClick = {
+                                onEntryClick(EntryType.PAYMENT)
+                            }
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        AppButton(
+                            modifier = Modifier
+                                .weight(1f),
+                            text = "Receive",
+                            backgroundColor = green,
+                            onClick = {
+                                onEntryClick(EntryType.RECEIPT)
+                            }
+                        )
+                    }
                 }
                 // endregion
             }
@@ -374,7 +444,7 @@ private fun BodyList(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        items(items) { item ->
+        items(items.reversed()) { item ->
             ListCard(item = item)
         }
     }

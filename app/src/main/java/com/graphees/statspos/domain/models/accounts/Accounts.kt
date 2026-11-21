@@ -1,5 +1,8 @@
 package com.graphees.statspos.domain.models.accounts
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Accounts(
     var id: Long? = null,
     var accountName: String? = null,

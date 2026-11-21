@@ -100,6 +100,7 @@ private sealed class Routes : NavKey {
     @Serializable
     data object Help : Routes()
 
+    @Serializable
     data class Ledger(val account: Accounts) : Routes()
 
 }
@@ -129,7 +130,6 @@ fun CustomersScreen(
                         navigate(Routes.AddUpdateCustomer(updateId, isUpdate))
                     },
                     onLedgerClick = { account ->
-                        Log.d("TAG Account", account.toString())
                         navigate(Routes.Ledger(account))
                     },
                     onBack = {
@@ -473,7 +473,9 @@ private fun ListCard(
             .fillMaxWidth()
             .padding(vertical = ConstantPaddings.LIST_PADDING_VERTICAL),
         onClick = {
-            onItemClick(item)
+            if(HP.userRights.accountsReport == true){
+                onItemClick(item)
+            }
         }
     ) {
         Column(
@@ -507,14 +509,16 @@ private fun ListCard(
                         Text(
                             modifier = Modifier
                                 .weight(1f),
-                            text = item.customerName.toString(),
+                            text = item.accountName.toString(),
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                         )
-                        Spacer(Modifier.width(8.dp))
-                        ArrowIconButton {
-                            onItemClick(item)
+                        if(HP.userRights.accountsReport == true) {
+                            Spacer(Modifier.width(8.dp))
+                            ArrowIconButton {
+                                onItemClick(item)
+                            }
                         }
                     }
                     // endregion

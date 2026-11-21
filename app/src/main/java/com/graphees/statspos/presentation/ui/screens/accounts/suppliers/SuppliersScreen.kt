@@ -13,9 +13,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Call
-import androidx.compose.material.icons.outlined.Whatsapp
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -46,7 +43,6 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.graphees.statspos.domain.models.accounts.Accounts
 import com.graphees.statspos.presentation.ui.components.AppFloatingActionButton
-import com.graphees.statspos.presentation.ui.components.AppIconButton
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.ArrowIconButton
 import com.graphees.statspos.presentation.ui.components.BottomHeading
@@ -54,15 +50,18 @@ import com.graphees.statspos.presentation.ui.components.ConfirmDialog
 import com.graphees.statspos.presentation.ui.components.DeleteIconButton
 import com.graphees.statspos.presentation.ui.components.EditIconButton
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
+import com.graphees.statspos.presentation.ui.components.ListCallIcon
 import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListHeading
 import com.graphees.statspos.presentation.ui.components.ListHorizontalDivider
 import com.graphees.statspos.presentation.ui.components.ListImageView
 import com.graphees.statspos.presentation.ui.components.ListLabel
+import com.graphees.statspos.presentation.ui.components.ListWhatsappIcon
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.components.TopAppBar
+import com.graphees.statspos.presentation.ui.screens.accounts.entries.LedgerScreen
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.ui.utils.openCall
 import com.graphees.statspos.presentation.ui.utils.openWhatsapp
@@ -81,6 +80,9 @@ private sealed class Routes : NavKey {
 
     @Serializable
     data class AddUpdateSupplier(val updateId: Long, val isUpdate: Boolean) : Routes()
+
+    @Serializable
+    data class Ledger(val account: Accounts) : Routes()
 }
 
 @Composable
@@ -107,6 +109,9 @@ fun SuppliersScreen(
                     onAddButtonClick = { updateId, isUpdate ->
                         navigate(Routes.AddUpdateSupplier(updateId, isUpdate))
                     },
+                    onLedgerClick = { account ->
+                        navigate(Routes.Ledger(account))
+                    },
                     onBack = {
                         onBack()
                     },
@@ -122,6 +127,14 @@ fun SuppliersScreen(
                     },
                 )
             }
+            entry<Routes.Ledger> { key ->
+                LedgerScreen (
+                    account = key.account,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                )
+            }
         }
     )
 }
@@ -131,6 +144,7 @@ fun SuppliersScreen(
 private fun Home(
     sharedViewModel: SharedViewModel,
     onAddButtonClick: (Long, Boolean) -> Unit,
+    onLedgerClick: (Accounts) -> Unit,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -263,7 +277,7 @@ private fun Home(
                         },
                         items = state.list,
                         onItemClick = { account ->
-//                            onAddButtonClick(account.id!!, true)
+                            onLedgerClick(account)
                         },
                         onEditClick = { account ->
                             onAddButtonClick(account.id!!, true)
@@ -349,7 +363,9 @@ private fun ListCard(
             .fillMaxWidth()
             .padding(vertical = ConstantPaddings.LIST_PADDING_VERTICAL),
         onClick = {
-            onItemClick(item)
+            if(HP.userRights.accountsReport == true){
+                onItemClick(item)
+            }
         }
     ) {
         Column(
@@ -383,14 +399,16 @@ private fun ListCard(
                         Text(
                             modifier = Modifier
                                 .weight(1f),
-                            text = item.supplierName.toString(),
+                            text = item.accountName.toString(),
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold,
                         )
-                        Spacer(Modifier.width(8.dp))
-                        ArrowIconButton {
-                            onItemClick(item)
+                        if(HP.userRights.accountsReport == true) {
+                            Spacer(Modifier.width(8.dp))
+                            ArrowIconButton {
+                                onItemClick(item)
+                            }
                         }
                     }
                     // endregion
@@ -419,28 +437,18 @@ private fun ListCard(
                 modifier = Modifier
                     .fillMaxWidth(),
                 horizontalArrangement = if (item.contact!!.isNotEmpty()) Arrangement.SpaceBetween else Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 // region WhatsApp & Call
                 if (item.contact!!.isNotEmpty()) {
                     Row {
-                        AppIconButton(
-                            icon = Icons.Outlined.Whatsapp,
-                            size = 18.dp,
-                            onClick = {
-                                openWhatsapp(
-                                    context,
-                                    HP.getContact(item.contact!!.replace("-", ""))
-                                )
-                            }
-                        )
+                        ListWhatsappIcon {
+                            openWhatsapp(context, HP.getContact(item.contact!!))
+                        }
                         Spacer(Modifier.width(4.dp))
-                        AppIconButton(
-                            icon = Icons.Outlined.Call,
-                            size = 18.dp,
-                            onClick = {
-                                openCall(context, item.contact!!.replace("-", ""))
-                            }
-                        )
+                        ListCallIcon {
+                            openCall(context, item.contact!!)
+                        }
                     }
                 }
                 // endregion

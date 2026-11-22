@@ -84,6 +84,9 @@ sealed class TopRoutes : NavKey {
     @Serializable
     data class ViewSalesBillItems(val salesBill: SalesBills) : TopRoutes()
 
+    @Serializable
+    data object SalesSettings : TopRoutes()
+
     // endregion
     // region Purchase
     @Serializable

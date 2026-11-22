@@ -33,6 +33,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -145,15 +146,6 @@ fun HomeScreen(
                 showErrorDialog = true
             }
         )
-    }
-
-    LaunchedEffect(Unit) {
-        val providerInfo = context.packageManager.resolveContentProvider(
-            "com.graphees.statspos.settings",
-            0
-        )
-
-        Log.d("TAG ProviderTest", "Provider: $providerInfo")
     }
 
     if (showErrorDialog) {
@@ -285,6 +277,20 @@ fun HomeScreen(
                                         icon = R.drawable.upgrade_to_premium,
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                         size = 22.dp
+                                    )
+                                }
+                            }
+
+                            if(navigationState.selectedRoute == BottomRoutes.Sales && HP.userRights.settings == true){
+                                IconButton(
+                                    onClick = {
+                                        onTopRouteClick(TopRoutes.SalesSettings)
+                                    }
+                                ) {
+                                    AppIcon(
+                                        icon = Icons.Default.Settings,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        size = 24.dp
                                     )
                                 }
                             }

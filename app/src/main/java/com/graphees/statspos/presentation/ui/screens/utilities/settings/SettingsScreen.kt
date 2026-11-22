@@ -470,7 +470,7 @@ private fun Settings(
 ) {
     ExpandableSection(
         title = "Settings",
-        icon = R.drawable.settings1,
+        icon = R.drawable.settings_color,
     ) {
         Spacer(Modifier.height(12.dp))
         Row {

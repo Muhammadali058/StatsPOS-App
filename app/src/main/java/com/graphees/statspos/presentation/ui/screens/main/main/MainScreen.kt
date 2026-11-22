@@ -60,6 +60,7 @@ import com.graphees.statspos.presentation.ui.screens.reports.stock.StockReportsS
 import com.graphees.statspos.presentation.ui.screens.sales.sales_bill.ViewSalesBillItemsScreen
 import com.graphees.statspos.presentation.ui.screens.sales.sales_bill.SalesItemsScreen
 import com.graphees.statspos.presentation.ui.screens.shopping_app.ShoppingAppScreen
+import com.graphees.statspos.presentation.ui.screens.utilities.settings.home.SalesSettingsScreen
 import com.graphees.statspos.presentation.ui.screens.utilities.settings.SettingsScreen
 import com.graphees.statspos.presentation.ui.screens.utilities.users.UpdateUserScreen
 import com.graphees.statspos.presentation.ui.screens.utilities.users.UsersScreen
@@ -302,6 +303,14 @@ fun MainScreen(
                 ViewSalesBillItemsScreen(
                     salesBill = key.salesBill,
                     isPostedBill = true,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<TopRoutes.SalesSettings> { key ->
+                SalesSettingsScreen (
+                    sharedViewModel = sharedViewModel,
                     onBack = {
                         backStack.removeLastOrNull()
                     }

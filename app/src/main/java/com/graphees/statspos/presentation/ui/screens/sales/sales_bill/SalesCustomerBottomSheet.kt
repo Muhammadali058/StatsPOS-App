@@ -171,10 +171,8 @@ fun SalesCustomerBottomSheet(
                 MOPSection(
                     mop = state.mop,
                     bank = state.bank,
-                    subBank = state.subBank,
                     onMOPChange = salesViewModel::onMOPChange,
                     onBankSelected = salesViewModel::onBankSelected,
-                    onSubBankSelected = salesViewModel::onSubBankSelected,
                     padding = PaddingValues(),
                 )
                 Spacer(Modifier.height(8.dp))

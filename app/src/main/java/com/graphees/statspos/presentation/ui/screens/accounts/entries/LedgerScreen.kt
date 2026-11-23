@@ -6,13 +6,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,7 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -59,19 +56,19 @@ import com.graphees.statspos.presentation.ui.components.ListHorizontalDivider
 import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.ListMainHeading
 import com.graphees.statspos.presentation.ui.components.ListMainLabel
+import com.graphees.statspos.presentation.ui.components.ListReportIcon
 import com.graphees.statspos.presentation.ui.components.ListWhatsappIcon
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.screens.reports.accounts.ledgerReport
 import com.graphees.statspos.presentation.ui.theme.blue
 import com.graphees.statspos.presentation.ui.theme.green
-import com.graphees.statspos.presentation.ui.theme.greenWhatsapp
 import com.graphees.statspos.presentation.ui.theme.red
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings.DEFAULT_RADIUS
 import com.graphees.statspos.presentation.ui.utils.openPdf
 import com.graphees.statspos.presentation.ui.utils.shareFileToWhatsApp
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
-import com.graphees.statspos.presentation.viewmodels.reports.LedgerViewModel
+import com.graphees.statspos.presentation.viewmodels.accounts.entries.LedgerViewModel
 import com.graphees.statspos.utils.EntryType
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.UiEvent
@@ -289,16 +286,14 @@ private fun Home(
                             Column(
                                 verticalArrangement = Arrangement.Top,
                             ) {
-                                ListColorIcon(
-                                    icon = R.drawable.report,
-                                    color = blue,
-                                    onClick = {
-                                        showLedger()
+                                ListReportIcon{
+                                    showLedger()
+                                }
+                                if(account.contact!!.isNotEmpty()) {
+                                    Spacer(Modifier.height(10.dp))
+                                    ListWhatsappIcon {
+                                        showLedger(true)
                                     }
-                                )
-                                Spacer(Modifier.height(10.dp))
-                                ListWhatsappIcon {
-                                    showLedger(true)
                                 }
                             }
                         }

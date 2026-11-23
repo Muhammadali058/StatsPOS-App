@@ -12,6 +12,7 @@ import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.getListOf
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.graphees.statspos.domain.models.accounts.Accounts
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +28,7 @@ class BanksViewModel @Inject constructor(
 
     // region ScreenState
     data class ScreenState(
-        val list: List<Banks> = emptyList(),
+        val list: List<Accounts> = emptyList(),
         val totalBanks: Int = 0,
 
         val search: String = "",
@@ -129,7 +130,7 @@ class BanksViewModel @Inject constructor(
                     val resultTotal =
                         result.data.get("total").asJsonObject.get("totalBanks").asInt
                     val resultList =
-                        Gson().getListOf<Banks>(result.data.get("rows").asJsonArray)
+                        Gson().getListOf<Accounts>(result.data.get("rows").asJsonArray)
                     state.update {
                         it.copy(
                             list = resultList,

@@ -34,7 +34,6 @@ class AccountReportsViewModel @Inject constructor(
         val customerName: String = "",
         val vendorName: String = "",
         val bank: DropdownItem = HP.getNoneDropdownItem(),
-        val subBank: DropdownItem = HP.getNoneDropdownItem(),
         val expense: DropdownItem = HP.getNoneDropdownItem(),
         val subExpense: DropdownItem = HP.getNoneDropdownItem(),
         val customerCategory: DropdownItem = HP.getNoneDropdownItem(),
@@ -133,10 +132,6 @@ class AccountReportsViewModel @Inject constructor(
         state.update { it.copy(bank = value) }
     }
 
-    fun onSubBankChange(value: DropdownItem) {
-        state.update { it.copy(subBank = value) }
-    }
-
     fun onExpenseChange(value: DropdownItem) {
         state.update { it.copy(expense = value) }
     }
@@ -220,13 +215,9 @@ class AccountReportsViewModel @Inject constructor(
         if (state.value.bank.id == 0L) {
             showMessage("Select bank")
         } else {
-            if (state.value.subBank.id == 0L) {
-                showMessage("Select bank account")
-            } else {
-                val params = getParams()
-                params.addProperty("accountId", state.value.subBank.id)
-                loadLedger(params, onSuccess)
-            }
+            val params = getParams()
+            params.addProperty("accountId", state.value.bank.id)
+            loadLedger(params, onSuccess)
         }
     }
 

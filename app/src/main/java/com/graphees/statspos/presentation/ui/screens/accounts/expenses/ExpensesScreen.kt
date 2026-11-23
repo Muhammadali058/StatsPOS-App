@@ -12,8 +12,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -41,9 +40,10 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.graphees.statspos.R
 import com.graphees.statspos.domain.models.accounts.Expenses
 import com.graphees.statspos.presentation.ui.components.AppFloatingActionButton
-import com.graphees.statspos.presentation.ui.components.AppIconButton
+import com.graphees.statspos.presentation.ui.components.AppIcon
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.ArrowIconButton
 import com.graphees.statspos.presentation.ui.components.BottomHeading
@@ -55,10 +55,12 @@ import com.graphees.statspos.presentation.ui.components.ListCard
 import com.graphees.statspos.presentation.ui.components.ListHeading
 import com.graphees.statspos.presentation.ui.components.ListHorizontalDivider
 import com.graphees.statspos.presentation.ui.components.ListLabel
+import com.graphees.statspos.presentation.ui.components.ListReportIcon
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.components.TopAppBar
+import com.graphees.statspos.presentation.ui.screens.TopRoutes
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.accounts.expenses.ExpensesViewModel
@@ -76,7 +78,11 @@ private sealed class Routes : NavKey {
     @Serializable
     data class AddUpdateExpense(val updateId: Long, val isUpdate: Boolean) : Routes()
 
-    data class SubExpenses(val expenseId:Long) : Routes()
+    @Serializable
+    data class SubExpenses(val expenseId: Long) : Routes()
+
+    @Serializable
+    data class Report(val expenseId: Long, val subExpenseId: Long) : Routes()
 }
 
 @Composable
@@ -106,6 +112,9 @@ fun ExpensesScreen(
                     onSubExpensesClick = { expenseId ->
                         navigate(Routes.SubExpenses(expenseId))
                     },
+                    onReportClick = { expenseId ->
+                        navigate(Routes.Report(expenseId, 0L))
+                    },
                     onBack = onBack,
                 )
             }
@@ -120,9 +129,21 @@ fun ExpensesScreen(
                 )
             }
             entry<Routes.SubExpenses> { key ->
-                SubExpensesScreen (
+                SubExpensesScreen(
                     sharedViewModel = sharedViewModel,
                     expenseId = key.expenseId,
+                    onReportClick = { subExpenseId ->
+                        navigate(Routes.Report(key.expenseId, subExpenseId))
+                    },
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    }
+                )
+            }
+            entry<Routes.Report> { key ->
+                ExpensesLedgerScreen(
+                    expenseId = key.expenseId,
+                    subExpenseId = key.subExpenseId,
                     onBack = {
                         backStack.removeLastOrNull()
                     }
@@ -137,6 +158,7 @@ private fun Home(
     sharedViewModel: SharedViewModel,
     onAddButtonClick: (Long, Boolean) -> Unit,
     onSubExpensesClick: (Long) -> Unit,
+    onReportClick: (Long) -> Unit,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -229,6 +251,21 @@ private fun Home(
                     onBack()
                 },
                 title = "Expenses",
+                actions = {
+                    if (HP.userRights.accountsReport == true) {
+                        IconButton(
+                            onClick = {
+                                onReportClick(0L)
+                            }
+                        ) {
+                            AppIcon(
+                                icon = R.drawable.report,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                size = 20.dp
+                            )
+                        }
+                    }
+                }
             )
         }
     ) { innerPadding ->
@@ -278,6 +315,9 @@ private fun Home(
                                 showDeleteDialog = true
                             }
                         },
+                        onReportClick = { expense ->
+                            onReportClick(expense.id!!)
+                        },
                     )
                 }
 
@@ -299,13 +339,14 @@ private fun BodyList(
     onItemClick: (Expenses) -> Unit,
     onEditClick: (Expenses) -> Unit,
     onDeleteClick: (Expenses) -> Unit,
+    onReportClick: (Expenses) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
     ) {
-        item{
+        item {
             Spacer(Modifier.height(4.dp))
         }
         items(items) { item ->
@@ -314,6 +355,7 @@ private fun BodyList(
                 onItemClick = onItemClick,
                 onEditClick = onEditClick,
                 onDeleteClick = onDeleteClick,
+                onReportClick = onReportClick,
             )
         }
     }
@@ -326,6 +368,7 @@ private fun ListCard(
     onItemClick: (Expenses) -> Unit,
     onEditClick: (Expenses) -> Unit,
     onDeleteClick: (Expenses) -> Unit,
+    onReportClick: (Expenses) -> Unit,
 ) {
     val primaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
     val secondaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.6f)
@@ -361,7 +404,7 @@ private fun ListCard(
                         fontWeight = FontWeight.SemiBold,
                     )
                     Spacer(Modifier.width(8.dp))
-                    ArrowIconButton{
+                    ArrowIconButton {
                         onItemClick(item)
                     }
                 }
@@ -379,8 +422,14 @@ private fun ListCard(
                     Row(
                         modifier = Modifier.weight(1f),
                     ) {
-                        ListHeading("Remarks: ", color = primaryColor)
-                        ListLabel(item.remarks.toString(), color = secondaryColor)
+                        if (HP.userRights.accountsReport == true) {
+                            ListReportIcon {
+                                onReportClick(item)
+                            }
+                        } else {
+                            ListHeading("Remarks: ", color = primaryColor)
+                            ListLabel(item.remarks.toString(), color = secondaryColor)
+                        }
                     }
                     if (HP.userRights.deleteAnything == true) {
                         Spacer(Modifier.width(8.dp))

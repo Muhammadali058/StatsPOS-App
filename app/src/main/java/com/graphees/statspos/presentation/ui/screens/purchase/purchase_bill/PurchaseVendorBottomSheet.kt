@@ -121,10 +121,8 @@ fun PurchaseVendorBottomSheet(
                 MOPSection(
                     mop = state.mop,
                     bank = state.bank,
-                    subBank = state.subBank,
                     onMOPChange = purchaseViewModel::onMOPChange,
                     onBankSelected = purchaseViewModel::onBankSelected,
-                    onSubBankSelected = purchaseViewModel::onSubBankSelected,
                     padding = PaddingValues(),
                 )
                 Others(

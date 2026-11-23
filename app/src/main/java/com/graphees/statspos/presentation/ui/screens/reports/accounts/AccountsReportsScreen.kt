@@ -388,9 +388,7 @@ private fun Home(
                         content = {
                             BankStatement(
                                 bank = state.bank,
-                                subBank = state.subBank,
                                 onBankChange = viewModel::onBankChange,
-                                onSubBankChange = viewModel::onSubBankChange,
                                 onShowClick = {
                                     viewModel.onBankStatementClick { accountReport, totalReport ->
                                         showBankStatement(accountReport, totalReport)
@@ -653,9 +651,7 @@ private fun Ledger(
 @Composable
 private fun BankStatement(
     bank: DropdownItem,
-    subBank: DropdownItem,
     onBankChange: (DropdownItem) -> Unit,
-    onSubBankChange: (DropdownItem) -> Unit,
     onShowClick: () -> Unit,
 ) {
     Column(
@@ -675,21 +671,6 @@ private fun BankStatement(
                 PlaceHolder(text = "Bank")
             },
             addNone = true,
-        )
-        SubComboBox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            items = HP.subBanks,
-            selectedItem = subBank,
-            onItemSelected = onSubBankChange,
-            label = {
-                Text("Bank Account")
-            },
-            placeholder = {
-                PlaceHolder(text = "Bank Account")
-            },
-            addNone = true,
-            mainId = bank.id
         )
         Spacer(Modifier.height(2.dp))
         Row(

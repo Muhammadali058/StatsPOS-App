@@ -153,10 +153,8 @@ fun NewPaymentEntryBody(
                 MOPSection(
                     mop = state.mop,
                     bank = state.bank,
-                    subBank = state.subBank,
                     onMOPChange = viewModel::onMOPChange,
                     onBankSelected = viewModel::onBankSelected,
-                    onSubBankSelected = viewModel::onSubBankSelected,
                 )
             }
 
@@ -310,44 +308,6 @@ private fun Body(
             label = {
                 Text("Naration")
             },
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun Prev() {
-    Column(
-        Modifier
-            .fillMaxSize(),
-    ) {
-        Body(
-            null,
-            null,
-            customerName = "",
-            vendorName = "",
-            isCustomer = false,
-            amount = "",
-            date = LocalDate.now(),
-            naration = "",
-            balance = "Balance: 0 (R)",
-            remarks = "",
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-        )
-        MOPSection(
-            mop = HP.mop[0],
-            bank = HP.getNoneDropdownItem(),
-            subBank = HP.getNoneDropdownItem(),
-            onMOPChange = {},
-            onBankSelected = {},
-            onSubBankSelected = {},
         )
     }
 }

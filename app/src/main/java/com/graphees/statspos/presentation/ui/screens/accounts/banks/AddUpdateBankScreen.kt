@@ -193,9 +193,13 @@ fun AddUpdateBankScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Body(
-                        bankName = state.bankName,
+                        accountName = state.accountName,
+                        branchCode = state.branchCode,
+                        branchAddress = state.branchAddress,
                         remarks = state.remarks,
-                        onBankNameChange = viewModel::onBankNameChange,
+                        onAccountNameChange = viewModel::onAccountNameChange,
+                        onBranchCodeChange = viewModel::onBranchCodeChange,
+                        onBranchAddressChange = viewModel::onBranchAddressChange,
                         onRemarksChange = viewModel::onRemarksChange,
                     )
                 }
@@ -229,19 +233,43 @@ fun AddUpdateBankScreen(
 
 @Composable
 private fun Body(
-    bankName: String,
+    accountName: String,
+    branchCode: String,
+    branchAddress: String,
     remarks: String,
-    onBankNameChange: (String) -> Unit,
+    onAccountNameChange: (String) -> Unit,
+    onBranchCodeChange: (String) -> Unit,
+    onBranchAddressChange: (String) -> Unit,
     onRemarksChange: (String) -> Unit,
 ) {
     TextboxOutlined(
-        value = bankName,
-        onValueChange = onBankNameChange,
+        value = accountName,
+        onValueChange = onAccountNameChange,
         modifier = Modifier
             .fillMaxWidth(),
         label = {
-            Text("Bank Name")
+            Text("Account Name")
         }
+    )
+    TextboxOutlined(
+        modifier = Modifier
+            .fillMaxWidth(),
+        value = branchCode,
+        onValueChange = onBranchCodeChange,
+        label = {
+            Text("Branch Code")
+        }
+    )
+    TextboxOutlined(
+        value = branchAddress,
+        onValueChange = onBranchAddressChange,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(84.dp),
+        label = {
+            Text("Branch Address")
+        },
+        singleLine = false,
     )
     TextboxOutlined(
         value = remarks,

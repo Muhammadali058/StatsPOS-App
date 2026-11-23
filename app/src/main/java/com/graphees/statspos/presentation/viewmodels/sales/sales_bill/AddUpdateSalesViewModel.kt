@@ -55,7 +55,6 @@ class AddUpdateSalesViewModel @Inject constructor(
 
         val mop: DropdownItem = HP.mop[0],
         var bank: DropdownItem = HP.getNoneDropdownItem(),
-        var subBank: DropdownItem = HP.getNoneDropdownItem(),
         var supplier: DropdownItem = HP.getNoneDropdownItem(),
 
         var isMopCashBank: Boolean = true,
@@ -192,10 +191,6 @@ class AddUpdateSalesViewModel @Inject constructor(
         state.update { it.copy(bank = value) }
     }
 
-    fun onSubBankSelected(value: DropdownItem) {
-        state.update { it.copy(subBank = value) }
-    }
-
     fun onSupplierSelected(value: DropdownItem) {
         state.update { it.copy(supplier = value) }
     }
@@ -206,7 +201,6 @@ class AddUpdateSalesViewModel @Inject constructor(
                 mop = value,
                 isMopCashBank = value.id == 1L,
                 bank = HP.getNoneDropdownItem(),
-                subBank = HP.getNoneDropdownItem(),
             )
         }
     }
@@ -479,7 +473,6 @@ class AddUpdateSalesViewModel @Inject constructor(
             customerId = state.value.customerId,
             customerName = state.value.customerName,
             bankId = state.value.bank.id,
-            subBankId = state.value.subBank.id,
             supplierId = state.value.supplier.id,
 
             isRetail = state.value.isRetail,
@@ -512,7 +505,6 @@ class AddUpdateSalesViewModel @Inject constructor(
                 change = sale.change.toString(),
                 mop = if (sale.isMopCashBank!!) HP.mop[0] else HP.mop[1],
                 bank = HP.getDropdownById(sale.bankId!!, HP.banks),
-                subBank = HP.getDropdownById(sale.subBankId!!, HP.subBanks),
                 supplier = HP.getDropdownById(sale.supplierId!!, HP.suppliers),
                 remarks = sale.remarks.toString(),
 
@@ -558,7 +550,6 @@ class AddUpdateSalesViewModel @Inject constructor(
                 selectedCustomerName = "",
                 customerName = "",
                 bank = HP.getNoneDropdownItem(),
-                subBank = HP.getNoneDropdownItem(),
                 supplier = HP.getNoneDropdownItem(),
 
                 isRetail = HP.settings.isDefaultRateRetail!!,
@@ -595,11 +586,6 @@ class AddUpdateSalesViewModel @Inject constructor(
             if (state.value.bank.id == 0L) {
                 showMessage("Please select bank")
                 return false
-            } else {
-                if (state.value.subBank.id == 0L) {
-                    showMessage("Please select bank account")
-                    return false
-                }
             }
         }
 

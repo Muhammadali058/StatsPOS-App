@@ -12,6 +12,7 @@ import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.get
 import com.graphees.statspos.utils.getListOf
 import com.google.gson.Gson
+import com.graphees.statspos.domain.models.accounts.Accounts
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +28,9 @@ class AddUpdateBankViewModel @Inject constructor(
     // region ScreenState
     data class ScreenState(
         val id: Long = 0L,
-        val bankName: String = "",
+        val accountName: String = "",
+        val branchCode: String = "",
+        val branchAddress: String = "",
         val remarks: String = "",
 
         // Extra
@@ -98,9 +101,18 @@ class AddUpdateBankViewModel @Inject constructor(
     // endregion
 
     // region onChangeMethods
-    fun onBankNameChange(value: String) {
-        state.update { it.copy(bankName = value) }
+    fun onAccountNameChange(value: String) {
+        state.update { it.copy(accountName = value) }
     }
+
+    fun onBranchCodeChange(value: String) {
+        state.update { it.copy(branchCode = value) }
+    }
+
+    fun onBranchAddressChange(value: String) {
+        state.update { it.copy(branchAddress = value) }
+    }
+
     fun onRemarksChange(value: String) {
         state.update { it.copy(remarks = value) }
     }
@@ -183,7 +195,7 @@ class AddUpdateBankViewModel @Inject constructor(
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
-                    val bank = Gson().get<Banks>(result.data.asJsonObject)
+                    val bank = Gson().get<Accounts>(result.data.asJsonObject)
                     setFormData(bank)
                 }
             }
@@ -192,18 +204,22 @@ class AddUpdateBankViewModel @Inject constructor(
     // endregion
 
     // region Methods
-    private fun getFormData(): Banks {
-        return Banks(
-            bankName = state.value.bankName,
+    private fun getFormData(): Accounts {
+        return Accounts(
+            accountName = state.value.accountName,
+            branchCode = state.value.branchCode,
+            branchAddress = state.value.branchAddress,
             remarks = state.value.remarks,
         )
     }
 
-    private fun setFormData(bank: Banks) {
+    private fun setFormData(expense: Accounts) {
         state.update {
             it.copy(
-                bankName =  bank.bankName.toString(),
-                remarks =  bank.remarks.toString(),
+                accountName = expense.accountName!!,
+                branchCode = expense.branchCode!!,
+                branchAddress = expense.branchAddress!!,
+                remarks = expense.remarks!!,
             )
         }
     }
@@ -211,7 +227,9 @@ class AddUpdateBankViewModel @Inject constructor(
     private fun clearTextboxes() {
         state.update {
             it.copy(
-                bankName = "",
+                accountName = "",
+                branchCode = "",
+                branchAddress = "",
                 remarks = "",
 
                 isUpdate = false,
@@ -221,8 +239,8 @@ class AddUpdateBankViewModel @Inject constructor(
     }
 
     private fun isValid(): Boolean {
-        if (state.value.bankName.isEmpty()) {
-            showMessage("Please enter bank name")
+        if (state.value.accountName.isEmpty()) {
+            showMessage("Please enter account name")
             return false
         }
 

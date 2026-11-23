@@ -350,6 +350,19 @@ fun ListWhatsappIcon(
 }
 
 @Composable
+fun ListReportIcon(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    ListColorIcon(
+        modifier = modifier,
+        icon = R.drawable.report,
+        color = blue,
+        onClick = onClick
+    )
+}
+
+@Composable
 fun ListCallIcon(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,

@@ -44,7 +44,7 @@ import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.TopAppBar
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
-import com.graphees.statspos.presentation.viewmodels.reports.LedgerViewModel
+import com.graphees.statspos.presentation.viewmodels.accounts.entries.EntryViewModel
 import com.graphees.statspos.utils.EntryType
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.UiEvent
@@ -60,7 +60,7 @@ fun EntryScreen(
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
-    val viewModel = hiltViewModel<LedgerViewModel>()
+    val viewModel = hiltViewModel<EntryViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val event by viewModel.event.collectAsState(UiEvent.Idle)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -81,12 +81,11 @@ fun EntryScreen(
     // Edit data when update
     LaunchedEffect(Unit) {
         if (!state.hasLoadedOnce) {
-            viewModel.updateInitialStateForEntry(
+            viewModel.updateInitialState(
                 account = account,
                 entryType = entryType,
             )
 
-            viewModel.loadLedger()
             viewModel.setHasLoadedOnce(true)
         }
     }
@@ -148,10 +147,8 @@ fun EntryScreen(
                     MOPSection(
                         mop = state.mop,
                         bank = state.bank,
-                        subBank = state.subBank,
                         onMOPChange = viewModel::onMOPChange,
                         onBankSelected = viewModel::onBankSelected,
-                        onSubBankSelected = viewModel::onSubBankSelected,
                     )
                 }
 

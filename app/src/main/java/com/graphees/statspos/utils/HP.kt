@@ -57,7 +57,7 @@ object HP {
     var expenses = emptyList<DropdownItem>()
     var subExpenses = emptyList<DropdownItem>()
     var banks = emptyList<DropdownItem>()
-    var subBanks = emptyList<DropdownItem>()
+//    var subBanks = emptyList<DropdownItem>()
     var warehouses = emptyList<DropdownItem>()
     var branches = emptyList<DropdownItem>()
     var branchGroups = emptyList<DropdownItem>()
@@ -226,13 +226,13 @@ object HP {
                 )
             }
             banks = Gson().getListOf<DropdownItem>(jsonObject.get("banks").asJsonArray)
-            subBanks = jsonObject.get("subBanks").asJsonArray.map { obj ->
-                DropdownItem(
-                    id = obj.asJsonObject.get("id").asLong,
-                    name = obj.asJsonObject.get("name").asString,
-                    mainId = obj.asJsonObject.get("bankId").asLong,
-                )
-            }
+//            subBanks = jsonObject.get("subBanks").asJsonArray.map { obj ->
+//                DropdownItem(
+//                    id = obj.asJsonObject.get("id").asLong,
+//                    name = obj.asJsonObject.get("name").asString,
+//                    mainId = obj.asJsonObject.get("bankId").asLong,
+//                )
+//            }
             warehouses = Gson().getListOf<DropdownItem>(jsonObject.get("warehouses").asJsonArray)
             branches = Gson().getListOf<DropdownItem>(jsonObject.get("branches").asJsonArray)
             branchGroups =

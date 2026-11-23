@@ -1,37 +1,45 @@
-package com.graphees.statspos.presentation.viewmodels.accounts.banks
+package com.graphees.statspos.presentation.viewmodels.accounts.expenses
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.graphees.statspos.domain.models.DropdownItem
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.graphees.statspos.domain.models.accounts.Accounts
-import com.graphees.statspos.domain.repository.accounts.BanksRepository
+import com.graphees.statspos.domain.models.reports.TotalReport
+import com.graphees.statspos.domain.models.reports.accounts.AccountReport
+import com.graphees.statspos.domain.repository.accounts.AccountsRepository
+import com.graphees.statspos.domain.repository.reports.AccountReportsRepository
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.Resource
 import com.graphees.statspos.utils.SnackbarType
 import com.graphees.statspos.utils.UiEvent
+import com.graphees.statspos.utils.get
 import com.graphees.statspos.utils.getListOf
-import com.google.gson.Gson
-import com.google.gson.JsonObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
-class SubBanksViewModel @Inject constructor(
-    private val api: BanksRepository
+class ExpenseReportViewModel @Inject constructor(
+    private val api: AccountReportsRepository,
 ) : ViewModel() {
 
     // region ScreenState
     data class ScreenState(
-        val list: List<Accounts> = emptyList(),
-        val totalSubBanks: Int = 0,
+//        val account: Accounts = Accounts(0L, accountName = ""),
+        val expenseId: Long = 0L,
+        val subExpenseId: Long = 0L,
 
-        val search: String = "",
-        val bankId: Long = 0L,
+        val fromDate: LocalDate = LocalDate.now().minusMonths(1),
+        val toDate: LocalDate = LocalDate.now(),
+
+        val accountReport: List<AccountReport> = emptyList(),
+        val totalReport: TotalReport = TotalReport(totalEntries = 0, accountName = ""),
 
         val hasLoadedOnce: Boolean = false,
 
@@ -99,87 +107,60 @@ class SubBanksViewModel @Inject constructor(
     // endregion
 
     // region onChangeMethods
-    fun onSearchChange(value: String) {
-        state.update { it.copy(search = value) }
-
-        if(HP.appSettings.instantSearch == true)
-            loadData()
+    fun onFromDateChange(value: LocalDate) {
+        state.update { it.copy(fromDate = value) }
+        loadExpenses()
     }
+
+    fun onToDateChange(value: LocalDate) {
+        state.update { it.copy(toDate = value) }
+        loadExpenses()
+    }
+
     fun setHasLoadedOnce(value: Boolean) {
         state.update { it.copy(hasLoadedOnce = value) }
     }
+
     // endregion
 
     // region Network calls
-    fun loadData() {
-        viewModelScope.launch {
-//            if (state.value.isLoading)
-//                return@launch
-
-            beforeRequest()
-
-            val params = JsonObject().apply {
-                addProperty("bankId", state.value.bankId)
-                addProperty("text", state.value.search)
-            }
-
-            when (val result = api.loadSubBanks(params)) {
-                is Resource.Error -> resultError(result.error)
-                is Resource.Information -> resultInformation(result.message)
-                is Resource.Success -> {
-                    resultSuccess()
-
-                    val resultTotal =
-                        result.data.get("total").asJsonObject.get("totalSubBanks").asInt
-                    val resultList =
-                        Gson().getListOf<Accounts>(result.data.get("rows").asJsonArray)
-                    state.update {
-                        it.copy(
-                            list = resultList,
-                            totalSubBanks = resultTotal,
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    fun deleteData(id: Long, onSuccess: () -> Unit) {
+    fun loadExpenses() {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
 
-            if (id == 0L)
-                return@launch
-
             beforeRequest()
 
-            when (val result = api.deleteSubBank(id)) {
+            val params = getParams()
+            params.addProperty("expenseId", state.value.expenseId)
+            params.addProperty("subExpenseId", state.value.subExpenseId)
+
+            when (val result = api.expenses(params)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
 
-                    state.update {
-                        it.copy(
-                            list = state.value.list.filter { it.id != id },
-                            totalSubBanks = state.value.totalSubBanks - 1,
-                        )
-                    }
+                    val accountReport =
+                        Gson().getListOf<AccountReport>(result.data.get("rows").asJsonArray)
+                    if (accountReport.isNotEmpty()) {
+                        val totalReport =
+                            Gson().get<TotalReport>(result.data.get("total").asJsonObject)
 
-                    HP.subBanks = result.data.get("subBanks").asJsonArray.map { obj ->
-                        DropdownItem(
-                            id = obj.asJsonObject.get("id").asLong,
-                            name = obj.asJsonObject.get("name").asString,
-                            mainId = obj.asJsonObject.get("bankId").asLong,
-                        )
+                        state.update {
+                            it.copy(
+                                accountReport = accountReport,
+                                totalReport = totalReport,
+                            )
+                        }
+
+                    } else {
+                        showMessage("Not record found")
                     }
-                    onSuccess()
                 }
             }
         }
     }
-
     // endregion
 
     // region Others
@@ -197,11 +178,21 @@ class SubBanksViewModel @Inject constructor(
         state.update { it.copy(isLoading = false, error = null) }
     }
 
-    fun updateInitialState(bankId: Long) {
-        state.update { it.copy(
-            bankId = bankId,
-        ) }
+    private fun getParams(): JsonObject {
+        return JsonObject().apply {
+            addProperty("fromDate", HP.getZonedDate(state.value.fromDate))
+            addProperty("toDate", HP.getZonedDate(state.value.toDate))
+        }
     }
 
-    // endregion
+    fun updateInitialState(expenseId: Long = 0, subExpenseId:Long = 0) {
+        state.update {
+            it.copy(
+                expenseId = expenseId,
+                subExpenseId = subExpenseId,
+            )
+        }
+    }
+
+// endregion
 }

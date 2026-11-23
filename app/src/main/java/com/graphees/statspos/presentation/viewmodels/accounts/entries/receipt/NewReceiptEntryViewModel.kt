@@ -39,7 +39,6 @@ class NewReceiptEntryViewModel @Inject constructor(
         val date: LocalDate = LocalDate.now(),
         val mop: DropdownItem = HP.mop[0],
         val bank: DropdownItem = HP.getNoneDropdownItem(),
-        val subBank: DropdownItem = HP.getNoneDropdownItem(),
 
         val isVendor: Boolean = false,
         val customerId: Long = 0L,
@@ -146,7 +145,6 @@ class NewReceiptEntryViewModel @Inject constructor(
             it.copy(
                 mop = value,
                 bank = HP.getNoneDropdownItem(),
-                subBank = HP.getNoneDropdownItem(),
             )
         }
         changeNaration()
@@ -154,10 +152,6 @@ class NewReceiptEntryViewModel @Inject constructor(
 
     fun onBankSelected(value: DropdownItem) {
         state.update { it.copy(bank = value) }
-    }
-
-    fun onSubBankSelected(value: DropdownItem) {
-        state.update { it.copy(subBank = value) }
         changeNaration()
     }
 
@@ -244,7 +238,7 @@ class NewReceiptEntryViewModel @Inject constructor(
     // region Methods
     private fun getFormData(): Entries {
         return Entries(
-            debitAccountId = if (state.value.mop.id == 1L) getFixedAccount(FixedAccounts.CASH) else state.value.subBank.id,
+            debitAccountId = if (state.value.mop.id == 1L) getFixedAccount(FixedAccounts.CASH) else state.value.bank.id,
             creditAccountId = if (state.value.isVendor) state.value.vendorId else state.value.customerId,
             amount = HP.getDoubleValue(state.value.amount),
             naration = state.value.naration,
@@ -269,7 +263,6 @@ class NewReceiptEntryViewModel @Inject constructor(
                 naration = "",
                 mop = HP.mop[0],
                 bank = HP.getNoneDropdownItem(),
-                subBank = HP.getNoneDropdownItem(),
             )
         }
     }
@@ -296,13 +289,8 @@ class NewReceiptEntryViewModel @Inject constructor(
             if (state.value.bank.id == 0L) {
                 showMessage("Please select bank")
                 return false
-            } else {
-                if (state.value.subBank.id == 0L) {
-                    showMessage("Please select bank account")
-                    return false
-                } else
-                    return isValidDate()
-            }
+            } else
+                return isValidDate()
         } else
             return isValidDate()
     }
@@ -350,8 +338,8 @@ class NewReceiptEntryViewModel @Inject constructor(
         }
 
         if (state.value.mop.id == 2L) {
-            state.value.subBank.run {
-                naration = (naration + " in " + state.value.subBank.name)
+            state.value.bank.run {
+                naration = (naration + " in " + state.value.bank.name)
             }
         }
 

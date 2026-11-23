@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,7 +28,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -37,17 +40,25 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.graphees.statspos.domain.models.accounts.Accounts
+import com.graphees.statspos.domain.models.accounts.Expenses
 import com.graphees.statspos.presentation.ui.components.AppFloatingActionButton
+import com.graphees.statspos.presentation.ui.components.ArrowIconButton
 import com.graphees.statspos.presentation.ui.components.BottomHeading
 import com.graphees.statspos.presentation.ui.components.ConfirmDialog
 import com.graphees.statspos.presentation.ui.components.DeleteIconButton
+import com.graphees.statspos.presentation.ui.components.EditIconButton
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.ListCard
+import com.graphees.statspos.presentation.ui.components.ListHeading
+import com.graphees.statspos.presentation.ui.components.ListHorizontalDivider
+import com.graphees.statspos.presentation.ui.components.ListLabel
 import com.graphees.statspos.presentation.ui.components.ListMainLabel
+import com.graphees.statspos.presentation.ui.components.ListReportIcon
 import com.graphees.statspos.presentation.ui.components.PasswordDialog
 import com.graphees.statspos.presentation.ui.components.PullToRefreshList
 import com.graphees.statspos.presentation.ui.components.SearchBox
 import com.graphees.statspos.presentation.ui.components.TopAppBar
+import com.graphees.statspos.presentation.ui.screens.accounts.banks.BankStatementScreen
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
 import com.graphees.statspos.presentation.viewmodels.accounts.expenses.SubExpensesViewModel
@@ -57,6 +68,7 @@ import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
 import com.graphees.statspos.utils.showToast
 import kotlinx.serialization.Serializable
+import kotlin.math.exp
 
 private sealed class SubRoutes : NavKey {
     @Serializable
@@ -65,12 +77,16 @@ private sealed class SubRoutes : NavKey {
     @Serializable
     data class AddUpdateSubExpense(val updateId: Long, val isUpdate: Boolean, val expenseId: Long) :
         SubRoutes()
+
+    @Serializable
+    data class Ledger(val account: Accounts) : SubRoutes()
 }
 
 @Composable
 fun SubExpensesScreen(
     sharedViewModel: SharedViewModel,
     expenseId: Long,
+    onReportClick: (Long) -> Unit,
     onBack: () -> Unit,
 ) {
     val backStack = rememberNavBackStack(SubRoutes.Home)
@@ -93,6 +109,12 @@ fun SubExpensesScreen(
                     onAddButtonClick = { updateId, isUpdated ->
                         navigate(SubRoutes.AddUpdateSubExpense(updateId, isUpdated, expenseId))
                     },
+                    onLedgerClick = { account ->
+                        navigate(SubRoutes.Ledger(account))
+                    },
+                    onReportClick = { subExpenseId ->
+                        onReportClick(subExpenseId)
+                    },
                     onBack = onBack,
                 )
             }
@@ -107,6 +129,15 @@ fun SubExpensesScreen(
                     }
                 )
             }
+            entry<SubRoutes.Ledger> { key ->
+                ExpenseEntryScreen (
+                    sharedViewModel = sharedViewModel,
+                    subExpenseId = key.account.id!!,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                )
+            }
         }
     )
 }
@@ -116,6 +147,8 @@ private fun Home(
     sharedViewModel: SharedViewModel,
     expenseId: Long,
     onAddButtonClick: (Long, Boolean) -> Unit,
+    onLedgerClick: (Accounts) -> Unit,
+    onReportClick: (Long) -> Unit,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -249,6 +282,9 @@ private fun Home(
                         },
                         items = state.list,
                         onItemClick = { subExpense ->
+                            onLedgerClick(subExpense)
+                        },
+                        onEditClick = { subExpense ->
                             onAddButtonClick(subExpense.id!!, true)
                         },
                         onDeleteClick = { subExpense ->
@@ -259,6 +295,9 @@ private fun Home(
                             } else {
                                 showDeleteDialog = true
                             }
+                        },
+                        onReportClick = { subExpense ->
+                            onReportClick(subExpense.id!!)
                         },
                     )
                 }
@@ -279,7 +318,9 @@ private fun BodyList(
     onRefresh: () -> Unit,
     items: List<Accounts>,
     onItemClick: (Accounts) -> Unit,
+    onEditClick: (Accounts) -> Unit,
     onDeleteClick: (Accounts) -> Unit,
+    onReportClick: (Accounts) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -293,7 +334,9 @@ private fun BodyList(
             ListCard(
                 item = item,
                 onItemClick = onItemClick,
+                onEditClick = onEditClick,
                 onDeleteClick = onDeleteClick,
+                onReportClick = onReportClick,
             )
         }
     }
@@ -304,8 +347,13 @@ private fun ListCard(
     modifier: Modifier = Modifier,
     item: Accounts,
     onItemClick: (Accounts) -> Unit,
+    onEditClick: (Accounts) -> Unit,
     onDeleteClick: (Accounts) -> Unit,
+    onReportClick: (Accounts) -> Unit,
 ) {
+    val primaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
+    val secondaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.6f)
+
     ListCard(
         modifier = modifier
             .fillMaxWidth()
@@ -319,18 +367,62 @@ private fun ListCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ListMainLabel(
+            Column(
                 modifier = Modifier
                     .weight(1f),
-                text = item.subExpenseName.toString()
-            )
+            ) {
+                // region Name
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .weight(1f),
+                        text = item.accountName.toString(),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    ArrowIconButton{
+                        onItemClick(item)
+                    }
+                }
+                // endregion
 
-            if (HP.userRights.deleteAnything == true) {
-                Spacer(Modifier.width(8.dp))
-                DeleteIconButton {
-                    onDeleteClick(item)
+                Spacer(Modifier.height(4.dp))
+                ListHorizontalDivider()
+                Spacer(Modifier.height(4.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Row(
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        if(HP.userRights.accountsReport == true) {
+                            ListReportIcon {
+                                onReportClick(item)
+                            }
+                        }
+                    }
+                    if (HP.userRights.deleteAnything == true) {
+                        Spacer(Modifier.width(8.dp))
+                        DeleteIconButton {
+                            onDeleteClick(item)
+                        }
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    EditIconButton {
+                        onEditClick(item)
+                    }
                 }
             }
         }
     }
 }
+
+

@@ -35,7 +35,6 @@ class NewExpenseEntryViewModel @Inject constructor(
         val date: LocalDate = LocalDate.now(),
         val mop: DropdownItem = HP.mop[0],
         val bank: DropdownItem = HP.getNoneDropdownItem(),
-        val subBank: DropdownItem = HP.getNoneDropdownItem(),
 
         val expense: DropdownItem = HP.getNoneDropdownItem(),
         val subExpense: DropdownItem = HP.getNoneDropdownItem(),
@@ -129,7 +128,6 @@ class NewExpenseEntryViewModel @Inject constructor(
             it.copy(
                 mop = value,
                 bank = HP.getNoneDropdownItem(),
-                subBank = HP.getNoneDropdownItem(),
             )
         }
         changeNaration()
@@ -137,12 +135,9 @@ class NewExpenseEntryViewModel @Inject constructor(
 
     fun onBankSelected(value: DropdownItem) {
         state.update { it.copy(bank = value) }
-    }
-
-    fun onSubBankSelected(value: DropdownItem) {
-        state.update { it.copy(subBank = value) }
         changeNaration()
     }
+
     // endregion
 
     // region Network calls
@@ -181,7 +176,7 @@ class NewExpenseEntryViewModel @Inject constructor(
     private fun getFormData(): Entries {
         return Entries(
             debitAccountId = state.value.subExpense.id,
-            creditAccountId = if (state.value.mop.id == 1L) getFixedAccount(FixedAccounts.CASH) else state.value.subBank.id,
+            creditAccountId = if (state.value.mop.id == 1L) getFixedAccount(FixedAccounts.CASH) else state.value.bank.id,
             amount = HP.getDoubleValue(state.value.amount),
             naration = state.value.naration,
             date = HP.getZonedDate(state.value.date),
@@ -201,7 +196,6 @@ class NewExpenseEntryViewModel @Inject constructor(
                 naration = "",
                 mop = HP.mop[0],
                 bank = HP.getNoneDropdownItem(),
-                subBank = HP.getNoneDropdownItem(),
             )
         }
     }
@@ -226,13 +220,8 @@ class NewExpenseEntryViewModel @Inject constructor(
             if (state.value.bank.id == 0L) {
                 showMessage("Please select bank")
                 return false
-            } else {
-                if (state.value.subBank.id == 0L) {
-                    showMessage("Please select bank account")
-                    return false
-                } else
-                    return isValidDate()
-            }
+            } else
+                return isValidDate()
         } else
             return isValidDate()
     }
@@ -273,8 +262,8 @@ class NewExpenseEntryViewModel @Inject constructor(
             ""
 
         if (state.value.mop.id == 2L) {
-            state.value.subBank.run {
-                naration = (naration + " from " + state.value.subBank.name)
+            state.value.bank.run {
+                naration = (naration + " from " + state.value.bank.name)
             }
         }else{
             naration = "$naration in Cash"

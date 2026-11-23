@@ -175,10 +175,8 @@ fun NewStockEntryBody(
                 MOPSection(
                     mop = state.mop,
                     bank = state.bank,
-                    subBank = state.subBank,
                     onMOPChange = viewModel::onMOPChange,
                     onBankSelected = viewModel::onBankSelected,
-                    onSubBankSelected = viewModel::onSubBankSelected,
                 )
             }
 

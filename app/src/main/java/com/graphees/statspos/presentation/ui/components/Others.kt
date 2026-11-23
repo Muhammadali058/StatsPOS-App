@@ -14,10 +14,8 @@ import com.graphees.statspos.utils.HP
 fun MOPSection(
     mop: DropdownItem,
     bank: DropdownItem,
-    subBank: DropdownItem,
     onMOPChange: (DropdownItem) -> Unit,
     onBankSelected: (DropdownItem) -> Unit,
-    onSubBankSelected: (DropdownItem) -> Unit,
     padding: PaddingValues = ConstantPaddings.BODY_HORIZONTAL,
 ) {
     ExpandableSection(
@@ -55,22 +53,22 @@ fun MOPSection(
             addNone = true,
             enabled = mop.id == 2L,
         )
-        SubComboBox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            items = HP.subBanks,
-            selectedItem = subBank,
-            onItemSelected = onSubBankSelected,
-            label = {
-                Text("Bank Account")
-            },
-            placeholder = {
-                PlaceHolder(text = "Bank Account")
-            },
-            outlined = true,
-            addNone = true,
-            enabled = mop.id == 2L,
-            mainId = bank.id
-        )
+//        SubComboBox(
+//            modifier = Modifier
+//                .fillMaxWidth(),
+//            items = HP.subBanks,
+//            selectedItem = subBank,
+//            onItemSelected = onSubBankSelected,
+//            label = {
+//                Text("Bank Account")
+//            },
+//            placeholder = {
+//                PlaceHolder(text = "Bank Account")
+//            },
+//            outlined = true,
+//            addNone = true,
+//            enabled = mop.id == 2L,
+//            mainId = bank.id
+//        )
     }
 }

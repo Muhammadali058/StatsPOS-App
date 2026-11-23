@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -41,9 +39,8 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.graphees.statspos.domain.models.accounts.Banks
+import com.graphees.statspos.domain.models.accounts.Accounts
 import com.graphees.statspos.presentation.ui.components.AppFloatingActionButton
-import com.graphees.statspos.presentation.ui.components.AppIconButton
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.ArrowIconButton
 import com.graphees.statspos.presentation.ui.components.BottomHeading
@@ -76,8 +73,8 @@ private sealed class Routes : NavKey {
     @Serializable
     data class AddUpdateBank(val updateId: Long, val isUpdate: Boolean) : Routes()
 
-    data class SubBanks(val bankId:Long) : Routes()
-
+    @Serializable
+    data class Ledger(val account: Accounts) : Routes()
 }
 
 @Composable
@@ -104,8 +101,8 @@ fun BanksScreen(
                     onAddButtonClick = { updateId, isUpdated ->
                         navigate(Routes.AddUpdateBank(updateId, isUpdated))
                     },
-                    onSubBanksClick = { bankId ->
-                        navigate(Routes.SubBanks(bankId))
+                    onLedgerClick = { account ->
+                        navigate(Routes.Ledger(account))
                     },
                     onBack = onBack,
                 )
@@ -120,13 +117,12 @@ fun BanksScreen(
                     }
                 )
             }
-            entry<Routes.SubBanks> { key ->
-                SubBanksScreen (
-                    sharedViewModel = sharedViewModel,
-                    bankId = key.bankId,
+            entry<Routes.Ledger> { key ->
+                BankStatementScreen (
+                    account = key.account,
                     onBack = {
                         backStack.removeLastOrNull()
-                    }
+                    },
                 )
             }
         }
@@ -137,7 +133,7 @@ fun BanksScreen(
 private fun Home(
     sharedViewModel: SharedViewModel,
     onAddButtonClick: (Long, Boolean) -> Unit,
-    onSubBanksClick: (Long) -> Unit,
+    onLedgerClick: (Accounts) -> Unit,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -265,7 +261,7 @@ private fun Home(
                         },
                         items = state.list,
                         onItemClick = { bank ->
-                            onSubBanksClick(bank.id!!)
+                            onLedgerClick(bank)
                         },
                         onEditClick = { bank ->
                             onAddButtonClick(bank.id!!, true)
@@ -283,7 +279,7 @@ private fun Home(
                 }
 
                 BottomHeading(
-                    text = "Total Banks: ",
+                    text = "Total Accounts: ",
                     value = state.totalBanks.toString()
                 )
             }
@@ -296,10 +292,10 @@ private fun BodyList(
     modifier: Modifier = Modifier,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
-    items: List<Banks>,
-    onItemClick: (Banks) -> Unit,
-    onEditClick: (Banks) -> Unit,
-    onDeleteClick: (Banks) -> Unit,
+    items: List<Accounts>,
+    onItemClick: (Accounts) -> Unit,
+    onEditClick: (Accounts) -> Unit,
+    onDeleteClick: (Accounts) -> Unit,
 ) {
     PullToRefreshList(
         modifier = modifier,
@@ -323,10 +319,10 @@ private fun BodyList(
 @Composable
 private fun ListCard(
     modifier: Modifier = Modifier,
-    item: Banks,
-    onItemClick: (Banks) -> Unit,
-    onEditClick: (Banks) -> Unit,
-    onDeleteClick: (Banks) -> Unit,
+    item: Accounts,
+    onItemClick: (Accounts) -> Unit,
+    onEditClick: (Accounts) -> Unit,
+    onDeleteClick: (Accounts) -> Unit,
 ) {
     val primaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
     val secondaryColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.6f)
@@ -356,7 +352,7 @@ private fun ListCard(
                     Text(
                         modifier = Modifier
                             .weight(1f),
-                        text = item.bankName.toString(),
+                        text = item.accountName.toString(),
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,

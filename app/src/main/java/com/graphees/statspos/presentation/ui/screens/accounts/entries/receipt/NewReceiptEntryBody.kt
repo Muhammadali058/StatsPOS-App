@@ -37,12 +37,12 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.domain.models.DropdownItem
 import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndicator
+import com.graphees.statspos.presentation.ui.components.AppSaveButton
 import com.graphees.statspos.presentation.ui.components.AppSwitch
 import com.graphees.statspos.presentation.ui.components.AppText
 import com.graphees.statspos.presentation.ui.components.BalanceBox
@@ -51,7 +51,6 @@ import com.graphees.statspos.presentation.ui.components.Dropdown
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.MOPSection
 import com.graphees.statspos.presentation.ui.components.ProgressBarLayout
-import com.graphees.statspos.presentation.ui.components.AppSaveButton
 import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.viewmodels.SharedViewModel
@@ -152,10 +151,8 @@ fun NewReceiptEntryBody(
                 MOPSection(
                     mop = state.mop,
                     bank = state.bank,
-                    subBank = state.subBank,
                     onMOPChange = viewModel::onMOPChange,
                     onBankSelected = viewModel::onBankSelected,
-                    onSubBankSelected = viewModel::onSubBankSelected,
                 )
             }
 
@@ -309,44 +306,6 @@ private fun Body(
             label = {
                 Text("Naration")
             },
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun Prev() {
-    Column(
-        Modifier
-            .fillMaxSize(),
-    ) {
-        Body(
-            null,
-            null,
-            customerName = "",
-            vendorName = "",
-            isVendor = false,
-            amount = "",
-            date = LocalDate.now(),
-            naration = "",
-            balance = "Balance: 0 (R)",
-            remarks = "",
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-        )
-        MOPSection(
-            mop = HP.mop[0],
-            bank = HP.getNoneDropdownItem(),
-            subBank = HP.getNoneDropdownItem(),
-            onMOPChange = {},
-            onBankSelected = {},
-            onSubBankSelected = {},
         )
     }
 }

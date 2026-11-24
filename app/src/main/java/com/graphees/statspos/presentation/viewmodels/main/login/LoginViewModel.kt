@@ -1,6 +1,5 @@
-package com.graphees.statspos.presentation.viewmodels.main
+package com.graphees.statspos.presentation.viewmodels.main.login
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
@@ -8,7 +7,6 @@ import com.graphees.statspos.domain.models.main.AppSubscription
 import com.graphees.statspos.domain.models.main.Clients
 import com.graphees.statspos.domain.models.utilities.users.UserRights
 import com.graphees.statspos.domain.models.utilities.users.Users
-import com.graphees.statspos.domain.repository.firebase.FirebaseRepository
 import com.graphees.statspos.domain.repository.main.ClientsRepository
 import com.graphees.statspos.domain.repository.main.MainRepository
 import com.graphees.statspos.domain.repository.utilities.UsersRepository

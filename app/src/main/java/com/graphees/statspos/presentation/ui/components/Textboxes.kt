@@ -38,6 +38,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -65,6 +66,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -81,6 +83,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import com.graphees.statspos.R
 import com.graphees.statspos.domain.models.DropdownItem
+import com.graphees.statspos.presentation.ui.theme.text2Light
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings.DEFAULT_RADIUS
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings.DEFAULT_TEXTBOX_RADIUS
@@ -312,7 +315,8 @@ fun Textbox2(
     onValueChange: (String) -> Unit,
     placeholder: String = "Search",
     textColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
-    placeholderColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    backgroundColor: Color = MaterialTheme.colorScheme.secondaryContainer,
+    placeholderColor: Color = text2Light,
     leadingIcon: (@Composable (() -> Unit))? = null,
     trailingIcon: (@Composable (() -> Unit))? = null,
     singleLine: Boolean = true,
@@ -337,6 +341,7 @@ fun Textbox2(
         modifier = modifier
             .height(42.dp)
             .clip(shape)
+            .background(backgroundColor)
             .background(MaterialTheme.colorScheme.secondaryContainer)
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.CenterStart
@@ -385,10 +390,17 @@ fun Textbox2(
                 isPassword -> {
                     Spacer(modifier = Modifier.width(8.dp))
                     IconButton(onClick = { visible = !visible }) {
-                        AppIcon(
-                            icon = icon,
-                            modifier = Modifier.size(24.dp)
+                        Icon(
+                            painter = painterResource(icon),
+                            contentDescription = null,
+                            tint = placeholderColor,
+                            modifier = Modifier
+                                .size(22.dp)
                         )
+//                        AppIcon(
+//                            icon = icon,
+//                            modifier = Modifier.size(24.dp)
+//                        )
                     }
                 }
 
@@ -396,6 +408,79 @@ fun Textbox2(
                     Spacer(modifier = Modifier.width(8.dp))
                     trailingIcon()
                 }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun Textbox3(
+    modifier: Modifier = Modifier,
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String = "Search",
+    textColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    backgroundColor: Color = MaterialTheme.colorScheme.secondaryContainer,
+    placeholderColor: Color = text2Light,
+    leadingIcon: (@Composable (() -> Unit))? = null,
+    trailingIcon: (@Composable (() -> Unit))? = null,
+    singleLine: Boolean = true,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    shape: Shape = RoundedCornerShape(8.dp),
+    textStyle: TextStyle = TextStyle(fontSize = 14.sp),
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    focusRequester: FocusRequester = remember { FocusRequester() },
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Box(
+        modifier = modifier
+            .height(46.dp)
+            .clip(shape)
+            .background(backgroundColor)
+            .padding(PaddingValues(horizontal = 12.dp, vertical = 0.dp)),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (leadingIcon != null) {
+                leadingIcon()
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+
+            Box(modifier = Modifier.weight(1f)) {
+                if (value.isEmpty()) {
+                    Text(
+                        text = placeholder,
+                        color = placeholderColor,
+                        style = textStyle
+                    )
+                }
+
+                BasicTextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    singleLine = singleLine,
+                    enabled = enabled,
+                    readOnly = readOnly,
+                    textStyle = textStyle.copy(color = textColor),
+                    cursorBrush = SolidColor(textColor),
+                    keyboardOptions = keyboardOptions,
+                    keyboardActions = keyboardActions,
+                    interactionSource = interactionSource,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
+                )
+            }
+
+            if (trailingIcon != null && value.isNotEmpty()) {
+                Spacer(modifier = Modifier.width(8.dp))
+                trailingIcon()
             }
         }
     }

@@ -12,14 +12,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Contacts
-import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -34,9 +33,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,14 +45,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.graphees.statspos.R
 import com.graphees.statspos.domain.models.main.Clients
 import com.graphees.statspos.presentation.ui.components.AppCircularProgressIndicator
-import com.graphees.statspos.presentation.ui.components.AppIcon
+import com.graphees.statspos.presentation.ui.components.AppSaveButton
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
-import com.graphees.statspos.presentation.ui.components.PasswordTextbox
-import com.graphees.statspos.presentation.ui.components.TextboxOutlined
 import com.graphees.statspos.presentation.ui.components.Textbox2
+import com.graphees.statspos.presentation.ui.theme.text2Light
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
-import com.graphees.statspos.presentation.viewmodels.main.ClientsViewModel
+import com.graphees.statspos.presentation.viewmodels.main.login.ClientsViewModel
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
 
@@ -102,7 +100,7 @@ fun ClientSignupScreen(
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(ConstantPaddings.BODY_HORIZONTAL)
-                .padding(vertical = 16.dp)
+                .padding(top = 16.dp)
         ) {
             Column(
                 Modifier
@@ -128,23 +126,6 @@ fun ClientSignupScreen(
                         onPasswordChange = viewModel::onPasswordChange,
                         onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
                     )
-
-                    Spacer(Modifier.height(16.dp))
-                    if (state.isLoading) {
-                        AppCircularProgressIndicator()
-                    } else {
-                        Button(
-                            onClick = {
-                                viewModel.clientSignup { client ->
-                                    onSignup(client)
-                                }
-                            },
-                            modifier = Modifier
-                                .width(120.dp)
-                        ) {
-                            Text("Signup")
-                        }
-                    }
                 }
 
                 Column(
@@ -153,21 +134,19 @@ fun ClientSignupScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 )
                 {
-//                    if (state.isLoading) {
-//                        AppCircularProgressIndicator(
-//                            modifier = Modifier
-//                                .size(32.dp)
-//                        )
-//                    } else {
-//                        SaveButton(
-//                            text = "Signup",
-//                            onClick = {
-//                                viewModel.clientSignup { client ->
-//                                    onSignup(client)
-//                                }
-//                            }
-//                        )
-//                    }
+                    if (state.isLoading) {
+                        AppCircularProgressIndicator()
+                    } else {
+                        AppSaveButton(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            text = "Sign Up"
+                        ) {
+                            viewModel.clientSignup { client ->
+                                onSignup(client)
+                            }
+                        }
+                    }
 
                     Row(
                         modifier = Modifier
@@ -269,8 +248,10 @@ private fun Body(
                     onValueChange = onBusinessNameChange,
                     placeholder = "Business Name",
                     leadingIcon = {
-                        AppIcon(
-                            icon = Icons.Default.Business,
+                        Icon(
+                            imageVector = Icons.Default.Business,
+                            contentDescription = null,
+                            tint = text2Light,
                             modifier = Modifier
                                 .size(20.dp)
                         )
@@ -282,10 +263,12 @@ private fun Body(
                     onValueChange = onContactChange,
                     placeholder = "Contact",
                     leadingIcon = {
-                        AppIcon(
-                            icon = Icons.Default.Contacts,
+                        Icon(
+                            imageVector = Icons.Default.Contacts,
+                            contentDescription = null,
+                            tint = text2Light,
                             modifier = Modifier
-                                .size(20.dp)
+                                .size(18.dp)
                         )
                     },
                     keyboardOptions = KeyboardOptions(
@@ -298,10 +281,12 @@ private fun Body(
                     onValueChange = onUsernameChange,
                     placeholder = "Username",
                     leadingIcon = {
-                        AppIcon(
-                            icon = R.drawable.ic_user,
+                        Icon(
+                            painter = painterResource(R.drawable.ic_user),
+                            contentDescription = null,
+                            tint = text2Light,
                             modifier = Modifier
-                                .size(20.dp)
+                                .size(22.dp)
                         )
                     }
                 )
@@ -316,10 +301,12 @@ private fun Body(
                         keyboardType = KeyboardType.Password
                     ),
                     leadingIcon = {
-                        AppIcon(
-                            icon = R.drawable.password,
+                        Icon(
+                            painter = painterResource(R.drawable.password),
+                            contentDescription = null,
+                            tint = text2Light,
                             modifier = Modifier
-                                .size(20.dp)
+                                .size(18.dp)
                         )
                     },
                 )
@@ -333,10 +320,12 @@ private fun Body(
                         keyboardType = KeyboardType.Password
                     ),
                     leadingIcon = {
-                        AppIcon(
-                            icon = R.drawable.password,
+                        Icon(
+                            painter = painterResource(R.drawable.password),
+                            contentDescription = null,
+                            tint = text2Light,
                             modifier = Modifier
-                                .size(20.dp)
+                                .size(18.dp)
                         )
                     },
                 )
@@ -347,119 +336,6 @@ private fun Body(
 
     }
 }
-
-@Composable
-private fun Body1(
-    modifier: Modifier = Modifier,
-    businessName: String,
-    contact: String,
-    username: String,
-    password: String,
-    confirmPassword: String,
-    onBusinessNameChange: (String) -> Unit,
-    onContactChange: (String) -> Unit,
-    onUsernameChange: (String) -> Unit,
-    onPasswordChange: (String) -> Unit,
-    onConfirmPasswordChange: (String) -> Unit,
-    isLoading: Boolean,
-    onSignup: () -> Unit
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        TextboxOutlined(
-            value = businessName,
-            onValueChange = onBusinessNameChange,
-            label = {
-                Text("Business Name")
-            },
-            modifier = Modifier
-                .fillMaxWidth(),
-            leadingIcon = {
-                AppIcon(icon = Icons.Default.Business)
-            },
-            contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
-        )
-        TextboxOutlined(
-            value = contact,
-            onValueChange = onContactChange,
-            label = {
-                Text("Contact")
-            },
-            modifier = Modifier
-                .fillMaxWidth(),
-            leadingIcon = {
-                AppIcon(icon = Icons.Default.Contacts)
-            },
-            contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number
-            )
-        )
-        TextboxOutlined(
-            value = username,
-            onValueChange = onUsernameChange,
-            label = {
-                Text("Username")
-            },
-            modifier = Modifier
-                .fillMaxWidth(),
-            leadingIcon = {
-                AppIcon(icon = R.drawable.ic_user)
-            },
-            contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
-        )
-        PasswordTextbox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            value = password,
-            onValueChange = onPasswordChange,
-            label = {
-                Text("Password")
-            },
-            leadingIcon = {
-                AppIcon(icon = R.drawable.password)
-            },
-            contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
-        )
-        PasswordTextbox(
-            modifier = Modifier
-                .fillMaxWidth(),
-            value = confirmPassword,
-            onValueChange = onConfirmPasswordChange,
-            label = {
-                Text("Confirm Password")
-            },
-            leadingIcon = {
-                AppIcon(icon = R.drawable.password)
-            },
-            contentPadding = ConstantPaddings.DEFAULT_TEXTBOX_INSIDE,
-            imeAction = ImeAction.Done
-        )
-        Spacer(
-            Modifier.height(16.dp)
-        )
-        if (isLoading) {
-            AppCircularProgressIndicator()
-        } else {
-            Button(
-                onClick = {
-                    onSignup()
-                },
-                modifier = Modifier
-                    .width(120.dp)
-            ) {
-                Text("Signup")
-            }
-        }
-    }
-}
-
 
 @Composable
 private fun Title(

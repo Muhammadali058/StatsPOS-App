@@ -55,7 +55,7 @@ import com.graphees.statspos.presentation.ui.theme.StatsPOSTheme
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
 import com.graphees.statspos.presentation.ui.utils.ConstantSize
 import com.graphees.statspos.presentation.viewmodels.main.LocalDataViewModel
-import com.graphees.statspos.presentation.viewmodels.main.LoginViewModel
+import com.graphees.statspos.presentation.viewmodels.main.login.LoginViewModel
 import com.graphees.statspos.utils.DB
 import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.SocketManager

@@ -1,5 +1,8 @@
 package com.graphees.statspos.domain.models.main
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Clients(
     var id: Int? = null,
     var clientName: String? = null,

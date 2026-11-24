@@ -1,9 +1,10 @@
 package com.graphees.statspos.presentation
 
 import android.app.Activity
-import android.util.Log
+import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -19,13 +20,17 @@ import com.graphees.statspos.presentation.ui.screens.main.login.ClientLoginScree
 import com.graphees.statspos.presentation.ui.screens.main.login.ClientSignupScreen
 import com.graphees.statspos.presentation.ui.screens.main.login.CloseAppScreen
 import com.graphees.statspos.presentation.ui.screens.main.login.LoginScreen
+import com.graphees.statspos.presentation.ui.screens.main.login.OtpScreen
+import com.graphees.statspos.presentation.ui.screens.main.login.RecoverAccountScreen
+import com.graphees.statspos.presentation.ui.screens.main.login.UpdateClientScreen
 import com.graphees.statspos.presentation.ui.screens.main.main.MainScreen
 import com.graphees.statspos.presentation.ui.screens.main.main.SplashScreen
 import com.graphees.statspos.presentation.ui.screens.main.main.premium.HelpScreen
 import com.graphees.statspos.presentation.ui.screens.main.main.premium.PaymentScreen
 import com.graphees.statspos.presentation.ui.screens.main.main.premium.SubscriptionExpiredScreen
-import com.graphees.statspos.presentation.viewmodels.main.ClientsViewModel
+import com.graphees.statspos.presentation.viewmodels.main.login.ClientsViewModel
 import com.graphees.statspos.presentation.viewmodels.main.LocalDataViewModel
+import com.graphees.statspos.presentation.viewmodels.main.login.AuthViewModel
 import com.graphees.statspos.utils.DB
 import com.graphees.statspos.utils.HP
 import kotlinx.coroutines.flow.first
@@ -47,6 +52,15 @@ private sealed class Screens : NavKey {
         Screens()
 
     @Serializable
+    data object RecoverAccount : Screens()
+
+    @Serializable
+    data class Otp(val client: Clients) : Screens()
+    @Serializable
+    data class UpdateClient(val client: Clients) : Screens()
+
+
+    @Serializable
     data object Main : Screens()
 
     @Serializable
@@ -63,11 +77,13 @@ private sealed class Screens : NavKey {
 
 }
 
+@RequiresApi(Build.VERSION_CODES.S)
 @Composable
 fun App() {
     val scope = rememberCoroutineScope()
     val backStack = rememberNavBackStack(Screens.Splash)
     val viewModel = hiltViewModel<LocalDataViewModel>()
+    val authViewModel = hiltViewModel<AuthViewModel>()
     val clientsViewModel = hiltViewModel<ClientsViewModel>()
 
     fun navigate(key: NavKey) {
@@ -147,6 +163,10 @@ fun App() {
                         backStack.removeLastOrNull()
                         backStack.add(Screens.ClientSignup)
                     },
+                    onForgotClick = {
+//                        backStack.removeLastOrNull()
+                        backStack.add(Screens.RecoverAccount)
+                    },
                     onHelpClick = {
                         backStack.add(Screens.Help)
                     }
@@ -192,6 +212,41 @@ fun App() {
                     },
                     onHelpClick = {
                         backStack.add(Screens.Help)
+                    }
+                )
+            }
+            entry<Screens.RecoverAccount> {
+                RecoverAccountScreen(
+                    authViewModel = authViewModel,
+                    viewModel = clientsViewModel,
+                    onBack = {
+                        backStack.removeLastOrNull()
+                    },
+                    navToOtp = { client ->
+                        navigate(Screens.Otp(client))
+                        backStack.remove(Screens.RecoverAccount)
+                    },
+                    onOtpVerified = { client ->
+                        navigate(Screens.UpdateClient(client))
+                        backStack.remove(Screens.RecoverAccount)
+                    },
+                )
+            }
+            entry<Screens.Otp> { key->
+                OtpScreen (
+                    authViewModel = authViewModel,
+                    contact = key.client.contact!!,
+                    onOtpVerified = {
+                        navigate(Screens.UpdateClient(key.client))
+                        backStack.remove(Screens.Otp(key.client))
+                    },
+                )
+            }
+            entry<Screens.UpdateClient> { key->
+                UpdateClientScreen (
+                    client = key.client,
+                    onUpdate = { client->
+                        showLoginScreen(client)
                     }
                 )
             }

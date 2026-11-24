@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -30,9 +31,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,16 +47,18 @@ import com.graphees.statspos.presentation.ui.components.AppIcon
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.ErrorDialog
 import com.graphees.statspos.presentation.ui.components.Textbox2
+import com.graphees.statspos.presentation.ui.theme.text2Light
 import com.graphees.statspos.presentation.ui.utils.ConstantPaddings
-import com.graphees.statspos.presentation.viewmodels.main.ClientsViewModel
+import com.graphees.statspos.presentation.viewmodels.main.login.ClientsViewModel
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.checkEvent
 
 @Composable
 fun ClientLoginScreen(
-    viewModel:ClientsViewModel,
+    viewModel: ClientsViewModel,
     onClientLogin: (client: Clients) -> Unit,
     onSignup: () -> Unit,
+    onForgotClick: () -> Unit,
     onHelpClick: () -> Unit,
 ) {
 //    val viewModel = hiltViewModel<ClientsViewModel>()
@@ -109,6 +114,7 @@ fun ClientLoginScreen(
                 onSignup = {
                     onSignup()
                 },
+                onForgotClick = onForgotClick,
                 onHelpClick = onHelpClick,
             )
         }
@@ -124,6 +130,7 @@ private fun Body(
     isLoading: Boolean,
     onClientLogin: () -> Unit,
     onSignup: () -> Unit,
+    onForgotClick: () -> Unit,
     onHelpClick: () -> Unit,
 ) {
     Column(
@@ -155,10 +162,12 @@ private fun Body(
                 onValueChange = onUsernameChange,
                 placeholder = "Username",
                 leadingIcon = {
-                    AppIcon(
-                        icon = R.drawable.ic_user,
+                    Icon(
+                        painter = painterResource(R.drawable.ic_user),
+                        contentDescription = null,
+                        tint = text2Light,
                         modifier = Modifier
-                            .size(20.dp)
+                            .size(22.dp)
                     )
                 }
             )
@@ -173,17 +182,17 @@ private fun Body(
                     keyboardType = KeyboardType.Password
                 ),
                 leadingIcon = {
-                    AppIcon(
-                        icon = R.drawable.password,
+                    Icon(
+                        painter = painterResource(R.drawable.password),
+                        contentDescription = null,
+                        tint = text2Light,
                         modifier = Modifier
-                            .size(20.dp)
+                            .size(18.dp)
                     )
                 },
             )
-            Spacer(
-                Modifier.height(16.dp)
-            )
 
+            Spacer(Modifier.height(16.dp))
             if (isLoading) {
                 AppCircularProgressIndicator()
             } else {
@@ -199,6 +208,21 @@ private fun Body(
             }
 
             Spacer(Modifier.height(8.dp))
+            TextButton(
+                onClick = {
+                    onForgotClick()
+                },
+            ) {
+                Text(
+                    text = "Forgot master login?",
+                    modifier = Modifier,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Left,
+                    ),
+                )
+            }
+
             TextButton(
                 onClick = {
                     onHelpClick()
@@ -285,6 +309,7 @@ private fun BodyPreview() {
         {},
         {},
         false,
+        {},
         {},
         {},
         {},

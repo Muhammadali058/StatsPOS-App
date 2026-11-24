@@ -58,7 +58,6 @@ class LocalDataStore @Inject constructor(
             settings[branchesKey] = Gson().toJson(branches)
 
             if(!client.isOnline!!){
-//                settings[clientIdKey] = 1
                 settings[baseUrlKey] = branches[0].baseUrl!!
             }
         }

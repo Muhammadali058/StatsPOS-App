@@ -1,7 +1,9 @@
-package com.graphees.statspos.presentation.viewmodels.main
+package com.graphees.statspos.presentation.viewmodels.main.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.graphees.statspos.domain.models.main.Branches
 import com.graphees.statspos.domain.models.main.Clients
 import com.graphees.statspos.domain.models.main.LocalBranches
@@ -12,8 +14,6 @@ import com.graphees.statspos.utils.SnackbarType
 import com.graphees.statspos.utils.UiEvent
 import com.graphees.statspos.utils.get
 import com.graphees.statspos.utils.getListOf
-import com.google.gson.Gson
-import com.google.gson.JsonObject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,19 +23,22 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ClientsViewModel @Inject constructor(
+class UpdateClientViewModel @Inject constructor(
     private val clientsRepository: ClientsRepository,
     private var dataStore: LocalDataStore,
 ) : ViewModel() {
     // region ScreenState
     data class ScreenState(
+        val client: Clients = Clients(),
+
         val businessName: String = "",
-        val contact: String = "",
         val username: String = "",
         val password: String = "",
         val confirmPassword: String = "",
 
         val localBranches: List<LocalBranches> = emptyList(),
+
+        val hasLoadedOnce: Boolean = false,
 
         val isLoading: Boolean = false,
         val error: String? = null,
@@ -74,15 +77,23 @@ class ClientsViewModel @Inject constructor(
         onEvent(UiEvent.ShowSnackbar(message, type))
     }
 
+    fun showMessage(message: String?) {
+        showSnackbar(message ?: "")
+
+//        state.update { it.copy(isLoading = false, error = null, message = message) }
+//        onEvent(UiEvent.ShowMessage(message ?: ""))
+    }
+
+    fun showError(error: String?) {
+        state.update { it.copy(error = error) }
+        onEvent(UiEvent.ShowError(error ?: ""))
+    }
+
     // endregion
 
     // region onChangeMethods
     fun onBusinessNameChange(value: String) {
         state.update { it.copy(businessName = value) }
-    }
-
-    fun onContactChange(value: String) {
-        state.update { it.copy(contact = value) }
     }
 
     fun onUsernameChange(value: String) {
@@ -96,60 +107,33 @@ class ClientsViewModel @Inject constructor(
     fun onConfirmPasswordChange(value: String) {
         state.update { it.copy(confirmPassword = value) }
     }
+
+    fun setHasLoadedOnce(value: Boolean) {
+        state.update { it.copy(hasLoadedOnce = value) }
+    }
+
     // endregion
 
     // region Network calls
-    fun clientLogin(onSuccess: (client: Clients) -> Unit) {
+    fun updateClient(onSuccess: (client: Clients) -> Unit) {
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
-            if (!loginValidation()) {
+
+            if (!isValid()) {
                 return@launch
             }
+
             beforeRequest()
 
-            val params = JsonObject().apply {
-                addProperty("username", state.value.username)
-                addProperty("password", state.value.password)
-            }
+            val client = Clients(
+                id = state.value.client.id!!,
+                clientName = state.value.businessName,
+                username = state.value.username,
+                password = state.value.password,
+            )
 
-            when (val result = clientsRepository.clientLogin(params)) {
-                is Resource.Error -> resultError(result.error)
-                is Resource.Information -> resultInformation(result.message)
-                is Resource.Success -> {
-                    resultSuccess()
-                    if (result.data.get("isExists").asBoolean) {
-                        val client = Gson().get<Clients>(result.data.get("data").asJsonObject)
-                        val branches = Gson().getListOf<Branches>(result.data.get("branches").asJsonArray)
-
-                        dataStore.setClient(client, branches)
-                        onSuccess(client)
-                    } else {
-                        showSnackbar("Username or password incorrect")
-                    }
-                }
-            }
-        }
-    }
-
-    fun clientSignup(onSuccess: (client: Clients) -> Unit) {
-        viewModelScope.launch {
-            if (state.value.isLoading)
-                return@launch
-            if (!signupValidation()) {
-                return@launch
-            }
-            beforeRequest()
-
-            val params = JsonObject().apply {
-                addProperty("clientName", state.value.businessName)
-                addProperty("contact", state.value.contact)
-                addProperty("username", state.value.username)
-                addProperty("password", state.value.password)
-                addProperty("isOnline", true)
-            }
-
-            when (val result = clientsRepository.clientSignup(params)) {
+            when (val result = clientsRepository.updateClient(client)) {
                 is Resource.Error -> resultError(result.error)
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
@@ -164,29 +148,14 @@ class ClientsViewModel @Inject constructor(
             }
         }
     }
+
     // endregion
 
     // region Others
-    private fun loginValidation(): Boolean {
-        if (state.value.username.isEmpty()) {
-            showSnackbar("Enter username")
-            return false
-        } else if (state.value.password.isEmpty()) {
-            showSnackbar("Enter password")
-            return false
-        } else
-            return true
-    }
 
-    private fun signupValidation(): Boolean {
+    private fun isValid(): Boolean {
         if (state.value.businessName.isEmpty()) {
             showSnackbar("Enter Business Name")
-            return false
-        } else if (state.value.contact.isEmpty()) {
-            showSnackbar("Enter phone number")
-            return false
-        }else if (state.value.contact.length != 11) {
-            showSnackbar("Please enter correct phone number")
             return false
         } else if (state.value.username.isEmpty()) {
             showSnackbar("Enter username")
@@ -217,5 +186,14 @@ class ClientsViewModel @Inject constructor(
     private fun resultSuccess() {
         state.update { it.copy(isLoading = false, error = null) }
     }
+
+    fun updateInitialState(client: Clients) {
+        state.update { it.copy(
+            client = client,
+            businessName = client.clientName!!,
+            username = client.username!!,
+        ) }
+    }
+
     // endregion
 }

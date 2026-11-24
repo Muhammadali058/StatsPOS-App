@@ -6,7 +6,6 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface BanksApi {
-    // region Banks
     @POST("banks/loadBanks")
     suspend fun loadBanks(@Body body: JsonObject): Response<JsonObject>
 
@@ -21,22 +20,4 @@ interface BanksApi {
 
     @POST("banks/getBank")
     suspend fun getBank(@Body body: JsonObject): Response<JsonObject>
-    // endregion
-
-    // region Sub-Banks
-    @POST("subBanks/loadSubBanks")
-    suspend fun loadSubBanks(@Body body: JsonObject): Response<JsonObject>
-
-    @POST("subBanks/insertSubBank")
-    suspend fun insertSubBank(@Body body: JsonObject): Response<JsonObject>
-
-    @POST("subBanks/updateSubBank")
-    suspend fun updateSubBank(@Body body: JsonObject): Response<JsonObject>
-
-    @POST("subBanks/deleteSubBank")
-    suspend fun deleteSubBank(@Body body: JsonObject): Response<JsonObject>
-
-    @POST("subBanks/getSubBank")
-    suspend fun getSubBank(@Body body: JsonObject): Response<JsonObject>
-    // endregion
 }

@@ -6,7 +6,9 @@ import com.graphees.statspos.utils.HP
 import com.graphees.statspos.utils.Resource
 import com.graphees.statspos.utils.safeApiCall
 import com.google.gson.JsonObject
+import com.graphees.statspos.domain.models.accounts.Accounts
 import com.graphees.statspos.domain.models.main.AppSubscription
+import com.graphees.statspos.domain.models.main.Clients
 import com.graphees.statspos.utils.DB
 import javax.inject.Inject
 
@@ -17,6 +19,27 @@ class ClientsRepositoryImpl @Inject constructor(
         safeApiCall { api.clientLogin(body) }
 
     override suspend fun clientSignup(body: JsonObject): Resource<JsonObject>  = safeApiCall { api.clientSignup(body) }
+
+    override suspend fun updateClient(client: Clients): Resource<JsonObject> {
+        val body = DB.getJsonObject(client)
+        return safeApiCall {
+            api.updateClient(
+                body
+            )
+        }
+    }
+
+    override suspend fun isClientContactExists(contact: String): Resource<JsonObject> {
+        val body = JsonObject().apply {
+            addProperty("contact", contact)
+        }
+
+        return safeApiCall {
+            api.isClientContactExists(
+                body
+            )
+        }
+    }
 
     override suspend fun getBranches(clientId: Int): Resource<JsonObject> {
         val body = JsonObject().apply {

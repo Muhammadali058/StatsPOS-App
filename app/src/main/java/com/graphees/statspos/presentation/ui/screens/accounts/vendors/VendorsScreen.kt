@@ -13,9 +13,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Call
-import androidx.compose.material.icons.outlined.Whatsapp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -49,7 +46,6 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.graphees.statspos.domain.models.accounts.Accounts
 import com.graphees.statspos.presentation.ui.components.AppFloatingActionButton
-import com.graphees.statspos.presentation.ui.components.AppIconButton
 import com.graphees.statspos.presentation.ui.components.AppSnackbarHost
 import com.graphees.statspos.presentation.ui.components.ArrowIconButton
 import com.graphees.statspos.presentation.ui.components.BottomHeading
@@ -527,7 +523,7 @@ private fun ListCard(
                 if (item.contact!!.isNotEmpty()) {
                     Row {
                         ListWhatsappIcon {
-                            openWhatsapp(context, HP.getContact(item.contact!!))
+                            openWhatsapp(context, item.contact!!)
                         }
                         Spacer(Modifier.width(4.dp))
                         ListCallIcon {

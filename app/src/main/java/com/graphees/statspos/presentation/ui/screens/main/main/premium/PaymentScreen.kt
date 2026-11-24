@@ -230,6 +230,7 @@ fun PaymentScreen(
                         onClick = {
                             openWhatsapp(
                                 context = context,
+                                contact = HP.graphees.contact!!,
                                 addClient = true,
                             )
                         },

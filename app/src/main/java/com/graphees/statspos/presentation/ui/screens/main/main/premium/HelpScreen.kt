@@ -131,7 +131,7 @@ fun HelpScreen(
             item {
                 Button(
                     onClick = {
-                        openCall(context)
+                        openCall(context, HP.graphees.contact!!)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -148,6 +148,7 @@ fun HelpScreen(
                     onClick = {
                         openWhatsapp(
                             context = context,
+                            contact = HP.graphees.contact!!,
                             addClient = true,
                         )
                     },

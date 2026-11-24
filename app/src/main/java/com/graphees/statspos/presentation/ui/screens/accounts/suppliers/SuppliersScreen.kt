@@ -443,7 +443,7 @@ private fun ListCard(
                 if (item.contact!!.isNotEmpty()) {
                     Row {
                         ListWhatsappIcon {
-                            openWhatsapp(context, HP.getContact(item.contact!!))
+                            openWhatsapp(context, item.contact!!)
                         }
                         Spacer(Modifier.width(4.dp))
                         ListCallIcon {

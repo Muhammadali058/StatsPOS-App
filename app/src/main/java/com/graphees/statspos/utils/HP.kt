@@ -253,7 +253,7 @@ object HP {
     }
 
     fun getContact(contact: String): String {
-        return "92${contact.replace("-", "").substring(1)}"
+        return "+92${contact.substring(1)}"
     }
 
     fun getImageUrl(imageUrl: String): String {

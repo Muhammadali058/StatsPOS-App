@@ -178,7 +178,7 @@ fun SalesOrderItemsScreen(
                 OrderCard(
                     item = salesOrder,
                     onWhatsappClick = {
-                        openWhatsapp(context, HP.getContact(salesOrder.contact!!))
+                        openWhatsapp(context, salesOrder.contact!!)
                     },
                     onCallClick = {
                         openCall(context, salesOrder.contact!!)

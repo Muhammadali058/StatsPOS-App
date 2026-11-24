@@ -405,7 +405,7 @@ fun sharePdf(
 
 fun openCall(
     context: Context,
-    contact: String = HP.getContact(HP.graphees.contact!!),
+    contact: String,
 ) {
     val intent = Intent(Intent.ACTION_DIAL).apply {
         data = "tel:${contact.replace("-", "")}".toUri()
@@ -415,7 +415,7 @@ fun openCall(
 
 fun openWhatsapp(
     context: Context,
-    contact: String = HP.getContact(HP.graphees.contact!!),
+    contact: String,
     message: String = "",
     addClient: Boolean = false
 ) {
@@ -429,7 +429,7 @@ fun openWhatsapp(
 
     val intent = Intent(
         Intent.ACTION_VIEW,
-        "https://wa.me/${contact.replace("-", "")}?text=${if (addClient) message1 else message}".toUri()
+        "https://wa.me/92${contact.replace("-", "").substring(1)}?text=${if (addClient) message1 else message}".toUri()
     )
     try {
         context.startActivity(intent)

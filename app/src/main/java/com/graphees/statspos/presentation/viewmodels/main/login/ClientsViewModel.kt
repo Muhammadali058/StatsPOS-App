@@ -1,5 +1,6 @@
 package com.graphees.statspos.presentation.viewmodels.main.login
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
@@ -115,9 +116,11 @@ class ClientsViewModel @Inject constructor(
         viewModelScope.launch {
             if (state.value.isLoading)
                 return@launch
+
             if (!loginValidation()) {
                 return@launch
             }
+
             beforeRequest()
 
             val params = JsonObject().apply {
@@ -130,6 +133,7 @@ class ClientsViewModel @Inject constructor(
                 is Resource.Information -> resultInformation(result.message)
                 is Resource.Success -> {
                     resultSuccess()
+
                     if (result.data.get("isExists").asBoolean) {
                         val client = Gson().get<Clients>(result.data.get("data").asJsonObject)
                         val branches = Gson().getListOf<Branches>(result.data.get("branches").asJsonArray)
